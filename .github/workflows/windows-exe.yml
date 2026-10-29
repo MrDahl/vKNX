@@ -1,0 +1,35 @@
+name: Windows exe
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21' }
+      - name: Build (javac, pinned Calimero)
+        shell: pwsh
+        run: tools/build.ps1
+      - name: Self-test (backend only, NOT an ETS test)
+        shell: pwsh
+        run: tools/selftest.ps1
+      - name: Package modules as jars
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/mods | Out-Null
+          foreach ($m in 'core','device','server','vknx') {
+            jar --create --file "dist/mods/$m.jar" -C "build/$m" .
+          }
+      - name: jpackage (app image with bundled Java runtime)
+        shell: pwsh
+        run: |
+          jpackage --type app-image --name vKNX --dest dist/out `
+            --module-path dist/mods --module org.vknx/org.vknx.Main `
+            --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql `
+            --win-console --app-version 0.1.0
+          Compress-Archive -Path dist/out/vKNX -DestinationPath dist/vKNX-windows.zip
+      - uses: actions/upload-artifact@v4
+        with: { name: vKNX-windows, path: dist/vKNX-windows.zip }
