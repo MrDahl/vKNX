@@ -1,60 +1,160 @@
 <!doctype html>
-<html lang="da">
+<html lang="da" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>vKNX</title>
+<script>
+// set the theme before first paint (no flash)
+try{var th=localStorage.getItem('vknx-theme')||('dark');document.documentElement.dataset.theme=th}catch(e){}
+</script>
 <style>
-  :root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--mute:#6b7488;--line:#e3e6ec;--accent:#0b6bcb;--on:#f5b301;--red:#d93025;--green:#188038;}
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
-  header{display:flex;align-items:center;gap:16px;padding:14px 24px;background:#fff;border-bottom:1px solid var(--line)}
-  header h1{margin:0;font-size:22px} header .sub{color:var(--mute);flex:1}
-  button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer}
-  button:hover{border-color:var(--accent)} button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-  main{padding:20px 24px;display:grid;gap:20px;max-width:1500px;margin:auto}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-  .card h2{margin:0 0 2px;font-size:18px} .prod{color:var(--mute);font-size:14px;margin-bottom:10px}
-  .row{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap}
-  .addr{font:600 20px ui-monospace,Consolas,monospace} .addr.un{color:var(--mute)}
-  .led{width:16px;height:16px;border-radius:50%;background:#cfd3dc;border:1px solid #b8bdc9} .led.on{background:var(--red);box-shadow:0 0 10px var(--red)}
-  .pill{font-size:13px;padding:2px 10px;border-radius:99px;background:#eef1f6;color:var(--mute)} .pill.ok{background:#e6f4ea;color:var(--green)}
-  .lamp{width:70px;height:70px;border-radius:50%;background:#e9ebf0;border:2px solid #c9cdd8;display:grid;place-items:center;font-size:30px;transition:.15s}
-  .lamp.on{background:#fff4c2;border-color:var(--on);box-shadow:0 0 28px 6px #ffd95a}
-  .bigbtn{width:100%;padding:18px;font-size:20px;border-radius:12px}
-  dl{margin:8px 0 0;display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:14px} dt{color:var(--mute)} dd{margin:0;font-weight:600}
-  .mon{padding:0} .mon .bar{display:flex;gap:10px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-  .mon input[type=text]{flex:1;min-width:180px;font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px}
-  #log{height:380px;overflow:auto;font:13px/1.5 ui-monospace,Consolas,monospace;padding:6px 0}
-  .ln{padding:1px 18px;white-space:pre-wrap;border-left:4px solid transparent} .ln .t{color:var(--mute)}
-  .ln.bus{border-left-color:var(--accent);background:#f2f7fd} .ln.exp{border-left-color:#c9cdd8}
-  .keys{display:grid;gap:10px;width:100%} .key{padding:22px 10px;font-size:18px;border-radius:12px;user-select:none;touch-action:none}
-  .key:active,.key.down{background:var(--accent);color:#fff}
-  .lamps{display:flex;gap:10px;flex-wrap:wrap} .lampbox{text-align:center;font-size:12px;color:var(--mute)}
-  .lampbox .lamp{width:46px;height:46px;font-size:20px}
-  .meter{height:10px;background:#e9ebf0;border-radius:6px;overflow:hidden;width:100%} .meter>i{display:block;height:100%;background:var(--on)}
-  .blinds{display:flex;gap:16px;width:100%} .blind{flex:1;text-align:center;font-size:13px}
-  .win{height:90px;border:2px solid #9aa3b5;border-radius:6px;background:#dff0ff;position:relative;overflow:hidden}
-  .win>i{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(#c9b48a 0 6px,#b59e72 6px 8px);transition:height .12s}
-  input[type=range]{width:100%} .sens{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;font-size:14px}
-  .sens label{color:var(--mute)} .add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 24px;background:#fff;border-bottom:1px solid var(--line)}
-  .add select,.add input{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px}
-  .rm{margin-left:auto;font-size:13px;color:var(--mute)} .err{color:var(--red);font-size:14px}
-  .ln .tag{display:inline-block;min-width:74px;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
-  .ln.bus .tag{color:var(--accent)} .note{color:var(--mute);font-size:13px;padding:8px 18px;border-top:1px solid var(--line)}
+:root{
+  --bg:#0b1220;--bg2:#0f192b;--panel:#131f35;--panel2:#18273f;--line:#233350;--ink:#e8eef9;--mute:#8d9fbd;
+  --accent:#38a1ff;--accent-ink:#04121f;--on:#ffc53d;--green:#35d07f;--orange:#ff9f43;--red:#ff5d5d;--cyan:#4fd8e6;
+  --shadow:0 6px 24px rgba(0,0,0,.35);--glass:rgba(255,255,255,.04);--mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+:root[data-theme=light]{
+  --bg:#eaeff6;--bg2:#f4f7fb;--panel:#ffffff;--panel2:#f3f6fb;--line:#d9e1ee;--ink:#14213a;--mute:#5d6e8c;
+  --accent:#0a67d1;--accent-ink:#fff;--on:#f0a800;--green:#13a05a;--orange:#d9690b;--red:#d03535;--cyan:#0f8fa0;
+  --shadow:0 4px 18px rgba(20,33,58,.10);--glass:rgba(10,103,209,.05);
+}
+*{box-sizing:border-box}
+html{font-size:clamp(14px,.62vw + 9px,21px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,Roboto,sans-serif;line-height:1.4;min-height:100vh}
+button,select,input{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--panel2);border-radius:.55rem;padding:.45rem .85rem;cursor:pointer;transition:.12s}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.ghost{background:transparent}
+input[type=text],select{background:var(--bg2);border:1px solid var(--line);border-radius:.55rem;padding:.4rem .65rem}
+input[type=range]{width:100%;accent-color:var(--accent)}
+
+/* ---------- header ---------- */
+header{display:flex;align-items:center;gap:1rem;padding:.7rem 1.3rem;background:linear-gradient(180deg,var(--panel),var(--bg2));border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.logo{display:flex;align-items:center;gap:.65rem}
+.logo svg{width:2.3rem;height:2.3rem}
+.logo b{font-size:1.45rem;letter-spacing:.02em} .logo b i{font-style:normal;color:var(--accent)}
+.logo small{display:block;color:var(--mute);font-size:.78rem;margin-top:-.15rem}
+.status{display:flex;gap:.6rem;align-items:center;flex:1;flex-wrap:wrap;margin-left:1.2rem}
+.chip{display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .7rem;border-radius:99px;background:var(--glass);border:1px solid var(--line);font-size:.82rem;color:var(--mute)}
+.chip b{color:var(--ink);font-weight:600}
+.dot{width:.62rem;height:.62rem;border-radius:50%;background:var(--mute);display:inline-block;flex:none}
+.dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)} .dot.prog{background:var(--red);box-shadow:0 0 8px var(--red)} .dot.warn{background:var(--orange)}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:minmax(17rem,21rem) minmax(0,1fr) minmax(16rem,20rem);gap:1rem;padding:1rem 1.3rem 0;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:.9rem;box-shadow:var(--shadow);overflow:hidden}
+.panel>h3{margin:0;padding:.7rem 1rem;font-size:.82rem;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));display:flex;align-items:center;gap:.5rem}
+.panel>h3 .n{margin-left:auto;background:var(--glass);border:1px solid var(--line);border-radius:99px;padding:0 .55rem;font-size:.75rem;color:var(--ink)}
+.col{display:grid;gap:1rem}
+.empty{padding:1rem;color:var(--mute);font-size:.9rem}
+
+/* topology */
+.line-h{padding:.45rem 1rem;font-size:.78rem;color:var(--mute);background:var(--glass);border-bottom:1px solid var(--line);letter-spacing:.06em}
+.dev-i{display:grid;grid-template-columns:auto 1fr;gap:.1rem .65rem;padding:.55rem 1rem;border-bottom:1px solid var(--line);cursor:pointer;align-items:center}
+.dev-i:hover{background:var(--glass)} .dev-i:last-child{border-bottom:0}
+.dev-i .a{font:600 .92rem var(--mono);color:var(--green)} .dev-i .a.un{color:var(--mute)}
+.dev-i .nm{font-weight:600} .dev-i .sm{grid-column:2;color:var(--mute);font-size:.8rem}
+.dev-i .dot{grid-row:1/3}
+
+/* add */
+.addbox{padding:.9rem 1rem;display:grid;gap:.5rem}
+.addbox .r{display:flex;gap:.5rem} .addbox .r>*{min-width:0} .addbox input{flex:1;width:100%} .addbox{min-width:0} .addbox select{width:100%}
+.err{color:var(--red);font-size:.85rem;min-height:1.1em}
+
+/* group addresses */
+.ga{padding:.6rem 1rem;border-bottom:1px solid var(--line)} .ga:last-child{border-bottom:0}
+.ga .g{font:700 1rem var(--mono);color:var(--orange)}
+.ga ul{list-style:none;margin:.25rem 0 0;padding:0;font-size:.82rem;color:var(--mute)}
+.ga li{display:flex;gap:.4rem;align-items:baseline} .ga li b{color:var(--ink);font-weight:600}
+.fl{font:600 .68rem var(--mono);letter-spacing:.05em;color:var(--cyan);margin-left:auto}
+
+/* devices */
+.grid{columns:19rem auto;column-gap:1rem}
+.card{break-inside:avoid;margin-bottom:1rem;background:var(--panel);border:1px solid var(--line);border-radius:.9rem;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s}
+.card.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),var(--shadow)}
+.card.prog{border-color:var(--red)}
+.card .hd{display:flex;gap:.7rem;align-items:flex-start;padding:.85rem 1rem .6rem}
+.card .hd .t{flex:1;min-width:0} .card h2{margin:0;font-size:1.1rem;line-height:1.2} .card .prod{color:var(--mute);font-size:.8rem}
+.addrchip{font:700 .95rem var(--mono);padding:.15rem .6rem;border-radius:.45rem;background:var(--glass);border:1px solid var(--line);color:var(--green);white-space:nowrap}
+.addrchip.un{color:var(--mute)}
+.card .bd{padding:.3rem 1rem .8rem;display:grid;gap:.7rem}
+.card .ft{display:flex;gap:.5rem;align-items:center;padding:.6rem 1rem;border-top:1px solid var(--line);background:var(--glass);border-radius:0 0 .9rem .9rem;flex-wrap:wrap}
+.pill{font-size:.74rem;padding:.1rem .6rem;border-radius:99px;background:var(--glass);border:1px solid var(--line);color:var(--mute)}
+.pill.ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
+.ft .grow{flex:1}
+.progbtn{display:inline-flex;align-items:center;gap:.5rem}
+.led{width:.8rem;height:.8rem;border-radius:50%;background:var(--line);display:inline-block}
+.led.on{background:var(--red);box-shadow:0 0 10px var(--red)}
+.xbtn{border:0;background:transparent;color:var(--mute);padding:.1rem .45rem;font-size:1.1rem;line-height:1} .xbtn:hover{color:var(--red)}
+details.params{font-size:.82rem;color:var(--mute)} details.params summary{cursor:pointer;user-select:none}
+details.params dl{margin:.4rem 0 0;display:grid;grid-template-columns:1fr auto;gap:.15rem .8rem} details.params dd{margin:0;color:var(--ink);font-weight:600;text-align:right}
+
+.bigbtn{width:100%;padding:1rem;font-size:1.1rem;border-radius:.8rem}
+.keys{display:grid;gap:.6rem}
+.key{padding:1.1rem .5rem;font-size:1rem;border-radius:.8rem;user-select:none;touch-action:none;background:var(--panel2)}
+.key:active,.key.down{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.lamp{width:3.6rem;height:3.6rem;border-radius:50%;background:var(--bg2);border:2px solid var(--line);display:grid;place-items:center;font-size:1.6rem;filter:grayscale(1) opacity(.55);transition:.18s;flex:none}
+.lamp.on{filter:none;background:color-mix(in srgb,var(--on) 25%,var(--panel));border-color:var(--on);box-shadow:0 0 26px 4px color-mix(in srgb,var(--on) 55%,transparent)}
+.lamps{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem} .lampbox{text-align:center;font-size:.75rem;color:var(--mute)} .lampbox .lamp{width:2.8rem;height:2.8rem;font-size:1.2rem;margin:0 auto .15rem}
+.row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.meter{height:.7rem;background:var(--bg2);border:1px solid var(--line);border-radius:6px;overflow:hidden;width:100%;margin-top:.3rem} .meter>i{display:block;height:100%;background:linear-gradient(90deg,#c98a00,var(--on));transition:width .08s}
+.blinds{display:grid;grid-template-columns:1fr 1fr;gap:.8rem} .blind{text-align:center;font-size:.8rem;color:var(--mute)}
+.win{height:5.5rem;border:2px solid var(--line);border-radius:.5rem;background:linear-gradient(180deg,#5aa9e6,#bfe3ff);position:relative;overflow:hidden;margin:.3rem 0}
+.win>i{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(#a8936a 0 6px,#8d7a54 6px 8px);transition:height .12s;border-bottom:2px solid #6e5e3e}
+.sens{display:grid;grid-template-columns:1fr auto;gap:.05rem .7rem;font-size:.85rem} .sens label{color:var(--mute)} .sens b{font-family:var(--mono)}
+.hint{color:var(--mute);font-size:.78rem}
+
+/* monitor */
+.monwrap{padding:1rem 1.3rem 1.3rem}
+.mon .bar{display:flex;gap:.8rem;align-items:center;padding:.6rem 1rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.mon .bar input[type=text]{flex:1;min-width:12rem}
+.mon .bar label{display:inline-flex;gap:.35rem;align-items:center;font-size:.85rem;color:var(--mute)}
+#log{height:22rem;overflow:auto;font:.82rem/1.55 var(--mono);padding:.3rem 0;background:var(--bg2)}
+.ln{padding:.05rem 1rem;white-space:pre-wrap;border-left:3px solid transparent;display:flex;gap:.7rem}
+.ln .t{color:var(--mute);flex:none} .ln .tag{flex:none;width:11rem;font-weight:700;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);overflow:hidden;text-overflow:ellipsis;padding-top:.12rem}
+.ln.bus{border-left-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)} .ln.bus .tag{color:var(--accent)}
+.ln.exp .x{color:var(--mute)}
+.ia{color:var(--green)} .gad{color:var(--orange)} .svc{color:var(--cyan)}
+.note{color:var(--mute);font-size:.8rem;padding:.6rem 1rem;border-top:1px solid var(--line)}
+
+@media (max-width:1200px){.layout{grid-template-columns:minmax(15rem,19rem) minmax(0,1fr)} .layout>.col:last-child{grid-column:1/-1}}
+@media (max-width:800px){.layout{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
-  <h1>vKNX</h1><div class="sub" id="sub"></div>
+  <div class="logo">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="var(--accent)"/><path d="M13 14l11 20 11-20" fill="none" stroke="var(--accent-ink)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><b>v<i>KNX</i></b><small id="tag"></small></div>
+  </div>
+  <div class="status" id="status"></div>
+  <button class="ghost" id="theme" onclick="toggleTheme()" title="Lyst/mørkt"></button>
   <button id="lang" onclick="toggleLang()">English</button>
 </header>
-<div class="add"><strong id="addTitle"></strong><select id="addProd"></select><input id="addName" maxlength="20" size="14"><button class="primary" id="btnAdd" onclick="addDevice()"></button><span class="err" id="addErr"></span></div>
-<main>
+
+<div class="layout">
+  <div class="col">
+    <section class="panel"><h3><span id="hTopo"></span><span class="n" id="nDev">0</span></h3><div id="topo"></div></section>
+    <section class="panel"><h3 id="hAdd"></h3>
+      <div class="addbox">
+        <select id="addProd"></select>
+        <div class="r"><input type="text" id="addName" maxlength="20"><button class="primary" id="btnAdd" onclick="addDevice()"></button></div>
+        <div class="err" id="addErr"></div>
+      </div>
+    </section>
+  </div>
   <section class="grid" id="devices"></section>
-  <section class="card mon">
+  <div class="col">
+    <section class="panel"><h3><span id="hGa"></span><span class="n" id="nGa">0</span></h3><div id="gas"></div></section>
+  </div>
+</div>
+
+<div class="monwrap">
+  <section class="panel mon">
+    <h3 id="monTitle"></h3>
     <div class="bar">
-      <strong id="monTitle"></strong>
       <input type="text" id="filter" placeholder="">
       <label><input type="checkbox" id="showBus" checked> <span id="lblBus"></span></label>
       <label><input type="checkbox" id="showExp" checked> <span id="lblExp"></span></label>
@@ -63,76 +163,123 @@
     <div id="log"></div>
     <div class="note" id="note"></div>
   </section>
-</main>
+</div>
+
 <script>
 const T={
- da:{sub:"Virtuelle KNX-enheder – programmeres fra ETS",lang:"English",prog:"Programmeringsknap",press:"Tryk",unassigned:"Ikke programmeret",
-  loaded:"Applikation hentet",notloaded:"Ingen applikation",dl:"Downloads",lamp:"Lampe",params:"Parametre fra ETS",
+ da:{tag:"Virtuel KNX-installation til undervisning",lang:"English",prog:"Programmeringsknap",press:"Tryk",unassigned:"Ikke programmeret",
+  loaded:"Applikation hentet",notloaded:"Ingen applikation",dl:"Downloads",params:"Parametre fra ETS",
   mon:"Telegrammonitor og forklaringer",filter:"Filtrer (adresse, tekst, enhed)…",bus:"Rigtige telegrammer",exp:"Enhedens forklaring",clear:"Ryd",
-  note:"Blå linjer er rigtige telegrammer på den virtuelle linje (afsender, modtager, service, rådata). Grå linjer er enhedens egen forklaring på, hvorfor den reagerede eller ignorerede noget – det er undervisningstekst, ikke data fra bussen.",
-  state:"Tilstand",on:"Tændt",off:"Slukket",relay:"Relæ",closed:"sluttet",open:"åbent",addTitle:"Tilføj enhed",addName:"Navn (fx Lampe2)",add:"Tilføj",remove:"Fjern",confirmRm:"Fjerne enheden og dens gemte konfiguration?",upper:"Øverste tast",lower:"Nederste tast",hold:"Hold nede = langt tryk",slider:"Skyder",toggle:"Tryk (tænd/sluk)",level:"Lysstyrke",ramping:"dæmper…",blind:"Persienne",up:"Op",down:"Ned",stop:"Stop",position:"Position",sensorHint:"Simulerede målinger – sendes cyklisk efter ETS-parametrene",random:"Seneste tilfældige værdi",cycles:"Sendte cyklusser"},
- en:{sub:"Virtual KNX devices – programmed from ETS",lang:"Dansk",prog:"Programming button",press:"Press",unassigned:"Not programmed",
-  loaded:"Application loaded",notloaded:"No application",dl:"Downloads",lamp:"Lamp",params:"Parameters from ETS",
+  note:"Blå linjer er rigtige telegrammer på den virtuelle linje (afsender, modtager, service, rådata). Grå linjer er enhedens egen forklaring på, hvorfor den reagerede eller ignorerede noget – undervisningstekst, ikke data fra bussen.",
+  relay:"Relæ",closed:"sluttet",open:"åbent",addTitle:"Tilføj enhed",addName:"Navn (fx Lampe2)",add:"Tilføj",remove:"Fjern",confirmRm:"Fjerne enheden og dens gemte konfiguration?",
+  upper:"Øverste tast",lower:"Nederste tast",hold:"Hold nede = langt tryk",slider:"Skyder",toggle:"Tryk (tænd/sluk)",level:"Lysstyrke",ramping:"dæmper…",
+  blind:"Persienne",position:"Position",sensorHint:"Simulerede målinger – sendes cyklisk efter ETS-parametrene",random:"Seneste tilfældige værdi",cycles:"Sendte cyklusser",
+  topo:"Enheder",ga:"Gruppeadresser",gaEmpty:"Ingen gruppeadresser endnu. Download en enhed fra ETS, så vises de her.",line:"Linje",unprog:"Ikke programmeret",
+  progMode:"programmeringstilstand",iface:"KNXnet/IP-interface",devs:"Enheder",telegrams:"Telegrammer",on:"tændt",off:"slukket",flagsHint:"K=kommunikation L=læs S=skriv Ü=send O=opdatér"},
+ en:{tag:"Virtual KNX installation for teaching",lang:"Dansk",prog:"Programming button",press:"Press",unassigned:"Not programmed",
+  loaded:"Application loaded",notloaded:"No application",dl:"Downloads",params:"Parameters from ETS",
   mon:"Telegram monitor and explanations",filter:"Filter (address, text, device)…",bus:"Real telegrams",exp:"Device explanation",clear:"Clear",
   note:"Blue lines are real telegrams on the virtual line (source, destination, service, raw data). Grey lines are the device's own explanation of why it reacted or ignored something – teaching text, not bus data.",
-  state:"State",on:"On",off:"Off",relay:"Relay",closed:"closed",open:"open",addTitle:"Add device",addName:"Name (e.g. Lamp2)",add:"Add",remove:"Remove",confirmRm:"Remove the device and its stored configuration?",upper:"Upper key",lower:"Lower key",hold:"Hold = long press",slider:"Slider",toggle:"Press (on/off)",level:"Brightness",ramping:"dimming…",blind:"Blind",up:"Up",down:"Down",stop:"Stop",position:"Position",sensorHint:"Simulated readings – sent cyclically according to the ETS parameters",random:"Last random value",cycles:"Cycles sent"}
+  relay:"Relay",closed:"closed",open:"open",addTitle:"Add device",addName:"Name (e.g. Lamp2)",add:"Add",remove:"Remove",confirmRm:"Remove the device and its stored configuration?",
+  upper:"Upper key",lower:"Lower key",hold:"Hold = long press",slider:"Slider",toggle:"Press (on/off)",level:"Brightness",ramping:"dimming…",
+  blind:"Blind",position:"Position",sensorHint:"Simulated readings – sent cyclically according to the ETS parameters",random:"Last random value",cycles:"Cycles sent",
+  topo:"Devices",ga:"Group addresses",gaEmpty:"No group addresses yet. Download a device from ETS and they will appear here.",line:"Line",unprog:"Not programmed",
+  progMode:"programming mode",iface:"KNXnet/IP interface",devs:"Devices",telegrams:"Telegrams",on:"on",off:"off",flagsHint:"C=communication R=read W=write T=transmit U=update"}
 };
-let lang=localStorage.getItem('vknx-lang')||'da', since=0, lines=[];
+let lang='da',theme='dark',since=0,lines=[],busCount=0,sel=null,openParams=new Set();
+try{lang=localStorage.getItem('vknx-lang')||'da'}catch(e){}
+theme=document.documentElement.dataset.theme;
 const t=k=>T[lang][k];
-function toggleLang(){lang=lang==='da'?'en':'da';localStorage.setItem('vknx-lang',lang);applyStatic();render(window.__s)}
-function applyStatic(){document.documentElement.lang=lang;sub.textContent=t('sub');document.getElementById('lang').textContent=t('lang');
- monTitle.textContent=t('mon');filter.placeholder=t('filter');lblBus.textContent=t('bus');lblExp.textContent=t('exp');btnClear.textContent=t('clear');note.textContent=t('note');addTitle.textContent=t('addTitle');addName.placeholder=t('addName');btnAdd.textContent=t('add');fillProducts()}
-async function post(u){await fetch(u,{method:'POST'});poll()}
-function render(s){ if(!s)return; window.__s=s; const el=document.getElementById('devices'); el.innerHTML='';
- for(const d of s.devices){ const c=document.createElement('div'); c.className='card';
-  const prod=lang==='da'?d.productDa:d.productEn;
-  let h=`<h2>${esc(d.name)}</h2><div class="prod">${esc(prod)}</div>
-   <div class="row"><span class="addr ${d.unassigned?'un':''}">${d.unassigned?'15.15.255':esc(d.address)}</span>
-   ${d.unassigned?`<span class="pill">${t('unassigned')}</span>`:''}</div>
-   <div class="row"><span class="led ${d.programming?'on':''}"></span><button onclick="post('/api/prog?dev=${encodeURIComponent(d.name)}')">${t('prog')}</button></div>
-   <div class="row"><span class="pill ${d.loaded?'ok':''}">${d.loaded?t('loaded'):t('notloaded')}</span><span class="pill">${t('dl')}: ${d.downloads}</span></div>`;
-  h+=body(d);
-  if(d.loaded&&d.params.length){h+=`<dl><dt colspan=2><b>${t('params')}</b></dt><dd></dd>`; for(const p of d.params) h+=`<dt>${esc(lang==='da'?p.da:p.en)}</dt><dd>${esc(lang==='da'?p.valueDa:p.valueEn)}</dd>`; h+='</dl>'}
-  h+=`<div class="row"><button class="rm" onclick="rmDev('${encodeURIComponent(d.name)}')">${t('remove')}</button></div>`;
-  c.innerHTML=h; el.appendChild(c)} }
+const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toggleLang(){lang=lang==='da'?'en':'da';try{localStorage.setItem('vknx-lang',lang)}catch(e){};applyStatic();_lastSig='';poll()}
+function themeLbl(){$('theme').textContent=theme==='dark'?'☀ '+(lang==='da'?'Lys':'Light'):'☾ '+(lang==='da'?'Mørk':'Dark')}
+function toggleTheme(){theme=theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;themeLbl();try{localStorage.setItem('vknx-theme',theme)}catch(e){}}
+function applyStatic(){document.documentElement.lang=lang;$('tag').textContent=t('tag');$('lang').textContent=t('lang');
+ $('monTitle').textContent=t('mon');$('filter').placeholder=t('filter');$('lblBus').textContent=t('bus');$('lblExp').textContent=t('exp');$('btnClear').textContent=t('clear');$('note').textContent=t('note');
+ $('hAdd').textContent=t('addTitle');$('addName').placeholder=t('addName');$('btnAdd').textContent=t('add');$('hTopo').textContent=t('topo');$('hGa').textContent=t('ga');themeLbl();fillProducts()}
+async function post(u){await fetch(u,{method:'POST'});poll()}
+
+/* ---------- helpers ---------- */
+function summary(d){const v=d.view||{};if(!d.loaded)return d.unassigned?t('unprog'):t('notloaded');
+ switch(d.product){
+  case 'switch-actuator':return v.lamp?'💡 '+t('on'):t('off');
+  case 'switch-actuator-4':case 'switch-actuator-8':return (v.lamps||'').split('').map(c=>c==='1'?'●':'○').join(' ');
+  case 'dimmer':return v.level+' %';
+  case 'blind-2':return (v.pos1??0)+' % / '+(v.pos2??0)+' %';
+  case 'multisensor':return (v.s3??'')+' °C · '+(v.s0??'')+' ppm';
+  case 'push-slider':return (v.level??0)+' %';
+  default:return t('loaded')}}
+function flagStr(f){const m=lang==='da'?[[4,'K'],[8,'L'],[16,'S'],[64,'Ü'],[128,'O']]:[[4,'C'],[8,'R'],[16,'W'],[64,'T'],[128,'U']];return m.filter(x=>f&x[0]).map(x=>x[1]).join('')}
+function select(name){sel=name;_lastSig='';poll();setTimeout(()=>{const c=document.querySelector('.card.sel');if(c)c.scrollIntoView({behavior:'smooth',block:'center'})},60)}
+
+/* ---------- rendering ---------- */
+function render(s){
+ const ds=s.devices;
+ /* status chips */
+ const prog=ds.filter(d=>d.programming).length,ld=ds.filter(d=>d.loaded).length;
+ $('status').innerHTML=`<span class="chip"><span class="dot ok"></span>${t('iface')} <b>UDP 3671</b></span><span class="chip">${t('devs')} <b>${ds.length}</b></span><span class="chip"><span class="dot ${ld?'ok':''}"></span>${t('loaded')} <b>${ld}</b></span>`+(prog?`<span class="chip"><span class="dot prog"></span>${t('progMode')} <b>${prog}</b></span>`:'')+`<span class="chip">${t('telegrams')} <b>${busCount}</b></span>`;
+ $('nDev').textContent=ds.length;
+ /* topology grouped by line */
+ const groups={};for(const d of ds){const k=d.unassigned?'–':d.address.split('.').slice(0,2).join('.');(groups[k]=groups[k]||[]).push(d)}
+ const keys=Object.keys(groups).sort((a,b)=>a==='–'?1:b==='–'?-1:a.localeCompare(b,undefined,{numeric:true}));
+ $('topo').innerHTML=keys.length?keys.map(k=>`<div class="line-h">${k==='–'?t('unprog'):t('line')+' '+k}</div>`+groups[k].sort((a,b)=>a.address.localeCompare(b.address,undefined,{numeric:true})).map(d=>
+   `<div class="dev-i" onclick="select('${esc(d.name).replace(/'/g,"\\'")}')"><span class="dot ${d.programming?'prog':d.loaded?'ok':d.unassigned?'':'warn'}"></span><span><span class="a ${d.unassigned?'un':''}">${d.unassigned?'15.15.255':esc(d.address)}</span> <span class="nm">${esc(d.name)}</span></span><span class="sm">${esc(summary(d))}</span></div>`).join('')).join(''):`<div class="empty">–</div>`;
+ /* group addresses */
+ const ga={};for(const d of ds)for(const a of (d.assoc||[]))(ga[a.ga]=ga[a.ga]||[]).push({dev:d.name,txt:lang==='da'?a.da:a.en,f:a.flags});
+ const gk=Object.keys(ga).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+ $('nGa').textContent=gk.length;
+ $('gas').innerHTML=gk.length?gk.map(g=>`<div class="ga"><div class="g">${esc(g)}</div><ul>${ga[g].map(x=>`<li><b>${esc(x.dev)}</b> ${esc(x.txt)}<span class="fl" title="${esc(t('flagsHint'))}">${flagStr(x.f)}</span></li>`).join('')}</ul></div>`).join(''):`<div class="empty">${t('gaEmpty')}</div>`;
+ /* device cards */
+ const el=$('devices');el.innerHTML='';
+ for(const d of ds){const c=document.createElement('div');c.className='card'+(d.name===sel?' sel':'')+(d.programming?' prog':'');
+  const prod=lang==='da'?d.productDa:d.productEn,en=esc(d.name).replace(/'/g,"\\'");
+  let h=`<div class="hd"><span class="dot ${d.programming?'prog':d.loaded?'ok':''}" style="margin-top:.5rem"></span><div class="t"><h2>${esc(d.name)}</h2><div class="prod">${esc(prod)}</div></div>
+   <span class="addrchip ${d.unassigned?'un':''}">${d.unassigned?'15.15.255':esc(d.address)}</span><button class="xbtn rm" title="${t('remove')}" onclick="rmDev('${encodeURIComponent(d.name)}')">✕</button></div><div class="bd">`;
+  h+=body(d);
+  if(d.loaded&&d.params.length){const op=openParams.has(d.name)?' open':'';h+=`<details class="params"${op} ontoggle="toggleParams('${en}',this.open)"><summary>${t('params')}</summary><dl>`+d.params.map(p=>`<dt>${esc(lang==='da'?p.da:p.en)}</dt><dd>${esc(lang==='da'?p.valueDa:p.valueEn)}</dd>`).join('')+`</dl></details>`}
+  h+=`</div><div class="ft"><button class="progbtn" onclick="post('/api/prog?dev=${encodeURIComponent(d.name)}')"><span class="led ${d.programming?'on':''}"></span>${t('prog')}</button><span class="grow"></span><span class="pill ${d.loaded?'ok':''}">${d.loaded?t('loaded'):t('notloaded')}</span><span class="pill">${t('dl')}: ${d.downloads}</span></div>`;
+  c.innerHTML=h;el.appendChild(c)}
+}
+function toggleParams(n,o){o?openParams.add(n):openParams.delete(n)}
 
 const SENS=[['CO2','ppm',400,5000,10],['Humidity','%',0,100,0.5],['Illuminance','lux',0,100000,50],['Temperature','°C',-30,60,0.5],['Pressure','Pa',30000,110000,50],['WindSpeed','m/s',0,50,0.5]];
 function dv(n){return encodeURIComponent(n)}
 function act(n,a,v){fetch(`/api/act?dev=${dv(n)}&a=${a}&v=${v}`,{method:'POST'})}
 function key(n,k,down){act(n,down?'down':'up',k)}
-function lampBox(on,label,op){return `<div class="lampbox"><div class="lamp ${on?'on':''}" ${op!=null?`style="opacity:${0.35+op*0.65}"`:''}>💡</div>${label||''}</div>`}
+function lampBox(on,label){return `<div class="lampbox"><div class="lamp ${on?'on':''}">💡</div>${label||''}</div>`}
+function keyBtn(e,k,label){return `<button class="key" onpointerdown="this.setPointerCapture(event.pointerId);this.classList.add('down');key('${e}',${k},true)" onpointerup="this.classList.remove('down');key('${e}',${k},false)" onpointercancel="this.classList.remove('down');key('${e}',${k},false)">${label}</button>`}
 function body(d){const v=d.view||{},n=d.name,e=esc(n).replace(/'/g,"\\'");let h='';
  switch(d.product){
- case 'push-button': h=`<div class="row"><button class="bigbtn primary" onclick="act('${e}','press',0)">${t('press')}</button></div>`;break;
- case 'push-rocker': h=`<div class="keys"><button class="key" onpointerdown="this.setPointerCapture(event.pointerId);this.classList.add('down');key('${e}',1,true)" onpointerup="this.classList.remove('down');key('${e}',1,false)" onpointercancel="this.classList.remove('down');key('${e}',1,false)">▲ ${t('upper')}</button>
-   <button class="key" onpointerdown="this.setPointerCapture(event.pointerId);this.classList.add('down');key('${e}',2,true)" onpointerup="this.classList.remove('down');key('${e}',2,false)" onpointercancel="this.classList.remove('down');key('${e}',2,false)">▼ ${t('lower')}</button></div>
-   <div class="row"><span class="led ${v.state?'on':''}" style="background:${v.state?'#f5b301':''}"></span><span class="pill">${t('hold')}</span></div>`;break;
- case 'push-slider': h=`<div class="row"><button class="bigbtn primary" onclick="act('${e}','press',0)">${t('toggle')}</button></div>
-   <div class="row" style="width:100%"><span>${t('slider')}: <b>${v.level??0} %</b></span><input type="range" min="0" max="100" value="${v.level??0}" oninput="act('${e}','sliderLive',this.value);this.previousElementSibling.querySelector('b').textContent=this.value+' %'" onchange="act('${e}','slider',this.value)"></div>`;break;
+ case 'push-button': h=`<button class="bigbtn primary" onclick="act('${e}','press',0)">${t('press')}</button>`;break;
+ case 'push-rocker': h=`<div class="keys">${keyBtn(e,1,'▲ '+t('upper'))}${keyBtn(e,2,'▼ '+t('lower'))}</div><div class="hint">${t('hold')}</div>`;break;
+ case 'push-slider': h=`<button class="bigbtn primary" onclick="act('${e}','press',0)">${t('toggle')}</button>
+   <div><div class="row">${t('slider')}: <b>${v.level??0} %</b></div><input type="range" min="0" max="100" value="${v.level??0}" oninput="act('${e}','sliderLive',this.value);this.previousElementSibling.querySelector('b').textContent=this.value+' %'" onchange="act('${e}','slider',this.value)"></div>`;break;
  case 'switch-actuator': h=`<div class="row"><div class="lamp ${v.lamp?'on':''}">💡</div><div>${t('relay')}: <b>${d.loaded?(v.relayClosed?t('closed'):t('open')):'–'}</b></div></div>`;break;
  case 'switch-actuator-4': case 'switch-actuator-8': h=`<div class="lamps">${[...(v.lamps||'')].map((c,i)=>lampBox(c==='1',i+1)).join('')}</div>`;break;
- case 'dimmer': h=`<div class="row"><div class="lamp ${v.level>0?'on':''}" style="opacity:${0.35+(v.level||0)/100*0.65}">💡</div><div style="flex:1">${t('level')}: <b>${d.loaded?v.level+' %':'–'}</b> ${v.ramping?`<span class="pill">${t('ramping')}</span>`:''}<div class="meter"><i style="width:${d.loaded?v.level:0}%"></i></div></div></div>`;break;
- case 'blind-2': h=`<div class="blinds">${[1,2].map(c=>`<div class="blind">${t('blind')} ${c}<div class="win"><i style="height:${d.loaded?v['pos'+c]:0}%"></i></div>${d.loaded?v['pos'+c]:'–'} % ${v['dir'+c]>0?'▼':v['dir'+c]<0?'▲':''}</div>`).join('')}</div>`;break;
- case 'multisensor': h=`<div class="note" style="padding:0 0 6px;border:0">${t('sensorHint')}</div><div class="sens">${SENS.map((s,i)=>`<label>${s[0]} (${s[1]})</label><b id="sv_${esc(n)}_${i}">${v['s'+i]}</b><input style="grid-column:1/3" type="range" min="${s[2]}" max="${s[3]}" step="${s[4]}" value="${v['s'+i]}" oninput="document.getElementById('sv_${esc(n)}_${i}').textContent=this.value" onchange="act('${e}','s${i}',Math.round(this.value*10))">`).join('')}
+ case 'dimmer': h=`<div class="row"><div class="lamp ${v.level>0?'on':''}" style="${v.level>0?'opacity:'+(0.45+v.level/100*0.55):''}">💡</div><div style="flex:1;min-width:8rem">${t('level')}: <b>${d.loaded?v.level+' %':'–'}</b> ${v.ramping?`<span class="pill">${t('ramping')}</span>`:''}<div class="meter"><i style="width:${d.loaded?v.level:0}%"></i></div></div></div>`;break;
+ case 'blind-2': h=`<div class="blinds">${[1,2].map(c=>`<div class="blind">${t('blind')} ${c}<div class="win"><i style="height:${d.loaded?v['pos'+c]:0}%"></i></div><b style="color:var(--ink)">${d.loaded?v['pos'+c]:'–'} %</b> ${v['dir'+c]>0?'▼':v['dir'+c]<0?'▲':''}</div>`).join('')}</div>`;break;
+ case 'multisensor': h=`<div class="hint">${t('sensorHint')}</div><div class="sens">${SENS.map((s,i)=>`<label>${s[0]} (${s[1]})</label><b id="sv_${esc(n)}_${i}">${v['s'+i]}</b><input style="grid-column:1/3" type="range" min="${s[2]}" max="${s[3]}" step="${s[4]}" value="${v['s'+i]}" oninput="document.getElementById('sv_${esc(n)}_${i}').textContent=this.value" onchange="act('${e}','s${i}',Math.round(this.value*10))">`).join('')}
    <label>${t('random')}</label><b>${v.random??0}</b><label>${t('cycles')}</label><b>${v.cycles??0}</b></div>`;break;
  default: h='';}
  return h}
 let _lastSig='';
-async function addDevice(){addErr.textContent='';const r=await fetch(`/api/add?product=${encodeURIComponent(addProd.value)}&name=${encodeURIComponent(addName.value.trim())}`,{method:'POST'});if(r.ok){addName.value='';_lastSig='';poll()}else addErr.textContent=await r.text()}
+async function addDevice(){$('addErr').textContent='';const r=await fetch(`/api/add?product=${encodeURIComponent($('addProd').value)}&name=${encodeURIComponent($('addName').value.trim())}`,{method:'POST'});if(r.ok){$('addName').value='';_lastSig='';poll()}else $('addErr').textContent=await r.text()}
 async function rmDev(n){if(!confirm(t('confirmRm')))return;await fetch(`/api/remove?dev=${n}`,{method:'POST'});_lastSig='';poll()}
 let prods=[];
 async function fillProducts(){if(!prods.length)try{prods=await (await fetch('/api/products')).json()}catch(e){return}
- const cur=addProd.value;addProd.innerHTML=prods.map(p=>`<option value="${p.key}">${esc(lang==='da'?p.da:p.en)}</option>`).join('');if(cur)addProd.value=cur}
+ const cur=$('addProd').value;$('addProd').innerHTML=prods.map(p=>`<option value="${p.key}">${esc(lang==='da'?p.da:p.en)}</option>`).join('');if(cur)$('addProd').value=cur}
 function clearLog(){lines=[];drawLog()}
-function drawLog(){const f=filter.value.toLowerCase(),b=showBus.checked,e=showExp.checked; const box=document.getElementById('log');
+function colorize(s){return esc(s).replace(/\b(\d{1,2}\.\d{1,2}\.\d{1,3})\b/g,'<span class="ia">$1</span>').replace(/\b(\d{1,2}\/\d{1,2}\/\d{1,3})\b/g,'<span class="gad">$1</span>').replace(/\b(GroupValue(?:Write|Read|Response)|A_[A-Za-z_]+(?:\.[a-z]+)?)/g,'<span class="svc">$1</span>')}
+function drawLog(){const f=$('filter').value.toLowerCase(),b=$('showBus').checked,e=$('showExp').checked,box=$('log');
  const stick=box.scrollTop+box.clientHeight>=box.scrollHeight-30;
  box.innerHTML=lines.filter(l=>(l.cat==='bus'?b:e)&&(!f||(l.dev+' '+l.text).toLowerCase().includes(f))).map(l=>
-  `<div class="ln ${l.cat==='bus'?'bus':'exp'}"><span class="t">${l.t}</span> <span class="tag">${l.cat==='bus'?'bus':esc(l.dev)+' · '+esc(l.cat)}</span> ${esc(l.text)}</div>`).join('');
+  `<div class="ln ${l.cat==='bus'?'bus':'exp'}"><span class="t">${l.t}</span><span class="tag">${l.cat==='bus'?'bus':esc(l.dev)+' · '+esc(l.cat)}</span><span class="${l.cat==='bus'?'':'x'}">${l.cat==='bus'?colorize(l.text):esc(l.text)}</span></div>`).join('');
  if(stick)box.scrollTop=box.scrollHeight}
-async function poll(){try{const s=await (await fetch('/api/state')).json();const sig=JSON.stringify(s)+lang;if(sig!==_lastSig&&!document.querySelector('.key.down')&&!(document.activeElement&&document.activeElement.type==='range')){_lastSig=sig;render(s)}
- const l=await (await fetch('/api/log?since='+since)).json(); if(l.entries.length){for(const x of l.entries){lines.push(x);since=x.seq} if(lines.length>2000)lines=lines.slice(-1500); drawLog()}}catch(e){}}
-for(const id of ['filter','showBus','showExp'])document.getElementById(id).addEventListener('input',drawLog);
+async function poll(){try{const s=await (await fetch('/api/state')).json();const sig=JSON.stringify(s)+lang+busCount+sel;
+  if(sig!==_lastSig&&!document.querySelector('.key.down')&&!(document.activeElement&&document.activeElement.type==='range')){_lastSig=sig;render(s)}
+  const l=await (await fetch('/api/log?since='+since)).json(); if(l.entries.length){for(const x of l.entries){lines.push(x);since=x.seq;if(x.cat==='bus')busCount++} if(lines.length>2000)lines=lines.slice(-1500); drawLog()}}catch(e){}}
+for(const id of ['filter','showBus','showExp'])$(id).addEventListener('input',drawLog);
 applyStatic();poll();setInterval(poll,600);
 </script>
 </body>

@@ -479,6 +479,18 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		};
 	}
 
+	/** Downloaded group-address associations for the control panel: {group address, object number, ETS flag byte}. */
+	public List<int[]> associationView() {
+		final var t = tables;
+		final var out = new ArrayList<int[]>();
+		for (final int[] a : t.associations()) {
+			if (a[0] < 1 || a[0] > t.groupAddresses().length)
+				continue;
+			out.add(new int[] { t.groupAddresses()[a[0] - 1], a[1], t.config(a[1]) });
+		}
+		return out;
+	}
+
 	/** Whether the application program (parameter area) is currently loaded. */
 	public boolean applicationLoaded() { return loadState(OBJ_APPLICATION) == LS_LOADED; }
 

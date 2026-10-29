@@ -33,3 +33,7 @@ Dæmper, slider-dæmper, persienne, multisensor (cyklisk), linjekobler med filte
 - Fejl rapporteret af ejeren: download fejler, når en enhed får anden adresse end 1.1.x. Årsag (reproduceret med `TunnelLineTest`): Calimeros KNXnet/IP-server opfører sig som én linje og dropper telegrammer til andre linjer/områder. Rettet med en lille lokal patch (`third_party/patches/`), så hele den virtuelle installation er "flad" og kan have alle adresser. [T uden ETS; skal bekræftes i ETS]
 - Der er stadig ingen rigtig linjekobler (filtertabel, hop count) – alle linjer er direkte forbundet.
 - Timer-opgaver (dæmpning, cyklisk sending, persienner) logger nu fejl i stedet for at stoppe lydløst.
+
+## Opdatering: nyt kontrolpanel (2026-10-29)
+- Panelet er redesignet: mørkt/lyst tema (standard mørkt), enhedsliste grupperet efter linje, oversigt over gruppeadresser (fra den downloadede konfiguration), kort-layout, farvet telegrammonitor, tilpasset projektor/stor skærm.
+- Ikke bygget endnu: plantegning med ikon-placering, scener/miljøpanel, simulerings-regler. Gruppeadresse-oversigten er ikke afprøvet med en rigtig ETS-download.

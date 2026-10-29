@@ -114,6 +114,18 @@ public final class WebUi {
 						.append(",\"valueEn\":").append(q(choice.map(c -> c.textEn()).orElse(String.valueOf(v))))
 						.append('}');
 			}
+			sb.append("],\"assoc\":[");
+			boolean fa = true;
+			for (final int[] a : d.associationView()) {
+				if (!fa)
+					sb.append(',');
+				fa = false;
+				final var o = d.product().object(a[1]);
+				sb.append("{\"ga\":").append(q(new io.calimero.GroupAddress(a[0]).toString())).append(",\"obj\":").append(a[1])
+						.append(",\"da\":").append(q(o.map(x -> x.textDa()).orElse("?"))).append(",\"en\":")
+						.append(q(o.map(x -> x.textEn()).orElse("?"))).append(",\"size\":").append(o.map(x -> x.sizeBits()).orElse(1))
+						.append(",\"flags\":").append(a[2]).append('}');
+			}
 			sb.append("],\"view\":{");
 			sb.append(d.behavior().view().entrySet().stream().map(e -> q(e.getKey()) + ":" + val(e.getValue()))
 					.collect(Collectors.joining(",")));
