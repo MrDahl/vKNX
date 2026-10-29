@@ -38,6 +38,9 @@ jobs:
             --module-path dist/mods --module org.vknx/org.vknx.Main `
             --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql,java.desktop `
             --win-console --app-version 0.1.0
+          Copy-Item products dist/out/vKNX/products -Recurse
+          Copy-Item tools/make-knxprod.ps1 dist/out/vKNX/
+          Copy-Item docs dist/out/vKNX/docs -Recurse
           Compress-Archive -Path dist/out/vKNX -DestinationPath dist/vKNX-windows.zip
       - name: Publish logs to ci-logs branch
         if: always()

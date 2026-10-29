@@ -7,10 +7,13 @@
 - Hent repoet: `git clone https://github.com/MrDahl/vKNX` og kør `tools\build.ps1` (se README).
 
 ## 1. Opret `.knxprod` (kræver ETS på maskinen)
-1. `tools\gen-products.ps1` → `products\vknx-push-button.xml`, `products\vknx-switch-actuator.xml`.
-2. Konvertér til `.knxprod` med **OpenKNXproducer** (`OpenKNXproducer knxprod <fil.xml>`) eller **Kaenx-Creator**. Notér fejlbeskeder ordret.
-   - Hvis konverteren afviser namespace `project/20`: notér ETS' fejltekst; send den til os.
-3. Notér: lykkedes konvertering? Blev filen signeret?
+Produkt-XML'erne ligger i repoet (`products/`) og i Windows-zip'en (`vKNX\products\`). De behøver ikke genereres igen.
+1. Hent seneste udgave af **OpenKNXproducer** fra https://github.com/OpenKNX/OpenKNXproducer/releases, udpak, og kør `Install-OpenKNX-Tools.ps1` (højreklik → *Kør med PowerShell*; ved signaturfejl: `PowerShell.exe -ExecutionPolicy Bypass -File .\Install-OpenKNX-Tools.ps1`). Værktøjet bruger ETS' egne DLL'er til konvertering og signering og kan finde ETS i `C:\Program Files (x86)\ETS6`.
+2. Kør i PowerShell: `.\make-knxprod.ps1` (ligger i `vKNX`-mappen), eller manuelt for hver fil:
+   `OpenKNXproducer knxprod vknx-push-button.xml -o vknx-push-button.knxprod`
+   Brug `knxprod`, ikke `create`/`check` (de er til OpenKNX's eget skabelonformat).
+3. Notér hele konsoludskriften. Hvis XSD-validering melder fejl, eller konverteren afviser filen: send teksten til os.
+4. Notér: lykkedes konvertering? Blev `.knxprod` oprettet?
 
 ## 2. Start simulatoren
 `tools\start.ps1` (åbner kontrolpanel på http://127.0.0.1:8080/). Notér de udskrevne IP-adresser og tunneladresser (1.1.241–244), port 3671.
