@@ -126,9 +126,14 @@ svg.ic{width:1.15em;height:1.15em;fill:currentColor;vertical-align:-.2em;flex:no
 .ic-temp{color:var(--c-temp)} .ic-hum{color:var(--c-hum)} .ic-co2{color:var(--c-co2)} .ic-lux{color:var(--c-lux)} .ic-press{color:var(--c-press)} .ic-wind{color:var(--c-wind)} .ic-dice{color:var(--c-rand)}
 .ic-sun{color:var(--c-sun)} .ic-moon{color:var(--c-moon)} .ic-close,.ic-trash{color:var(--c-danger)} .ic-plus,.ic-check,.ic-upload,.ic-edit{color:var(--c-ok)} .ic-devices,.ic-plan,.ic-translate{color:var(--c-btn)}
 .mkbtn svg.ic,.key.down svg.ic,button.primary svg.ic,.tabs button.act svg.ic{color:inherit} .mkbtn svg.ic{width:1.3em;height:1.3em}
-.lamp svg.ic{width:1.45em;height:1.45em} .mk .lamp svg.ic{color:#7c8799} .mk .lamp.on svg.ic{color:var(--c-lamp)}
+.lamp svg.ic{width:1.45em;height:1.45em} .mk .lamp svg.ic{color:#7c8799} .mk .dimlamp.lit .base svg.ic{color:var(--c-lamp)!important} .mk .lamp.on svg.ic{color:var(--c-lamp)}
 button svg.ic,label.btn svg.ic{margin-right:.35rem} .xbtn svg.ic,.mkx svg.ic{margin:0}
 .sens label svg.ic{margin-right:.35rem} .mkx svg.ic{color:#fff!important;width:.9em;height:.9em;margin:0} .mkpill svg.ic{width:1em;height:1em;margin-right:.3rem}
+/* dimmable lamp: the outline stays, the filled bulb fades in with the brightness */
+.dimlamp{display:grid;place-items:center} .dimlamp>*{grid-area:1/1;display:grid;place-items:center}
+.dimlamp .base svg.ic{color:var(--mute)} .dimlamp.lit .base svg.ic{color:var(--c-lamp)!important;filter:none}
+.dimlamp .fill svg.ic{color:var(--c-lamp)!important;filter:drop-shadow(0 0 5px var(--c-lamp))}
+.lamp.dim{transition:box-shadow .1s}
 /* tabs + floor plan */
 .tabs{display:flex;gap:.3rem;background:var(--glass);border:1px solid var(--line);border-radius:.7rem;padding:.2rem}
 .tabs button{border:0;background:transparent;padding:.35rem .9rem} .tabs button.act{background:var(--accent);color:var(--accent-ink);font-weight:600}
@@ -314,6 +319,8 @@ const SENS=[['CO2','ppm',400,5000,10],['Humidity','%',0,100,0.5],['Illuminance',
 function dv(n){return encodeURIComponent(n)}
 function act(n,a,v){fetch(`/api/act?dev=${dv(n)}&a=${a}&v=${v}`,{method:'POST'})}
 function key(n,k,down){act(n,down?'down':'up',k)}
+function dimLamp(pct,on){const lv=Math.max(0,Math.min(100,pct||0))/100;const g=lv>0?`box-shadow:0 0 ${(26*lv).toFixed(1)}px ${(4*lv).toFixed(1)}px color-mix(in srgb,var(--c-lamp) ${Math.round(55*lv)}%,transparent);border-color:color-mix(in srgb,var(--c-lamp) ${Math.round(100*lv)}%,var(--line));`:'';
+ return `<div class="lamp dim" style="${g}"><span class="dimlamp ${lv>0?'lit':''}"><span class="base">${ic('lampOff','lamp')}</span><span class="fill" style="opacity:${lv}">${ic('lamp','lamp')}</span></span></div>`}
 function lampBox(on,label){return `<div class="lampbox"><div class="lamp ${on?'on':''}">${ic(on?'lamp':'lampOff','lamp')}</div>${label||''}</div>`}
 function keyBtn(e,k,label){return `<button class="key" onpointerdown="this.setPointerCapture(event.pointerId);this.classList.add('down');key('${e}',${k},true)" onpointerup="this.classList.remove('down');key('${e}',${k},false)" onpointercancel="this.classList.remove('down');key('${e}',${k},false)">${label}</button>`}
 function body(d){const v=d.view||{},n=d.name,e=esc(n).replace(/'/g,"\\'");let h='';
@@ -324,7 +331,7 @@ function body(d){const v=d.view||{},n=d.name,e=esc(n).replace(/'/g,"\\'");let h=
    <div><div class="row">${t('slider')}: <b>${v.level??0} %</b></div><input type="range" min="0" max="100" value="${v.level??0}" oninput="act('${e}','sliderLive',this.value);this.previousElementSibling.querySelector('b').textContent=this.value+' %'" onchange="act('${e}','slider',this.value)"></div>`;break;
  case 'switch-actuator': h=`<div class="row"><div class="lamp ${v.lamp?'on':''}">${ic(v.lamp?'lamp':'lampOff','lamp')}</div><div>${t('relay')}: <b>${d.loaded?(v.relayClosed?t('closed'):t('open')):'–'}</b></div></div>`;break;
  case 'switch-actuator-4': case 'switch-actuator-8': h=`<div class="lamps">${[...(v.lamps||'')].map((c,i)=>lampBox(c==='1',i+1)).join('')}</div>`;break;
- case 'dimmer': h=`<div class="row"><div class="lamp ${v.level>0?'on':''}" style="${v.level>0?'opacity:'+(0.45+v.level/100*0.55):''}">${ic(v.level>0?'lamp':'lampOff','lamp')}</div><div style="flex:1;min-width:8rem">${t('level')}: <b>${d.loaded?v.level+' %':'–'}</b> ${v.ramping?`<span class="pill">${t('ramping')}</span>`:''}<div class="meter"><i style="width:${d.loaded?v.level:0}%"></i></div></div></div>`;break;
+ case 'dimmer': h=`<div class="row">${dimLamp(d.loaded?v.level:0)}<div style="flex:1;min-width:8rem">${t('level')}: <b>${d.loaded?v.level+' %':'–'}</b> ${v.ramping?`<span class="pill">${t('ramping')}</span>`:''}<div class="meter"><i style="width:${d.loaded?v.level:0}%"></i></div></div></div>`;break;
  case 'blind-2': h=`<div class="blinds">${[1,2].map(c=>`<div class="blind">${t('blind')} ${c}<div class="win"><i style="height:${d.loaded?v['pos'+c]:0}%"></i></div><b style="color:var(--ink)">${d.loaded?v['pos'+c]:'–'} %</b> ${v['dir'+c]>0?ic('arrowDown','blind'):v['dir'+c]<0?ic('arrowUp','blind'):''}</div>`).join('')}</div>`;break;
  case 'multisensor': h=`<div class="hint">${t('sensorHint')}</div><div class="sens">${SENS.map((s,i)=>`<label>${ic(SENSIC[i])}${s[0]} (${s[1]})</label><b id="sv_${esc(n)}_${i}">${v['s'+i]}</b><input style="grid-column:1/3" type="range" min="${s[2]}" max="${s[3]}" step="${s[4]}" value="${v['s'+i]}" oninput="document.getElementById('sv_${esc(n)}_${i}').textContent=this.value" onchange="act('${e}','s${i}',Math.round(this.value*10))">`).join('')}
    <label>${t('random')}</label><b>${v.random??0}</b><label>${t('cycles')}</label><b>${v.cycles??0}</b></div>`;break;
@@ -356,7 +363,7 @@ function pointsOf(d){const v=d.view||{},n=d.name,P=[];const add=(k,type,extra)=>
 function icoOf(p){return p.type==='sensor'?ic(SENSIC[+p.k.slice(1)]):p.type==='key'?ic(p.sym):p.type==='lamp'?ic('lampOff','lamp'):ic(p.type)}
 function markerHtml(p,it){const e=esc(p.dev).replace(/'/g,"\\'");let inner='';
  switch(p.type){
-  case 'lamp':inner=`<div class="lamp ${p.on?'on':''}" style="${p.on&&p.pct!=null?'opacity:'+(0.45+p.pct/100*0.55):''}">${ic(p.on?'lamp':'lampOff','lamp')}</div>${p.pct!=null&&p.on?`<span class="pct">${p.pct} %</span>`:''}`;break;
+  case 'lamp':inner=(p.pct!=null?dimLamp(p.pct):`<div class="lamp ${p.on?'on':''}">${ic(p.on?'lamp':'lampOff','lamp')}</div>`)+(p.pct!=null&&p.on?`<span class="pct">${p.pct} %</span>`:'');break;
   case 'button':inner=`<button class="mkbtn" onclick="act('${e}','press',0)">${ic('button')}</button>`;break;
   case 'key':inner=`<button class="mkbtn key" onpointerdown="this.setPointerCapture(event.pointerId);this.classList.add('down');key('${e}',${p.keyNo},true)" onpointerup="this.classList.remove('down');key('${e}',${p.keyNo},false)" onpointercancel="this.classList.remove('down');key('${e}',${p.keyNo},false)">${ic(p.sym,'key')}</button>`;break;
   case 'slider':inner=`<input type="range" min="0" max="100" value="${p.val}" oninput="act('${e}','sliderLive',this.value)" onchange="act('${e}','slider',this.value)">`;break;
