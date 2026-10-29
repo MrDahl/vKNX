@@ -35,7 +35,7 @@ namespace VKnx.Launcher
             status.ForeColor = Color.FromArgb(232, 238, 249);
             status.Font = new Font("Segoe UI", 13f);
             status.TextAlign = ContentAlignment.MiddleCenter;
-            status.Text = "Starter vKNX…";
+            status.Text = "Starting vKNX…";
             web.Dock = DockStyle.Fill;
             web.Visible = false;
             Controls.Add(web);
@@ -58,14 +58,14 @@ namespace VKnx.Launcher
 
             if (!File.Exists(serverExe))
             {
-                Fail("Programfilerne mangler:\n" + serverExe + "\n\nInstallér vKNX igen.");
+                Fail("Program files are missing:\n" + serverExe + "\n\nPlease reinstall vKNX.");
                 return;
             }
             port = ChoosePort();
             if (!StartServer()) return;
             if (!await WaitReady(60))
             {
-                Fail("vKNX-motoren svarede ikke.\n\nLog: " + Path.Combine(dataDir, "console.log"));
+                Fail("The vKNX engine did not respond.\n\nLog: " + Path.Combine(dataDir, "console.log"));
                 return;
             }
             await ShowWeb();
@@ -117,7 +117,7 @@ namespace VKnx.Launcher
             }
             catch (Exception ex)
             {
-                Fail("Kunne ikke starte vKNX-motoren:\n" + ex.Message);
+                Fail("Could not start the vKNX engine:\n" + ex.Message);
                 return false;
             }
         }
@@ -153,7 +153,7 @@ namespace VKnx.Launcher
             {
                 // WebView2 runtime missing: fall back to the default browser, the server keeps running
                 try { Process.Start(Url); } catch { }
-                status.Text = "WebView2 mangler på denne pc, så vKNX er åbnet i din browser.\n\nLuk dette vindue for at stoppe vKNX.\n\n" + Url;
+                status.Text = "WebView2 is missing on this PC, so vKNX was opened in your browser.\n\nClose this window to stop vKNX.\n\n" + Url;
                 return;
             }
             var cw = web.CoreWebView2;
@@ -218,7 +218,7 @@ namespace VKnx.Launcher
                 {
                     status.Visible = true;
                     web.Visible = false;
-                    status.Text = "Gemmer og lukker vKNX…";
+                    status.Text = "Saving and closing vKNX…";
                     Refresh();
                     try
                     {

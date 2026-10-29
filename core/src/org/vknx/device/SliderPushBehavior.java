@@ -32,6 +32,7 @@ public final class SliderPushBehavior extends DeviceBehavior {
 			case "slider", "sliderLive" -> {
 				final boolean live = action.equals("sliderLive");
 				levelPct = Math.max(0, Math.min(100, value));
+				on = levelPct > 0; // the next press must toggle relative to what the slider just set
 				if (live && dev.param("SliderSend") == 0)
 					break; // parameter says: only send when the slider is released
 				if (live) {

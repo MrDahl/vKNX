@@ -18,7 +18,7 @@ namespace VKnx.Launcher
             {
                 if (!created)
                 {
-                    MessageBox.Show("vKNX kører allerede.", "vKNX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("vKNX is already running.", "vKNX", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
                 Application.EnableVisualStyles();

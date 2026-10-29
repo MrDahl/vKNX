@@ -1,23 +1,40 @@
 # Changelog
 
-Alle væsentlige ændringer i vKNX. Versionsnumre følger `v<major>.<minor>.<patch>`.
-Teksten under hver version vises også som release-noter på GitHub og i programmets "Søg efter opdateringer".
+All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
+The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
+
+## [0.3.0] - 2026-10-29
+English only, a reworked multisensor, and fixes for dimming and status.
+
+### New
+- **Multisensor rework:** the six measurements (CO2, humidity, illuminance, temperature, air pressure, wind speed) each have their own group object and their own ETS parameter page. Per measurement you choose in ETS: fixed value or random value between a minimum and maximum, and an individual send interval in seconds (0 = never). The control panel no longer changes values; it only shows them.
+- **English everywhere:** control panel, ETS product catalogue (`products/*.xml` and the `.knxprod` you build from them), documentation and GitHub pages. The language button is gone.
+- Product application version is now 2 (texts and parameter layout changed). Import the new `.knxprod` files in ETS and update or re-add the devices.
+
+### Fixed
+- **Relative dimming sent only "break":** when ETS changes only some parameters (partial download), vKNX reset all other parameters to 0, so the dimming step became 0 (= break) and "send status" turned off. Partial downloads now keep the unchanged parameters; values that are not valid choices fall back to the default. The device log now prints the parameter memory after each download.
+- **Slider push button and dimmer status:** the button now follows the slider (a press after moving the slider toggles correctly), and the missing status feedback caused by the reset above is gone.
+- **Update check failed with `handshake_failure`:** the bundled Java runtime was missing the modules for GitHub's TLS (`jdk.crypto.ec`). They are now included.
+
+### Known / not tested
+- The new multisensor pages (they use ETS `choose/when`) and version 2 of all products have not been tried in ETS yet. Rocker, blind actuator and 4-/8-channel actuators are also still untested in ETS.
+- The update button can only be tested with a release newer than the installed one.
 
 ## [0.2.0] - 2026-10-29
-Første versionerede udgave med installer og opdateringsknap.
+First versioned release with installer and update button.
 
-### Nyt
-- **Windows-program:** installer (`vKNX-Setup-0.2.0.exe`) med startmenu-genvej og afinstallering, installeres uden administratorrettigheder. vKNX kører i ét vindue (WebView2) – ingen konsol og ingen separat browser.
-- **Søg efter opdateringer:** knappen under Indstillinger (tandhjulet) spørger GitHub efter nyere version, viser ændringerne og kan hente og installere den.
-- **Interface-linje til ETS:** Indstillinger → "Interface til ETS". Skriv fx `2.9`, så interfacets adresse (2.9.241) passer til en linje i dit ETS-projekt og ETS ikke klager.
-- **Plantegning:** zoom ind og ud (30–300 %) efter upload; zoomniveauet gemmes.
-- Nyt, mindre og mere overskueligt kontrolpanel; mørkt/lyst tema; Material Design Icons med faste farver; dæmpbart lys med omrids der toner ind.
-- Enheder kan have vilkårligt område og linje (fladt netværk).
+### New
+- **Windows application:** installer (`vKNX-Setup-0.2.0.exe`) with start-menu shortcut and uninstaller, installed without administrator rights. vKNX runs in one window (WebView2) – no console and no separate browser.
+- **Check for updates:** the button under Settings (cog icon) asks GitHub for a newer version, shows the changes and can download and install it.
+- **Interface line for ETS:** Settings → "Interface for ETS". Enter e.g. `2.9` so the interface address (2.9.241) matches a line in your ETS project and ETS does not complain.
+- **Floor plan:** zoom in and out (30–300 %) after upload; the zoom level is saved.
+- New, smaller and clearer control panel; dark/light theme; Material Design Icons with fixed colours; dimmable light with an outline that fades in.
+- Devices can have any area and line (flat network).
 
-### Rettet
-- Skyderen på skydedæmper-trykket opdateres nu, også efter at den har været brugt (fokus på skyderen blokerede opdateringen).
+### Fixed
+- The slider of the slider push button now updates, also after it has been used (focus on the slider blocked the update).
 
-### Kendt / ikke testet
-- ETS-kompatibilitet er bekræftet af ejeren for: tryk, kontaktaktuator, dæmper, skydetryk og multisensor (import, adressering, download). Persienne, vippe og 4-/8-kanals aktuatorer er endnu ikke prøvet i ETS.
-- Installer og automatisk opdatering er kun testet på GitHubs Windows-maskine, ikke på skole-pc'er. Programmet er ikke kodesigneret, så Windows kan vise en SmartScreen-advarsel.
-- Linjekobler (filtertabel, hop count) er ikke bygget.
+### Known / not tested
+- ETS compatibility is confirmed by the owner for: push button, switch actuator, dimmer, slider push button and multisensor (import, addressing, download). Blind actuator, rocker and 4-/8-channel actuators have not been tried in ETS yet.
+- The installer and automatic update were only tested on GitHub's Windows machine, not on school PCs. The program is not code-signed, so Windows may show a SmartScreen warning.
+- Line coupler (filter table, hop count) is not built.

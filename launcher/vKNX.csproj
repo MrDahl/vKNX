@@ -11,7 +11,7 @@
     <Version>0.0.0</Version>
     <Product>vKNX</Product>
     <Company>Marc Sonne Dahl</Company>
-    <Description>vKNX - virtuel KNX-installation til undervisning</Description>
+    <Description>vKNX - virtual KNX installation for teaching</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2592.51" />

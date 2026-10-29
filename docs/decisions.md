@@ -1,31 +1,35 @@
-# Beslutninger
+# Decisions
 
-Evidensniveauer: **[K]** kilde, **[T]** egen test (ikke ETS), **[P]** sandsynligt, **[U]** ikke understøttet. Se `research.md`.
+Evidence levels: **[S]** source, **[T]** own test (not ETS), **[P]** probable, **[U]** unsupported. See `research.md`.
 
-## D1. Stak: Java 21 + Calimero (ikke thelsing/knx)
-Begrundelse i `research.md` §2. Kort: flere enheder pr. proces, KNXnet/IP-server, Windows via JVM, licensfrihed (GPLv2 + Classpath-undtagelse). Vi implementerer *ikke* begge.
+## D1. Stack: Java 21 + Calimero (not thelsing/knx)
+Reasons in `research.md` §2. In short: several devices per process, a KNXnet/IP server, Windows via the JVM, licence freedom (GPLv2 + Classpath exception). We do *not* implement both.
 
-## D2. Build uden Maven/Gradle
-Calimero-kilder hentes ved pinnede commits (`third_party/PINS.txt`) og kompileres med almindelig `javac` (`tools/build.sh`). Grund: reproducerbar build, ingen afhængighed af Maven Central. Opgradering af pins kræver ny selvtest **og** ny ETS-test.
+## D2. Build without Maven/Gradle
+Calimero sources are fetched at pinned commits (`third_party/PINS.txt`) and compiled with plain `javac` (`tools/build.sh`). Reason: reproducible build, no dependency on Maven Central. Upgrading the pins requires a new self-test **and** a new ETS test.
 
-## D3. Maske 0x07B0 (System B), producent 0x00FA
-Samme valg som `knx-spring-boot-starter` [K]. 0x00FA er et test-/eksperiment-ID; det er **ikke** bevist, at ETS 6.4 accepterer usigneret/eksperimentel signering [P].
+## D3. Mask 0x07B0 (System B), manufacturer 0x00FA
+Same choice as `knx-spring-boot-starter` [S]. 0x00FA is a test/experimental ID. ETS 6.4 has been confirmed to accept our unsigned `.knxprod` for the first products (owner's tests).
 
-## D4. Faste lagerslots
-Adressetabel 0x0400, association 0x0800, GO-tabel 0x0C00 (hver 0x400), applikation 0x1000 (0x1000). ETS bruger *relativ* allokering; vi svarer med disse faste adresser i TABLE_REFERENCE. Håndteringen af additional load control `0x0B` bygger på optagelse af en rigtig download fra en anden (reference-)enhed – den er **ikke** afprøvet mod ETS 6.4 [P].
+## D4. Fixed memory slots
+Address table 0x0400, association table 0x0800, group object table 0x0C00 (each 0x400), application 0x1000 (0x1000). ETS uses *relative* allocation; we answer with these fixed addresses in TABLE_REFERENCE. The handling of additional load control `0x0B` is based on a recording of a real download from another (reference) device and has worked with ETS 6.4 for the products tried so far.
+Allocation mode 1 (full download) initialises the segment; mode 0 (partial download, only changed parameters) keeps the existing content (fixed in 0.3.0).
 
-## D5. Produktdefinition er eneste sandhed
-`org.vknx.product.Products` → (a) backendens parametre/objekter, (b) produkt-XML via `ProductXmlGenerator`. Det forhindrer, at ETS udstiller funktioner, backend ignorerer.
-Kør: `java -p build/core:build/device:build/server:build/vknx -m org.vknx/org.vknx.tools.ProductXmlGenerator products`.
+## D5. The product definition is the single source of truth
+`org.vknx.product.Products` → (a) the backend's parameters/objects, (b) the product XML via `ProductXmlGenerator`. This prevents ETS from exposing functions the backend ignores.
+Run: `java -p build/core:build/device:build/server:build/vknx -m org.vknx/org.vknx.tools.ProductXmlGenerator products`.
 
-## D6. Én delt virtuel linje 1.1
-ETS tunnelinterface = `1.1.0` (tunnel 1.1.241–244), og alle elever-enheder ligger på linje 1.1, ellers droppes P2P-frames (set i test) [T]. Linjekobler kræver ekstra containere og er senere fase.
+## D6. One flat virtual network
+Calimero's server acts as one line and drops frames to other lines/areas. A small local patch (`third_party/patches/`) makes the network "flat", so devices can have any area/line. The interface address is configurable (Settings → Interface for ETS) because ETS cannot write it on our server. A real line coupler (filter table, hop count) is a later phase.
 
-## D7. Web-UI via lokal backend
-Browseren kan ikke tale UDP/KNXnet/IP. UI = JDK `HttpServer` på `127.0.0.1` + `index.html` (da/en). Blå linjer = rigtige telegrammer; grå = enhedens forklaring. [T]
+## D7. Web UI via local backend
+A browser cannot speak UDP/KNXnet/IP. UI = JDK `HttpServer` on `127.0.0.1` + `index.html`, shown in a WebView2 window by the Windows launcher. Blue lines = real telegrams; grey = the device's own explanation. [T]
 
 ## D8. CRC-16 / MCB
-`Crc16.ccitt` er uafhængigt implementeret og krydstjekket mod thelsings C-funktion (`core/test/crc-vectors.txt`, 40 vektorer) [T]. At *ETS accepterer* MCB-indholdet er ikke testet [P].
+`Crc16.ccitt` is implemented independently and cross-checked against thelsing's C function (`core/test/crc-vectors.txt`, 40 vectors) [T].
 
-## D9. Licens (besluttet af ejeren 2026-10-29)
-Ejeren ønskede "så open source som muligt": vKNX's egen kode er **MIT**. Det er muligt, fordi Calimero har Classpath-undtagelse (linkende kode kan have anden licens). Calimero og Java forbliver GPLv2+CPE og er ikke kopieret ind i repoet; se `THIRD-PARTY-NOTICES.md`. OpenKNXproducer (GPL-3.0) bruges kun som eksternt værktøj. Zennio-referencekode må aldrig publiceres. KNX Explorer-kode er ikke genbrugt (kun ejerens egen ikke-kommercielle licens dér).
+## D9. License (decided by the owner 2026-10-29)
+The owner wanted "as open source as possible": vKNX's own code is **MIT**. This is possible because Calimero has a Classpath exception (code that links to it may use another license). Calimero and Java remain GPLv2+CPE and are not copied into the repo; see `THIRD-PARTY-NOTICES.md`. OpenKNXproducer (GPL-3.0) is only used as an external tool. Zennio reference code must never be published. KNX Explorer code is not reused (only the owner's own non-commercial license applies there).
+
+## D10. English only (decided by the owner 2026-10-29)
+The application, the product catalogue (`.knxprod`), the documentation and the GitHub pages are English only, so that anyone can understand and extend the project. Product application versions were raised to 2 for this release.

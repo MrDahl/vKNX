@@ -117,7 +117,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				: new IndividualAddress(0xFFFF);
 		final KNXNetworkLink link = uplink.createDeviceLink(startAddress);
 		device.setDeviceLink(link);
-		logic.log("device", "created " + product.nameEn() + (restored ? " (state restored)" : " (factory state)")
+		logic.log("device", "created " + product.name() + (restored ? " (state restored)" : " (factory state)")
 				+ ", address " + device.getAddress());
 		logic.afterTablesChanged();
 		logic.startApplication();
@@ -318,13 +318,16 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		}
 		allocatedSize[obj] = size;
 		final var mem = base.deviceMemory();
-		final byte[] region = new byte[size];
-		if (fill)
+		// Mode 1 = (re)initialise with the fill byte (full download). Mode 0 = partial download: keep what is already in
+		// memory, because ETS then writes only the parameters that changed. Zeroing here wiped every unchanged parameter.
+		if (fill && size > 0) {
+			final byte[] region = new byte[size];
 			java.util.Arrays.fill(region, fillByte);
-		if (size > 0)
 			mem.set(SLOT_ADDRESS[obj], region);
+		}
 		base.getInterfaceObjectServer().setProperty(obj, PID.TABLE_REFERENCE, 1, 1, intBytes(SLOT_ADDRESS[obj]));
-		log("download", String.format("relative allocation obj %d: %d bytes at 0x%04X", obj, size, SLOT_ADDRESS[obj]));
+		log("download", String.format("relative allocation obj %d: %d bytes at 0x%04X (%s)", obj, size, SLOT_ADDRESS[obj],
+				fill ? "initialised" : "existing content kept, partial download"));
 		return true;
 	}
 
@@ -451,8 +454,15 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	/** (Re)starts the application behaviour if an application is loaded - after a download, a restart or process start. */
 	private void startApplication() {
 		behavior.onStop();
-		if (applicationLoaded())
+		if (applicationLoaded()) {
+			final byte[] area = parameterArea();
+			final var sb = new StringBuilder();
+			for (final var pd : product.params())
+				if (pd.showWhenParam().isEmpty() || param(pd.showWhenParam()) == pd.showWhenValue())
+					sb.append(sb.length() == 0 ? "" : ", ").append(pd.name()).append('=').append(param(pd.name()));
+			log("download", "application started; parameter memory " + HexFormat.of().formatHex(area) + " -> " + sb);
 			behavior.onApplicationLoaded();
+		}
 	}
 
 	/** Timer thread shared by the behaviours (dimming ramps, blind travel, cyclic sending). */
@@ -502,6 +512,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			return new byte[0];
 		return base.deviceMemory().get(SLOT_ADDRESS[OBJ_APPLICATION], product.paramAreaSize());
 	}
+
+	/** Raw parameter area (test hook). */
+	public byte[] parameterAreaForTest() { return parameterArea(); }
 
 	/** Current value of a parameter: the downloaded value, or the product default when not loaded. */
 	public int param(final String paramName) {
@@ -689,6 +702,6 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	@Override
 	public String toString() {
-		return name + " (" + product.nameEn() + ") " + address();
+		return name + " (" + product.name() + ") " + address();
 	}
 }

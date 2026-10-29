@@ -30,7 +30,6 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ArchitecturesAllowed=x64compatible
 
 [Languages]
-Name: "danish"; MessagesFile: "compiler:Languages\Danish.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]

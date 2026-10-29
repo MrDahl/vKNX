@@ -8,7 +8,7 @@ import java.util.Optional;
  * communication objects from here, and {@code ProductXmlGenerator} writes the ETS product-database XML
  * from exactly the same data, so ETS and simulator cannot drift apart.
  */
-public record ProductDef(String key, int appNumber, int appVersion, String nameDa, String nameEn, String orderNumber,
+public record ProductDef(String key, int appNumber, int appVersion, String name, String orderNumber,
 		int hardwareSerial, int paramAreaSize, List<ParamDef> params, List<ObjDef> objects) {
 
 	public ProductDef {

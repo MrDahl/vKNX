@@ -17,7 +17,7 @@ import org.vknx.product.Products;
  * projects (OpenKNXproducer/TemplateApplication.xml, commit 7f23a63): one relative segment for the parameter
  * area (load state machine 4), merged load procedures 2/4/7, 16-bit group address / association tables.
  *
- * <p>Status: <b>not yet verified against ETS</b>. Verification is step 3 of docs/ets-test-guide.md.
+ * <p>Verified in ETS 6.4.1 for the single-page products; the multi-page multisensor (choose/when) is new in 0.3.0.
  */
 public final class ProductXmlGenerator {
 	private ProductXmlGenerator() {}
@@ -58,18 +58,19 @@ public final class ProductXmlGenerator {
 		x.append("  <ManufacturerData>\n    <Manufacturer RefId=\"").append(mfr).append("\">\n");
 
 		x.append("      <Catalog>\n        <CatalogSection Id=\"").append(mfr)
-				.append("_CS-vKNX\" Name=\"vKNX\" Number=\"vKNX\" DefaultLanguage=\"da-DK\">\n");
-		x.append("          <CatalogItem Id=\"").append(ciId).append("\" Name=\"").append(esc(p.nameDa()))
+				.append("_CS-vKNX\" Name=\"vKNX\" Number=\"vKNX\" DefaultLanguage=\"en-US\">\n");
+		x.append("          <CatalogItem Id=\"").append(ciId).append("\" Name=\"").append(esc(p.name()))
 				.append("\" Number=\"1\" ProductRefId=\"").append(prodId).append("\" Hardware2ProgramRefId=\"")
-				.append(h2p).append("\" DefaultLanguage=\"da-DK\" />\n");
+				.append(h2p).append("\" DefaultLanguage=\"en-US\" />\n");
 		x.append("        </CatalogSection>\n      </Catalog>\n");
 
 		x.append("      <ApplicationPrograms>\n");
 		x.append("        <ApplicationProgram Id=\"").append(aid).append("\" ApplicationNumber=\"").append(p.appNumber())
 				.append("\" ApplicationVersion=\"").append(p.appVersion())
-				.append("\" ProgramType=\"ApplicationProgram\" MaskVersion=\"MV-07B0\" Name=\"").append(esc(p.nameDa()))
-				.append("\" LoadProcedureStyle=\"MergedProcedure\" PeiType=\"0\" DefaultLanguage=\"da-DK\" ")
-				.append("DynamicTableManagement=\"false\" Linkable=\"true\" MinEtsVersion=\"5.0\" ReplacesVersions=\"0\">\n");
+				.append("\" ProgramType=\"ApplicationProgram\" MaskVersion=\"MV-07B0\" Name=\"").append(esc(p.name()))
+				.append("\" LoadProcedureStyle=\"MergedProcedure\" PeiType=\"0\" DefaultLanguage=\"en-US\" ")
+				.append("DynamicTableManagement=\"false\" Linkable=\"true\" MinEtsVersion=\"5.0\" ReplacesVersions=\"")
+				.append(replaces(p.appVersion())).append("\">\n");
 		x.append("          <Static>\n");
 		x.append("            <Code>\n              <RelativeSegment Id=\"").append(seg)
 				.append("\" Name=\"Parameters\" Offset=\"0\" Size=\"").append(p.paramAreaSize())
@@ -86,7 +87,7 @@ public final class ProductXmlGenerator {
 			}
 			x.append("                <TypeRestriction Base=\"Value\" SizeInBit=\"").append(pr.bits()).append("\">\n");
 			for (final var c : pr.choices())
-				x.append("                  <Enumeration Text=\"").append(esc(c.textDa())).append("\" Value=\"")
+				x.append("                  <Enumeration Text=\"").append(esc(c.text())).append("\" Value=\"")
 						.append(c.value()).append("\" Id=\"").append(aid).append("_PT-").append(pr.name()).append("_EN-")
 						.append(c.value()).append("\" />\n");
 			x.append("                </TypeRestriction>\n              </ParameterType>\n");
@@ -97,7 +98,7 @@ public final class ProductXmlGenerator {
 		for (final ParamDef pr : p.params())
 			x.append("              <Parameter Id=\"").append(aid).append("_P-").append(pr.id()).append("\" Name=\"")
 					.append(pr.name()).append("\" ParameterType=\"").append(aid).append("_PT-").append(pr.name())
-					.append("\" Text=\"").append(esc(pr.textDa())).append("\" Value=\"").append(pr.defaultValue())
+					.append("\" Text=\"").append(esc(pr.text())).append("\" Value=\"").append(pr.defaultValue())
 					.append("\">\n                <Memory CodeSegment=\"").append(seg).append("\" Offset=\"")
 					.append(pr.byteOffset()).append("\" BitOffset=\"").append(pr.bitOffset())
 					.append("\" />\n              </Parameter>\n");
@@ -112,8 +113,8 @@ public final class ProductXmlGenerator {
 		x.append("            <ComObjectTable>\n");
 		for (final ObjDef o : p.objects())
 			x.append("              <ComObject Id=\"").append(aid).append("_O-").append(o.number()).append("\" Name=\"")
-					.append(o.name()).append("\" Text=\"").append(esc(o.textDa())).append("\" Number=\"")
-					.append(o.number()).append("\" FunctionText=\"").append(o.functionTextEn()).append("\" ObjectSize=\"")
+					.append(o.name()).append("\" Text=\"").append(esc(o.text())).append("\" Number=\"")
+					.append(o.number()).append("\" FunctionText=\"").append(o.functionText()).append("\" ObjectSize=\"")
 					.append(o.etsObjectSize()).append("\" ReadFlag=\"").append(flag(o.read())).append("\" WriteFlag=\"")
 					.append(flag(o.write())).append("\" CommunicationFlag=\"Enabled\" TransmitFlag=\"")
 					.append(flag(o.transmit())).append("\" UpdateFlag=\"").append(flag(o.update()))
@@ -147,23 +148,47 @@ public final class ProductXmlGenerator {
 		x.append("          </Static>\n");
 
 		x.append("          <Dynamic>\n            <ChannelIndependentBlock>\n");
-		x.append("              <ParameterBlock Id=\"").append(aid).append("_PB-1\" Name=\"General\" Text=\"Generelt\">\n");
+		// one ETS parameter page per group, in order of first appearance; "" = "General"
+		final var pages = new java.util.LinkedHashSet<String>();
 		for (final ParamDef pr : p.params())
-			x.append("                <ParameterRefRef RefId=\"").append(aid).append("_P-").append(pr.id()).append("_R-")
-					.append(pr.id()).append("\" />\n");
+			pages.add(pr.group());
 		for (final ObjDef o : p.objects())
-			x.append("                <ComObjectRefRef RefId=\"").append(aid).append("_O-").append(o.number()).append("_R-")
-					.append(o.number()).append("\" />\n");
-		x.append("              </ParameterBlock>\n");
+			pages.add(o.group());
+		int pb = 0;
+		for (final String page : pages) {
+			pb++;
+			final String title = page.isEmpty() ? "General" : page;
+			x.append("              <ParameterBlock Id=\"").append(aid).append("_PB-").append(pb).append("\" Name=\"")
+					.append(title.replace(" ", "")).append("\" Text=\"").append(esc(title)).append("\">\n");
+			for (final ParamDef pr : p.params()) {
+				if (!pr.group().equals(page))
+					continue;
+				final String ref = aid + "_P-" + pr.id() + "_R-" + pr.id();
+				if (pr.showWhenParam().isEmpty())
+					x.append("                <ParameterRefRef RefId=\"").append(ref).append("\" />\n");
+				else {
+					final ParamDef other = p.param(pr.showWhenParam());
+					x.append("                <choose ParamRefId=\"").append(aid).append("_P-").append(other.id()).append("_R-")
+							.append(other.id()).append("\">\n                  <when test=\"").append(pr.showWhenValue())
+							.append("\">\n                    <ParameterRefRef RefId=\"").append(ref)
+							.append("\" />\n                  </when>\n                </choose>\n");
+				}
+			}
+			for (final ObjDef o : p.objects())
+				if (o.group().equals(page))
+					x.append("                <ComObjectRefRef RefId=\"").append(aid).append("_O-").append(o.number()).append("_R-")
+							.append(o.number()).append("\" />\n");
+			x.append("              </ParameterBlock>\n");
+		}
 		x.append("            </ChannelIndependentBlock>\n          </Dynamic>\n");
 		x.append("        </ApplicationProgram>\n      </ApplicationPrograms>\n");
 
-		x.append("      <Hardware>\n        <Hardware Id=\"").append(hwId).append("\" Name=\"").append(esc(p.nameDa()))
+		x.append("      <Hardware>\n        <Hardware Id=\"").append(hwId).append("\" Name=\"").append(esc(p.name()))
 				.append("\" SerialNumber=\"").append(p.hardwareSerial())
 				.append("\" VersionNumber=\"1\" BusCurrent=\"10\" HasIndividualAddress=\"true\" HasApplicationProgram=\"true\">\n");
 		x.append("          <Products>\n            <Product Id=\"").append(prodId).append("\" Text=\"")
-				.append(esc(p.nameDa())).append("\" OrderNumber=\"").append(p.orderNumber())
-				.append("\" IsRailMounted=\"false\" DefaultLanguage=\"da-DK\">\n");
+				.append(esc(p.name())).append("\" OrderNumber=\"").append(p.orderNumber())
+				.append("\" IsRailMounted=\"false\" DefaultLanguage=\"en-US\">\n");
 		x.append("              <RegistrationInfo RegistrationStatus=\"Registered\" />\n            </Product>\n          </Products>\n");
 		x.append("          <Hardware2Programs>\n            <Hardware2Program Id=\"").append(h2p)
 				.append("\" MediumTypes=\"MT-0\">\n              <ApplicationProgramRef RefId=\"").append(aid).append("\" />\n");
@@ -172,6 +197,16 @@ public final class ProductXmlGenerator {
 		x.append("        </Hardware>\n      </Hardware>\n");
 		x.append("    </Manufacturer>\n  </ManufacturerData>\n</KNX>\n");
 		return x.toString();
+	}
+
+	/** Versions this application replaces: "0" for version 1, otherwise 1..version-1 (so ETS can update devices in place). */
+	private static String replaces(final int version) {
+		if (version <= 1)
+			return "0";
+		final var sb = new StringBuilder();
+		for (int v = 1; v < version; v++)
+			sb.append(sb.length() == 0 ? "" : " ").append(v);
+		return sb.toString();
 	}
 
 	private static String flag(final boolean b) { return b ? "Enabled" : "Disabled"; }

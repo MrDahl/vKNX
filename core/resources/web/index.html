@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="da" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -103,7 +103,7 @@ details.params dl{margin:.4rem 0 0;display:grid;grid-template-columns:1fr auto;g
 .blinds{display:grid;grid-template-columns:1fr 1fr;gap:.8rem} .blind{text-align:center;font-size:.8rem;color:var(--mute)}
 .win{height:5.5rem;border:2px solid var(--line);border-radius:.5rem;background:linear-gradient(180deg,#5aa9e6,#bfe3ff);position:relative;overflow:hidden;margin:.3rem 0}
 .win>i{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(#a8936a 0 6px,#8d7a54 6px 8px);transition:height .12s;border-bottom:2px solid #6e5e3e}
-.sens{display:grid;grid-template-columns:1fr auto;gap:.05rem .7rem;font-size:.85rem} .sens label{color:var(--mute)} .sens b{font-family:var(--mono)}
+.sens{display:grid;grid-template-columns:1fr auto;gap:.05rem .7rem;font-size:.85rem} .sens label{color:var(--mute)} .sens b{font-family:var(--mono)} .sens .sub{grid-column:1/3;color:var(--mute);font-size:.72rem;margin:-.05rem 0 .35rem 1.55rem}
 .hint{color:var(--mute);font-size:.78rem}
 
 /* monitor */
@@ -187,8 +187,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
   <nav class="tabs"><button id="tabDev" class="act" onclick="setView('dev')"></button><button id="tabPlan" onclick="setView('plan')"></button></nav>
   <div class="status" id="status"></div>
   <button class="ghost" id="btnSettings" onclick="openSettings()"></button>
-  <button class="ghost" id="theme" onclick="toggleTheme()" title="Lyst/mørkt"></button>
-  <button id="lang" onclick="toggleLang()">English</button>
+  <button class="ghost" id="theme" onclick="toggleTheme()" title="Light/dark"></button>
 </header>
 
 <div class="layout">
@@ -240,28 +239,13 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 
 <script>
 const T={
- da:{tag:"Virtuel KNX-installation til undervisning",lang:"English",prog:"Programmeringsknap",press:"Tryk",unassigned:"Ikke programmeret",
-  loaded:"Applikation hentet",notloaded:"Ingen applikation",dl:"Downloads",params:"Parametre fra ETS",
-  mon:"Telegrammonitor og forklaringer",filter:"Filtrer (adresse, tekst, enhed)…",bus:"Rigtige telegrammer",exp:"Enhedens forklaring",clear:"Ryd",
-  note:"Blå linjer er rigtige telegrammer på den virtuelle linje (afsender, modtager, service, rådata). Grå linjer er enhedens egen forklaring på, hvorfor den reagerede eller ignorerede noget – undervisningstekst, ikke data fra bussen.",
-  relay:"Relæ",closed:"sluttet",open:"åbent",addTitle:"Tilføj enhed",addName:"Navn (fx Lampe2)",add:"Tilføj",remove:"Fjern",confirmRm:"Fjerne enheden og dens gemte konfiguration?",
-  upper:"Øverste tast",lower:"Nederste tast",hold:"Hold nede = langt tryk",slider:"Skyder",toggle:"Tryk (tænd/sluk)",level:"Lysstyrke",ramping:"dæmper…",
-  blind:"Persienne",position:"Position",sensorHint:"Simulerede målinger – sendes cyklisk efter ETS-parametrene",random:"Seneste tilfældige værdi",cycles:"Sendte cyklusser",
-  fit:"100 %",settings:"Indstillinger",about:"Om vKNX",version:"Version",checkUpd:"Søg efter opdateringer",checking:"Søger…",upToDate:"Du har den nyeste version.",newVer:"Ny version tilgængelig:",
-  install:"Hent og installér",notesH:"Hvad er nyt",openPage:"Åbn download-siden",checkFail:"Kunne ikke kontakte GitHub (er der internet?):",downloading:"Henter…",installing:"Installerer – programmet lukker og starter igen om lidt…",manualOnly:"Automatisk installation virker kun i det installerede program. Hent installeren fra download-siden.",
-  ifaceH:"Interface til ETS",ifaceInfo:"Interfacets adresse i ETS er",ifaceHelp:"Skriv område.linje, så den passer til en linje i dit ETS-projekt (fx 2.9). Enheder kan alligevel have alle adresser.",saveRestart:"Gem og genstart",restarting:"Genstarter…",restartManual:"Gemt. Luk programmet og start det igen for at bruge den nye adresse.",badLine:"Skriv fx 2.9 (område 0–15, linje 0–15)",close:"Luk",
-  tabDev:"Enheder",tabPlan:"Plantegning",loadPlan:"Indlæs plantegning…",editOn:"Færdig med placering",editOff:"Placér udgange og indgange",removePlan:"Fjern plantegning",
-  hintEdit:"Træk punkter fra listen ind på plantegningen, flyt dem rundt, dobbeltklik for at omdøbe, krydset fjerner.",hintRun:"Her kan du betjene tryk og se lamper, dæmpere, persienner og sensorer – som i en rigtig bolig.",
-  pal:"Ikke placeret",palEmpty:"Alle punkter er placeret.",noPlan:"Ingen plantegning endnu.\nIndlæs et billede (PNG, JPG, SVG) – eller placér bare punkterne på det tomme gitter.",confirmPlanRm:"Fjerne plantegningen? Placeringerne bevares.",rename:"Nyt navn:",
-  topo:"Enheder",ga:"Gruppeadresser",gaEmpty:"Ingen gruppeadresser endnu. Download en enhed fra ETS, så vises de her.",line:"Linje",unprog:"Ikke programmeret",
-  progMode:"programmeringstilstand",iface:"KNXnet/IP-interface",devs:"Enheder",telegrams:"Telegrammer",on:"tændt",off:"slukket",flagsHint:"K=kommunikation L=læs S=skriv Ü=send O=opdatér"},
- en:{tag:"Virtual KNX installation for teaching",lang:"Dansk",prog:"Programming button",press:"Press",unassigned:"Not programmed",
+ en:{tag:"Virtual KNX installation for teaching",prog:"Programming button",press:"Press",unassigned:"Not programmed",
   loaded:"Application loaded",notloaded:"No application",dl:"Downloads",params:"Parameters from ETS",
   mon:"Telegram monitor and explanations",filter:"Filter (address, text, device)…",bus:"Real telegrams",exp:"Device explanation",clear:"Clear",
   note:"Blue lines are real telegrams on the virtual line (source, destination, service, raw data). Grey lines are the device's own explanation of why it reacted or ignored something – teaching text, not bus data.",
   relay:"Relay",closed:"closed",open:"open",addTitle:"Add device",addName:"Name (e.g. Lamp2)",add:"Add",remove:"Remove",confirmRm:"Remove the device and its stored configuration?",
   upper:"Upper key",lower:"Lower key",hold:"Hold = long press",slider:"Slider",toggle:"Press (on/off)",level:"Brightness",ramping:"dimming…",
-  blind:"Blind",position:"Position",sensorHint:"Simulated readings – sent cyclically according to the ETS parameters",random:"Last random value",cycles:"Cycles sent",
+  blind:"Blind",position:"Position",sensorHint:"Values and send intervals are set per measurement in ETS – this panel only shows them",random:"random",fixed:"fixed",every:"every",sentN:"sent",noCyclic:"not sent cyclically",
   fit:"100 %",settings:"Settings",about:"About vKNX",version:"Version",checkUpd:"Check for updates",checking:"Checking…",upToDate:"You have the latest version.",newVer:"New version available:",
   install:"Download and install",notesH:"What's new",openPage:"Open download page",checkFail:"Could not reach GitHub (is there internet?):",downloading:"Downloading…",installing:"Installing – the program will close and start again shortly…",manualOnly:"Automatic installation only works in the installed program. Get the installer from the download page.",
   ifaceH:"Interface for ETS",ifaceInfo:"The interface address in ETS is",ifaceHelp:"Enter area.line so it matches a line in your ETS project (e.g. 2.9). Devices can still use any address.",saveRestart:"Save and restart",restarting:"Restarting…",restartManual:"Saved. Close the program and start it again to use the new address.",badLine:"Enter e.g. 2.9 (area 0–15, line 0–15)",close:"Close",
@@ -275,16 +259,14 @@ const MDI={"lamp": "M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 
 const ICN={lamp:'lamp',lampOff:'lamp',button:'button',key:'key',slider:'slider',blind:'blind'};
 function ic(n,cls){return `<svg class="ic ic-${cls||n}" viewBox="0 0 24 24" aria-hidden="true"><path d="${MDI[n]}"/></svg>`}
 const SENSIC=['co2','hum','lux','temp','press','wind'];
-let lang='da',theme='dark',since=0,lines=[],busCount=0,sel=null,openParams=new Set();
-try{lang=localStorage.getItem('vknx-lang')||'da'}catch(e){}
+let lang='en',theme='dark',since=0,lines=[],busCount=0,sel=null,openParams=new Set();
 theme=document.documentElement.dataset.theme;
-const t=k=>T[lang][k];
+const t=k=>T.en[k];
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function toggleLang(){lang=lang==='da'?'en':'da';try{localStorage.setItem('vknx-lang',lang)}catch(e){};applyStatic();_lastSig='';poll()}
-function themeLbl(){$('theme').innerHTML=theme==='dark'?ic('sun')+(lang==='da'?'Lys':'Light'):ic('moon')+(lang==='da'?'Mørk':'Dark')}
+function themeLbl(){$('theme').innerHTML=theme==='dark'?ic('sun')+'Light':ic('moon')+'Dark'}
 function toggleTheme(){theme=theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;themeLbl();try{localStorage.setItem('vknx-theme',theme)}catch(e){}}
-function applyStatic(){document.documentElement.lang=lang;$('tag').textContent=t('tag');$('lang').textContent=t('lang');
+function applyStatic(){document.documentElement.lang=lang;$('tag').textContent=t('tag');
  $('monTitle').textContent=t('mon');$('filter').placeholder=t('filter');$('lblBus').textContent=t('bus');$('lblExp').textContent=t('exp');$('btnClear').textContent=t('clear');$('note').textContent=t('note');
  $('hAdd').textContent=t('addTitle');$('addName').placeholder=t('addName');$('btnAdd').innerHTML=ic('plus')+t('add');$('hTopo').textContent=t('topo');$('hGa').textContent=t('ga');$('btnSettings').innerHTML=ic('cog');$('btnSettings').title=t('settings');$('tabDev').innerHTML=ic('devices')+t('tabDev');$('tabPlan').innerHTML=ic('plan')+t('tabPlan');$('lblLoadPlan').innerHTML=ic('upload')+t('loadPlan');$('btnPlanRm').innerHTML=ic('trash')+t('removePlan');$('zOut').innerHTML=ic('zoomOut');$('zIn').innerHTML=ic('zoomIn');$('zFit').innerHTML=ic('fit')+t('fit');$('hPal').textContent=t('pal');planStatic();themeLbl();fillProducts()}
 async function post(u){await fetch(u,{method:'POST'});poll()}
@@ -299,7 +281,7 @@ function summary(d){const v=d.view||{};if(!d.loaded)return d.unassigned?t('unpro
   case 'multisensor':return (v.s3??'')+' °C · '+(v.s0??'')+' ppm';
   case 'push-slider':return (v.level??0)+' %';
   default:return t('loaded')}}
-function flagStr(f){const m=lang==='da'?[[4,'K'],[8,'L'],[16,'S'],[64,'Ü'],[128,'O']]:[[4,'C'],[8,'R'],[16,'W'],[64,'T'],[128,'U']];return m.filter(x=>f&x[0]).map(x=>x[1]).join('')}
+function flagStr(f){const m=[[4,'C'],[8,'R'],[16,'W'],[64,'T'],[128,'U']];return m.filter(x=>f&x[0]).map(x=>x[1]).join('')}
 function select(name){sel=name;_lastSig='';poll();setTimeout(()=>{const c=document.querySelector('.card.sel');if(c)c.scrollIntoView({behavior:'smooth',block:'center'})},60)}
 
 /* ---------- rendering ---------- */
@@ -316,25 +298,25 @@ function render(s){
  $('topo').innerHTML=keys.length?keys.map(k=>`<div class="line-h">${k==='–'?t('unprog'):t('line')+' '+k}</div>`+groups[k].sort((a,b)=>a.address.localeCompare(b.address,undefined,{numeric:true})).map(d=>
    `<div class="dev-i" onclick="select('${esc(d.name).replace(/'/g,"\\'")}')"><span class="dot ${d.programming?'prog':d.loaded?'ok':d.unassigned?'':'warn'}"></span><span><span class="a ${d.unassigned?'un':''}">${d.unassigned?'15.15.255':esc(d.address)}</span> <span class="nm">${esc(d.name)}</span></span><span class="sm">${esc(summary(d))}</span></div>`).join('')).join(''):`<div class="empty">–</div>`;
  /* group addresses */
- const ga={};for(const d of ds)for(const a of (d.assoc||[]))(ga[a.ga]=ga[a.ga]||[]).push({dev:d.name,txt:lang==='da'?a.da:a.en,f:a.flags});
+ const ga={};for(const d of ds)for(const a of (d.assoc||[]))(ga[a.ga]=ga[a.ga]||[]).push({dev:d.name,txt:a.text,f:a.flags});
  const gk=Object.keys(ga).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
  $('nGa').textContent=gk.length;
  $('gas').innerHTML=gk.length?gk.map(g=>`<div class="ga"><div class="g">${esc(g)}</div><ul>${ga[g].map(x=>`<li><b>${esc(x.dev)}</b> ${esc(x.txt)}<span class="fl" title="${esc(t('flagsHint'))}">${flagStr(x.f)}</span></li>`).join('')}</ul></div>`).join(''):`<div class="empty">${t('gaEmpty')}</div>`;
  /* device cards */
  const el=$('devices');el.innerHTML='';
  for(const d of ds){const c=document.createElement('div');c.className='card'+(d.name===sel?' sel':'')+(d.programming?' prog':'');
-  const prod=lang==='da'?d.productDa:d.productEn,en=esc(d.name).replace(/'/g,"\\'");
+  const prod=d.productName,en=esc(d.name).replace(/'/g,"\\'");
   let h=`<div class="hd"><span class="dot ${d.programming?'prog':d.loaded?'ok':''}" style="margin-top:.5rem"></span><div class="t"><h2>${esc(d.name)}</h2><div class="prod">${esc(prod)}</div></div>
    <span class="addrchip ${d.unassigned?'un':''}">${d.unassigned?'15.15.255':esc(d.address)}</span><button class="xbtn rm" title="${t('remove')}" onclick="rmDev('${encodeURIComponent(d.name)}')">${ic('close')}</button></div><div class="bd">`;
   h+=body(d);
-  if(d.loaded&&d.params.length){const op=openParams.has(d.name)?' open':'';h+=`<details class="params"${op} ontoggle="toggleParams('${en}',this.open)"><summary>${t('params')}</summary><dl>`+d.params.map(p=>`<dt>${esc(lang==='da'?p.da:p.en)}</dt><dd>${esc(lang==='da'?p.valueDa:p.valueEn)}</dd>`).join('')+`</dl></details>`}
+  if(d.loaded&&d.params.length){const op=openParams.has(d.name)?' open':'';h+=`<details class="params"${op} ontoggle="toggleParams('${en}',this.open)"><summary>${t('params')}</summary><dl>`+d.params.filter(p=>p.visible).map(p=>`<dt>${esc((p.group?p.group+': ':'')+p.text)}</dt><dd>${esc(p.value)}</dd>`).join('')+`</dl></details>`}
   h+=`</div><div class="ft"><button class="progbtn" onclick="post('/api/prog?dev=${encodeURIComponent(d.name)}')"><span class="led ${d.programming?'on':''}"></span>${t('prog')}</button><span class="grow"></span><span class="pill ${d.loaded?'ok':''}">${d.loaded?t('loaded'):t('notloaded')}</span><span class="pill">${t('dl')}: ${d.downloads}</span></div>`;
   c.innerHTML=h;el.appendChild(c)}
  if(view==='plan')renderPlan(ds);
 }
 function toggleParams(n,o){o?openParams.add(n):openParams.delete(n)}
 
-const SENS=[['CO2','ppm',400,5000,10],['Humidity','%',0,100,0.5],['Illuminance','lux',0,100000,50],['Temperature','°C',-30,60,0.5],['Pressure','Pa',30000,110000,50],['WindSpeed','m/s',0,50,0.5]];
+const SENS=[['CO2','ppm'],['Humidity','%'],['Illuminance','lux'],['Temperature','°C'],['Pressure','hPa'],['Wind speed','m/s']];
 function dv(n){return encodeURIComponent(n)}
 function act(n,a,v){fetch(`/api/act?dev=${dv(n)}&a=${a}&v=${v}`,{method:'POST'})}
 function key(n,k,down){act(n,down?'down':'up',k)}
@@ -352,8 +334,7 @@ function body(d){const v=d.view||{},n=d.name,e=esc(n).replace(/'/g,"\\'");let h=
  case 'switch-actuator-4': case 'switch-actuator-8': h=`<div class="lamps">${[...(v.lamps||'')].map((c,i)=>lampBox(c==='1',i+1)).join('')}</div>`;break;
  case 'dimmer': h=`<div class="row">${dimLamp(d.loaded?v.level:0)}<div style="flex:1;min-width:8rem">${t('level')}: <b>${d.loaded?v.level+' %':'–'}</b> ${v.ramping?`<span class="pill">${t('ramping')}</span>`:''}<div class="meter"><i style="width:${d.loaded?v.level:0}%"></i></div></div></div>`;break;
  case 'blind-2': h=`<div class="blinds">${[1,2].map(c=>`<div class="blind">${t('blind')} ${c}<div class="win"><i style="height:${d.loaded?v['pos'+c]:0}%"></i></div><b style="color:var(--ink)">${d.loaded?v['pos'+c]:'–'} %</b> ${v['dir'+c]>0?ic('arrowDown','blind'):v['dir'+c]<0?ic('arrowUp','blind'):''}</div>`).join('')}</div>`;break;
- case 'multisensor': h=`<div class="hint">${t('sensorHint')}</div><div class="sens">${SENS.map((s,i)=>`<label>${ic(SENSIC[i])}${s[0]} (${s[1]})</label><b id="sv_${esc(n)}_${i}">${v['s'+i]}</b><input style="grid-column:1/3" type="range" min="${s[2]}" max="${s[3]}" step="${s[4]}" value="${v['s'+i]}" oninput="document.getElementById('sv_${esc(n)}_${i}').textContent=this.value" onchange="act('${e}','s${i}',Math.round(this.value*10))">`).join('')}
-   <label>${t('random')}</label><b>${v.random??0}</b><label>${t('cycles')}</label><b>${v.cycles??0}</b></div>`;break;
+ case 'multisensor': h=`<div class="hint">${t('sensorHint')}</div><div class="sens">${SENS.map((s,i)=>`<label>${ic(SENSIC[i])}${s[0]}</label><b>${d.loaded?v['s'+i]+' '+s[1]:'–'}</b><small class="sub">${d.loaded?(v['r'+i]?t('random'):t('fixed'))+' · '+(v['i'+i]>0?t('every')+' '+v['i'+i]+' s · '+v['n'+i]+' '+t('sentN'):t('noCyclic')):''}</small>`).join('')}</div>`;break;
  default: h='';}
  return h}
 /* ================= floor plan ================= */
@@ -446,7 +427,7 @@ async function addDevice(){$('addErr').textContent='';const r=await fetch(`/api/
 async function rmDev(n){if(!confirm(t('confirmRm')))return;await fetch(`/api/remove?dev=${n}`,{method:'POST'});_lastSig='';poll()}
 let prods=[];
 async function fillProducts(){if(!prods.length)try{prods=await (await fetch('/api/products')).json()}catch(e){return}
- const cur=$('addProd').value;$('addProd').innerHTML=prods.map(p=>`<option value="${p.key}">${esc(lang==='da'?p.da:p.en)}</option>`).join('');if(cur)$('addProd').value=cur}
+ const cur=$('addProd').value;$('addProd').innerHTML=prods.map(p=>`<option value="${p.key}">${esc(p.name)}</option>`).join('');if(cur)$('addProd').value=cur}
 function clearLog(){lines=[];drawLog()}
 function colorize(s){return esc(s).replace(/\b(\d{1,2}\.\d{1,2}\.\d{1,3})\b/g,'<span class="ia">$1</span>').replace(/\b(\d{1,2}\/\d{1,2}\/\d{1,3})\b/g,'<span class="gad">$1</span>').replace(/\b(GroupValue(?:Write|Read|Response)|A_[A-Za-z_]+(?:\.[a-z]+)?)/g,'<span class="svc">$1</span>')}
 function drawLog(){const f=$('filter').value.toLowerCase(),b=$('showBus').checked,e=$('showExp').checked,box=$('log');
@@ -454,7 +435,7 @@ function drawLog(){const f=$('filter').value.toLowerCase(),b=$('showBus').checke
  box.innerHTML=lines.filter(l=>(l.cat==='bus'?b:e)&&(!f||(l.dev+' '+l.text).toLowerCase().includes(f))).map(l=>
   `<div class="ln ${l.cat==='bus'?'bus':'exp'}"><span class="t">${l.t}</span><span class="tag">${l.cat==='bus'?'bus':esc(l.dev)+' · '+esc(l.cat)}</span><span class="${l.cat==='bus'?'':'x'}">${l.cat==='bus'?colorize(l.text):esc(l.text)}</span></div>`).join('');
  if(stick)box.scrollTop=box.scrollHeight}
-async function poll(){try{const s=await (await fetch('/api/state')).json();const sig=JSON.stringify(s)+lang+busCount+sel;
+async function poll(){try{const s=await (await fetch('/api/state')).json();const sig=JSON.stringify(s)+busCount+sel;
   if(sig!==_lastSig&&!dragging&&!document.querySelector('.key.down')&&!sliderDown){_lastSig=sig;render(s)}
   const l=await (await fetch('/api/log?since='+since)).json(); if(l.entries.length){for(const x of l.entries){lines.push(x);since=x.seq;if(x.cat==='bus')busCount++} if(lines.length>2000)lines=lines.slice(-1500); drawLog()}}catch(e){}}
 for(const id of ['filter','showBus','showExp'])$(id).addEventListener('input',drawLog);

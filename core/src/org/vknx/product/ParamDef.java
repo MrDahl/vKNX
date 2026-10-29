@@ -4,24 +4,39 @@ import java.util.List;
 
 /**
  * One ETS parameter that lives in the application-program memory segment.
- * Either an enumeration ({@code choices} not empty, 1..8 bits inside one byte) or a plain unsigned number
- * ({@code choices} empty; 8 or 16 bits on a byte boundary, big-endian as in the KNX memory model, with {@code min}/{@code max}).
+ * Either an enumeration ({@code choices} not empty, 1..8 bits inside one byte) or a plain number
+ * ({@code choices} empty; 8 or 16 bits on a byte boundary, big-endian as in the KNX memory model, with {@code min}/{@code max};
+ * a negative {@code min} makes a 16-bit parameter signed).
+ *
+ * <p>{@code group} is the ETS parameter page the parameter is shown on ("" = "General"). {@code showWhenParam}
+ * (empty = always visible) makes ETS show the parameter only while that other parameter has the value {@code showWhenValue}.
  */
-public record ParamDef(int id, String name, String textDa, String textEn, int byteOffset, int bitOffset, int bits,
-		int defaultValue, List<Choice> choices, int min, int max) {
+public record ParamDef(int id, String name, String text, int byteOffset, int bitOffset, int bits, int defaultValue,
+		List<Choice> choices, int min, int max, String group, String showWhenParam, int showWhenValue) {
 
-	public record Choice(int value, String textDa, String textEn) {}
+	public record Choice(int value, String text) {}
 
-	/** Enumeration parameter (the form used by the first two products). */
-	public ParamDef(final int id, final String name, final String textDa, final String textEn, final int byteOffset,
-			final int bitOffset, final int bits, final int defaultValue, final List<Choice> choices) {
-		this(id, name, textDa, textEn, byteOffset, bitOffset, bits, defaultValue, choices, 0, (1 << bits) - 1);
+	/** Enumeration parameter. */
+	public ParamDef(final int id, final String name, final String text, final int byteOffset, final int bitOffset,
+			final int bits, final int defaultValue, final List<Choice> choices) {
+		this(id, name, text, byteOffset, bitOffset, bits, defaultValue, choices, 0, (1 << bits) - 1, "", "", 0);
 	}
 
-	/** Plain unsigned number parameter of 8 or 16 bits. */
-	public static ParamDef number(final int id, final String name, final String textDa, final String textEn,
-			final int byteOffset, final int bits, final int defaultValue, final int min, final int max) {
-		return new ParamDef(id, name, textDa, textEn, byteOffset, 0, bits, defaultValue, List.of(), min, max);
+	/** Plain number parameter of 8 or 16 bits. */
+	public static ParamDef number(final int id, final String name, final String text, final int byteOffset,
+			final int bits, final int defaultValue, final int min, final int max) {
+		return new ParamDef(id, name, text, byteOffset, 0, bits, defaultValue, List.of(), min, max, "", "", 0);
+	}
+
+	/** Same parameter, shown on the named ETS parameter page. */
+	public ParamDef inGroup(final String page) {
+		return new ParamDef(id, name, text, byteOffset, bitOffset, bits, defaultValue, choices, min, max, page,
+				showWhenParam, showWhenValue);
+	}
+
+	/** Same parameter, shown only while parameter {@code other} equals {@code value}. */
+	public ParamDef showWhen(final String other, final int value) {
+		return new ParamDef(id, name, text, byteOffset, bitOffset, bits, defaultValue, choices, min, max, group, other, value);
 	}
 
 	public ParamDef {
@@ -36,15 +51,21 @@ public record ParamDef(int id, String name, String textDa, String textEn, int by
 
 	public int sizeBytes() { return bits == 16 ? 2 : 1; }
 
-	/** Reads this parameter out of the raw parameter area. */
+	/**
+	 * Reads this parameter out of the raw parameter area. A value that is not one of the defined choices (for example
+	 * because the memory was never written) falls back to the default instead of producing nonsense.
+	 */
 	public int read(final byte[] area) {
 		if (byteOffset + sizeBytes() > area.length)
 			return defaultValue;
 		if (bits == 16) {
 			final int u = ((area[byteOffset] & 0xff) << 8) | (area[byteOffset + 1] & 0xff);
-			return min < 0 ? (short) u : u; // signed 16-bit parameters have a negative minimum
+			return min < 0 ? (short) u : u;
 		}
 		final int mask = (1 << bits) - 1;
-		return ((area[byteOffset] & 0xff) >>> bitOffset) & mask;
+		final int v = ((area[byteOffset] & 0xff) >>> bitOffset) & mask;
+		if (!choices.isEmpty() && choices.stream().noneMatch(c -> c.value() == v))
+			return defaultValue;
+		return v;
 	}
 }

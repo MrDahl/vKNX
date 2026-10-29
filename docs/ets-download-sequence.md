@@ -1,34 +1,36 @@
-# ETS-downloadsekvens og hvad vKNX gør
+# ETS download sequence and what vKNX does
 
-Kilde: optagelse af en rigtig ETS-download til en referenceenhed (maske 07B0), analyseret tidligere (projektdokument `analyse-zennio-dx1`; referenceenhedens kode/data publiceres ikke). Niveau [K] for sekvensen *som optaget*; vKNX's svar er [T] mod vores mini-ETS, **ikke** mod ETS.
+Source: a recording of a real ETS download to a reference device (mask 07B0), analysed earlier (project document `analyse-zennio-dx1`; the reference device's code/data is not published). Level [S] for the sequence *as recorded*; vKNX's answers are verified [T] against our mini-ETS and, for the products tried so far, against ETS 6.4.
 
-| Trin | ETS sender | vKNX-kode |
+| Step | ETS sends | vKNX code |
 |---|---|---|
-| 1 | A_IndividualAddress_Read (broadcast) | svarer kun i programmeringstilstand (`readAddress`) |
-| 2 | A_IndividualAddress_Write | accepteres kun i programmeringstilstand (`writeAddress`) |
-| 3 | A_IndividualAddress_Read (verifikation) | som 1 |
+| 1 | A_IndividualAddress_Read (broadcast) | answers only in programming mode (`readAddress`) |
+| 2 | A_IndividualAddress_Write | accepted only in programming mode (`writeAddress`) |
+| 3 | A_IndividualAddress_Read (verification) | as 1 |
 | 4 | T_Connect, A_DeviceDescriptor_Read | `0x07B0` |
-| 5 | A_Property_Read (identitet, load-states) | `readProperty` |
-| 6 | A_Restart | `restart` (rydder programmeringstilstand) |
-| 7 | UNLOAD (event 4) på obj 4,3,2,1 | `loadControl` |
-| 8 | START_LOADING (1) + additional load control `[3][0x0B][størrelse u32][doFill][fill]` | `allocate` |
-| 9 | Læs TABLE_REFERENCE | svarer med faste slots |
-| 10 | A_MemoryExtendedWrite, 50 byte ad gangen | `writeMemory` |
-| 11 | Skriv PROG_VERSION på obj 4 | gemmes |
+| 5 | A_Property_Read (identity, load states) | `readProperty` |
+| 6 | A_Restart | `restart` (clears programming mode) |
+| 7 | UNLOAD (event 4) on obj 4,3,2,1 (full download only) | `loadControl` |
+| 8 | START_LOADING (1) + additional load control `[3][0x0B][size u32][mode][fill]` | `allocate` – mode 1 initialises the segment, mode 0 (partial download) keeps its content |
+| 9 | Read TABLE_REFERENCE | answers with fixed slots |
+| 10 | A_MemoryExtendedWrite, up to 10 data bytes at a time (device max APDU length) | `writeMemory` |
+| 11 | Write PROG_VERSION on obj 4 | stored |
 | 12 | LOAD_COMPLETED (2) | `afterTablesChanged()` + `onApplicationLoaded` |
-| 13 | Læs MCB_TABLE (PID 27) `[segmentstørrelse u32][CRC-kontrol 0][adgang 0xFF][CRC-16]` | `memoryControlBlock` |
-| 14 | A_Restart | persistens |
+| 13 | Read MCB_TABLE (PID 27) `[segment size u32][CRC control 0][access 0xFF][CRC-16]` | `memoryControlBlock` |
+| 14 | A_Restart | persistence |
 
-Load-states: 0 unloaded, 1 loaded, 2 loading, 3 error.
+Load states: 0 unloaded, 1 loaded, 2 loading, 3 error.
 
-## Tabelformater [K: thelsing/knx; T: egen parsing]
-- Adressetabel: u16 antal + u16 GA pr. post
-- Associationstabel: u16 antal + (u16 GA-indeks, u16 GO-nummer)
-- GO-tabel: u16 antal + 2 byte pr. objekt (flagbyte, værdityp)
-- Flagbyte: 0x80 update, 0x40 transmit, 0x20 readOnInit, 0x10 write, 0x08 read, 0x04 comm, 0x03 prioritet.
+A **partial download** (only changed parameters) skips the unload, allocates with mode 0 and writes only the changed bytes. Until 0.3.0 vKNX zeroed the segment on every allocation, which lost all unchanged parameters.
 
-## Kendte usikkerheder mod ETS 6.4
-1. Præcis opbygning af additional load control for vores produkt-XML.
-2. Om ETS verificerer MCB/CRC som vi forventer.
-3. Om ETS forventer yderligere load-procedurer (fx hardware-type-sammenligning, MergeId 1).
-Disse skal afklares med log fra rigtig ETS (se `ets-test-guide.md`).
+## Table formats [S: thelsing/knx; T: own parsing]
+- Address table: u16 count + u16 group address per entry
+- Association table: u16 count + (u16 group address index, u16 group object number)
+- Group object table: u16 count + 2 bytes per object (flag byte, value type)
+- Flag byte: 0x80 update, 0x40 transmit, 0x20 readOnInit, 0x10 write, 0x08 read, 0x04 comm, 0x03 priority.
+
+## Remaining uncertainties against ETS 6.4
+1. Exact structure of the additional load control for products with several parameter pages (multisensor v2).
+2. Whether ETS verifies the MCB/CRC the way we expect for every product.
+3. Whether ETS expects further load procedures (e.g. hardware type comparison, MergeId 1).
+Clarify these with logs from real ETS (see `ets-test-guide.md`).

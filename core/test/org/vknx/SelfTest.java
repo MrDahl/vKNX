@@ -123,6 +123,34 @@ public final class SelfTest {
 			mc.readProperty(d, obj, PID.MCB_TABLE, 1, 1);
 		}
 
+		/** Partial download as ETS does it for changed parameters: no unload, allocation without fill, write only changed bytes. */
+		void partialWrite(final IndividualAddress dev, final int obj, final int size, final int offset, final byte[] data)
+				throws Exception {
+			try {
+				partialWriteOnce(dev, obj, size, offset, data);
+			}
+			catch (final io.calimero.KNXException e) { // the management connection of the previous step may still be closing
+				Thread.sleep(500);
+				partialWriteOnce(dev, obj, size, offset, data);
+			}
+		}
+
+		private void partialWriteOnce(final IndividualAddress dev, final int obj, final int size, final int offset,
+				final byte[] data) throws Exception {
+			final Destination d = mc.createDestination(dev, true);
+			try {
+				loadEvent(d, obj, (byte) 1);
+				loadEvent(d, obj, ByteBuffer.allocate(8).put((byte) 3).put((byte) 0x0B).putInt(size).put((byte) 0).put((byte) 0).array());
+				final int addr = ByteBuffer.wrap(mc.readProperty(d, obj, PID.TABLE_REFERENCE, 1, 1)).getInt();
+				mc.writeMemory(d, addr + offset, data);
+				if (loadEvent(d, obj, (byte) 2) != 1)
+					throw new IllegalStateException("partial download not Loaded");
+			}
+			finally {
+				d.destroy();
+			}
+		}
+
 		void downloadAll(final IndividualAddress dev, final int[] gas, final int[][] assoc, final int[] goFlags,
 				final int[] params) throws Exception {
 			final byte[] app = new byte[4];
@@ -132,6 +160,18 @@ public final class SelfTest {
 		}
 
 		void downloadAll(final IndividualAddress dev, final int[] gas, final int[][] assoc, final int[] goFlags,
+				final byte[] app) throws Exception {
+			try {
+				downloadAllOnce(dev, gas, assoc, goFlags, app);
+			}
+			catch (final io.calimero.KNXException e) { // a download starts with UNLOAD, so repeating it is safe; ETS retries too
+				System.out.println("  (download to " + dev + " retried after: " + e.getMessage() + ")");
+				Thread.sleep(1000);
+				downloadAllOnce(dev, gas, assoc, goFlags, app);
+			}
+		}
+
+		private void downloadAllOnce(final IndividualAddress dev, final int[] gas, final int[][] assoc, final int[] goFlags,
 				final byte[] app) throws Exception {
 			final Destination d = mc.createDestination(dev, true);
 			try {

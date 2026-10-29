@@ -1,49 +1,44 @@
-# ETS-testvejledning (ETS 6.4 på Windows)
+# ETS test guide (ETS 6.4 on Windows)
 
-> **Status: ikke gennemført.** Resultatet er ukendt. Dette er proceduren, så testen kan køres og logs sendes tilbage. Ret ikke i XML/koden, før logs er indsamlet.
+> **Status:** the first products have been confirmed in ETS 6.4 (Build 8718) by the owner. Version 2 of the products (0.3.0) and the products listed under "Not yet tried" in `limitations.md` still need this test. Use this procedure and send back the logs listed in §5.
 
-## 0. Forudsætninger
-- Windows 10/11 med ETS 6.4 og **Java 21 (JDK)**, Git.
-- Hent repoet: `git clone https://github.com/MrDahl/vKNX` og kør `tools\build.ps1` (se README).
+## 0. Prerequisites
+- Windows 10/11 with ETS 6.4 and the vKNX installer (or, for development, JDK 21 + git and `tools\build.ps1`).
 
-## 1. Opret `.knxprod` (kræver ETS på maskinen)
-Produkt-XML'erne ligger i repoet (`products/`) og i Windows-zip'en (`vKNX\products\`). De behøver ikke genereres igen.
-1. Hent seneste udgave af **OpenKNXproducer** fra https://github.com/OpenKNX/OpenKNXproducer/releases, udpak, og kør `Install-OpenKNX-Tools.ps1` (højreklik → *Kør med PowerShell*; ved signaturfejl: `PowerShell.exe -ExecutionPolicy Bypass -File .\Install-OpenKNX-Tools.ps1`). Værktøjet bruger ETS' egne DLL'er til konvertering og signering og kan finde ETS i `C:\Program Files (x86)\ETS6`.
-2. Kør i PowerShell: `.\make-knxprod.ps1` (ligger i `vKNX`-mappen), eller manuelt for hver fil:
+## 1. Create the `.knxprod` files (needs ETS on the machine)
+The product XML files are in the repo (`products/`) and in the Windows zip (`vKNX\products\`). They do not have to be generated again.
+1. Download the latest **OpenKNXproducer** from https://github.com/OpenKNX/OpenKNXproducer/releases, unzip it, and run `Install-OpenKNX-Tools.ps1` (right-click → *Run with PowerShell*; on a signature error: `PowerShell.exe -ExecutionPolicy Bypass -File .\Install-OpenKNX-Tools.ps1`). The tool uses ETS's own DLLs for conversion and signing and finds ETS in `C:\Program Files (x86)\ETS6`.
+2. In PowerShell run `.\make-knxprod.ps1` (in the `vKNX` folder), or manually for each file:
    `OpenKNXproducer knxprod vknx-push-button.xml -o vknx-push-button.knxprod`
-   Brug `knxprod`, ikke `create`/`check` (de er til OpenKNX's eget skabelonformat).
-3. Notér hele konsoludskriften. Hvis XSD-validering melder fejl, eller konverteren afviser filen: send teksten til os.
-4. Notér: lykkedes konvertering? Blev `.knxprod` oprettet?
+   Use `knxprod`, not `create`/`check` (those are for OpenKNX's own template format).
+3. Keep the whole console output. If XSD validation reports errors or the converter rejects a file, send us the text.
 
-## 2. Start simulatoren
-`tools\start.ps1` (åbner kontrolpanel på http://127.0.0.1:8080/). Notér de udskrevne IP-adresser og tunneladresser (1.1.241–244), port 3671.
-Tillad Java i Windows Firewall (privat netværk) når Windows spørger.
+## 2. Start the simulator
+Start vKNX from the start menu (or `tools\start.ps1`). Note the interface address shown at the top (e.g. 5.7.241) and allow it through Windows Firewall (private network) when Windows asks. In Settings you can change the interface line (e.g. `2.9`) so it matches a line in your ETS project.
 
-## 3. I ETS
-1. Katalog → Importér → vælg begge `.knxprod`. *Noter eventuelle advarsler.*
-2. Nyt projekt, linje 1.1; tilføj "Tryk" og "Lampe" fra kataloget.
-3. Forbindelser → Ny → KNXnet/IP: vælger ETS interfacet automatisk? Ellers manuelt (IP fra trin 2, port 3671). Notér hvad der virker.
-4. Tildel individuelle adresser (1.1.1 og 1.1.2) → tryk **Programmeringsknap** på den ene enhed i vKNX → "Programmér individuel adresse".
-   *Forventet:* kun den valgte enhed reagerer.
-5. Sæt gruppeadresser: Tryk objekt 1 og Lampe objekt 1 → 1/0/1; Lampe objekt 2 → 1/0/2 og Tryk objekt 2 → 1/0/2.
-6. **Programmér applikation** på begge enheder. Notér om ETS melder succes eller fejl (ordret).
-7. Klik "Tryk" i vKNX. Lampen bør skifte. Skift parameter (Relælogik → inverteret) og download igen.
-8. Genstart vKNX (Ctrl+C) og start igen: er adresser/applikation bevaret? Kan ETS downloade en ændring bagefter?
+## 3. In ETS
+1. Catalogs → Import → choose the `.knxprod` files. *Note any warnings.* If an older vKNX version is already in the catalog, ETS may offer an update; if it complains, remove the old catalog entries first.
+2. New project; add a push button and a switch actuator from the catalog.
+3. Connections → New → KNXnet/IP: does ETS find the interface automatically? Otherwise enter it manually (IP and port 3671).
+4. Assign individual addresses → press **Programming button** on one device in vKNX → "Program individual address". *Expected:* only the selected device reacts.
+5. Set group addresses and **program the application** on both devices. Note whether ETS reports success or an error (verbatim).
+6. Click the button in vKNX. The lamp should switch. Change a parameter (relay logic → inverted) and download again; this is a *partial download*.
+7. Restart vKNX and start it again: are addresses and application kept? Can ETS download a change afterwards?
 
-## 4. Accepttest (12 punkter)
-Notér for hvert punkt: ✔ / ✘ / ikke nået.
-1 ETS forbinder · 2 produkter importeres og kan tilføjes · 3 kun valgt enhed i prog-mode · 4 adresser til begge · 5 fuld download · 6 ændret gruppeassociering ændrer kommunikation · 7 en downloadet parameter ændrer adfærd · 8 tryk sender fra knappens adresse · 9 aktuator reagerer efter downloadet konfiguration · 10 status følger produktet · 11 konfiguration overlever genstart · 12 senere ændring + download virker.
+## 4. Acceptance test (12 points)
+For each point note ✔ / ✘ / not reached.
+1 ETS connects · 2 products import and can be added · 3 only the selected device is in programming mode · 4 addresses for both · 5 full download · 6 a changed group association changes communication · 7 a downloaded parameter changes behaviour · 8 the button sends from its own address · 9 the actuator reacts to the downloaded configuration · 10 status follows the product · 11 configuration survives a restart · 12 a later change + download works.
 
-## 5. Det vi skal bruge tilbage
-1. Screenshot/tekst af alle ETS-fejl/advarsler (import, download).
-2. ETS **Gruppemonitor** og **Busmonitor/Diagnostik** under download (eksportér `.txt`).
-3. vKNX-loggen: `runtime\vknx.log` (kopiér) og udskrift fra panelets monitor.
-4. ETS-version, Windows-version, Java-version (`java -version`).
-5. De genererede `.xml`/`.knxprod`-filer.
-Med disse kan vi justere XML, load control og MCB uden at gætte.
+## 5. What we need back
+1. Screenshot/text of every ETS error/warning (import, download).
+2. ETS **Group monitor** and **Bus monitor/diagnostics** during the download (export `.txt`).
+3. The vKNX log: `console.log` and `vknx.log` in `%LOCALAPPDATA%\vKNX\data` and the output of the panel's monitor. Since 0.3.0 the log prints the parameter memory after each download.
+4. ETS version and Windows version.
+5. The generated `.xml`/`.knxprod` files.
 
-## 6. Test af de nye produkter (ét ad gangen)
-1. Kør `make-knxprod.ps1` igen (genererer alle 9 `.knxprod`). Slet gamle vKNX-produkter fra kataloget (evt. `C:\ProgramData\KNX\ETS6\ProductStore` som før) og importér de nye.
-2. Start med **Dæmper + Vippe**: Vippe-objekt "Relativ dæmpning" og Dæmper "Relativ dæmpning" på samme gruppeadresse; Kontakt på en anden. Download begge. Kort tryk = tænd/sluk, langt tryk = dæmp op/ned.
-3. Derefter Skyder-tryk → Dæmper (1 byte), Persienne, Kontakt 4/8, Multisensor (tjek cyklus og tilfældig værdi i Gruppemonitor).
-4. Ved fejl: send ordret ETS-fejl, gruppemonitor og `vknx.log`, og hvilket produkt det gjaldt.
+## 6. Testing the products one at a time
+1. Run `make-knxprod.ps1` again (builds all 9 `.knxprod` files). Remove old vKNX products from the catalog and import the new ones.
+2. Start with **Dimming actuator + rocker**: rocker "Relative dimming" and dimmer "Relative dimming" on the same group address; switch objects on another. Download both. Short press = on/off, long press = dim up/down in the chosen step (e.g. 12.5 %).
+3. Then slider push button → dimmer (1 byte, with the status address linked back), blind actuator, switch actuator 4/8.
+4. **Multisensor:** each measurement has its own ETS page. Set a fixed value or a random range and an interval, link each group object to its own group address and watch the Group monitor; change one value and download again (partial download).
+5. On errors: send the verbatim ETS error, the group monitor, `console.log`/`vknx.log`, and which product it concerned.

@@ -217,8 +217,7 @@ public final class WebUi {
 	}
 
 	private void products(final HttpExchange ex) throws IOException {
-		final String json = Products.ALL.values().stream().map(p -> "{\"key\":" + q(p.key()) + ",\"da\":" + q(p.nameDa())
-				+ ",\"en\":" + q(p.nameEn()) + "}").collect(Collectors.joining(",", "[", "]"));
+		final String json = Products.ALL.values().stream().map(p -> "{\"key\":" + q(p.key()) + ",\"name\":" + q(p.name()) + "}").collect(Collectors.joining(",", "[", "]"));
 		send(ex, 200, "application/json; charset=utf-8", json.getBytes(StandardCharsets.UTF_8));
 	}
 
@@ -256,8 +255,7 @@ public final class WebUi {
 				sb.append(',');
 			first = false;
 			sb.append("{\"name\":").append(q(d.name())).append(",\"product\":").append(q(d.product().key()))
-					.append(",\"productDa\":").append(q(d.product().nameDa())).append(",\"productEn\":")
-					.append(q(d.product().nameEn())).append(",\"address\":").append(q(d.address().toString()))
+					.append(",\"productName\":").append(q(d.product().name())).append(",\"address\":").append(q(d.address().toString()))
 					.append(",\"unassigned\":").append(d.address().getRawAddress() == 0xFFFF)
 					.append(",\"programming\":").append(d.programmingMode()).append(",\"loaded\":")
 					.append(d.applicationLoaded()).append(",\"downloads\":").append(d.downloadCount())
@@ -269,9 +267,10 @@ public final class WebUi {
 				fp = false;
 				final int v = d.param(p.name());
 				final var choice = p.choices().stream().filter(c -> c.value() == v).findFirst();
-				sb.append("{\"da\":").append(q(p.textDa())).append(",\"en\":").append(q(p.textEn()))
-						.append(",\"valueDa\":").append(q(choice.map(c -> c.textDa()).orElse(String.valueOf(v))))
-						.append(",\"valueEn\":").append(q(choice.map(c -> c.textEn()).orElse(String.valueOf(v))))
+				final boolean visible = p.showWhenParam().isEmpty() || d.param(p.showWhenParam()) == p.showWhenValue();
+				sb.append("{\"text\":").append(q(p.text())).append(",\"group\":").append(q(p.group()))
+						.append(",\"visible\":").append(visible)
+						.append(",\"value\":").append(q(choice.map(c -> c.text()).orElse(String.valueOf(v))))
 						.append('}');
 			}
 			sb.append("],\"assoc\":[");
@@ -282,8 +281,7 @@ public final class WebUi {
 				fa = false;
 				final var o = d.product().object(a[1]);
 				sb.append("{\"ga\":").append(q(new io.calimero.GroupAddress(a[0]).toString())).append(",\"obj\":").append(a[1])
-						.append(",\"da\":").append(q(o.map(x -> x.textDa()).orElse("?"))).append(",\"en\":")
-						.append(q(o.map(x -> x.textEn()).orElse("?"))).append(",\"size\":").append(o.map(x -> x.sizeBits()).orElse(1))
+						.append(",\"text\":").append(q(o.map(x -> x.text()).orElse("?"))).append(",\"size\":").append(o.map(x -> x.sizeBits()).orElse(1))
 						.append(",\"flags\":").append(a[2]).append('}');
 			}
 			sb.append("],\"view\":{");

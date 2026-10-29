@@ -3,158 +3,158 @@
   <ManufacturerData>
     <Manufacturer RefId="M-00FA">
       <Catalog>
-        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="da-DK">
-          <CatalogItem Id="M-00FA_H-2568-1_HP-0A08-01-0000_CI-VKNXSA8-1" Name="vKNX Koblingsaktuator 8-fold" Number="1" ProductRefId="M-00FA_H-2568-1_P-VKNXSA8" Hardware2ProgramRefId="M-00FA_H-2568-1_HP-0A08-01-0000" DefaultLanguage="da-DK" />
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
+          <CatalogItem Id="M-00FA_H-2568-1_HP-0A08-02-0000_CI-VKNXSA8-1" Name="vKNX Switch Actuator 8-fold" Number="1" ProductRefId="M-00FA_H-2568-1_P-VKNXSA8" Hardware2ProgramRefId="M-00FA_H-2568-1_HP-0A08-02-0000" DefaultLanguage="en-US" />
         </CatalogSection>
       </Catalog>
       <ApplicationPrograms>
-        <ApplicationProgram Id="M-00FA_A-0A08-01-0000" ApplicationNumber="2568" ApplicationVersion="1" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Koblingsaktuator 8-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="da-DK" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="0">
+        <ApplicationProgram Id="M-00FA_A-0A08-02-0000" ApplicationNumber="2568" ApplicationVersion="2" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Switch Actuator 8-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1">
           <Static>
             <Code>
-              <RelativeSegment Id="M-00FA_A-0A08-01-0000_RS-04-00000" Name="Parameters" Offset="0" Size="2" LoadStateMachine="4" />
+              <RelativeSegment Id="M-00FA_A-0A08-02-0000_RS-04-00000" Name="Parameters" Offset="0" Size="2" LoadStateMachine="4" />
             </Code>
             <ParameterTypes>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-Ch1Logic" Name="Ch1Logic">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-Ch1Logic" Name="Ch1Logic">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A08-01-0000_PT-Ch1Logic_EN-0" />
-                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A08-01-0000_PT-Ch1Logic_EN-1" />
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A08-02-0000_PT-Ch1Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A08-02-0000_PT-Ch1Logic_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-Ch2Logic" Name="Ch2Logic">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-Ch2Logic" Name="Ch2Logic">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A08-01-0000_PT-Ch2Logic_EN-0" />
-                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A08-01-0000_PT-Ch2Logic_EN-1" />
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A08-02-0000_PT-Ch2Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A08-02-0000_PT-Ch2Logic_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-Ch3Logic" Name="Ch3Logic">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-Ch3Logic" Name="Ch3Logic">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A08-01-0000_PT-Ch3Logic_EN-0" />
-                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A08-01-0000_PT-Ch3Logic_EN-1" />
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A08-02-0000_PT-Ch3Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A08-02-0000_PT-Ch3Logic_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-Ch4Logic" Name="Ch4Logic">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-Ch4Logic" Name="Ch4Logic">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A08-01-0000_PT-Ch4Logic_EN-0" />
-                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A08-01-0000_PT-Ch4Logic_EN-1" />
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A08-02-0000_PT-Ch4Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A08-02-0000_PT-Ch4Logic_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-Ch5Logic" Name="Ch5Logic">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-Ch5Logic" Name="Ch5Logic">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A08-01-0000_PT-Ch5Logic_EN-0" />
-                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A08-01-0000_PT-Ch5Logic_EN-1" />
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A08-02-0000_PT-Ch5Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A08-02-0000_PT-Ch5Logic_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-Ch6Logic" Name="Ch6Logic">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-Ch6Logic" Name="Ch6Logic">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A08-01-0000_PT-Ch6Logic_EN-0" />
-                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A08-01-0000_PT-Ch6Logic_EN-1" />
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A08-02-0000_PT-Ch6Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A08-02-0000_PT-Ch6Logic_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-Ch7Logic" Name="Ch7Logic">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-Ch7Logic" Name="Ch7Logic">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A08-01-0000_PT-Ch7Logic_EN-0" />
-                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A08-01-0000_PT-Ch7Logic_EN-1" />
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A08-02-0000_PT-Ch7Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A08-02-0000_PT-Ch7Logic_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-Ch8Logic" Name="Ch8Logic">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-Ch8Logic" Name="Ch8Logic">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A08-01-0000_PT-Ch8Logic_EN-0" />
-                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A08-01-0000_PT-Ch8Logic_EN-1" />
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A08-02-0000_PT-Ch8Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A08-02-0000_PT-Ch8Logic_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-StartupState" Name="StartupState">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-StartupState" Name="StartupState">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Slukket" Value="0" Id="M-00FA_A-0A08-01-0000_PT-StartupState_EN-0" />
-                  <Enumeration Text="Tændt" Value="1" Id="M-00FA_A-0A08-01-0000_PT-StartupState_EN-1" />
-                  <Enumeration Text="Uændret" Value="2" Id="M-00FA_A-0A08-01-0000_PT-StartupState_EN-2" />
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A08-02-0000_PT-StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A08-02-0000_PT-StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A08-02-0000_PT-StartupState_EN-2" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A08-01-0000_PT-SendStatus" Name="SendStatus">
+              <ParameterType Id="M-00FA_A-0A08-02-0000_PT-SendStatus" Name="SendStatus">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Nej" Value="0" Id="M-00FA_A-0A08-01-0000_PT-SendStatus_EN-0" />
-                  <Enumeration Text="Ja" Value="1" Id="M-00FA_A-0A08-01-0000_PT-SendStatus_EN-1" />
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A08-02-0000_PT-SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A08-02-0000_PT-SendStatus_EN-1" />
                 </TypeRestriction>
               </ParameterType>
             </ParameterTypes>
             <Parameters>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-1" Name="Ch1Logic" ParameterType="M-00FA_A-0A08-01-0000_PT-Ch1Logic" Text="Udgang 1: relælogik" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-1" Name="Ch1Logic" ParameterType="M-00FA_A-0A08-02-0000_PT-Ch1Logic" Text="Output 1: relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="0" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-2" Name="Ch2Logic" ParameterType="M-00FA_A-0A08-01-0000_PT-Ch2Logic" Text="Udgang 2: relælogik" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="0" BitOffset="1" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-2" Name="Ch2Logic" ParameterType="M-00FA_A-0A08-02-0000_PT-Ch2Logic" Text="Output 2: relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="0" BitOffset="1" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-3" Name="Ch3Logic" ParameterType="M-00FA_A-0A08-01-0000_PT-Ch3Logic" Text="Udgang 3: relælogik" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="0" BitOffset="2" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-3" Name="Ch3Logic" ParameterType="M-00FA_A-0A08-02-0000_PT-Ch3Logic" Text="Output 3: relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="0" BitOffset="2" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-4" Name="Ch4Logic" ParameterType="M-00FA_A-0A08-01-0000_PT-Ch4Logic" Text="Udgang 4: relælogik" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="0" BitOffset="3" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-4" Name="Ch4Logic" ParameterType="M-00FA_A-0A08-02-0000_PT-Ch4Logic" Text="Output 4: relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="0" BitOffset="3" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-5" Name="Ch5Logic" ParameterType="M-00FA_A-0A08-01-0000_PT-Ch5Logic" Text="Udgang 5: relælogik" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="0" BitOffset="4" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-5" Name="Ch5Logic" ParameterType="M-00FA_A-0A08-02-0000_PT-Ch5Logic" Text="Output 5: relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="0" BitOffset="4" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-6" Name="Ch6Logic" ParameterType="M-00FA_A-0A08-01-0000_PT-Ch6Logic" Text="Udgang 6: relælogik" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="0" BitOffset="5" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-6" Name="Ch6Logic" ParameterType="M-00FA_A-0A08-02-0000_PT-Ch6Logic" Text="Output 6: relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="0" BitOffset="5" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-7" Name="Ch7Logic" ParameterType="M-00FA_A-0A08-01-0000_PT-Ch7Logic" Text="Udgang 7: relælogik" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="0" BitOffset="6" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-7" Name="Ch7Logic" ParameterType="M-00FA_A-0A08-02-0000_PT-Ch7Logic" Text="Output 7: relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="0" BitOffset="6" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-8" Name="Ch8Logic" ParameterType="M-00FA_A-0A08-01-0000_PT-Ch8Logic" Text="Udgang 8: relælogik" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="0" BitOffset="7" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-8" Name="Ch8Logic" ParameterType="M-00FA_A-0A08-02-0000_PT-Ch8Logic" Text="Output 8: relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="0" BitOffset="7" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-9" Name="StartupState" ParameterType="M-00FA_A-0A08-01-0000_PT-StartupState" Text="Tilstand efter download/genstart" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="1" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-9" Name="StartupState" ParameterType="M-00FA_A-0A08-02-0000_PT-StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="1" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A08-01-0000_P-10" Name="SendStatus" ParameterType="M-00FA_A-0A08-01-0000_PT-SendStatus" Text="Send status ved ændring" Value="1">
-                <Memory CodeSegment="M-00FA_A-0A08-01-0000_RS-04-00000" Offset="1" BitOffset="2" />
+              <Parameter Id="M-00FA_A-0A08-02-0000_P-10" Name="SendStatus" ParameterType="M-00FA_A-0A08-02-0000_PT-SendStatus" Text="Send status on change" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A08-02-0000_RS-04-00000" Offset="1" BitOffset="2" />
               </Parameter>
             </Parameters>
             <ParameterRefs>
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-1_R-1" RefId="M-00FA_A-0A08-01-0000_P-1" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-2_R-2" RefId="M-00FA_A-0A08-01-0000_P-2" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-3_R-3" RefId="M-00FA_A-0A08-01-0000_P-3" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-4_R-4" RefId="M-00FA_A-0A08-01-0000_P-4" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-5_R-5" RefId="M-00FA_A-0A08-01-0000_P-5" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-6_R-6" RefId="M-00FA_A-0A08-01-0000_P-6" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-7_R-7" RefId="M-00FA_A-0A08-01-0000_P-7" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-8_R-8" RefId="M-00FA_A-0A08-01-0000_P-8" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-9_R-9" RefId="M-00FA_A-0A08-01-0000_P-9" />
-              <ParameterRef Id="M-00FA_A-0A08-01-0000_P-10_R-10" RefId="M-00FA_A-0A08-01-0000_P-10" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-1_R-1" RefId="M-00FA_A-0A08-02-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-2_R-2" RefId="M-00FA_A-0A08-02-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-3_R-3" RefId="M-00FA_A-0A08-02-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-4_R-4" RefId="M-00FA_A-0A08-02-0000_P-4" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-5_R-5" RefId="M-00FA_A-0A08-02-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-6_R-6" RefId="M-00FA_A-0A08-02-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-7_R-7" RefId="M-00FA_A-0A08-02-0000_P-7" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-8_R-8" RefId="M-00FA_A-0A08-02-0000_P-8" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-9_R-9" RefId="M-00FA_A-0A08-02-0000_P-9" />
+              <ParameterRef Id="M-00FA_A-0A08-02-0000_P-10_R-10" RefId="M-00FA_A-0A08-02-0000_P-10" />
             </ParameterRefs>
             <ComObjectTable>
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-1" Name="Ch1Switch" Text="Udgang 1: kontakt" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-2" Name="Ch2Switch" Text="Udgang 2: kontakt" Number="2" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-3" Name="Ch3Switch" Text="Udgang 3: kontakt" Number="3" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-4" Name="Ch4Switch" Text="Udgang 4: kontakt" Number="4" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-5" Name="Ch5Switch" Text="Udgang 5: kontakt" Number="5" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-6" Name="Ch6Switch" Text="Udgang 6: kontakt" Number="6" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-7" Name="Ch7Switch" Text="Udgang 7: kontakt" Number="7" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-8" Name="Ch8Switch" Text="Udgang 8: kontakt" Number="8" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-9" Name="Ch1Status" Text="Udgang 1: status" Number="9" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-10" Name="Ch2Status" Text="Udgang 2: status" Number="10" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-11" Name="Ch3Status" Text="Udgang 3: status" Number="11" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-12" Name="Ch4Status" Text="Udgang 4: status" Number="12" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-13" Name="Ch5Status" Text="Udgang 5: status" Number="13" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-14" Name="Ch6Status" Text="Udgang 6: status" Number="14" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-15" Name="Ch7Status" Text="Udgang 7: status" Number="15" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A08-01-0000_O-16" Name="Ch8Status" Text="Udgang 8: status" Number="16" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-1" Name="Ch1Switch" Text="Output 1: switch" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-2" Name="Ch2Switch" Text="Output 2: switch" Number="2" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-3" Name="Ch3Switch" Text="Output 3: switch" Number="3" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-4" Name="Ch4Switch" Text="Output 4: switch" Number="4" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-5" Name="Ch5Switch" Text="Output 5: switch" Number="5" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-6" Name="Ch6Switch" Text="Output 6: switch" Number="6" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-7" Name="Ch7Switch" Text="Output 7: switch" Number="7" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-8" Name="Ch8Switch" Text="Output 8: switch" Number="8" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-9" Name="Ch1Status" Text="Output 1: status" Number="9" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-10" Name="Ch2Status" Text="Output 2: status" Number="10" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-11" Name="Ch3Status" Text="Output 3: status" Number="11" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-12" Name="Ch4Status" Text="Output 4: status" Number="12" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-13" Name="Ch5Status" Text="Output 5: status" Number="13" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-14" Name="Ch6Status" Text="Output 6: status" Number="14" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-15" Name="Ch7Status" Text="Output 7: status" Number="15" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A08-02-0000_O-16" Name="Ch8Status" Text="Output 8: status" Number="16" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
             </ComObjectTable>
             <ComObjectRefs>
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-1_R-1" RefId="M-00FA_A-0A08-01-0000_O-1" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-2_R-2" RefId="M-00FA_A-0A08-01-0000_O-2" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-3_R-3" RefId="M-00FA_A-0A08-01-0000_O-3" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-4_R-4" RefId="M-00FA_A-0A08-01-0000_O-4" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-5_R-5" RefId="M-00FA_A-0A08-01-0000_O-5" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-6_R-6" RefId="M-00FA_A-0A08-01-0000_O-6" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-7_R-7" RefId="M-00FA_A-0A08-01-0000_O-7" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-8_R-8" RefId="M-00FA_A-0A08-01-0000_O-8" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-9_R-9" RefId="M-00FA_A-0A08-01-0000_O-9" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-10_R-10" RefId="M-00FA_A-0A08-01-0000_O-10" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-11_R-11" RefId="M-00FA_A-0A08-01-0000_O-11" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-12_R-12" RefId="M-00FA_A-0A08-01-0000_O-12" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-13_R-13" RefId="M-00FA_A-0A08-01-0000_O-13" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-14_R-14" RefId="M-00FA_A-0A08-01-0000_O-14" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-15_R-15" RefId="M-00FA_A-0A08-01-0000_O-15" />
-              <ComObjectRef Id="M-00FA_A-0A08-01-0000_O-16_R-16" RefId="M-00FA_A-0A08-01-0000_O-16" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-1_R-1" RefId="M-00FA_A-0A08-02-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-2_R-2" RefId="M-00FA_A-0A08-02-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-3_R-3" RefId="M-00FA_A-0A08-02-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-4_R-4" RefId="M-00FA_A-0A08-02-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-5_R-5" RefId="M-00FA_A-0A08-02-0000_O-5" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-6_R-6" RefId="M-00FA_A-0A08-02-0000_O-6" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-7_R-7" RefId="M-00FA_A-0A08-02-0000_O-7" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-8_R-8" RefId="M-00FA_A-0A08-02-0000_O-8" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-9_R-9" RefId="M-00FA_A-0A08-02-0000_O-9" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-10_R-10" RefId="M-00FA_A-0A08-02-0000_O-10" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-11_R-11" RefId="M-00FA_A-0A08-02-0000_O-11" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-12_R-12" RefId="M-00FA_A-0A08-02-0000_O-12" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-13_R-13" RefId="M-00FA_A-0A08-02-0000_O-13" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-14_R-14" RefId="M-00FA_A-0A08-02-0000_O-14" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-15_R-15" RefId="M-00FA_A-0A08-02-0000_O-15" />
+              <ComObjectRef Id="M-00FA_A-0A08-02-0000_O-16_R-16" RefId="M-00FA_A-0A08-02-0000_O-16" />
             </ComObjectRefs>
             <AddressTable MaxEntries="255" />
             <AssociationTable MaxEntries="255" />
@@ -177,48 +177,48 @@
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
-              <ParameterBlock Id="M-00FA_A-0A08-01-0000_PB-1" Name="General" Text="Generelt">
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-1_R-1" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-2_R-2" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-3_R-3" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-4_R-4" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-5_R-5" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-6_R-6" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-7_R-7" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-8_R-8" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-9_R-9" />
-                <ParameterRefRef RefId="M-00FA_A-0A08-01-0000_P-10_R-10" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-1_R-1" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-2_R-2" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-3_R-3" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-4_R-4" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-5_R-5" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-6_R-6" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-7_R-7" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-8_R-8" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-9_R-9" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-10_R-10" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-11_R-11" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-12_R-12" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-13_R-13" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-14_R-14" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-15_R-15" />
-                <ComObjectRefRef RefId="M-00FA_A-0A08-01-0000_O-16_R-16" />
+              <ParameterBlock Id="M-00FA_A-0A08-02-0000_PB-1" Name="General" Text="General">
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-1_R-1" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-2_R-2" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-3_R-3" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-4_R-4" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-5_R-5" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-6_R-6" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-7_R-7" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-8_R-8" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-9_R-9" />
+                <ParameterRefRef RefId="M-00FA_A-0A08-02-0000_P-10_R-10" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-1_R-1" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-2_R-2" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-3_R-3" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-4_R-4" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-5_R-5" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-6_R-6" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-7_R-7" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-8_R-8" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-9_R-9" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-10_R-10" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-11_R-11" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-12_R-12" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-13_R-13" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-14_R-14" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-15_R-15" />
+                <ComObjectRefRef RefId="M-00FA_A-0A08-02-0000_O-16_R-16" />
               </ParameterBlock>
             </ChannelIndependentBlock>
           </Dynamic>
         </ApplicationProgram>
       </ApplicationPrograms>
       <Hardware>
-        <Hardware Id="M-00FA_H-2568-1" Name="vKNX Koblingsaktuator 8-fold" SerialNumber="2568" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+        <Hardware Id="M-00FA_H-2568-1" Name="vKNX Switch Actuator 8-fold" SerialNumber="2568" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
           <Products>
-            <Product Id="M-00FA_H-2568-1_P-VKNXSA8" Text="vKNX Koblingsaktuator 8-fold" OrderNumber="VKNXSA8" IsRailMounted="false" DefaultLanguage="da-DK">
+            <Product Id="M-00FA_H-2568-1_P-VKNXSA8" Text="vKNX Switch Actuator 8-fold" OrderNumber="VKNXSA8" IsRailMounted="false" DefaultLanguage="en-US">
               <RegistrationInfo RegistrationStatus="Registered" />
             </Product>
           </Products>
           <Hardware2Programs>
-            <Hardware2Program Id="M-00FA_H-2568-1_HP-0A08-01-0000" MediumTypes="MT-0">
-              <ApplicationProgramRef RefId="M-00FA_A-0A08-01-0000" />
+            <Hardware2Program Id="M-00FA_H-2568-1_HP-0A08-02-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A08-02-0000" />
               <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
             </Hardware2Program>
           </Hardware2Programs>

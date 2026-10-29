@@ -1,16 +1,16 @@
-# Tredjepartskomponenter
+# Third-party components
 
-vKNX's egen kode er under MIT (se `LICENSE`). Følgende er ikke vKNX-kode og har egne licenser:
+vKNX's own code is under MIT (see `LICENSE`). The following is not vKNX code and has its own licenses:
 
-| Komponent | Licens | Hvordan det indgår |
+| Component | License | How it is used |
 |---|---|---|
-| Calimero (core, device, server), pinnede commits i `third_party/PINS.txt` | GPLv2 + Classpath-undtagelse | Hentes ved build; indgår som biblioteks-jar i Windows-pakken. Classpath-undtagelsen tillader, at kode der linker mod Calimero har anden licens. Calimeros licenstekst følger med kildekoden i `third_party/src` efter `fetch-calimero.sh`. |
-| Java-runtime (OpenJDK) | GPLv2 + Classpath-undtagelse | Pakkes ind af jpackage i exe-udgaven. |
-| OpenKNXproducer | GPL-3.0 | Eksternt værktøj, brugeren henter det selv; indgår ikke i vKNX. |
-| Material Design Icons (Pictogrammers, `@mdi/js` 7.4.47) | Apache-2.0 (Pictogrammers Free License) | Enkelte ikon-stier er indlejret som inline-SVG i `core/resources/web/index.html`; ingen netværksadgang nødvendig. Kilde: https://pictogrammers.com/library/mdi/ |
-| ETS (KNX Association) | Kommerciel | Ikke inkluderet. |
+| Calimero (core, device, server), pinned commits in `third_party/PINS.txt` | GPLv2 + Classpath exception | Fetched at build time; included as library jars in the Windows package. The Classpath exception allows code that links to Calimero to use another license. Calimero's license text comes with the sources in `third_party/src` after `fetch-calimero.sh`. One local patch is published in `third_party/patches/`. |
+| Java runtime (OpenJDK) | GPLv2 + Classpath exception | Bundled by jpackage in the Windows package. |
+| OpenKNXproducer | GPL-3.0 | External tool the user downloads; not part of vKNX. |
+| Material Design Icons (Pictogrammers, `@mdi/js` 7.4.47) | Apache-2.0 (Pictogrammers Free License) | A few icon paths are embedded as inline SVG in `core/resources/web/index.html`; no network access needed. Source: https://pictogrammers.com/library/mdi/ |
+| ETS (KNX Association) | Commercial | Not included. |
 
-KNX og ETS er varemærker tilhørende KNX Association. vKNX er uafhængigt og ikke certificeret.
-Ingen kode fra KNX Explorer (ejerens ikke-kommercielle licens) eller Zennio er kopieret ind.
+KNX and ETS are trademarks of KNX Association. vKNX is independent and not certified.
+No code from KNX Explorer (the owner's non-commercial license) or Zennio has been copied in.
 
-Windows-programmet bruger desuden (kun i installerede udgaver): Microsoft Edge WebView2 (Microsoft Software License Terms; runtime er en del af Windows 10/11) og NuGet-pakken `Microsoft.Web.WebView2` (BSD-3-Clause-lignende licens), samt Inno Setup (Inno Setup License) til installeren.
+The Windows application also uses (installed builds only): Microsoft Edge WebView2 (Microsoft Software License Terms; the runtime is part of Windows 10/11) and the NuGet package `Microsoft.Web.WebView2` (BSD-3-Clause-like license), plus Inno Setup (Inno Setup License) for the installer.

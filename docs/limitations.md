@@ -1,44 +1,27 @@
-# Kendte begrænsninger (status 2026-10-29)
+# Known limitations (status 0.3.0)
 
-**Afgørende:** Intet i vKNX er testet mod rigtig ETS endnu. En vellykket build og selvtest er *ikke* bevis for ETS-kompatibilitet.
+**Decisive:** a successful build and self-test is *not* proof of ETS compatibility. Only what the owner has tried in ETS counts as confirmed.
 
-## Verificeret (egen test, uden ETS) [T]
-`tools/selftest.sh` (mini-ETS i Java) og `tools/selftest.sh TunnelTest` (via ægte KNXnet/IP-tunnel):
-adressetildeling kun i programmeringstilstand, deskriptor 0x07B0, komplet download af to enheder, tryk → telegram fra 1.1.1 → aktuator → status, ændret associering ændrer kommunikation, parameter (RelayLogic) ændrer adfærd, adresse/applikation/parametre/association overlever genstart.
+## Confirmed in ETS 6.4 (Build 8718) by the owner
+Import, addressing and download for push button, switch actuator, dimmer, slider push button and multisensor (version 1); devices on other areas/lines; sensor cycles and dimmer reacting. The interface-line setting (Settings → Interface for ETS) was added to avoid the "E_DATA_VOID" error when ETS tries to write the interface address.
 
-## Uverificeret mod ETS 6.4.8718 [P]
-- Importerer produkt-XML'en overhovedet (namespace `project/20`; OpenKNXproducer nævner ETS ≤ 6.3)?
-- Accepteres usigneret/eksperimentelt `.knxprod` med producent 0x00FA?
-- Fungerer discovery og forbindelse (loopback vs. netværksinterface, Windows-firewall, UDP 3671)? Serveren binder interface-IP, ikke 127.0.0.1.
-- Præcis additional load control, MCB/CRC-accept, evt. ekstra load-procedurer.
-- Engelske tekster i produktkataloget findes ikke (kun dansk).
+## Not yet tried in ETS
+- Rocker, blind actuator and the 4-/8-channel switch actuators.
+- **Version 2 of all products (0.3.0):** English texts, new multisensor with one ETS page per measurement (uses `choose/when` to show only the relevant parameters), `ReplacesVersions="1"`. If ETS complains on import, remove the old catalogue entries and re-import.
+- The fix for partial downloads (ETS writes only changed parameters; before 0.3.0 the unchanged parameters were reset to 0, which could give a dimming step of 0 = "break" and switch status sending off).
+- The Windows installer, the WebView2 window and the update button on real PCs (only smoke-tested on GitHub's Windows runner).
 
-## Funktionelt ikke bygget endnu
-Dæmper, slider-dæmper, persienne, multisensor (cyklisk), linjekobler med filtertabel/hop count, flere instanser pr. elev, scener, rum, gemte opsætninger, plantegning, ETS-projektimport. Windows-pakning (jlink/jpackage) og Windows-scripts er skrevet men **ikke kørt på Windows**.
+## Verified by our own tests (without ETS) [T]
+`tools/selftest.sh` (mini-ETS in Java), `TunnelTest`/`TunnelLineTest` (real KNXnet/IP tunnel, other areas/lines), `ProductsTest` (all products, partial download, multisensor parameters), `AppTest` (settings, update parsing), and a browser test of the panel and floor plan.
+
+## Functional limits
+- No line coupler (filter table, hop count): all lines are directly connected.
+- No scenes, rooms or simulation rules; no ETS project import.
+- Memory writes are at most 10 data bytes per telegram (device max APDU length 15, Calimero default); ETS follows the property by itself.
+- The multisensor value and interval are set in ETS only; the panel just shows them.
 
 ## Design
-- Alle enheder på linje 1.1 (D6).
-- Persistens skrives ved lukning; hård nedlukning kan miste ændringer.
-- Intet login/isolering pr. elev: hver elev kører sin egen lokale instans.
-- Bygget kun til undervisning; ingen emulering af andre producenters firmware.
-
-## Opdatering: 9 produkter (kun testet uden ETS)
-- **Bekræftet i ETS 6.4.8718 af ejeren [T]:** import, adressetildeling og fuld download for de to første produkter (Trykknap 1-fold, Kontakt-aktuator 1-fold).
-- **Bygget og enhedstestet, IKKE testet i ETS [P]:** Vippe (dæmp 4 bit), Skyder-tryk, Kontakt-aktuator 4/8, Dæmper, Persienne 2 kanaler, Multisensor. Nyt i XML: 4-bit objekter, 16-bit tal-parametre (signed/unsigned), DPT-9 objekter, parametre pakket i bits. Multisensor "Tilfældig værdi" bruger `DPT-9` uden undertype – ETS kan afvise den.
-- **Kendt begrænsning:** enhedens max APDU-længde er Calimeros standard 15, så hukommelsesskrivning er maks. 10 databytes pr. telegram (ETS følger egenskaben selv; egen test-ETS skriver 10 bytes ad gangen).
-- Linjekobler (filtertabel, hop count) er ikke bygget.
-- Enheder tilføjes/fjernes i panelet og gemmes i `devices.txt` i data-mappen. `--no-browser` starter uden at åbne browseren.
-
-## Opdatering: vilkårligt område/linje (2026-10-29)
-- Fejl rapporteret af ejeren: download fejler, når en enhed får anden adresse end 1.1.x. Årsag (reproduceret med `TunnelLineTest`): Calimeros KNXnet/IP-server opfører sig som én linje og dropper telegrammer til andre linjer/områder. Rettet med en lille lokal patch (`third_party/patches/`), så hele den virtuelle installation er "flad" og kan have alle adresser. [T uden ETS; skal bekræftes i ETS]
-- Der er stadig ingen rigtig linjekobler (filtertabel, hop count) – alle linjer er direkte forbundet.
-- Timer-opgaver (dæmpning, cyklisk sending, persienner) logger nu fejl i stedet for at stoppe lydløst.
-
-## Opdatering: nyt kontrolpanel (2026-10-29)
-- Panelet er redesignet: mørkt/lyst tema (standard mørkt), enhedsliste grupperet efter linje, oversigt over gruppeadresser (fra den downloadede konfiguration), kort-layout, farvet telegrammonitor, tilpasset projektor/stor skærm.
-- Ikke bygget endnu: plantegning med ikon-placering, scener/miljøpanel, simulerings-regler. Gruppeadresse-oversigten er ikke afprøvet med en rigtig ETS-download.
-
-## Opdatering: plantegning (2026-10-29)
-- Fane "Plantegning": indlæs PNG/JPG/SVG/WebP/GIF (maks. 12 MB), placér enkelte udgange/indgange (lamper, tryk, vippetaster, skyder, persienner, sensorer) ved at trække dem fra listen ind på tegningen. I kørselstilstand kan man betjene tryk og se lamper, dæmpning, persienneposition og sensorværdier live.
-- Gemmes i datamappen (`plan.<ext>`, `plan-layout.json`) – en mappe pr. elev/instans.
-- Testet i browser uden ETS (upload, placering, træk, genindlæsning). Ikke bygget: egne ikonsæt, rum/zoner, tegne-værktøj, scener.
+- Persistence is written on shutdown; a hard kill can lose changes.
+- No login/isolation per student: each student runs their own local instance.
+- Built for teaching only; no emulation of other manufacturers' firmware.
+- The program is not code-signed, so Windows may show a SmartScreen warning; the first start asks for a firewall exception (UDP/TCP 3671).

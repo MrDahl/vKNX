@@ -1,63 +1,71 @@
 # vKNX
 
-Open-source undervisningssimulator til KNX. Mål: elever programmerer **virtuelle enheder fra rigtig ETS** (importér produkter, tildel adresse, sæt parametre og gruppeadresser, tryk programmeringsknap, download) uden fysisk KNX-hardware – og betjener derefter knapper, lamper m.m. i et enkelt browser-kontrolpanel. Kun Windows er målplatform; kun egne generiske undervisningsprodukter.
+Open-source teaching simulator for KNX. Goal: students program **virtual devices from real ETS** (import the products, assign an individual address, set parameters and group addresses, press the programming button, download) without any physical KNX hardware – and then operate buttons, lamps, dimmers, blinds and sensors in a single control panel. Windows is the target platform; only our own generic teaching products are included.
 
 > ## Status: prototype
-> Bekræftet i ETS 6.4 af ejeren: forbindelse, import, adressering og download for tryk, kontaktaktuator, dæmper, skydetryk og multisensor. Øvrige produkter og installer/auto-opdatering er ikke afprøvet på rigtige elev-pc'er. Se `docs/limitations.md`. Intet må beskrives som "testet med ETS", før testen er kørt.
+> Confirmed in ETS 6.4 by the project owner: connection, import, addressing and download for push button, switch actuator, dimmer, slider push button and multisensor (the multisensor was reworked in 0.3.0 and the new version still has to be tried in ETS). The other products and the installer/auto-update have not been tried on real student PCs. See `docs/limitations.md`. Nothing may be described as "tested with ETS" before that test has been run.
 
-## Hvad er med nu
-- Java 21 + [Calimero](https://github.com/calimero-project) (KNXnet/IP-server, virtuelle enheder) – `docs/decisions.md`
-- 9 produkter: tryk, vippe, skydetryk, kontaktaktuator 1/4/8, dæmper, persienne (2 kanaler), multisensor
-- ETS-produkt-XML genereret fra samme produktdefinition som backenden bruger
-- Kontrolpanel (da/en, mørkt/lyst): enheder, gruppeadresse-oversigt, telegrammonitor, plantegning med placerbare udgange/indgange
-- Windows-program med installer, eget vindue (WebView2) og "Søg efter opdateringer" – se `CHANGELOG.md`
-- Ikke endnu: linjekobler, scener/miljøpanel (se `docs/limitations.md`)
+## What is included
+- Java 21 + [Calimero](https://github.com/calimero-project) (KNXnet/IP server, virtual devices) – see `docs/decisions.md`
+- 9 products: push button, rocker, slider push button, switch actuator 1/4/8, dimming actuator, blind actuator (2 channels), multisensor (6 measurements, each with its own group object and ETS page)
+- ETS product XML generated from the same product definition the backend runs on
+- Control panel (dark/light): devices, group address overview, telegram monitor, floor plan with placeable outputs and inputs
+- Windows application with installer, its own window (WebView2) and "Check for updates" – see `CHANGELOG.md`
+- Not yet: line coupler, scenes/environment panel (see `docs/limitations.md`)
 
-## Byg og kør
-Kræver JDK 21 og git (ingen Maven/Gradle).
+## Build and run
+Requires JDK 21 and git (no Maven/Gradle).
 
-Linux/macOS (bruges i udvikling):
+Linux/macOS (used for development):
 ```
-tools/build.sh          # henter pinnede Calimero-kilder, kompilerer alt
-tools/selftest.sh       # backend-selvtest (IKKE ETS-test); også: TunnelTest, CrcCrossCheck
-tools/run.sh            # starter simulator + kontrolpanel på http://127.0.0.1:8080/
+tools/build.sh          # fetches the pinned Calimero sources, compiles everything
+tools/selftest.sh       # backend self-test (NOT an ETS test); also: TunnelTest, CrcCrossCheck
+tools/run.sh            # starts simulator + control panel on http://127.0.0.1:8080/
 ```
-**Windows-program:** hent `vKNX-Setup-<version>.exe` fra [Releases](https://github.com/MrDahl/vKNX/releases/latest) og kør den (ingen administratorrettigheder; Windows kan advare om "ukendt udgiver", fordi programmet ikke er kodesigneret – vælg "Kør alligevel"). Start vKNX fra startmenuen; tillad Windows Firewall for privat netværk, så ETS kan finde interfacet. Java og WebView2-vinduet er med. Opdatering: tandhjulet → "Søg efter opdateringer". Alternativt hentes `vKNX-<version>-windows.zip` (udpakkes og køres uden installation). Data (enheder, plantegning, log) ligger i `%LOCALAPPDATA%\vKNX\data`.
+**Windows application:** download `vKNX-Setup-<version>.exe` from [Releases](https://github.com/MrDahl/vKNX/releases/latest) and run it (no administrator rights needed; Windows may warn about an "unknown publisher" because the program is not code-signed – choose "Run anyway"). Start vKNX from the start menu and allow it through Windows Firewall on private networks so ETS can find the interface. Java and the WebView2 window are included. To update: cog icon → "Check for updates". Alternatively download `vKNX-<version>-windows.zip` (unzip and run without installing). Data (devices, floor plan, log) lives in `%LOCALAPPDATA%\vKNX\data`.
 
-**Udgivelser (til udvikleren):** skriv ændringer i `CHANGELOG.md` under `## [x.y.z]`, og push et tag `vx.y.z` – GitHub Actions bygger, smoke-tester, laver installer og zip og udgiver releasen med teksten fra CHANGELOG.
+**Releases (for the maintainer):** write the changes in `CHANGELOG.md` under `## [x.y.z]`, then run the GitHub Actions workflow "windows-exe" with *Run workflow* and the version number (or push a tag `vx.y.z`). It builds, smoke-tests, creates the installer and zip, and publishes the release with the CHANGELOG text as release notes.
 
-Windows (PowerShell; bygning er kørt i GitHub Actions på Windows): `tools\build.ps1`, `tools\selftest.ps1`, `tools\start.ps1`, `tools\gen-products.ps1`.
+Windows (PowerShell; the build is exercised in GitHub Actions on Windows): `tools\build.ps1`, `tools\selftest.ps1`, `tools\start.ps1`, `tools\gen-products.ps1`, `tools\make-knxprod.ps1`.
 
-Valg: `--port 3671 --web 8080 --name "vKNX" --dir runtime --line 1.1 --no-browser --device produkt:navn`. Logfil: `runtime/vknx.log`.
+Options: `--port 3671 --web 8080 --name "vKNX" --dir runtime --line 1.1 --no-browser --device product:name`. Log file: `runtime/vknx.log`.
 
-## Hvad vi bruger til hvad
-| Del | Bruges til | Licens / status |
+## Getting the products into ETS
+1. Generate the product XML (already included in `products/`; regenerate with `tools/gen-products.ps1` after changing `Products.java`).
+2. Convert all XML files to `.knxprod` with `tools/make-knxprod.ps1` (needs OpenKNXproducer in `%USERPROFILE%\bin` and ETS installed).
+3. Import the `.knxprod` files in ETS (Catalogs → Import), add the devices to a project, add a KNXnet/IP interface pointing at the vKNX address shown in the panel, and program the devices.
+
+## What we use for what
+| Part | Used for | License / status |
 |---|---|---|
-| **Java 21 (JDK)** | Programmeringssprog og kørsel. Alt bygges med almindelig `javac` – ingen Maven/Gradle (Maven Central er ikke nødvendig) | GPLv2+CPE (OpenJDK) |
-| **[Calimero](https://github.com/calimero-project)** (`calimero-core`, `calimero-device`, `calimero-server`) | KNX-protokollen i Java: telegrammer, datapunkttyper, virtuelle enheder med hukommelse og tabeller (`calimero-device`), og KNXnet/IP-serveren som ETS ser som et IP-interface (`calimero-server`). Hentes ved build i de fastlåste commits i `third_party/PINS.txt` og er ikke kopieret ind i repoet | GPLv2 + Classpath-undtagelse |
-| **vKNX-kode** (`core/`) | Produktbeskrivelser, enhedsadfærd (tryk, aktuator, dæmper, persienne, multisensor), download-håndtering til ETS, persistens, webpanel og telegrammonitor | ejeren vælger licens |
-| **Webpanel** (indbygget HTTP-server + ren HTML/JS) | Betjening af knapper, visning af lamper/dæmpere/persienner og telegrammonitor – på dansk og engelsk | del af vKNX |
-| **Produkt-XML-generator** (`ProductXmlGenerator`) | Laver ETS-produktfiler (`products/*.xml`) ud fra de samme produktdefinitioner som simulatoren bruger, så ETS-parametre og simulator ikke kan komme ud af trit | del af vKNX |
-| **[OpenKNXproducer](https://github.com/OpenKNX/OpenKNXproducer)** | Konverterer produkt-XML til `.knxprod`, som ETS kan importere. Kaldes via `tools/make-knxprod.ps1`. Kræver at ETS er installeret på pc'en, fordi den bruger ETS's egne signerings-DLL'er | GPL-3.0 (bruges som eksternt værktøj, ikke indbygget) |
-| **ETS 6 (KNX Association)** | Programmerer de virtuelle enheder (gruppeadresser, parametre, download) – præcis som i en rigtig installation | kommerciel, ikke inkluderet |
-| **jpackage + GitHub Actions** | Bygger en Windows-mappe med `vknx.exe` (indeholder Java), så man ikke skal installere noget for at køre simulatoren | del af byggeprocessen |
-| **PowerShell-scripts** (`tools/*.ps1`) | Start, bygning, selvtest og konvertering på Windows | del af vKNX |
-| **[KNX Explorer](https://github.com/MrDahl/KNX)** | Ejerens egen undervisningsapp. vKNX er et *separat* projekt og henviser blot til den som baggrund og mulig genbrug (se `docs/knx-explorer-genbrug.md`) | ejerens egen kode |
-| **Claude (Anthropic, Claude Sonnet 5.5, via Claude Code)** | AI-assistent der har researchet, skrevet og testet koden og dokumentationen i samarbejde med ejeren. Alle commits er markeret med `Co-Authored-By: Claude`. Claude kan ikke køre ETS; ETS-kompatibilitet er kun det, ejeren selv har bekræftet | – |
+| **Java 21 (JDK)** | Programming language and runtime. Everything is built with plain `javac` – no Maven/Gradle (Maven Central is not needed) | GPLv2+CPE (OpenJDK) |
+| **[Calimero](https://github.com/calimero-project)** (`calimero-core`, `calimero-device`, `calimero-server`) | The KNX protocol in Java: telegrams, datapoint types, virtual devices with memory and tables (`calimero-device`), and the KNXnet/IP server that ETS sees as an IP interface (`calimero-server`). Fetched at build time at the pinned commits in `third_party/PINS.txt`, not copied into the repo. One small local patch (`third_party/patches/`) lets devices live on any area/line | GPLv2 + Classpath exception |
+| **vKNX code** (`core/`) | Product descriptions, device behaviour (buttons, actuators, dimmer, blinds, multisensor), ETS download handling, persistence, web panel and telegram monitor | MIT |
+| **Web panel** (built-in HTTP server + plain HTML/JS) | Operating buttons, showing lamps/dimmers/blinds/sensors and the telegram monitor | part of vKNX |
+| **Product XML generator** (`ProductXmlGenerator`) | Writes the ETS product files (`products/*.xml`) from the same product definitions the simulator uses, so ETS parameters and simulator cannot drift apart | part of vKNX |
+| **[OpenKNXproducer](https://github.com/OpenKNX/OpenKNXproducer)** | Converts product XML to `.knxprod`, which ETS can import. Called through `tools/make-knxprod.ps1`. Needs ETS installed on the PC because it uses ETS's own signing DLLs | GPL-3.0 (used as an external tool, not bundled) |
+| **ETS 6 (KNX Association)** | Programs the virtual devices (group addresses, parameters, download) – exactly as in a real installation | commercial, not included |
+| **jpackage + GitHub Actions** | Builds the Windows application (Java runtime included), so nothing has to be installed to run the simulator | part of the build process |
+| **WebView2 launcher** (`launcher/`) | Small Windows program that shows the control panel in its own window and starts/stops the simulator in the background | MIT; uses Microsoft WebView2 |
+| **Inno Setup** | Builds the Windows installer | Inno Setup license (free) |
+| **[Material Design Icons](https://pictogrammers.com/library/mdi/)** | Icons in the control panel | Apache-2.0 |
+| **PowerShell scripts** (`tools/*.ps1`) | Start, build, self-test and conversion on Windows | part of vKNX |
+| **[KNX Explorer](https://github.com/MrDahl/KNX)** | The owner's own teaching app. vKNX is a *separate* project and only refers to it as background and possible reuse (see `docs/knx-explorer-reuse.md`) | owner's own code |
+| **Claude (Anthropic, via Claude Code)** | AI assistant that researched, wrote and tested the code and documentation together with the owner. Commits are marked with `Co-Authored-By: Claude`. Claude cannot run ETS; ETS compatibility is only what the owner has confirmed | – |
 
-**Kun læst som reference (ikke brugt i koden):** [thelsing/knx](https://github.com/thelsing/knx) (GPL-3.0), [Kaenx-Creator](https://github.com/OpenKNX/Kaenx-Creator) (MIT) og OpenKNX-skabelonerne – brugt til at forstå ETS' produktformat. Zennio DIMinBOX DX1 er kun funktionel reference; ingen Zennio-kode indgår.
+**Read as reference only (not used in the code):** [thelsing/knx](https://github.com/thelsing/knx) (GPL-3.0), [Kaenx-Creator](https://github.com/OpenKNX/Kaenx-Creator) (MIT) and the OpenKNX templates – used to understand the ETS product format. The Zennio DIMinBOX DX1 is a functional reference only; no Zennio code is included.
 
-**Evidensniveau:** ETS-import, adressering og download er bekræftet af ejeren i ETS 6.4 for Trykknap og Kontakt-aktuator 1-fold. De øvrige produkter er testet uden ETS. Se `docs/limitations.md`.
+**Evidence level:** ETS import, addressing and download are confirmed by the owner in ETS 6.4 for the push button, switch actuator, dimmer, slider push button and (version 1 of) the multisensor. The other products are tested without ETS. See `docs/limitations.md`.
 
-## Dokumentation
-| Fil | Indhold |
+## Documentation
+| File | Contents |
 |---|---|
-| `docs/research.md` | Kildebaseret research (Calimero, thelsing/knx, produktværktøjer, øvrige projekter) med commits og evidensniveauer |
-| `docs/decisions.md` | Valg af stak og begrundelser |
-| `docs/ets-download-sequence.md` | ETS-downloadsekvensen og vKNX's svar |
-| `docs/ets-test-guide.md` | **Præcis ETS-testvejledning** + hvilke logs vi skal have tilbage |
-| `docs/knx-explorer-genbrug.md` | Genbrug af KNX Explorer og licensforslag |
-| `docs/limitations.md` | Kendte begrænsninger |
+| `docs/research.md` | Source-based research (Calimero, thelsing/knx, product tools, other projects) with commits and evidence levels |
+| `docs/decisions.md` | Choice of stack and reasons |
+| `docs/ets-download-sequence.md` | The ETS download sequence and vKNX's answers |
+| `docs/ets-test-guide.md` | **Exact ETS test guide** + which logs we need back |
+| `docs/knx-explorer-reuse.md` | Reuse of KNX Explorer and licence suggestion |
+| `docs/limitations.md` | Known limitations |
 
-## Licens
-vKNX's egen kode er under **MIT-licensen** (`LICENSE`) – frit at bruge, ændre og dele, også kommercielt. Tredjepartskomponenter (Calimero, Java, OpenKNXproducer) har deres egne licenser, se `THIRD-PARTY-NOTICES.md`. KNX og ETS er registrerede varemærker tilhørende KNX Association; vKNX er uafhængigt og ikke certificeret.
+## License
+vKNX's own code is under the **MIT license** (`LICENSE`) – free to use, change and share, also commercially. Third-party components (Calimero, Java, OpenKNXproducer) have their own licenses, see `THIRD-PARTY-NOTICES.md`. KNX and ETS are registered trademarks of KNX Association; vKNX is independent and not certified.

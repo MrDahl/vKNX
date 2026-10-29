@@ -3,65 +3,65 @@
   <ManufacturerData>
     <Manufacturer RefId="M-00FA">
       <Catalog>
-        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="da-DK">
-          <CatalogItem Id="M-00FA_H-2563-1_HP-0A03-01-0000_CI-VKNXRK1-1" Name="vKNX Vippe (dobbelt tryk) 1-fold" Number="1" ProductRefId="M-00FA_H-2563-1_P-VKNXRK1" Hardware2ProgramRefId="M-00FA_H-2563-1_HP-0A03-01-0000" DefaultLanguage="da-DK" />
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
+          <CatalogItem Id="M-00FA_H-2563-1_HP-0A03-02-0000_CI-VKNXRK1-1" Name="vKNX Rocker (double push) 1-fold" Number="1" ProductRefId="M-00FA_H-2563-1_P-VKNXRK1" Hardware2ProgramRefId="M-00FA_H-2563-1_HP-0A03-02-0000" DefaultLanguage="en-US" />
         </CatalogSection>
       </Catalog>
       <ApplicationPrograms>
-        <ApplicationProgram Id="M-00FA_A-0A03-01-0000" ApplicationNumber="2563" ApplicationVersion="1" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Vippe (dobbelt tryk) 1-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="da-DK" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="0">
+        <ApplicationProgram Id="M-00FA_A-0A03-02-0000" ApplicationNumber="2563" ApplicationVersion="2" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Rocker (double push) 1-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1">
           <Static>
             <Code>
-              <RelativeSegment Id="M-00FA_A-0A03-01-0000_RS-04-00000" Name="Parameters" Offset="0" Size="2" LoadStateMachine="4" />
+              <RelativeSegment Id="M-00FA_A-0A03-02-0000_RS-04-00000" Name="Parameters" Offset="0" Size="2" LoadStateMachine="4" />
             </Code>
             <ParameterTypes>
-              <ParameterType Id="M-00FA_A-0A03-01-0000_PT-Orientation" Name="Orientation">
+              <ParameterType Id="M-00FA_A-0A03-02-0000_PT-Orientation" Name="Orientation">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Tænd / lysere (nederste: sluk / mørkere)" Value="0" Id="M-00FA_A-0A03-01-0000_PT-Orientation_EN-0" />
-                  <Enumeration Text="Sluk / mørkere (nederste: tænd / lysere)" Value="1" Id="M-00FA_A-0A03-01-0000_PT-Orientation_EN-1" />
+                  <Enumeration Text="On / brighter (lower: off / darker)" Value="0" Id="M-00FA_A-0A03-02-0000_PT-Orientation_EN-0" />
+                  <Enumeration Text="Off / darker (lower: on / brighter)" Value="1" Id="M-00FA_A-0A03-02-0000_PT-Orientation_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A03-01-0000_PT-LongPressTime" Name="LongPressTime">
+              <ParameterType Id="M-00FA_A-0A03-02-0000_PT-LongPressTime" Name="LongPressTime">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="0,4 s" Value="0" Id="M-00FA_A-0A03-01-0000_PT-LongPressTime_EN-0" />
-                  <Enumeration Text="0,6 s" Value="1" Id="M-00FA_A-0A03-01-0000_PT-LongPressTime_EN-1" />
-                  <Enumeration Text="1,0 s" Value="2" Id="M-00FA_A-0A03-01-0000_PT-LongPressTime_EN-2" />
+                  <Enumeration Text="0.4 s" Value="0" Id="M-00FA_A-0A03-02-0000_PT-LongPressTime_EN-0" />
+                  <Enumeration Text="0.6 s" Value="1" Id="M-00FA_A-0A03-02-0000_PT-LongPressTime_EN-1" />
+                  <Enumeration Text="1.0 s" Value="2" Id="M-00FA_A-0A03-02-0000_PT-LongPressTime_EN-2" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A03-01-0000_PT-DimStep" Name="DimStep">
+              <ParameterType Id="M-00FA_A-0A03-02-0000_PT-DimStep" Name="DimStep">
                 <TypeRestriction Base="Value" SizeInBit="3">
-                  <Enumeration Text="100 % (kør til endepunkt)" Value="1" Id="M-00FA_A-0A03-01-0000_PT-DimStep_EN-1" />
-                  <Enumeration Text="50 %" Value="2" Id="M-00FA_A-0A03-01-0000_PT-DimStep_EN-2" />
-                  <Enumeration Text="25 %" Value="3" Id="M-00FA_A-0A03-01-0000_PT-DimStep_EN-3" />
-                  <Enumeration Text="12,5 %" Value="4" Id="M-00FA_A-0A03-01-0000_PT-DimStep_EN-4" />
-                  <Enumeration Text="6,25 %" Value="5" Id="M-00FA_A-0A03-01-0000_PT-DimStep_EN-5" />
+                  <Enumeration Text="100 % (run to end)" Value="1" Id="M-00FA_A-0A03-02-0000_PT-DimStep_EN-1" />
+                  <Enumeration Text="50 %" Value="2" Id="M-00FA_A-0A03-02-0000_PT-DimStep_EN-2" />
+                  <Enumeration Text="25 %" Value="3" Id="M-00FA_A-0A03-02-0000_PT-DimStep_EN-3" />
+                  <Enumeration Text="12.5 %" Value="4" Id="M-00FA_A-0A03-02-0000_PT-DimStep_EN-4" />
+                  <Enumeration Text="6.25 %" Value="5" Id="M-00FA_A-0A03-02-0000_PT-DimStep_EN-5" />
                 </TypeRestriction>
               </ParameterType>
             </ParameterTypes>
             <Parameters>
-              <Parameter Id="M-00FA_A-0A03-01-0000_P-1" Name="Orientation" ParameterType="M-00FA_A-0A03-01-0000_PT-Orientation" Text="Øverste tast sender" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A03-01-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A03-02-0000_P-1" Name="Orientation" ParameterType="M-00FA_A-0A03-02-0000_PT-Orientation" Text="Upper key sends" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A03-02-0000_RS-04-00000" Offset="0" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A03-01-0000_P-2" Name="LongPressTime" ParameterType="M-00FA_A-0A03-01-0000_PT-LongPressTime" Text="Tid for langt tryk" Value="1">
-                <Memory CodeSegment="M-00FA_A-0A03-01-0000_RS-04-00000" Offset="0" BitOffset="1" />
+              <Parameter Id="M-00FA_A-0A03-02-0000_P-2" Name="LongPressTime" ParameterType="M-00FA_A-0A03-02-0000_PT-LongPressTime" Text="Long-press time" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A03-02-0000_RS-04-00000" Offset="0" BitOffset="1" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A03-01-0000_P-3" Name="DimStep" ParameterType="M-00FA_A-0A03-01-0000_PT-DimStep" Text="Dæmpetrin (relativ dæmpning)" Value="1">
-                <Memory CodeSegment="M-00FA_A-0A03-01-0000_RS-04-00000" Offset="1" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A03-02-0000_P-3" Name="DimStep" ParameterType="M-00FA_A-0A03-02-0000_PT-DimStep" Text="Dimming step (relative dimming)" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A03-02-0000_RS-04-00000" Offset="1" BitOffset="0" />
               </Parameter>
             </Parameters>
             <ParameterRefs>
-              <ParameterRef Id="M-00FA_A-0A03-01-0000_P-1_R-1" RefId="M-00FA_A-0A03-01-0000_P-1" />
-              <ParameterRef Id="M-00FA_A-0A03-01-0000_P-2_R-2" RefId="M-00FA_A-0A03-01-0000_P-2" />
-              <ParameterRef Id="M-00FA_A-0A03-01-0000_P-3_R-3" RefId="M-00FA_A-0A03-01-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A03-02-0000_P-1_R-1" RefId="M-00FA_A-0A03-02-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A03-02-0000_P-2_R-2" RefId="M-00FA_A-0A03-02-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A03-02-0000_P-3_R-3" RefId="M-00FA_A-0A03-02-0000_P-3" />
             </ParameterRefs>
             <ComObjectTable>
-              <ComObject Id="M-00FA_A-0A03-01-0000_O-1" Name="Switch" Text="Kontakt" Number="1" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A03-01-0000_O-2" Name="Dimming" Text="Relativ dæmpning" Number="2" FunctionText="Output" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
-              <ComObject Id="M-00FA_A-0A03-01-0000_O-3" Name="Status" Text="Status" Number="3" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A03-02-0000_O-1" Name="Switch" Text="Switch" Number="1" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A03-02-0000_O-2" Name="Dimming" Text="Relative dimming" Number="2" FunctionText="Output" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A03-02-0000_O-3" Name="Status" Text="Status" Number="3" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
             </ComObjectTable>
             <ComObjectRefs>
-              <ComObjectRef Id="M-00FA_A-0A03-01-0000_O-1_R-1" RefId="M-00FA_A-0A03-01-0000_O-1" />
-              <ComObjectRef Id="M-00FA_A-0A03-01-0000_O-2_R-2" RefId="M-00FA_A-0A03-01-0000_O-2" />
-              <ComObjectRef Id="M-00FA_A-0A03-01-0000_O-3_R-3" RefId="M-00FA_A-0A03-01-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A03-02-0000_O-1_R-1" RefId="M-00FA_A-0A03-02-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A03-02-0000_O-2_R-2" RefId="M-00FA_A-0A03-02-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A03-02-0000_O-3_R-3" RefId="M-00FA_A-0A03-02-0000_O-3" />
             </ComObjectRefs>
             <AddressTable MaxEntries="255" />
             <AssociationTable MaxEntries="255" />
@@ -84,28 +84,28 @@
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
-              <ParameterBlock Id="M-00FA_A-0A03-01-0000_PB-1" Name="General" Text="Generelt">
-                <ParameterRefRef RefId="M-00FA_A-0A03-01-0000_P-1_R-1" />
-                <ParameterRefRef RefId="M-00FA_A-0A03-01-0000_P-2_R-2" />
-                <ParameterRefRef RefId="M-00FA_A-0A03-01-0000_P-3_R-3" />
-                <ComObjectRefRef RefId="M-00FA_A-0A03-01-0000_O-1_R-1" />
-                <ComObjectRefRef RefId="M-00FA_A-0A03-01-0000_O-2_R-2" />
-                <ComObjectRefRef RefId="M-00FA_A-0A03-01-0000_O-3_R-3" />
+              <ParameterBlock Id="M-00FA_A-0A03-02-0000_PB-1" Name="General" Text="General">
+                <ParameterRefRef RefId="M-00FA_A-0A03-02-0000_P-1_R-1" />
+                <ParameterRefRef RefId="M-00FA_A-0A03-02-0000_P-2_R-2" />
+                <ParameterRefRef RefId="M-00FA_A-0A03-02-0000_P-3_R-3" />
+                <ComObjectRefRef RefId="M-00FA_A-0A03-02-0000_O-1_R-1" />
+                <ComObjectRefRef RefId="M-00FA_A-0A03-02-0000_O-2_R-2" />
+                <ComObjectRefRef RefId="M-00FA_A-0A03-02-0000_O-3_R-3" />
               </ParameterBlock>
             </ChannelIndependentBlock>
           </Dynamic>
         </ApplicationProgram>
       </ApplicationPrograms>
       <Hardware>
-        <Hardware Id="M-00FA_H-2563-1" Name="vKNX Vippe (dobbelt tryk) 1-fold" SerialNumber="2563" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+        <Hardware Id="M-00FA_H-2563-1" Name="vKNX Rocker (double push) 1-fold" SerialNumber="2563" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
           <Products>
-            <Product Id="M-00FA_H-2563-1_P-VKNXRK1" Text="vKNX Vippe (dobbelt tryk) 1-fold" OrderNumber="VKNXRK1" IsRailMounted="false" DefaultLanguage="da-DK">
+            <Product Id="M-00FA_H-2563-1_P-VKNXRK1" Text="vKNX Rocker (double push) 1-fold" OrderNumber="VKNXRK1" IsRailMounted="false" DefaultLanguage="en-US">
               <RegistrationInfo RegistrationStatus="Registered" />
             </Product>
           </Products>
           <Hardware2Programs>
-            <Hardware2Program Id="M-00FA_H-2563-1_HP-0A03-01-0000" MediumTypes="MT-0">
-              <ApplicationProgramRef RefId="M-00FA_A-0A03-01-0000" />
+            <Hardware2Program Id="M-00FA_H-2563-1_HP-0A03-02-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A03-02-0000" />
               <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
             </Hardware2Program>
           </Hardware2Programs>

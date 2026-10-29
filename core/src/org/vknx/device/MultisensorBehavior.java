@@ -1,94 +1,89 @@
 package org.vknx.device;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import org.vknx.product.Products;
+import org.vknx.product.Products.Channel;
+
 /**
- * Multisensor: six simulated environment values (set from the control panel) sent cyclically, plus a random value
- * between two ETS-configured limits sent at its own ETS-configured interval. All objects are DPT 9 (2-byte float).
+ * Multisensor: six measurements (CO2, humidity, illuminance, temperature, air pressure, wind speed). Everything comes from
+ * the ETS download: every channel has its own group object, its own send interval and either a fixed value or a random
+ * range. The control panel only shows the values; it cannot change them. All objects are DPT 9 (2-byte float).
  */
 public final class MultisensorBehavior extends DeviceBehavior {
-	/** name, unit, default, min, max for the UI sliders (values are sent as DPT 9.xxx). */
-	public static final String[][] SENSORS = {
-		{ "CO2", "ppm", "600", "400", "5000" }, { "Humidity", "%", "45", "0", "100" },
-		{ "Illuminance", "lux", "300", "0", "100000" }, { "Temperature", "°C", "21", "-30", "60" },
-		{ "Pressure", "Pa", "101325", "30000", "110000" }, { "WindSpeed", "m/s", "3", "0", "50" } };
-	private final double[] value = new double[6];
-	private volatile int lastRandom;
-	private volatile int cyclicSends;
-	private ScheduledFuture<?> cyclic;
-	private ScheduledFuture<?> random;
+	private static final List<Channel> CH = Products.CHANNELS;
+	private final int n = CH.size();
+	private final double[] value = new double[n];
+	private final int[] sent = new int[n];
+	private final ScheduledFuture<?>[] task = new ScheduledFuture<?>[n];
 
 	MultisensorBehavior(final VirtualDevice dev) {
 		super(dev);
-		for (int i = 0; i < 6; i++)
-			value[i] = Double.parseDouble(SENSORS[i][2]);
+		for (int i = 0; i < n; i++)
+			value[i] = CH.get(i).def() * CH.get(i).unitsPerStep();
 	}
 
-	@Override
-	public void act(final String action, final int v) {
-		// "s0".."s5": new simulated value, scaled x10 so that one decimal can be set from the UI
-		if (action.length() == 2 && action.charAt(0) == 's') {
-			final int i = action.charAt(1) - '0';
-			if (i >= 0 && i < 6) {
-				value[i] = v / 10.0;
-				dev.log("sensor", SENSORS[i][0] + " set to " + value[i] + " " + SENSORS[i][1] + " (sent at the next cycle)");
-				dev.changed();
-			}
-		}
-		else
-			super.act(action, v);
-	}
+	private String p(final int i, final String what) { return CH.get(i).name() + what; }
 
 	@Override
 	synchronized void onApplicationLoaded() {
 		onStop();
-		final int cycle = dev.param("CycleTime");
-		final int rInt = dev.param("RandomInterval");
-		if (cycle > 0) {
-			dev.log("sensor", "cyclic sending every " + cycle + " s (parameter CycleTime)");
-			cyclic = dev.every(this::sendCycle, 2, cycle, TimeUnit.SECONDS);
+		for (int i = 0; i < n; i++) {
+			final int ch = i;
+			final Channel c = CH.get(i);
+			final boolean random = dev.param(p(i, "Mode")) == 1;
+			final int interval = dev.param(p(i, "Interval"));
+			next(i); // set the starting value
+			dev.log("sensor", c.name() + ": " + (random ? "random between " + dev.param(p(i, "Min")) + " and " + dev.param(p(i, "Max"))
+					: "fixed " + dev.param(p(i, "Value"))) + " (parameter units), "
+					+ (interval > 0 ? "sent every " + interval + " s" : "cyclic sending off (interval 0)"));
+			if (interval > 0)
+				task[i] = dev.every(() -> send(ch), 2, interval, TimeUnit.SECONDS);
+		}
+		dev.changed();
+	}
+
+	/** Computes the next value of channel i (fixed or random) from the ETS parameters, in engineering units. */
+	private void next(final int i) {
+		final Channel c = CH.get(i);
+		int raw;
+		if (dev.param(p(i, "Mode")) == 1) {
+			int lo = dev.param(p(i, "Min")), hi = dev.param(p(i, "Max"));
+			if (lo > hi) {
+				final int t = lo;
+				lo = hi;
+				hi = t;
+			}
+			raw = lo == hi ? lo : ThreadLocalRandom.current().nextInt(lo, hi + 1);
 		}
 		else
-			dev.log("sensor", "cyclic sending off (parameter CycleTime=0)");
-		if (rInt > 0) {
-			dev.log("sensor", "random value every " + rInt + " s between " + dev.param("RandomMin") + " and "
-					+ dev.param("RandomMax"));
-			random = dev.every(this::sendRandom, 2, rInt, TimeUnit.SECONDS);
-		}
-		else
-			dev.log("sensor", "random value off (parameter RandomInterval=0)");
+			raw = dev.param(p(i, "Value"));
+		value[i] = raw * c.unitsPerStep();
 	}
 
 	@Override
 	synchronized void onStop() {
-		if (cyclic != null)
-			cyclic.cancel(false);
-		if (random != null)
-			random.cancel(false);
+		for (int i = 0; i < n; i++)
+			if (task[i] != null)
+				task[i].cancel(false);
 	}
 
-	private void sendCycle() {
-		cyclicSends++;
-		for (int i = 0; i < 6; i++)
-			dev.transmit(i + 1, Dpt9.encode(value[i]), true);
-		dev.log("sensor", "cycle " + cyclicSends + ": values sent to the associated group addresses (objects without address are skipped)");
+	private void send(final int i) {
+		final Channel c = CH.get(i);
+		next(i);
+		sent[i]++;
+		dev.transmit(i + 1, Dpt9.encode(Math.round(value[i] / c.unitsPerStep()) * c.toDpt()), true);
+		dev.log("sensor", c.name() + " " + fmt(i) + " sent (#" + sent[i] + ")");
 		dev.changed();
 	}
 
-	private void sendRandom() {
-		int lo = dev.param("RandomMin"), hi = dev.param("RandomMax");
-		if (lo > hi) {
-			final int t = lo;
-			lo = hi;
-			hi = t;
-		}
-		lastRandom = lo == hi ? lo : ThreadLocalRandom.current().nextInt(lo, hi + 1);
-		dev.transmit(7, Dpt9.encode(lastRandom), true);
-		dev.log("sensor", "random value " + lastRandom + " (between " + lo + " and " + hi + ")");
-		dev.changed();
+	private String fmt(final int i) {
+		final Channel c = CH.get(i);
+		return String.format(java.util.Locale.ROOT, c.unitsPerStep() < 1 ? "%.1f %s" : "%.0f %s", value[i], c.unit());
 	}
 
 	@Override
@@ -96,16 +91,22 @@ public final class MultisensorBehavior extends DeviceBehavior {
 
 	@Override
 	Integer valueOf(final int go) {
-		return go >= 1 && go <= 6 ? Dpt9.encode(value[go - 1]) : go == 7 ? Dpt9.encode(lastRandom) : null;
+		if (go < 1 || go > n)
+			return null;
+		final Channel c = CH.get(go - 1);
+		return Dpt9.encode(Math.round(value[go - 1] / c.unitsPerStep()) * c.toDpt());
 	}
 
 	@Override
 	public Map<String, Object> view() {
 		final var m = newView();
-		for (int i = 0; i < 6; i++)
-			m.put("s" + i, value[i]);
-		m.put("random", lastRandom);
-		m.put("cycles", cyclicSends);
+		for (int i = 0; i < n; i++) {
+			m.put("s" + i, Math.round(value[i] * 10) / 10.0);
+			m.put("n" + i, sent[i]);
+			final int interval = dev.param(p(i, "Interval"));
+			m.put("i" + i, interval);
+			m.put("r" + i, dev.param(p(i, "Mode")) == 1);
+		}
 		return m;
 	}
 }

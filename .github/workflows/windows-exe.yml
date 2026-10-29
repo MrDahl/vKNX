@@ -60,7 +60,7 @@ jobs:
         run: |
           jpackage --type app-image --name vKNX-Server --dest dist/jp `
             --module-path dist/mods --module org.vknx/org.vknx.Main `
-            --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql,java.desktop,java.net.http `
+            --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql,java.desktop,java.net.http,jdk.crypto.ec,jdk.crypto.cryptoki `
             --app-version $env:NUMVER
           New-Item -ItemType Directory -Force dist/app/server | Out-Null
           Copy-Item dist/jp/vKNX-Server/* dist/app/server -Recurse
@@ -96,6 +96,10 @@ jobs:
           }
           "smoke1 server answers: $ok" | Add-Content $log
           if ($ok) { ($r.Content.Substring(0, [Math]::Min(160, $r.Content.Length))) | Add-Content $log }
+          try {
+            $u = Invoke-WebRequest http://127.0.0.1:18099/api/update/check -UseBasicParsing -TimeoutSec 40
+            "smoke1 update check (TLS to GitHub from the bundled runtime): HTTP $($u.StatusCode) $($u.Content.Substring(0, [Math]::Min(110, $u.Content.Length)))" | Add-Content $log
+          } catch { "smoke1 update check FAILED: $($_.Exception.Message) $($_.ErrorDetails.Message)" | Add-Content $log }
           try { Invoke-WebRequest http://127.0.0.1:18099/api/shutdown -Method Post -UseBasicParsing -TimeoutSec 5 | Out-Null } catch {}
           $exited = $p.WaitForExit(15000)
           "smoke1 server exited after shutdown: $exited (exit code $($p.ExitCode))" | Add-Content $log

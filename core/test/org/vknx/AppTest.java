@@ -18,7 +18,7 @@ public final class AppTest {
 		SelfTest.check("garbage tag is not newer than dev", !Version.newer("latest", "dev"));
 
 		final String json = "{\"url\":\"x\",\"html_url\":\"https://github.com/MrDahl/vKNX/releases/tag/v0.3.0\",\"tag_name\":\"v0.3.0\","
-				+ "\"body\":\"## Nyt\\r\\n- Plantegning \\u00e6\\n- \\\"Opdatering\\\"\","
+				+ "\"body\":\"## New\\r\\n- Floor plan \\u00e9\\n- \\\"Update\\\"\","
 				+ "\"assets\":[{\"browser_download_url\":\"https://github.com/MrDahl/vKNX/releases/download/v0.3.0/vKNX-0.3.0-windows.zip\"},"
 				+ "{\"browser_download_url\":\"https://github.com/MrDahl/vKNX/releases/download/v0.3.0/vKNX-Setup-0.3.0.exe\"}]}";
 		final var i = Updater.parse(json, "v0.2.0");
@@ -26,7 +26,7 @@ public final class AppTest {
 		SelfTest.check("parse newer", i.newer());
 		SelfTest.check("parse installer asset (not the zip)", i.asset().endsWith("vKNX-Setup-0.3.0.exe"));
 		SelfTest.check("parse page", i.page().endsWith("/tag/v0.3.0"));
-		SelfTest.check("parse notes unescaped", i.notes().contains("## Nyt\n- Plantegning æ\n- \"Opdatering\""));
+		SelfTest.check("parse notes unescaped", i.notes().contains("## New\n- Floor plan é\n- \"Update\""));
 		SelfTest.check("current equals latest: not newer", !Updater.parse(json, "v0.3.0").newer());
 
 		SelfTest.check("line 2.9 valid", Settings.valid("2.9"));

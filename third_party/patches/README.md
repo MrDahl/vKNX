@@ -1,7 +1,7 @@
-# Lokale rettelser til Calimero
-Anvendes automatisk efter hentning af de pinnede commits (`tools/fetch-calimero.sh`, `tools/build.ps1`).
-Calimero er GPLv2 + Classpath-undtagelse; rettelserne er offentliggjort her.
+# Local patches for Calimero
+Applied automatically after fetching the pinned commits (`tools/fetch-calimero.sh`, `tools/build.ps1`).
+Calimero is GPLv2 + Classpath exception; the patches are published here.
 
-| Patch | Hvorfor |
+| Patch | Why |
 |---|---|
-| `calimero-server-flat-network.patch` | Calimeros KNXnet/IP-server opfører sig som én linje og dropper telegrammer til adresser uden for serverens egen linje (1.1.x). Med `-Dvknx.flatNetwork=true` (sat af vKNX) kan enheder have vilkårlig område/linje, så ETS kan downloade til f.eks. 2.3.4. Linjekoblerens filtertabel/hop count er ikke implementeret endnu. |
+| `calimero-server-flat-network.patch` | Calimero's KNXnet/IP server acts as one line and drops telegrams to addresses outside the server's own line (1.1.x). With `-Dvknx.flatNetwork=true` (set by vKNX) devices can have any area/line, so ETS can download to e.g. 2.3.4. The line coupler's filter table/hop count is not implemented yet. |

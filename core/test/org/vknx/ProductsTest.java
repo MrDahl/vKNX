@@ -125,11 +125,17 @@ public final class ProductsTest {
 			}
 
 			// ---------------- slider push
-			ets.downloadAll(slider.address(), new int[] { gVal, gSw }, new int[][] { { 1, 2 }, { 2, 1 } },
+			ets.downloadAll(slider.address(), new int[] { gVal, gSw, gValSt }, new int[][] { { 1, 2 }, { 2, 1 }, { 3, 3 } },
 					new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0 });
 			check("slider application loaded", await(3000, slider::applicationLoaded));
 			slider.behavior().act("slider", 25);
 			check("slider 25 % sends value 64 to the dimmer", await(2000, () -> dim.levelPct() == 25));
+			check("slider follows the dimmer status (25 %)", await(2000, () -> ((Number) slider.behavior().view().get("level")).intValue() == 25));
+			etsLink.sendRequestWait(new GroupAddress(gSw), Priority.LOW, w1(0)); // switch the dimmer off from the bus
+			check("dimmer off from the bus: slider goes to 0 %", await(2000, () -> dim.levelPct() == 0
+					&& ((Number) slider.behavior().view().get("level")).intValue() == 0));
+			slider.behavior().act("press", 0);
+			check("slider button press after that switches the dimmer on again", await(2000, () -> dim.levelPct() > 0));
 
 			// ---------------- blinds
 			final int gMove = ga(2, 0, 1), gStop = ga(2, 0, 2), gPos = ga(2, 0, 3);
@@ -159,29 +165,47 @@ public final class ProductsTest {
 			final var s4 = (SwitchActuatorNBehavior) sa4.behavior();
 			check("channel 3 on, channel 2 (inverted) open: lamps 0010", await(2000, () -> "0010".equals(s4.view().get("lamps"))));
 
-			// ---------------- multisensor: cycle 1 s, random every 1 s between -5 and 5
-			final int gTemp = ga(4, 0, 4), gRnd = ga(4, 0, 7);
-			ets.downloadAll(ms.address(), new int[] { gTemp, gRnd }, new int[][] { { 1, 4 }, { 2, 7 } },
-					new int[] { 0, 0, 0, SEND, 0, 0, SEND }, new byte[] { 0, 1, 0, 1, (byte) 0xFF, (byte) 0xFB, 0, 5 });
-			check("multisensor application loaded with 16-bit params (CycleTime 1, RandomMin -5, RandomMax 5)",
-					await(3000, ms::applicationLoaded) && ms.param("CycleTime") == 1 && ms.param("RandomMin") == -5
-							&& ms.param("RandomMax") == 5);
+			// ---------------- multisensor: temperature fixed 21.5 degC every 1 s, CO2 random 400..500 every 1 s
+			final int gTemp = ga(4, 0, 4), gCo2 = ga(4, 0, 7);
+			final byte[] msParams = new byte[60];
+			msParams[0] = 1; // CO2 mode = random
+			msParams[2] = 0; msParams[3] = 1; // CO2 interval 1 s
+			msParams[6] = 0x01; msParams[7] = (byte) 0x90; // CO2 min 400
+			msParams[8] = 0x01; msParams[9] = (byte) 0xF4; // CO2 max 500
+			msParams[30] = 0; // temperature mode = fixed value
+			msParams[32] = 0; msParams[33] = 1; // temperature interval 1 s
+			msParams[34] = 0; msParams[35] = (byte) 215; // temperature value 215 = 21.5 degC
+			ets.downloadAll(ms.address(), new int[] { gTemp, gCo2 }, new int[][] { { 1, 4 }, { 2, 1 } },
+					new int[] { SEND, 0, 0, SEND, 0, 0 }, msParams);
+			check("multisensor application loaded with per-channel ETS parameters",
+					await(3000, ms::applicationLoaded) && ms.param("CO2Mode") == 1 && ms.param("CO2Min") == 400
+							&& ms.param("CO2Max") == 500 && ms.param("TemperatureInterval") == 1
+							&& ms.param("TemperatureValue") == 215);
 			final var mb = (MultisensorBehavior) ms.behavior();
-			check("multisensor sends cyclic temperature 21.0 degC as DPT9 0x0C1A to 4/0/4", await(6000, () -> {
+			check("multisensor sends temperature 21.5 degC as DPT9 0x0C33 to 4/0/4", await(6000, () -> {
 				synchronized (trace) {
 					return trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.6") && s.contains("4/0/4")
-							&& s.toLowerCase().contains("0c1a"));
+							&& s.toLowerCase().contains("0c33"));
 				}
 			}));
-			check("multisensor sends random value to 4/0/7", await(6000, () -> {
+			check("multisensor sends CO2 to its own group address 4/0/7", await(6000, () -> {
 				synchronized (trace) {
 					return trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.6") && s.contains("4/0/7"));
 				}
 			}));
-			final int r = (Integer) mb.view().get("random");
-			check("random value within -5..5 (" + r + ")", r >= -5 && r <= 5);
-			mb.act("s3", 305); // 30.5 degC
-			check("simulated temperature can be changed from the panel", Math.abs((Double) mb.view().get("s3") - 30.5) < 0.01);
+			final double co2 = (Double) mb.view().get("s0");
+			check("random CO2 within 400..500 (" + co2 + ")", co2 >= 400 && co2 <= 500);
+			mb.act("s3", 305);
+			check("the panel cannot change a multisensor value (ETS only)", Math.abs((Double) mb.view().get("s3") - 21.5) < 0.01);
+
+			// ---------------- partial download keeps parameters that did not change
+			ets.partialWrite(rocker.address(), 4, 2, 1, new byte[] { 4 }); // ETS changes only DimStep -> 12.5 %
+			check("partial download writes the changed parameter (DimStep 12.5 % = 4)", await(2000, () -> rocker.param("DimStep") == 4));
+			final int pLong = rocker.param("LongPressTime");
+			ets.partialWrite(rocker.address(), 4, 2, 0, new byte[] { (byte) (rocker.parameterAreaForTest()[0] | 1) }); // then only Orientation
+			check("a second partial download keeps the parameters that did not change (DimStep stays 4)",
+					await(2000, () -> rocker.param("Orientation") == 1) && rocker.param("DimStep") == 4
+							&& rocker.param("LongPressTime") == pLong);
 
 			// ---------------- registry
 			final var log = new EventLog(100);

@@ -3,71 +3,71 @@
   <ManufacturerData>
     <Manufacturer RefId="M-00FA">
       <Catalog>
-        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="da-DK">
-          <CatalogItem Id="M-00FA_H-2566-1_HP-0A06-01-0000_CI-VKNXBL2-1" Name="vKNX Persienneaktuator 2-fold" Number="1" ProductRefId="M-00FA_H-2566-1_P-VKNXBL2" Hardware2ProgramRefId="M-00FA_H-2566-1_HP-0A06-01-0000" DefaultLanguage="da-DK" />
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
+          <CatalogItem Id="M-00FA_H-2566-1_HP-0A06-02-0000_CI-VKNXBL2-1" Name="vKNX Blind Actuator 2-fold" Number="1" ProductRefId="M-00FA_H-2566-1_P-VKNXBL2" Hardware2ProgramRefId="M-00FA_H-2566-1_HP-0A06-02-0000" DefaultLanguage="en-US" />
         </CatalogSection>
       </Catalog>
       <ApplicationPrograms>
-        <ApplicationProgram Id="M-00FA_A-0A06-01-0000" ApplicationNumber="2566" ApplicationVersion="1" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Persienneaktuator 2-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="da-DK" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="0">
+        <ApplicationProgram Id="M-00FA_A-0A06-02-0000" ApplicationNumber="2566" ApplicationVersion="2" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Blind Actuator 2-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1">
           <Static>
             <Code>
-              <RelativeSegment Id="M-00FA_A-0A06-01-0000_RS-04-00000" Name="Parameters" Offset="0" Size="1" LoadStateMachine="4" />
+              <RelativeSegment Id="M-00FA_A-0A06-02-0000_RS-04-00000" Name="Parameters" Offset="0" Size="1" LoadStateMachine="4" />
             </Code>
             <ParameterTypes>
-              <ParameterType Id="M-00FA_A-0A06-01-0000_PT-Ch1RunTime" Name="Ch1RunTime">
+              <ParameterType Id="M-00FA_A-0A06-02-0000_PT-Ch1RunTime" Name="Ch1RunTime">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="10 s" Value="0" Id="M-00FA_A-0A06-01-0000_PT-Ch1RunTime_EN-0" />
-                  <Enumeration Text="20 s" Value="1" Id="M-00FA_A-0A06-01-0000_PT-Ch1RunTime_EN-1" />
-                  <Enumeration Text="30 s" Value="2" Id="M-00FA_A-0A06-01-0000_PT-Ch1RunTime_EN-2" />
-                  <Enumeration Text="60 s" Value="3" Id="M-00FA_A-0A06-01-0000_PT-Ch1RunTime_EN-3" />
+                  <Enumeration Text="10 s" Value="0" Id="M-00FA_A-0A06-02-0000_PT-Ch1RunTime_EN-0" />
+                  <Enumeration Text="20 s" Value="1" Id="M-00FA_A-0A06-02-0000_PT-Ch1RunTime_EN-1" />
+                  <Enumeration Text="30 s" Value="2" Id="M-00FA_A-0A06-02-0000_PT-Ch1RunTime_EN-2" />
+                  <Enumeration Text="60 s" Value="3" Id="M-00FA_A-0A06-02-0000_PT-Ch1RunTime_EN-3" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A06-01-0000_PT-Ch2RunTime" Name="Ch2RunTime">
+              <ParameterType Id="M-00FA_A-0A06-02-0000_PT-Ch2RunTime" Name="Ch2RunTime">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="10 s" Value="0" Id="M-00FA_A-0A06-01-0000_PT-Ch2RunTime_EN-0" />
-                  <Enumeration Text="20 s" Value="1" Id="M-00FA_A-0A06-01-0000_PT-Ch2RunTime_EN-1" />
-                  <Enumeration Text="30 s" Value="2" Id="M-00FA_A-0A06-01-0000_PT-Ch2RunTime_EN-2" />
-                  <Enumeration Text="60 s" Value="3" Id="M-00FA_A-0A06-01-0000_PT-Ch2RunTime_EN-3" />
+                  <Enumeration Text="10 s" Value="0" Id="M-00FA_A-0A06-02-0000_PT-Ch2RunTime_EN-0" />
+                  <Enumeration Text="20 s" Value="1" Id="M-00FA_A-0A06-02-0000_PT-Ch2RunTime_EN-1" />
+                  <Enumeration Text="30 s" Value="2" Id="M-00FA_A-0A06-02-0000_PT-Ch2RunTime_EN-2" />
+                  <Enumeration Text="60 s" Value="3" Id="M-00FA_A-0A06-02-0000_PT-Ch2RunTime_EN-3" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A06-01-0000_PT-SendPosition" Name="SendPosition">
+              <ParameterType Id="M-00FA_A-0A06-02-0000_PT-SendPosition" Name="SendPosition">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Nej" Value="0" Id="M-00FA_A-0A06-01-0000_PT-SendPosition_EN-0" />
-                  <Enumeration Text="Ja" Value="1" Id="M-00FA_A-0A06-01-0000_PT-SendPosition_EN-1" />
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A06-02-0000_PT-SendPosition_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A06-02-0000_PT-SendPosition_EN-1" />
                 </TypeRestriction>
               </ParameterType>
             </ParameterTypes>
             <Parameters>
-              <Parameter Id="M-00FA_A-0A06-01-0000_P-1" Name="Ch1RunTime" ParameterType="M-00FA_A-0A06-01-0000_PT-Ch1RunTime" Text="Persienne 1: køretid op/ned" Value="1">
-                <Memory CodeSegment="M-00FA_A-0A06-01-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A06-02-0000_P-1" Name="Ch1RunTime" ParameterType="M-00FA_A-0A06-02-0000_PT-Ch1RunTime" Text="Blind 1: travel time" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A06-02-0000_RS-04-00000" Offset="0" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A06-01-0000_P-2" Name="Ch2RunTime" ParameterType="M-00FA_A-0A06-01-0000_PT-Ch2RunTime" Text="Persienne 2: køretid op/ned" Value="1">
-                <Memory CodeSegment="M-00FA_A-0A06-01-0000_RS-04-00000" Offset="0" BitOffset="2" />
+              <Parameter Id="M-00FA_A-0A06-02-0000_P-2" Name="Ch2RunTime" ParameterType="M-00FA_A-0A06-02-0000_PT-Ch2RunTime" Text="Blind 2: travel time" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A06-02-0000_RS-04-00000" Offset="0" BitOffset="2" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A06-01-0000_P-3" Name="SendPosition" ParameterType="M-00FA_A-0A06-01-0000_PT-SendPosition" Text="Send position som status" Value="1">
-                <Memory CodeSegment="M-00FA_A-0A06-01-0000_RS-04-00000" Offset="0" BitOffset="4" />
+              <Parameter Id="M-00FA_A-0A06-02-0000_P-3" Name="SendPosition" ParameterType="M-00FA_A-0A06-02-0000_PT-SendPosition" Text="Send position as status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A06-02-0000_RS-04-00000" Offset="0" BitOffset="4" />
               </Parameter>
             </Parameters>
             <ParameterRefs>
-              <ParameterRef Id="M-00FA_A-0A06-01-0000_P-1_R-1" RefId="M-00FA_A-0A06-01-0000_P-1" />
-              <ParameterRef Id="M-00FA_A-0A06-01-0000_P-2_R-2" RefId="M-00FA_A-0A06-01-0000_P-2" />
-              <ParameterRef Id="M-00FA_A-0A06-01-0000_P-3_R-3" RefId="M-00FA_A-0A06-01-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A06-02-0000_P-1_R-1" RefId="M-00FA_A-0A06-02-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A06-02-0000_P-2_R-2" RefId="M-00FA_A-0A06-02-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A06-02-0000_P-3_R-3" RefId="M-00FA_A-0A06-02-0000_P-3" />
             </ParameterRefs>
             <ComObjectTable>
-              <ComObject Id="M-00FA_A-0A06-01-0000_O-1" Name="Ch1Move" Text="Persienne 1: op/ned" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-8" />
-              <ComObject Id="M-00FA_A-0A06-01-0000_O-2" Name="Ch1Stop" Text="Persienne 1: stop" Number="2" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-7" />
-              <ComObject Id="M-00FA_A-0A06-01-0000_O-3" Name="Ch1Position" Text="Persienne 1: position status" Number="3" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
-              <ComObject Id="M-00FA_A-0A06-01-0000_O-4" Name="Ch2Move" Text="Persienne 2: op/ned" Number="4" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-8" />
-              <ComObject Id="M-00FA_A-0A06-01-0000_O-5" Name="Ch2Stop" Text="Persienne 2: stop" Number="5" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-7" />
-              <ComObject Id="M-00FA_A-0A06-01-0000_O-6" Name="Ch2Position" Text="Persienne 2: position status" Number="6" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A06-02-0000_O-1" Name="Ch1Move" Text="Blind 1: up/down" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-8" />
+              <ComObject Id="M-00FA_A-0A06-02-0000_O-2" Name="Ch1Stop" Text="Blind 1: stop" Number="2" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-7" />
+              <ComObject Id="M-00FA_A-0A06-02-0000_O-3" Name="Ch1Position" Text="Blind 1: position status" Number="3" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A06-02-0000_O-4" Name="Ch2Move" Text="Blind 2: up/down" Number="4" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-8" />
+              <ComObject Id="M-00FA_A-0A06-02-0000_O-5" Name="Ch2Stop" Text="Blind 2: stop" Number="5" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-7" />
+              <ComObject Id="M-00FA_A-0A06-02-0000_O-6" Name="Ch2Position" Text="Blind 2: position status" Number="6" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
             </ComObjectTable>
             <ComObjectRefs>
-              <ComObjectRef Id="M-00FA_A-0A06-01-0000_O-1_R-1" RefId="M-00FA_A-0A06-01-0000_O-1" />
-              <ComObjectRef Id="M-00FA_A-0A06-01-0000_O-2_R-2" RefId="M-00FA_A-0A06-01-0000_O-2" />
-              <ComObjectRef Id="M-00FA_A-0A06-01-0000_O-3_R-3" RefId="M-00FA_A-0A06-01-0000_O-3" />
-              <ComObjectRef Id="M-00FA_A-0A06-01-0000_O-4_R-4" RefId="M-00FA_A-0A06-01-0000_O-4" />
-              <ComObjectRef Id="M-00FA_A-0A06-01-0000_O-5_R-5" RefId="M-00FA_A-0A06-01-0000_O-5" />
-              <ComObjectRef Id="M-00FA_A-0A06-01-0000_O-6_R-6" RefId="M-00FA_A-0A06-01-0000_O-6" />
+              <ComObjectRef Id="M-00FA_A-0A06-02-0000_O-1_R-1" RefId="M-00FA_A-0A06-02-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A06-02-0000_O-2_R-2" RefId="M-00FA_A-0A06-02-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A06-02-0000_O-3_R-3" RefId="M-00FA_A-0A06-02-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A06-02-0000_O-4_R-4" RefId="M-00FA_A-0A06-02-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0A06-02-0000_O-5_R-5" RefId="M-00FA_A-0A06-02-0000_O-5" />
+              <ComObjectRef Id="M-00FA_A-0A06-02-0000_O-6_R-6" RefId="M-00FA_A-0A06-02-0000_O-6" />
             </ComObjectRefs>
             <AddressTable MaxEntries="255" />
             <AssociationTable MaxEntries="255" />
@@ -90,31 +90,31 @@
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
-              <ParameterBlock Id="M-00FA_A-0A06-01-0000_PB-1" Name="General" Text="Generelt">
-                <ParameterRefRef RefId="M-00FA_A-0A06-01-0000_P-1_R-1" />
-                <ParameterRefRef RefId="M-00FA_A-0A06-01-0000_P-2_R-2" />
-                <ParameterRefRef RefId="M-00FA_A-0A06-01-0000_P-3_R-3" />
-                <ComObjectRefRef RefId="M-00FA_A-0A06-01-0000_O-1_R-1" />
-                <ComObjectRefRef RefId="M-00FA_A-0A06-01-0000_O-2_R-2" />
-                <ComObjectRefRef RefId="M-00FA_A-0A06-01-0000_O-3_R-3" />
-                <ComObjectRefRef RefId="M-00FA_A-0A06-01-0000_O-4_R-4" />
-                <ComObjectRefRef RefId="M-00FA_A-0A06-01-0000_O-5_R-5" />
-                <ComObjectRefRef RefId="M-00FA_A-0A06-01-0000_O-6_R-6" />
+              <ParameterBlock Id="M-00FA_A-0A06-02-0000_PB-1" Name="General" Text="General">
+                <ParameterRefRef RefId="M-00FA_A-0A06-02-0000_P-1_R-1" />
+                <ParameterRefRef RefId="M-00FA_A-0A06-02-0000_P-2_R-2" />
+                <ParameterRefRef RefId="M-00FA_A-0A06-02-0000_P-3_R-3" />
+                <ComObjectRefRef RefId="M-00FA_A-0A06-02-0000_O-1_R-1" />
+                <ComObjectRefRef RefId="M-00FA_A-0A06-02-0000_O-2_R-2" />
+                <ComObjectRefRef RefId="M-00FA_A-0A06-02-0000_O-3_R-3" />
+                <ComObjectRefRef RefId="M-00FA_A-0A06-02-0000_O-4_R-4" />
+                <ComObjectRefRef RefId="M-00FA_A-0A06-02-0000_O-5_R-5" />
+                <ComObjectRefRef RefId="M-00FA_A-0A06-02-0000_O-6_R-6" />
               </ParameterBlock>
             </ChannelIndependentBlock>
           </Dynamic>
         </ApplicationProgram>
       </ApplicationPrograms>
       <Hardware>
-        <Hardware Id="M-00FA_H-2566-1" Name="vKNX Persienneaktuator 2-fold" SerialNumber="2566" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+        <Hardware Id="M-00FA_H-2566-1" Name="vKNX Blind Actuator 2-fold" SerialNumber="2566" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
           <Products>
-            <Product Id="M-00FA_H-2566-1_P-VKNXBL2" Text="vKNX Persienneaktuator 2-fold" OrderNumber="VKNXBL2" IsRailMounted="false" DefaultLanguage="da-DK">
+            <Product Id="M-00FA_H-2566-1_P-VKNXBL2" Text="vKNX Blind Actuator 2-fold" OrderNumber="VKNXBL2" IsRailMounted="false" DefaultLanguage="en-US">
               <RegistrationInfo RegistrationStatus="Registered" />
             </Product>
           </Products>
           <Hardware2Programs>
-            <Hardware2Program Id="M-00FA_H-2566-1_HP-0A06-01-0000" MediumTypes="MT-0">
-              <ApplicationProgramRef RefId="M-00FA_A-0A06-01-0000" />
+            <Hardware2Program Id="M-00FA_H-2566-1_HP-0A06-02-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A06-02-0000" />
               <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
             </Hardware2Program>
           </Hardware2Programs>
