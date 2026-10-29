@@ -160,7 +160,7 @@ jobs:
         if: env.PUBLISH == 'True'
         shell: pwsh
         run: |
-          $lines = Get-Content CHANGELOG.md -Encoding UTF8
+          $lines = Get-Content dist/app/CHANGELOG.md -Encoding UTF8
           $head = '## [' + $env:VERSION + ']'
           $out = @(); $in = $false
           foreach ($l in $lines) {
