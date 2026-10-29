@@ -27,6 +27,25 @@ Windows (PowerShell; bygning er kørt i GitHub Actions på Windows): `tools\buil
 
 Valg: `--port 3671 --web 8080 --name "vKNX" --dir runtime --device produkt:navn`. Logfil: `runtime/vknx.log`.
 
+## Hvad vi bruger til hvad
+| Del | Bruges til | Licens / status |
+|---|---|---|
+| **Java 21 (JDK)** | Programmeringssprog og kørsel. Alt bygges med almindelig `javac` – ingen Maven/Gradle (Maven Central er ikke nødvendig) | GPLv2+CPE (OpenJDK) |
+| **[Calimero](https://github.com/calimero-project)** (`calimero-core`, `calimero-device`, `calimero-server`) | KNX-protokollen i Java: telegrammer, datapunkttyper, virtuelle enheder med hukommelse og tabeller (`calimero-device`), og KNXnet/IP-serveren som ETS ser som et IP-interface (`calimero-server`). Hentes ved build i de fastlåste commits i `third_party/PINS.txt` og er ikke kopieret ind i repoet | GPLv2 + Classpath-undtagelse |
+| **vKNX-kode** (`core/`) | Produktbeskrivelser, enhedsadfærd (tryk, aktuator, dæmper, persienne, multisensor), download-håndtering til ETS, persistens, webpanel og telegrammonitor | ejeren vælger licens |
+| **Webpanel** (indbygget HTTP-server + ren HTML/JS) | Betjening af knapper, visning af lamper/dæmpere/persienner og telegrammonitor – på dansk og engelsk | del af vKNX |
+| **Produkt-XML-generator** (`ProductXmlGenerator`) | Laver ETS-produktfiler (`products/*.xml`) ud fra de samme produktdefinitioner som simulatoren bruger, så ETS-parametre og simulator ikke kan komme ud af trit | del af vKNX |
+| **[OpenKNXproducer](https://github.com/OpenKNX/OpenKNXproducer)** | Konverterer produkt-XML til `.knxprod`, som ETS kan importere. Kaldes via `tools/make-knxprod.ps1`. Kræver at ETS er installeret på pc'en, fordi den bruger ETS's egne signerings-DLL'er | GPL-3.0 (bruges som eksternt værktøj, ikke indbygget) |
+| **ETS 6 (KNX Association)** | Programmerer de virtuelle enheder (gruppeadresser, parametre, download) – præcis som i en rigtig installation | kommerciel, ikke inkluderet |
+| **jpackage + GitHub Actions** | Bygger en Windows-mappe med `vknx.exe` (indeholder Java), så man ikke skal installere noget for at køre simulatoren | del af byggeprocessen |
+| **PowerShell-scripts** (`tools/*.ps1`) | Start, bygning, selvtest og konvertering på Windows | del af vKNX |
+| **[KNX Explorer](https://github.com/MrDahl/KNX)** | Ejerens egen undervisningsapp. vKNX er et *separat* projekt og henviser blot til den som baggrund og mulig genbrug (se `docs/knx-explorer-genbrug.md`) | ejerens egen kode |
+| **Claude (Anthropic, Claude Sonnet 5.5, via Claude Code)** | AI-assistent der har researchet, skrevet og testet koden og dokumentationen i samarbejde med ejeren. Alle commits er markeret med `Co-Authored-By: Claude`. Claude kan ikke køre ETS; ETS-kompatibilitet er kun det, ejeren selv har bekræftet | – |
+
+**Kun læst som reference (ikke brugt i koden):** [thelsing/knx](https://github.com/thelsing/knx) (GPL-3.0), [Kaenx-Creator](https://github.com/OpenKNX/Kaenx-Creator) (MIT) og OpenKNX-skabelonerne – brugt til at forstå ETS' produktformat. Zennio DIMinBOX DX1 er kun funktionel reference; ingen Zennio-kode indgår.
+
+**Evidensniveau:** ETS-import, adressering og download er bekræftet af ejeren i ETS 6.4 for Trykknap og Kontakt-aktuator 1-fold. De øvrige produkter er testet uden ETS. Se `docs/limitations.md`.
+
 ## Dokumentation
 | Fil | Indhold |
 |---|---|
