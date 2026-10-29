@@ -9,6 +9,7 @@ import org.vknx.device.VirtualDevice;
 import org.vknx.product.Products;
 import org.vknx.sim.Subnet;
 import org.vknx.ui.EventLog;
+import org.vknx.device.DeviceRegistry;
 import org.vknx.ui.WebUi;
 
 /**
@@ -40,8 +41,6 @@ public final class Main {
 				}
 			}
 		}
-		if (specs.isEmpty())
-			specs.addAll(List.of("push-button:Tryk1", "switch-actuator:Lampe1"));
 
 		Files.createDirectories(dir);
 		final var log = new EventLog(1000);
@@ -49,20 +48,16 @@ public final class Main {
 		final var net = Subnet.withServer(dir, friendly, port);
 		net.monitor(s -> log.add("bus", "", s));
 
-		final var devices = new ArrayList<VirtualDevice>();
-		for (final String spec : specs) {
-			final String[] p = spec.split(":", 2);
-			final var product = Products.ALL.get(p[0]);
-			if (product == null) {
-				System.err.println("unknown product " + p[0] + ", available: " + Products.ALL.keySet());
+		final var registry = new DeviceRegistry(dir, net, log);
+		for (final String spec : specs)
+			if (!Products.ALL.containsKey(spec.split(":", 2)[0])) {
+				System.err.println("unknown product in " + spec + ", available: " + Products.ALL.keySet());
 				return;
 			}
-			final String name = p.length > 1 ? p[1] : p[0];
-			devices.add(VirtualDevice.create(name, product, serialFor(name), dir.resolve(name + ".state"), net,
-					(src, cat, text) -> log.add(cat, src.name(), text)));
-		}
+		registry.restoreOrDefault(specs);
+		final var devices = registry.devices();
 
-		final var ui = new WebUi(web, devices, log);
+		final var ui = new WebUi(web, registry, log);
 		ui.start();
 		System.out.println();
 		System.out.println("vKNX is running.");
@@ -80,7 +75,7 @@ public final class Main {
 		}
 		System.out.println("Press Ctrl+C to stop (device configuration is saved on exit).");
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			devices.forEach(VirtualDevice::close);
+			registry.closeAll();
 			net.close();
 		}));
 		Thread.currentThread().join();

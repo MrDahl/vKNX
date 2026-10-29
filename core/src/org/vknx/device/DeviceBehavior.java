@@ -15,12 +15,27 @@ public abstract class DeviceBehavior {
 		return switch (p.key()) {
 			case "push-button" -> new PushButtonBehavior(dev);
 			case "switch-actuator" -> new SwitchActuatorBehavior(dev);
+			case "push-rocker" -> new RockerBehavior(dev);
+			case "push-slider" -> new SliderPushBehavior(dev);
+			case "dimmer" -> new DimmerBehavior(dev);
+			case "blind-2" -> new BlindBehavior(dev);
+			case "switch-actuator-4" -> new SwitchActuatorNBehavior(dev, 4);
+			case "switch-actuator-8" -> new SwitchActuatorNBehavior(dev, 8);
+			case "multisensor" -> new MultisensorBehavior(dev);
 			default -> throw new IllegalArgumentException("no behaviour for product " + p.key());
 		};
 	}
 
 	/** Called after ETS completed the application download (and at restart if the application is loaded). */
 	abstract void onApplicationLoaded();
+
+	/** Called before the application is (re)started, unloaded or the device is closed: stop timers. */
+	void onStop() {}
+
+	/** An operation from the control panel (button press, slider, ...). Names are product specific. */
+	public void act(final String action, final int value) {
+		dev.log("ui", "unknown action " + action);
+	}
 
 	/** A group telegram was accepted for object {@code go} (flags already checked). */
 	abstract void onObjectReceived(int go, int value);

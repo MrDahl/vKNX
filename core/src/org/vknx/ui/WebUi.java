@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.vknx.device.PushButtonBehavior;
+import org.vknx.device.DeviceRegistry;
+import org.vknx.product.Products;
 import org.vknx.device.VirtualDevice;
 import org.vknx.product.ParamDef;
 
@@ -23,21 +24,57 @@ import com.sun.net.httpserver.HttpServer;
  */
 public final class WebUi {
 	private final HttpServer server;
+	private final DeviceRegistry registry;
 	private final List<VirtualDevice> devices;
 	private final EventLog log;
 
-	public WebUi(final int port, final List<VirtualDevice> devices, final EventLog log) throws IOException {
-		this.devices = devices;
+	public WebUi(final int port, final DeviceRegistry registry, final EventLog log) throws IOException {
+		this.registry = registry;
+		this.devices = registry.devices();
 		this.log = log;
 		server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
 		server.createContext("/", this::page);
 		server.createContext("/api/state", this::state);
 		server.createContext("/api/log", this::logs);
 		server.createContext("/api/prog", ex -> action(ex, d -> d.toggleProgrammingMode()));
-		server.createContext("/api/press", ex -> action(ex, d -> {
-			if (d.behavior() instanceof final PushButtonBehavior pb)
-				pb.press();
-		}));
+		server.createContext("/api/act", ex -> {
+			final String a = param(ex.getRequestURI(), "a", "");
+			final int v = Integer.parseInt(param(ex.getRequestURI(), "v", "0"));
+			action(ex, d -> d.behavior().act(a, v));
+		});
+		server.createContext("/api/press", ex -> action(ex, d -> d.behavior().act("press", 0)));
+		server.createContext("/api/products", this::products);
+		server.createContext("/api/add", this::add);
+		server.createContext("/api/remove", ex -> {
+			final String n = param(ex.getRequestURI(), "dev", "");
+			try {
+				registry.remove(n);
+				send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
+			}
+			catch (final Exception e) {
+				send(ex, 500, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+			}
+		});
+	}
+
+	private void products(final HttpExchange ex) throws IOException {
+		final String json = Products.ALL.values().stream().map(p -> "{\"key\":" + q(p.key()) + ",\"da\":" + q(p.nameDa())
+				+ ",\"en\":" + q(p.nameEn()) + "}").collect(Collectors.joining(",", "[", "]"));
+		send(ex, 200, "application/json; charset=utf-8", json.getBytes(StandardCharsets.UTF_8));
+	}
+
+	private void add(final HttpExchange ex) throws IOException {
+		if (!"POST".equals(ex.getRequestMethod())) {
+			send(ex, 405, "text/plain", "POST only".getBytes(StandardCharsets.UTF_8));
+			return;
+		}
+		try {
+			registry.add(param(ex.getRequestURI(), "product", ""), param(ex.getRequestURI(), "name", ""));
+			send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
+		}
+		catch (final Exception e) {
+			send(ex, 400, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+		}
 	}
 
 	public void start() { server.start(); }

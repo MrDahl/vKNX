@@ -1,0 +1,217 @@
+package org.vknx;
+
+import static org.vknx.SelfTest.check;
+
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BooleanSupplier;
+
+import org.vknx.device.BlindBehavior;
+import org.vknx.device.DeviceRegistry;
+import org.vknx.device.DimmerBehavior;
+import org.vknx.device.Dpt9;
+import org.vknx.device.MultisensorBehavior;
+import org.vknx.device.SwitchActuatorNBehavior;
+import org.vknx.device.VirtualDevice;
+import org.vknx.product.ProductDef;
+import org.vknx.product.Products;
+import org.vknx.sim.Subnet;
+import org.vknx.ui.EventLog;
+
+import io.calimero.GroupAddress;
+import io.calimero.IndividualAddress;
+import io.calimero.Priority;
+
+/**
+ * Backend test of the products beyond button + relay (rocker, dimmer, blinds, 4-channel relay, multisensor, registry),
+ * driven by the mini ETS of {@link SelfTest}. NOT an ETS compatibility test.
+ */
+public final class ProductsTest {
+	static final int W = 0x04 | 0x10 | 0x03, SEND = 0x04 | 0x40 | 0x03, STATUS_OUT = 0x04 | 0x08 | 0x40 | 0x03,
+			STATUS_IN = 0x04 | 0x10 | 0x80 | 0x03;
+
+	static boolean await(final long ms, final BooleanSupplier c) throws InterruptedException {
+		for (long t = 0; t < ms; t += 50) {
+			if (c.getAsBoolean())
+				return true;
+			Thread.sleep(50);
+		}
+		return c.getAsBoolean();
+	}
+
+	static byte[] w1(final int v) { return new byte[] { 0x00, (byte) (0x80 | v) }; }
+
+	static byte[] w8(final int v) { return new byte[] { 0x00, (byte) 0x80, (byte) v }; }
+
+	static int ga(final int a, final int b, final int c) { return new GroupAddress(a, b, c).getRawAddress(); }
+
+	public static void main(final String[] args) throws Exception {
+		final var dir = Files.createTempDirectory("vknx-products");
+		final List<String> trace = new ArrayList<>();
+		final VirtualDevice.Listener listener = (src, cat, text) -> {
+			synchronized (trace) { trace.add(SelfTest.ms() + src.name() + " [" + cat + "] " + text); }
+		};
+		final var net = Subnet.inProcess();
+		net.monitor(s -> { synchronized (trace) { trace.add(SelfTest.ms() + "BUS " + s); } });
+		final var etsLink = net.createDeviceLink(new IndividualAddress(0, 2, 255));
+		final var ets = new SelfTest.EtsLikeClient(etsLink);
+		int serial = 10;
+		try {
+			// DPT 9 helper
+			check("DPT9 21.0 -> 0x0C1A", Dpt9.encode(21.0) == 0x0C1A);
+			check("DPT9 round trip -5 / 21 / 101325", Dpt9.decode(Dpt9.encode(-5)) == -5.0
+					&& Math.abs(Dpt9.decode(Dpt9.encode(21)) - 21) < 0.1
+					&& Math.abs(Dpt9.decode(Dpt9.encode(101325)) - 101325) < 100);
+
+			// ---------------- create + address all devices
+			final var rocker = VirtualDevice.create("rk", Products.PUSH_ROCKER, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("rk.state"), net, listener);
+			final var slider = VirtualDevice.create("sl", Products.PUSH_SLIDER, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("sl.state"), net, listener);
+			final var dimmer = VirtualDevice.create("dm", Products.DIMMER, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("dm.state"), net, listener);
+			final var blind = VirtualDevice.create("bl", Products.BLIND_2, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("bl.state"), net, listener);
+			final var sa4 = VirtualDevice.create("s4", Products.SWITCH_ACTUATOR_4, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("s4.state"), net, listener);
+			final var ms = VirtualDevice.create("ms", Products.MULTISENSOR, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("ms.state"), net, listener);
+			int host = 1;
+			for (final var d : List.of(rocker, slider, dimmer, blind, sa4, ms)) {
+				d.toggleProgrammingMode();
+				final var addr = new IndividualAddress(1, 1, host++);
+				check(d.name() + " address assignment", ets.assignAddress(addr) && await(3000, () -> d.address().equals(addr)));
+			}
+			check("every product has a catalogue entry with unique app number", Products.ALL.values().stream()
+					.map(ProductDef::appNumber).distinct().count() == Products.ALL.size());
+
+			// ---------------- rocker -> dimmer
+			final int gSw = ga(1, 0, 1), gDim = ga(1, 0, 2), gVal = ga(1, 0, 3), gSwSt = ga(1, 0, 4), gValSt = ga(1, 0, 5);
+			final int[] gas = { gSw, gDim, gVal, gSwSt, gValSt };
+			// rocker: Orientation 0, LongPressTime 0 (0.4 s), DimStep 1 ; objects: 1 switch(send) 2 dim(send) 3 status
+			ets.downloadAll(rocker.address(), new int[] { gSw, gDim, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } },
+					new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0b000, 0x01 });
+			// dimmer: DimTime 0 (2 s), OnLevel 1 (100 %), Startup 0, SendStatus 1
+			ets.downloadAll(dimmer.address(), gas, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 } },
+					new int[] { W, W, W, STATUS_OUT, STATUS_OUT }, new byte[] { 0b0010_0100 });
+			check("rocker + dimmer applications loaded", await(3000, () -> rocker.applicationLoaded() && dimmer.applicationLoaded()));
+			final var dim = (DimmerBehavior) dimmer.behavior();
+			rocker.behavior().act("down", 1);
+			Thread.sleep(250);
+			rocker.behavior().act("up", 1); // short press upper -> ON
+			check("rocker short press ON switches dimmer to 100 % (OnLevel=100 %)", await(2000, () -> dim.levelPct() == 100));
+			rocker.behavior().act("down", 2);
+			Thread.sleep(250);
+			rocker.behavior().act("up", 2); // short press lower -> OFF
+			check("rocker short press OFF switches dimmer off", await(2000, () -> dim.levelPct() == 0));
+			rocker.behavior().act("down", 1);
+			Thread.sleep(1100); // long press: dim up starts after 0.4 s, 2 s for 0-100 %
+			rocker.behavior().act("up", 1);
+			final int afterStop = dim.levelPct();
+			check("long press ramps up and release stops it (level " + afterStop + " %)", afterStop > 10 && afterStop < 60);
+			Thread.sleep(500);
+			check("ramp really stopped", dim.levelPct() == afterStop);
+			etsLink.sendRequestWait(new GroupAddress(gVal), Priority.LOW, w8(128));
+			check("brightness value 128 -> 50 %", await(2000, () -> dim.levelPct() == 50));
+			etsLink.sendRequestWait(new GroupAddress(gDim), Priority.LOW, w1(0x0F & 0x09 | 0)); // up, step 1 (start)
+			Thread.sleep(300);
+			etsLink.sendRequestWait(new GroupAddress(gDim), Priority.LOW, w1(0)); // stop
+			check("relative dimming telegram from the bus moves the dimmer", dim.levelPct() > 50);
+			synchronized (trace) {
+				check("dimmer sent status telegrams on its status addresses",
+						trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.3") && s.contains("1/0/4"))
+								&& trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.3") && s.contains("1/0/5")));
+			}
+
+			// ---------------- slider push
+			ets.downloadAll(slider.address(), new int[] { gVal, gSw }, new int[][] { { 1, 2 }, { 2, 1 } },
+					new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0 });
+			check("slider application loaded", await(3000, slider::applicationLoaded));
+			slider.behavior().act("slider", 25);
+			check("slider 25 % sends value 64 to the dimmer", await(2000, () -> dim.levelPct() == 25));
+
+			// ---------------- blinds
+			final int gMove = ga(2, 0, 1), gStop = ga(2, 0, 2), gPos = ga(2, 0, 3);
+			ets.downloadAll(blind.address(), new int[] { gMove, gStop, gPos }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } },
+					new int[] { W, W, STATUS_OUT, W, W, STATUS_OUT }, new byte[] { 0b0001_0000 /* both 10 s, SendPosition */ });
+			check("blind application loaded", await(3000, blind::applicationLoaded));
+			final var bl = (BlindBehavior) blind.behavior();
+			etsLink.sendRequestWait(new GroupAddress(gMove), Priority.LOW, w1(1)); // down
+			Thread.sleep(1500);
+			etsLink.sendRequestWait(new GroupAddress(gStop), Priority.LOW, w1(1));
+			final int p1 = (Integer) bl.view().get("pos1");
+			check("blind 1 moved down ~15 % in 1.5 s at 10 s travel (pos " + p1 + " %)", p1 >= 10 && p1 <= 22);
+			check("blind 2 untouched", (Integer) bl.view().get("pos2") == 0);
+			Thread.sleep(300);
+			check("blind stopped", (Integer) bl.view().get("pos1") == p1);
+			synchronized (trace) {
+				check("blind sent position status", trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.4") && s.contains("2/0/3")));
+			}
+
+			// ---------------- 4-channel switch actuator, channel 2 inverted
+			final int gC3 = ga(3, 0, 3), gC2 = ga(3, 0, 2);
+			ets.downloadAll(sa4.address(), new int[] { gC3, gC2 }, new int[][] { { 1, 3 }, { 2, 2 } },
+					new int[] { 0, W, W, 0, 0, 0, 0, 0 }, new byte[] { 0b0000_0010, 0b0000_0100 });
+			check("4-fold actuator application loaded", await(3000, sa4::applicationLoaded));
+			etsLink.sendRequestWait(new GroupAddress(gC3), Priority.LOW, w1(1));
+			etsLink.sendRequestWait(new GroupAddress(gC2), Priority.LOW, w1(1));
+			final var s4 = (SwitchActuatorNBehavior) sa4.behavior();
+			check("channel 3 on, channel 2 (inverted) open: lamps 0010", await(2000, () -> "0010".equals(s4.view().get("lamps"))));
+
+			// ---------------- multisensor: cycle 1 s, random every 1 s between -5 and 5
+			final int gTemp = ga(4, 0, 4), gRnd = ga(4, 0, 7);
+			ets.downloadAll(ms.address(), new int[] { gTemp, gRnd }, new int[][] { { 1, 4 }, { 2, 7 } },
+					new int[] { 0, 0, 0, SEND, 0, 0, SEND }, new byte[] { 0, 1, 0, 1, (byte) 0xFF, (byte) 0xFB, 0, 5 });
+			check("multisensor application loaded with 16-bit params (CycleTime 1, RandomMin -5, RandomMax 5)",
+					await(3000, ms::applicationLoaded) && ms.param("CycleTime") == 1 && ms.param("RandomMin") == -5
+							&& ms.param("RandomMax") == 5);
+			final var mb = (MultisensorBehavior) ms.behavior();
+			check("multisensor sends cyclic temperature 21.0 degC as DPT9 0x0C1A to 4/0/4", await(6000, () -> {
+				synchronized (trace) {
+					return trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.6") && s.contains("4/0/4")
+							&& s.toLowerCase().contains("0c1a"));
+				}
+			}));
+			check("multisensor sends random value to 4/0/7", await(6000, () -> {
+				synchronized (trace) {
+					return trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.6") && s.contains("4/0/7"));
+				}
+			}));
+			final int r = (Integer) mb.view().get("random");
+			check("random value within -5..5 (" + r + ")", r >= -5 && r <= 5);
+			mb.act("s3", 305); // 30.5 degC
+			check("simulated temperature can be changed from the panel", Math.abs((Double) mb.view().get("s3") - 30.5) < 0.01);
+
+			// ---------------- registry
+			final var log = new EventLog(100);
+			final var regDir = Files.createTempDirectory("vknx-registry");
+			final var reg = new DeviceRegistry(regDir, Subnet.inProcess(), log);
+			reg.add("dimmer", "Dimmer1");
+			boolean dup = false;
+			try { reg.add("dimmer", "dimmer1"); } catch (final IllegalArgumentException e) { dup = true; }
+			boolean bad = false;
+			try { reg.add("dimmer", "bad name!"); } catch (final IllegalArgumentException e) { bad = true; }
+			check("registry rejects duplicate and invalid names", dup && bad);
+			check("registry remembers devices", Files.readAllLines(regDir.resolve("devices.txt")).equals(List.of("dimmer:Dimmer1")));
+			reg.remove("Dimmer1");
+			check("registry remove deletes state", reg.devices().isEmpty()
+					&& Files.list(regDir).noneMatch(f -> f.getFileName().toString().startsWith("Dimmer1.state")));
+			reg.add("dimmer", "Dimmer1");
+			check("same name can be added again after removal", reg.devices().size() == 1);
+			reg.closeAll();
+		}
+		catch (final Throwable t) {
+			t.printStackTrace(System.out);
+			SelfTest.failed++;
+		}
+		finally {
+			if (SelfTest.failed > 0) {
+				System.out.println("---- trace ----");
+				synchronized (trace) { trace.forEach(System.out::println); }
+			}
+		}
+		System.out.println(SelfTest.failed == 0 ? "ALL PASSED" : SelfTest.failed + " FAILED");
+		System.exit(SelfTest.failed == 0 ? 0 : 1);
+	}
+}

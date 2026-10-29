@@ -41,3 +41,9 @@ Notér for hvert punkt: ✔ / ✘ / ikke nået.
 4. ETS-version, Windows-version, Java-version (`java -version`).
 5. De genererede `.xml`/`.knxprod`-filer.
 Med disse kan vi justere XML, load control og MCB uden at gætte.
+
+## 6. Test af de nye produkter (ét ad gangen)
+1. Kør `make-knxprod.ps1` igen (genererer alle 9 `.knxprod`). Slet gamle vKNX-produkter fra kataloget (evt. `C:\ProgramData\KNX\ETS6\ProductStore` som før) og importér de nye.
+2. Start med **Dæmper + Vippe**: Vippe-objekt "Relativ dæmpning" og Dæmper "Relativ dæmpning" på samme gruppeadresse; Kontakt på en anden. Download begge. Kort tryk = tænd/sluk, langt tryk = dæmp op/ned.
+3. Derefter Skyder-tryk → Dæmper (1 byte), Persienne, Kontakt 4/8, Multisensor (tjek cyklus og tilfældig værdi i Gruppemonitor).
+4. Ved fejl: send ordret ETS-fejl, gruppemonitor og `vknx.log`, og hvilket produkt det gjaldt.

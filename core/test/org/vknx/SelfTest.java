@@ -111,8 +111,10 @@ public final class SelfTest {
 			loadEvent(d, obj, alloc);
 			final byte[] ref = mc.readProperty(d, obj, PID.TABLE_REFERENCE, 1, 1);
 			final int addr = ByteBuffer.wrap(ref).getInt();
-			for (int off = 0; off < data.length; off += 50) {
-				final int n = Math.min(50, data.length - off);
+			// ETS splits writes according to the device's PID_MAX_APDU_LENGTH (Calimero default 15 -> 10 data bytes per write)
+			final int piece = 10;
+			for (int off = 0; off < data.length; off += piece) {
+				final int n = Math.min(piece, data.length - off);
 				mc.writeMemory(d, addr + off, java.util.Arrays.copyOfRange(data, off, off + n));
 			}
 			final int st = loadEvent(d, obj, (byte) 2); // load completed
@@ -123,6 +125,14 @@ public final class SelfTest {
 
 		void downloadAll(final IndividualAddress dev, final int[] gas, final int[][] assoc, final int[] goFlags,
 				final int[] params) throws Exception {
+			final byte[] app = new byte[4];
+			for (int i = 0; i < params.length; i++)
+				app[i] = (byte) params[i];
+			downloadAll(dev, gas, assoc, goFlags, app);
+		}
+
+		void downloadAll(final IndividualAddress dev, final int[] gas, final int[][] assoc, final int[] goFlags,
+				final byte[] app) throws Exception {
 			final Destination d = mc.createDestination(dev, true);
 			try {
 				final var at = ByteBuffer.allocate(2 + 2 * gas.length).putShort((short) gas.length);
@@ -134,9 +144,6 @@ public final class SelfTest {
 				final var go = ByteBuffer.allocate(2 + 2 * goFlags.length).putShort((short) goFlags.length);
 				for (final int f : goFlags)
 					go.put((byte) f).put((byte) 0); // value type 0 = 1 bit
-				final byte[] app = new byte[4];
-				for (int i = 0; i < params.length; i++)
-					app[i] = (byte) params[i];
 				downloadSegment(d, 4, app);
 				downloadSegment(d, 3, go.array());
 				downloadSegment(d, 1, at.array());

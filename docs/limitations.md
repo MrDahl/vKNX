@@ -21,3 +21,10 @@ Dæmper, slider-dæmper, persienne, multisensor (cyklisk), linjekobler med filte
 - Persistens skrives ved lukning; hård nedlukning kan miste ændringer.
 - Intet login/isolering pr. elev: hver elev kører sin egen lokale instans.
 - Bygget kun til undervisning; ingen emulering af andre producenters firmware.
+
+## Opdatering: 9 produkter (kun testet uden ETS)
+- **Bekræftet i ETS 6.4.8718 af ejeren [T]:** import, adressetildeling og fuld download for de to første produkter (Trykknap 1-fold, Kontakt-aktuator 1-fold).
+- **Bygget og enhedstestet, IKKE testet i ETS [P]:** Vippe (dæmp 4 bit), Skyder-tryk, Kontakt-aktuator 4/8, Dæmper, Persienne 2 kanaler, Multisensor. Nyt i XML: 4-bit objekter, 16-bit tal-parametre (signed/unsigned), DPT-9 objekter, parametre pakket i bits. Multisensor "Tilfældig værdi" bruger `DPT-9` uden undertype – ETS kan afvise den.
+- **Kendt begrænsning:** enhedens max APDU-længde er Calimeros standard 15, så hukommelsesskrivning er maks. 10 databytes pr. telegram (ETS følger egenskaben selv; egen test-ETS skriver 10 bytes ad gangen).
+- Linjekobler (filtertabel, hop count) er ikke bygget.
+- Enheder tilføjes/fjernes i panelet og gemmes i `devices.txt` i data-mappen. `--no-browser` starter uden at åbne browseren.

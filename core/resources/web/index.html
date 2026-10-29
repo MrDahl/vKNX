@@ -28,6 +28,18 @@
   #log{height:380px;overflow:auto;font:13px/1.5 ui-monospace,Consolas,monospace;padding:6px 0}
   .ln{padding:1px 18px;white-space:pre-wrap;border-left:4px solid transparent} .ln .t{color:var(--mute)}
   .ln.bus{border-left-color:var(--accent);background:#f2f7fd} .ln.exp{border-left-color:#c9cdd8}
+  .keys{display:grid;gap:10px;width:100%} .key{padding:22px 10px;font-size:18px;border-radius:12px;user-select:none;touch-action:none}
+  .key:active,.key.down{background:var(--accent);color:#fff}
+  .lamps{display:flex;gap:10px;flex-wrap:wrap} .lampbox{text-align:center;font-size:12px;color:var(--mute)}
+  .lampbox .lamp{width:46px;height:46px;font-size:20px}
+  .meter{height:10px;background:#e9ebf0;border-radius:6px;overflow:hidden;width:100%} .meter>i{display:block;height:100%;background:var(--on)}
+  .blinds{display:flex;gap:16px;width:100%} .blind{flex:1;text-align:center;font-size:13px}
+  .win{height:90px;border:2px solid #9aa3b5;border-radius:6px;background:#dff0ff;position:relative;overflow:hidden}
+  .win>i{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(#c9b48a 0 6px,#b59e72 6px 8px);transition:height .12s}
+  input[type=range]{width:100%} .sens{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;font-size:14px}
+  .sens label{color:var(--mute)} .add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 24px;background:#fff;border-bottom:1px solid var(--line)}
+  .add select,.add input{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px}
+  .rm{margin-left:auto;font-size:13px;color:var(--mute)} .err{color:var(--red);font-size:14px}
   .ln .tag{display:inline-block;min-width:74px;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
   .ln.bus .tag{color:var(--accent)} .note{color:var(--mute);font-size:13px;padding:8px 18px;border-top:1px solid var(--line)}
 </style>
@@ -37,6 +49,7 @@
   <h1>vKNX</h1><div class="sub" id="sub"></div>
   <button id="lang" onclick="toggleLang()">English</button>
 </header>
+<div class="add"><strong id="addTitle"></strong><select id="addProd"></select><input id="addName" maxlength="20" size="14"><button class="primary" id="btnAdd" onclick="addDevice()"></button><span class="err" id="addErr"></span></div>
 <main>
   <section class="grid" id="devices"></section>
   <section class="card mon">
@@ -57,18 +70,18 @@ const T={
   loaded:"Applikation hentet",notloaded:"Ingen applikation",dl:"Downloads",lamp:"Lampe",params:"Parametre fra ETS",
   mon:"Telegrammonitor og forklaringer",filter:"Filtrer (adresse, tekst, enhed)…",bus:"Rigtige telegrammer",exp:"Enhedens forklaring",clear:"Ryd",
   note:"Blå linjer er rigtige telegrammer på den virtuelle linje (afsender, modtager, service, rådata). Grå linjer er enhedens egen forklaring på, hvorfor den reagerede eller ignorerede noget – det er undervisningstekst, ikke data fra bussen.",
-  state:"Tilstand",on:"Tændt",off:"Slukket",relay:"Relæ",closed:"sluttet",open:"åbent"},
+  state:"Tilstand",on:"Tændt",off:"Slukket",relay:"Relæ",closed:"sluttet",open:"åbent",addTitle:"Tilføj enhed",addName:"Navn (fx Lampe2)",add:"Tilføj",remove:"Fjern",confirmRm:"Fjerne enheden og dens gemte konfiguration?",upper:"Øverste tast",lower:"Nederste tast",hold:"Hold nede = langt tryk",slider:"Skyder",toggle:"Tryk (tænd/sluk)",level:"Lysstyrke",ramping:"dæmper…",blind:"Persienne",up:"Op",down:"Ned",stop:"Stop",position:"Position",sensorHint:"Simulerede målinger – sendes cyklisk efter ETS-parametrene",random:"Seneste tilfældige værdi",cycles:"Sendte cyklusser"},
  en:{sub:"Virtual KNX devices – programmed from ETS",lang:"Dansk",prog:"Programming button",press:"Press",unassigned:"Not programmed",
   loaded:"Application loaded",notloaded:"No application",dl:"Downloads",lamp:"Lamp",params:"Parameters from ETS",
   mon:"Telegram monitor and explanations",filter:"Filter (address, text, device)…",bus:"Real telegrams",exp:"Device explanation",clear:"Clear",
   note:"Blue lines are real telegrams on the virtual line (source, destination, service, raw data). Grey lines are the device's own explanation of why it reacted or ignored something – teaching text, not bus data.",
-  state:"State",on:"On",off:"Off",relay:"Relay",closed:"closed",open:"open"}
+  state:"State",on:"On",off:"Off",relay:"Relay",closed:"closed",open:"open",addTitle:"Add device",addName:"Name (e.g. Lamp2)",add:"Add",remove:"Remove",confirmRm:"Remove the device and its stored configuration?",upper:"Upper key",lower:"Lower key",hold:"Hold = long press",slider:"Slider",toggle:"Press (on/off)",level:"Brightness",ramping:"dimming…",blind:"Blind",up:"Up",down:"Down",stop:"Stop",position:"Position",sensorHint:"Simulated readings – sent cyclically according to the ETS parameters",random:"Last random value",cycles:"Cycles sent"}
 };
 let lang=localStorage.getItem('vknx-lang')||'da', since=0, lines=[];
 const t=k=>T[lang][k];
 function toggleLang(){lang=lang==='da'?'en':'da';localStorage.setItem('vknx-lang',lang);applyStatic();render(window.__s)}
 function applyStatic(){document.documentElement.lang=lang;sub.textContent=t('sub');document.getElementById('lang').textContent=t('lang');
- monTitle.textContent=t('mon');filter.placeholder=t('filter');lblBus.textContent=t('bus');lblExp.textContent=t('exp');btnClear.textContent=t('clear');note.textContent=t('note')}
+ monTitle.textContent=t('mon');filter.placeholder=t('filter');lblBus.textContent=t('bus');lblExp.textContent=t('exp');btnClear.textContent=t('clear');note.textContent=t('note');addTitle.textContent=t('addTitle');addName.placeholder=t('addName');btnAdd.textContent=t('add');fillProducts()}
 async function post(u){await fetch(u,{method:'POST'});poll()}
 function render(s){ if(!s)return; window.__s=s; const el=document.getElementById('devices'); el.innerHTML='';
  for(const d of s.devices){ const c=document.createElement('div'); c.className='card';
@@ -78,18 +91,46 @@ function render(s){ if(!s)return; window.__s=s; const el=document.getElementById
    ${d.unassigned?`<span class="pill">${t('unassigned')}</span>`:''}</div>
    <div class="row"><span class="led ${d.programming?'on':''}"></span><button onclick="post('/api/prog?dev=${encodeURIComponent(d.name)}')">${t('prog')}</button></div>
    <div class="row"><span class="pill ${d.loaded?'ok':''}">${d.loaded?t('loaded'):t('notloaded')}</span><span class="pill">${t('dl')}: ${d.downloads}</span></div>`;
-  if(d.product==='push-button') h+=`<div class="row"><button class="bigbtn primary" onclick="post('/api/press?dev=${encodeURIComponent(d.name)}')">${t('press')}</button></div>`;
-  if(d.product==='switch-actuator') h+=`<div class="row"><div class="lamp ${d.view.lamp?'on':''}">💡</div><div>${t('relay')}: <b>${d.loaded?(d.view.relayClosed?t('closed'):t('open')):'–'}</b></div></div>`;
+  h+=body(d);
   if(d.loaded&&d.params.length){h+=`<dl><dt colspan=2><b>${t('params')}</b></dt><dd></dd>`; for(const p of d.params) h+=`<dt>${esc(lang==='da'?p.da:p.en)}</dt><dd>${esc(lang==='da'?p.valueDa:p.valueEn)}</dd>`; h+='</dl>'}
+  h+=`<div class="row"><button class="rm" onclick="rmDev('${encodeURIComponent(d.name)}')">${t('remove')}</button></div>`;
   c.innerHTML=h; el.appendChild(c)} }
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+const SENS=[['CO2','ppm',400,5000,10],['Humidity','%',0,100,0.5],['Illuminance','lux',0,100000,50],['Temperature','°C',-30,60,0.5],['Pressure','Pa',30000,110000,50],['WindSpeed','m/s',0,50,0.5]];
+function dv(n){return encodeURIComponent(n)}
+function act(n,a,v){fetch(`/api/act?dev=${dv(n)}&a=${a}&v=${v}`,{method:'POST'})}
+function key(n,k,down){act(n,down?'down':'up',k)}
+function lampBox(on,label,op){return `<div class="lampbox"><div class="lamp ${on?'on':''}" ${op!=null?`style="opacity:${0.35+op*0.65}"`:''}>💡</div>${label||''}</div>`}
+function body(d){const v=d.view||{},n=d.name,e=esc(n).replace(/'/g,"\\'");let h='';
+ switch(d.product){
+ case 'push-button': h=`<div class="row"><button class="bigbtn primary" onclick="act('${e}','press',0)">${t('press')}</button></div>`;break;
+ case 'push-rocker': h=`<div class="keys"><button class="key" onpointerdown="this.setPointerCapture(event.pointerId);this.classList.add('down');key('${e}',1,true)" onpointerup="this.classList.remove('down');key('${e}',1,false)" onpointercancel="this.classList.remove('down');key('${e}',1,false)">▲ ${t('upper')}</button>
+   <button class="key" onpointerdown="this.setPointerCapture(event.pointerId);this.classList.add('down');key('${e}',2,true)" onpointerup="this.classList.remove('down');key('${e}',2,false)" onpointercancel="this.classList.remove('down');key('${e}',2,false)">▼ ${t('lower')}</button></div>
+   <div class="row"><span class="led ${v.state?'on':''}" style="background:${v.state?'#f5b301':''}"></span><span class="pill">${t('hold')}</span></div>`;break;
+ case 'push-slider': h=`<div class="row"><button class="bigbtn primary" onclick="act('${e}','press',0)">${t('toggle')}</button></div>
+   <div class="row" style="width:100%"><span>${t('slider')}: <b>${v.level??0} %</b></span><input type="range" min="0" max="100" value="${v.level??0}" oninput="act('${e}','sliderLive',this.value);this.previousElementSibling.querySelector('b').textContent=this.value+' %'" onchange="act('${e}','slider',this.value)"></div>`;break;
+ case 'switch-actuator': h=`<div class="row"><div class="lamp ${v.lamp?'on':''}">💡</div><div>${t('relay')}: <b>${d.loaded?(v.relayClosed?t('closed'):t('open')):'–'}</b></div></div>`;break;
+ case 'switch-actuator-4': case 'switch-actuator-8': h=`<div class="lamps">${[...(v.lamps||'')].map((c,i)=>lampBox(c==='1',i+1)).join('')}</div>`;break;
+ case 'dimmer': h=`<div class="row"><div class="lamp ${v.level>0?'on':''}" style="opacity:${0.35+(v.level||0)/100*0.65}">💡</div><div style="flex:1">${t('level')}: <b>${d.loaded?v.level+' %':'–'}</b> ${v.ramping?`<span class="pill">${t('ramping')}</span>`:''}<div class="meter"><i style="width:${d.loaded?v.level:0}%"></i></div></div></div>`;break;
+ case 'blind-2': h=`<div class="blinds">${[1,2].map(c=>`<div class="blind">${t('blind')} ${c}<div class="win"><i style="height:${d.loaded?v['pos'+c]:0}%"></i></div>${d.loaded?v['pos'+c]:'–'} % ${v['dir'+c]>0?'▼':v['dir'+c]<0?'▲':''}</div>`).join('')}</div>`;break;
+ case 'multisensor': h=`<div class="note" style="padding:0 0 6px;border:0">${t('sensorHint')}</div><div class="sens">${SENS.map((s,i)=>`<label>${s[0]} (${s[1]})</label><b id="sv_${esc(n)}_${i}">${v['s'+i]}</b><input style="grid-column:1/3" type="range" min="${s[2]}" max="${s[3]}" step="${s[4]}" value="${v['s'+i]}" oninput="document.getElementById('sv_${esc(n)}_${i}').textContent=this.value" onchange="act('${e}','s${i}',Math.round(this.value*10))">`).join('')}
+   <label>${t('random')}</label><b>${v.random??0}</b><label>${t('cycles')}</label><b>${v.cycles??0}</b></div>`;break;
+ default: h='';}
+ return h}
+let _lastSig='';
+async function addDevice(){addErr.textContent='';const r=await fetch(`/api/add?product=${encodeURIComponent(addProd.value)}&name=${encodeURIComponent(addName.value.trim())}`,{method:'POST'});if(r.ok){addName.value='';_lastSig='';poll()}else addErr.textContent=await r.text()}
+async function rmDev(n){if(!confirm(t('confirmRm')))return;await fetch(`/api/remove?dev=${n}`,{method:'POST'});_lastSig='';poll()}
+let prods=[];
+async function fillProducts(){if(!prods.length)try{prods=await (await fetch('/api/products')).json()}catch(e){return}
+ const cur=addProd.value;addProd.innerHTML=prods.map(p=>`<option value="${p.key}">${esc(lang==='da'?p.da:p.en)}</option>`).join('');if(cur)addProd.value=cur}
 function clearLog(){lines=[];drawLog()}
 function drawLog(){const f=filter.value.toLowerCase(),b=showBus.checked,e=showExp.checked; const box=document.getElementById('log');
  const stick=box.scrollTop+box.clientHeight>=box.scrollHeight-30;
  box.innerHTML=lines.filter(l=>(l.cat==='bus'?b:e)&&(!f||(l.dev+' '+l.text).toLowerCase().includes(f))).map(l=>
   `<div class="ln ${l.cat==='bus'?'bus':'exp'}"><span class="t">${l.t}</span> <span class="tag">${l.cat==='bus'?'bus':esc(l.dev)+' · '+esc(l.cat)}</span> ${esc(l.text)}</div>`).join('');
  if(stick)box.scrollTop=box.scrollHeight}
-async function poll(){try{const s=await (await fetch('/api/state')).json();render(s);
+async function poll(){try{const s=await (await fetch('/api/state')).json();const sig=JSON.stringify(s)+lang;if(sig!==_lastSig&&!document.querySelector('.key.down')&&!(document.activeElement&&document.activeElement.type==='range')){_lastSig=sig;render(s)}
  const l=await (await fetch('/api/log?since='+since)).json(); if(l.entries.length){for(const x of l.entries){lines.push(x);since=x.seq} if(lines.length>2000)lines=lines.slice(-1500); drawLog()}}catch(e){}}
 for(const id of ['filter','showBus','showExp'])document.getElementById(id).addEventListener('input',drawLog);
 applyStatic();poll();setInterval(poll,600);

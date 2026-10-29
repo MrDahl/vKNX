@@ -79,6 +79,11 @@ public final class ProductXmlGenerator {
 		for (final ParamDef pr : p.params()) {
 			x.append("              <ParameterType Id=\"").append(aid).append("_PT-").append(pr.name()).append("\" Name=\"")
 					.append(pr.name()).append("\">\n");
+			if (pr.choices().isEmpty()) {
+				x.append("                <TypeNumber SizeInBit=\"").append(pr.bits()).append("\" Type=\"").append(pr.min() < 0 ? "signedInt" : "unsignedInt").append("\" minInclusive=\"")
+						.append(pr.min()).append("\" maxInclusive=\"").append(pr.max()).append("\" />\n              </ParameterType>\n");
+				continue;
+			}
 			x.append("                <TypeRestriction Base=\"Value\" SizeInBit=\"").append(pr.bits()).append("\">\n");
 			for (final var c : pr.choices())
 				x.append("                  <Enumeration Text=\"").append(esc(c.textDa())).append("\" Value=\"")

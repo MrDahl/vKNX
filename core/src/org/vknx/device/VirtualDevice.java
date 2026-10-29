@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.vknx.product.ObjDef;
 import org.vknx.product.ParamDef;
@@ -73,6 +75,11 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	private final List<Listener> listeners = new CopyOnWriteArrayList<>();
 	private final int[] allocatedSize = new int[5];
 
+	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+		final Thread t = new Thread(r, "vknx-timer");
+		t.setDaemon(true);
+		return t;
+	});
 	private BaseKnxDevice base;
 	private DeviceBehavior behavior;
 	private volatile Tables tables = Tables.EMPTY;
@@ -113,6 +120,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		logic.log("device", "created " + product.nameEn() + (restored ? " (state restored)" : " (factory state)")
 				+ ", address " + device.getAddress());
 		logic.afterTablesChanged();
+		logic.startApplication();
 		return logic;
 	}
 
@@ -193,6 +201,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		log("mgmt", "A_Restart (" + (masterReset ? "master reset " + eraseCode : "basic restart") + ")");
 		final var r = super.restart(masterReset, eraseCode, channel);
 		afterTablesChanged();
+		startApplication();
 		changed();
 		return r;
 	}
@@ -293,8 +302,10 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				downloadCount++;
 			afterTablesChanged();
 			if (obj == OBJ_APPLICATION)
-				behavior.onApplicationLoaded();
+				startApplication();
 		}
+		if (event == LE_UNLOAD && obj == OBJ_APPLICATION)
+			behavior.onStop();
 		changed();
 		return (byte) state;
 	}
@@ -437,6 +448,16 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		return base.getInterfaceObjectServer().getProperty(obj, PID.LOAD_STATE_CONTROL, 1, 1)[0] & 0xff;
 	}
 
+	/** (Re)starts the application behaviour if an application is loaded - after a download, a restart or process start. */
+	private void startApplication() {
+		behavior.onStop();
+		if (applicationLoaded())
+			behavior.onApplicationLoaded();
+	}
+
+	/** Timer thread shared by the behaviours (dimming ramps, blind travel, cyclic sending). */
+	ScheduledExecutorService scheduler() { return scheduler; }
+
 	/** Whether the application program (parameter area) is currently loaded. */
 	public boolean applicationLoaded() { return loadState(OBJ_APPLICATION) == LS_LOADED; }
 
@@ -501,7 +522,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				continue;
 			}
 			log("rx", head + "-> object " + go + " (" + oname + ")");
-			behavior.onObjectReceived(go, decode(e.getASDU()));
+			behavior.onObjectReceived(go, decode(e.getASDU(), product.object(go).map(ObjDef::sizeBits).orElse(1)));
 		}
 		changed();
 	}
@@ -530,40 +551,63 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			final int bits = product.object(go).map(ObjDef::sizeBits).orElse(1);
 			log("tx", head + "answering from object " + go + " with " + v);
 			return bits <= 6 ? new ServiceResult<>(new byte[] { (byte) (v & 0x3f) }, true)
-					: new ServiceResult<>(new byte[] { (byte) (int) v }, false);
+					: new ServiceResult<>(encodeData(bits, v), false);
 		}
 		return null;
 	}
 
-	private static int decode(final byte[] asdu) {
-		return asdu.length == 0 ? 0 : asdu[asdu.length - 1] & 0xff;
+	/** Value of a group telegram: small objects (up to 6 bit) are packed into the APCI byte, larger ones are big-endian bytes. */
+	static int decode(final byte[] asdu, final int bits) {
+		if (asdu.length == 0)
+			return 0;
+		if (bits <= 6)
+			return asdu[asdu.length - 1] & 0x3f;
+		int v = 0;
+		for (int i = Math.max(0, asdu.length - 4); i < asdu.length; i++)
+			v = (v << 8) | (asdu[i] & 0xff);
+		return v;
+	}
+
+	private static byte[] encodeData(final int bits, final int v) {
+		return bits == 16 ? new byte[] { (byte) (v >> 8), (byte) v } : new byte[] { (byte) v };
 	}
 
 	/**
 	 * Sends the value of an object to its sending group address, if ETS configured the object to do so.
 	 * Gives the reason in the log if nothing is sent (this is the "why didn't it react" explanation).
 	 */
-	boolean transmit(final int go, final int value) {
+	boolean transmit(final int go, final int value) { return transmit(go, value, false); }
+
+	/** @param quiet true for cyclic sending: stay silent in the log when nothing can be sent (avoids log flooding) */
+	boolean transmit(final int go, final int value, final boolean quiet) {
 		final String oname = product.object(go).map(ObjDef::name).orElse("?");
 		final var t = tables;
 		if (!applicationLoaded()) {
-			log("tx", "object " + go + " (" + oname + ") not sent: no application program loaded");
+			if (!quiet)
+				log("tx", "object " + go + " (" + oname + ") not sent: no application program loaded");
 			return false;
 		}
 		final GroupAddress ga = t.sendAddress(go);
 		if (ga == null) {
-			log("tx", "object " + go + " (" + oname + ") not sent: no group address associated");
+			if (!quiet)
+				log("tx", "object " + go + " (" + oname + ") not sent: no group address associated");
 			return false;
 		}
 		final int cfg = t.config(go);
 		if ((cfg & F_COMM) == 0 || (cfg & F_TRANSMIT) == 0) {
-			log("tx", "object " + go + " (" + oname + ") not sent: " + ((cfg & F_COMM) == 0 ? "communication" : "transmit")
-					+ " flag off");
+			if (!quiet)
+				log("tx", "object " + go + " (" + oname + ") not sent: " + ((cfg & F_COMM) == 0 ? "communication" : "transmit")
+						+ " flag off");
 			return false;
 		}
 		final int bits = product.object(go).map(ObjDef::sizeBits).orElse(1);
+		final byte[] data = encodeData(bits, value);
 		final byte[] apdu = bits <= 6 ? new byte[] { 0x00, (byte) (0x80 | (value & 0x3f)) }
-				: new byte[] { 0x00, (byte) 0x80, (byte) value };
+				: new byte[2 + data.length];
+		if (bits > 6) {
+			apdu[1] = (byte) 0x80;
+			System.arraycopy(data, 0, apdu, 2, data.length);
+		}
 		try {
 			base.getDeviceLink().sendRequest(ga, Priority.LOW, apdu);
 			log("tx", "GroupValueWrite " + address() + " -> " + ga + " value " + value + " (object " + go + " " + oname
@@ -605,6 +649,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	@Override
 	public void close() {
+		behavior.onStop();
+		scheduler.shutdownNow();
 		base.close();
 	}
 

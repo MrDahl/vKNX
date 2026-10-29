@@ -30,6 +30,14 @@ public final class PushButtonBehavior extends DeviceBehavior {
 		dev.changed();
 	}
 
+	@Override
+	public void act(final String action, final int value) {
+		if ("press".equals(action))
+			press();
+		else
+			super.act(action, value);
+	}
+
 	@Override void onApplicationLoaded() { state = false; }
 
 	@Override
