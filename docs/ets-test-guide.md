@@ -17,7 +17,7 @@ The product XML files are in the repo (`products/`) and in the Windows zip (`vKN
 Start vKNX from the start menu (or `tools\start.ps1`). Note the interface address shown at the top (e.g. 5.7.241) and allow it through Windows Firewall (private network) when Windows asks. In Settings you can change the interface line (e.g. `2.9`) so it matches a line in your ETS project.
 
 ## 3. In ETS
-1. Catalogs → Import → choose the `.knxprod` files. *Note any warnings.* If an older vKNX version is already in the catalog, ETS may offer an update; if it complains, remove the old catalog entries first.
+1. Catalogs → Import → choose the `.knxprod` files. *Note any warnings.* (ETS lists the manufacturer as "KNX Association" because vKNX uses the test ID `0x00FA`; the products are not made or certified by KNX Association.) If an older vKNX version is already in the catalog, ETS may offer an update; if it complains, remove the old catalog entries first.
 2. New project; add a push button and a switch actuator from the catalog.
 3. Connections → New → KNXnet/IP: does ETS find the interface automatically? Otherwise enter it manually (IP and port 3671).
 4. Assign individual addresses → press **Programming button** on one device in vKNX → "Program individual address". *Expected:* only the selected device reacts.

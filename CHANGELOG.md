@@ -3,6 +3,17 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [0.3.1] - 2026-10-29
+### New
+- **Penguin icon:** the program, installer and shortcuts now use the penguin. The original blue "V" icon is still inside `vKNX.exe`: right-click a vKNX shortcut → *Properties* → *Change Icon…* to switch (the `.ico` files are also in the `icons` folder).
+- README and ETS test guide now state that ETS shows "KNX Association" as manufacturer only because vKNX uses the test manufacturer ID `0x00FA`; the products are not made by or certified by KNX Association.
+
+### Fixed
+- **"Check for updates" showed a fetch error** when the latest release had long release notes: the parser overflowed the stack. It now reads the release JSON without regular expressions, never drops the connection on an unexpected error, and says "vKNX is up to date" when there is no newer version. A test uses the real v0.3.0 release JSON.
+
+### Known / not tested
+- The icon switch in the Windows "Change Icon" dialog is verified only by a build check (the exe must contain two icon groups and the penguin must be the default); it has not been tried on a real PC.
+
 ## [0.3.0] - 2026-10-29
 English only, a reworked multisensor, and fixes for dimming and status.
 

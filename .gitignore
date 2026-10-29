@@ -8,3 +8,5 @@ runtime/
 *.xml.bak
 vknx-ios.xml
 .vknx-ios_*.xml
+launcher/vknx.res
+launcher/version.h

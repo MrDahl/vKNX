@@ -6,8 +6,9 @@
     <AssemblyName>vKNX</AssemblyName>
     <RootNamespace>VKnx.Launcher</RootNamespace>
     <LangVersion>9.0</LangVersion>
-    <ApplicationIcon>vknx.ico</ApplicationIcon>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- icons (penguin default + original V), manifest and version info are compiled into vknx.res by make-res.ps1 -->
+    <Win32Resource>vknx.res</Win32Resource>
+    <NoWin32Manifest>true</NoWin32Manifest>
     <Version>0.0.0</Version>
     <Product>vKNX</Product>
     <Company>Marc Sonne Dahl</Company>

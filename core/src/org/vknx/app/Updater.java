@@ -43,7 +43,7 @@ public final class Updater {
 	/** Parses the GitHub "latest release" JSON (only the few fields we need, no JSON library). */
 	public static Info parse(final String json, final String current) {
 		final String tag = first(json, "\"tag_name\"\\s*:\\s*\"([^\"]+)\"");
-		final String body = unescape(first(json, "\"body\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\""));
+		final String body = jsonString(json, "body");
 		final String page = first(json, "\"html_url\"\\s*:\\s*\"([^\"]+)\"");
 		final String asset = first(json, "\"browser_download_url\"\\s*:\\s*\"([^\"]*Setup[^\"]*\\.exe)\"");
 		return new Info(current, tag, !tag.isEmpty() && Version.newer(tag, current), body, page, asset);
@@ -54,19 +54,35 @@ public final class Updater {
 		return m.find() ? m.group(1) : "";
 	}
 
-	private static String unescape(final String s) {
+	/**
+	 * Reads the string value of {@code "key"} by hand. A regular expression with an alternation inside a loop overflows
+	 * the stack on long strings (the release notes), so this scans the characters directly.
+	 */
+	static String jsonString(final String json, final String key) {
+		final int k = json.indexOf("\"" + key + "\"");
+		if (k < 0)
+			return "";
+		int i = json.indexOf(':', k) + 1;
+		while (i > 0 && i < json.length() && Character.isWhitespace(json.charAt(i)))
+			i++;
+		if (i <= 0 || i >= json.length() || json.charAt(i) != '"')
+			return ""; // null or missing
 		final var sb = new StringBuilder();
-		for (int i = 0; i < s.length(); i++) {
-			final char c = s.charAt(i);
-			if (c == '\\' && i + 1 < s.length()) {
-				final char n = s.charAt(++i);
+		for (i++; i < json.length(); i++) {
+			final char c = json.charAt(i);
+			if (c == '"')
+				break;
+			if (c == '\\' && i + 1 < json.length()) {
+				final char n = json.charAt(++i);
 				switch (n) {
 					case 'n' -> sb.append('\n');
 					case 'r' -> { }
 					case 't' -> sb.append('\t');
 					case 'u' -> {
-						sb.append((char) Integer.parseInt(s.substring(i + 1, i + 5), 16));
-						i += 4;
+						if (i + 4 < json.length()) {
+							sb.append((char) Integer.parseInt(json.substring(i + 1, i + 5), 16));
+							i += 4;
+						}
 					}
 					default -> sb.append(n);
 				}

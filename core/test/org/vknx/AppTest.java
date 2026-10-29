@@ -27,6 +27,13 @@ public final class AppTest {
 		SelfTest.check("parse installer asset (not the zip)", i.asset().endsWith("vKNX-Setup-0.3.0.exe"));
 		SelfTest.check("parse page", i.page().endsWith("/tag/v0.3.0"));
 		SelfTest.check("parse notes unescaped", i.notes().contains("## New\n- Floor plan é\n- \"Update\""));
+		// the real (long) release JSON of v0.3.0: the old regular expression overflowed the stack on it
+		final String real = java.nio.file.Files.readString(java.nio.file.Path.of("core/test/data/release-v0.3.0.json"));
+		final var same = Updater.parse(real, "v0.3.0");
+		SelfTest.check("real release JSON: up to date on v0.3.0", same.latest().equals("v0.3.0") && !same.newer());
+		SelfTest.check("real release JSON: long notes parsed", same.notes().length() > 500 && same.notes().contains("Multisensor rework"));
+		SelfTest.check("real release JSON: installer asset found", same.asset().endsWith("vKNX-Setup-0.3.0.exe"));
+		SelfTest.check("real release JSON: newer than v0.2.0", Updater.parse(real, "v0.2.0").newer());
 		SelfTest.check("current equals latest: not newer", !Updater.parse(json, "v0.3.0").newer());
 
 		SelfTest.check("line 2.9 valid", Settings.valid("2.9"));

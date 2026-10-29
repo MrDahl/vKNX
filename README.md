@@ -35,6 +35,11 @@ Options: `--port 3671 --web 8080 --name "vKNX" --dir runtime --line 1.1 --no-bro
 2. Convert all XML files to `.knxprod` with `tools/make-knxprod.ps1` (needs OpenKNXproducer in `%USERPROFILE%\bin` and ETS installed).
 3. Import the `.knxprod` files in ETS (Catalogs → Import), add the devices to a project, add a KNXnet/IP interface pointing at the vKNX address shown in the panel, and program the devices.
 
+> **Note on the manufacturer name in ETS:** ETS shows these products with the manufacturer **"KNX Association"**. That is only because vKNX uses manufacturer ID `0x00FA`, the ID KNX Association reserves for tests and experiments; ETS looks the name up from the ID. **The products and `.knxprod` files are not made by KNX Association** – they are made by the vKNX project and are not certified or endorsed by KNX Association. A different manufacturer name would need an officially assigned KNX manufacturer ID.
+
+## Icon
+vKNX uses a penguin as its program icon. The original blue "V" icon is built into `vKNX.exe` too: right-click the vKNX shortcut → *Properties* → *Change Icon…* and pick the one you like (the `.ico` files are also in the `icons` folder).
+
 ## What we use for what
 | Part | Used for | License / status |
 |---|---|---|

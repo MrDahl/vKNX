@@ -192,8 +192,8 @@ public final class WebUi {
 					+ ",\"newer\":" + i.newer() + ",\"notes\":" + q(i.notes()) + ",\"page\":" + q(i.page()) + ",\"asset\":" + q(i.asset())
 					+ ",\"canInstall\":" + (supervised && !i.asset().isEmpty()) + "}"));
 		}
-		catch (final Exception e) {
-			send(ex, 502, "text/plain", utf8(String.valueOf(e.getMessage())));
+		catch (final Throwable e) { // also Errors: an uncaught one would drop the connection and show "Failed to fetch"
+			send(ex, 502, "text/plain", utf8(String.valueOf(e.getMessage() != null ? e.getMessage() : e)));
 		}
 	}
 

@@ -68,15 +68,30 @@ jobs:
       - name: Build launcher (WinForms + WebView2, .NET Framework 4.8)
         shell: pwsh
         run: |
+          ./launcher/make-res.ps1 -Version $env:NUMVER
           dotnet build launcher/vKNX.csproj -c Release -p:Version=$env:NUMVER -o dist/launcher
           if ($LASTEXITCODE) { throw 'launcher build failed' }
           Get-ChildItem dist/launcher | Select-Object Name, Length | Format-Table | Out-String | Write-Host
+          # the exe must contain two icon groups (penguin + V) so "Change Icon..." on a shortcut offers both
+          Add-Type -Namespace Win -Name Shell -MemberDefinition '[DllImport("shell32.dll", CharSet=CharSet.Unicode)] public static extern uint ExtractIconEx(string f, int i, IntPtr[] l, IntPtr[] s, uint n);'
+          $n = [Win.Shell]::ExtractIconEx((Resolve-Path dist/launcher/vKNX.exe).Path, -1, $null, $null, 0)
+          "launcher icon groups: $n" | Tee-Object -FilePath dist/iconcheck.log
+          if ($n -ne 2) { throw "expected 2 icon groups in vKNX.exe, found $n" }
+          # the default (first) icon is the penguin (warm colours: red > blue), the second one the blue "V"
+          Add-Type -AssemblyName System.Drawing
+          $bmp = [System.Drawing.Icon]::ExtractAssociatedIcon((Resolve-Path dist/launcher/vKNX.exe).Path).ToBitmap()
+          $r = 0; $b = 0
+          for ($x = 0; $x -lt $bmp.Width; $x++) { for ($y = 0; $y -lt $bmp.Height; $y++) { $c = $bmp.GetPixel($x, $y); if ($c.A -gt 200) { $r += $c.R; $b += $c.B } } }
+          "default icon colour sums: red $r blue $b (penguin expected: red > blue)" | Tee-Object -FilePath dist/iconcheck.log -Append
+          if ($b -gt $r) { throw 'the default icon of vKNX.exe is not the penguin' }
           Copy-Item dist/launcher/* dist/app -Recurse -Exclude *.pdb
 
       - name: Assemble app folder
         shell: pwsh
         run: |
           Copy-Item products dist/app/products -Recurse
+          New-Item -ItemType Directory -Force dist/app/icons | Out-Null
+          Copy-Item launcher/penguin.ico, launcher/vknx-v.ico dist/app/icons/
           Copy-Item tools/make-knxprod.ps1 dist/app/
           Copy-Item docs dist/app/docs -Recurse
           foreach ($f in 'README.md','CHANGELOG.md','LICENSE','THIRD-PARTY-NOTICES.md') { Copy-Item $f dist/app/ }
@@ -158,6 +173,7 @@ jobs:
           git checkout --orphan ci-logs; git rm -rf -q . 2>$null
           Copy-Item dist/selftest.log selftest.log -ErrorAction SilentlyContinue
           Copy-Item dist/smoke.log smoke.log -ErrorAction SilentlyContinue
+          Copy-Item dist/iconcheck.log iconcheck.log -ErrorAction SilentlyContinue
           git add -A; git commit -q -m "ci logs"; git push -f origin ci-logs
 
       - name: Release notes from CHANGELOG.md
