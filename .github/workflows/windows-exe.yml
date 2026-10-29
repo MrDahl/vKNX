@@ -160,9 +160,16 @@ jobs:
         if: env.PUBLISH == 'True'
         shell: pwsh
         run: |
-          $t = Get-Content CHANGELOG.md -Raw -Encoding UTF8
-          $m = [regex]::Match($t, "(?ms)^## \[$([regex]::Escape($env:VERSION))\][^\n]*\n(.*?)(?=^## \[|\z)")
-          if ($m.Success) { $m.Groups[1].Value.Trim() | Set-Content dist/notes.md -Encoding UTF8 } else { "vKNX $env:VERSION" | Set-Content dist/notes.md }
+          $lines = Get-Content CHANGELOG.md -Encoding UTF8
+          $head = '## [' + $env:VERSION + ']'
+          $out = @(); $in = $false
+          foreach ($l in $lines) {
+            if ($l.StartsWith($head)) { $in = $true; continue }
+            if ($in -and $l.StartsWith('## [')) { break }
+            if ($in) { $out += $l }
+          }
+          if ($out.Count -eq 0) { $out = @("vKNX $env:VERSION") }
+          ($out -join "`n").Trim() | Set-Content dist/notes.md -Encoding UTF8
           Get-Content dist/notes.md | Write-Host
 
       - name: Publish release
