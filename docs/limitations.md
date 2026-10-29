@@ -37,3 +37,8 @@ Dæmper, slider-dæmper, persienne, multisensor (cyklisk), linjekobler med filte
 ## Opdatering: nyt kontrolpanel (2026-10-29)
 - Panelet er redesignet: mørkt/lyst tema (standard mørkt), enhedsliste grupperet efter linje, oversigt over gruppeadresser (fra den downloadede konfiguration), kort-layout, farvet telegrammonitor, tilpasset projektor/stor skærm.
 - Ikke bygget endnu: plantegning med ikon-placering, scener/miljøpanel, simulerings-regler. Gruppeadresse-oversigten er ikke afprøvet med en rigtig ETS-download.
+
+## Opdatering: plantegning (2026-10-29)
+- Fane "Plantegning": indlæs PNG/JPG/SVG/WebP/GIF (maks. 12 MB), placér enkelte udgange/indgange (lamper, tryk, vippetaster, skyder, persienner, sensorer) ved at trække dem fra listen ind på tegningen. I kørselstilstand kan man betjene tryk og se lamper, dæmpning, persienneposition og sensorværdier live.
+- Gemmes i datamappen (`plan.<ext>`, `plan-layout.json`) – en mappe pr. elev/instans.
+- Testet i browser uden ETS (upload, placering, træk, genindlæsning). Ikke bygget: egne ikonsæt, rum/zoner, tegne-værktøj, scener.

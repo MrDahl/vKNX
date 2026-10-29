@@ -29,6 +29,9 @@ public final class DeviceRegistry {
 
 	public List<VirtualDevice> devices() { return devices; }
 
+	/** Data directory of this simulator instance (devices, floor plan, layout). */
+	public Path dir() { return dir; }
+
 	/** Restores the devices of an earlier run, or creates the defaults when there is nothing saved yet. */
 	public void restoreOrDefault(final List<String> specs) throws Exception {
 		final Path file = dir.resolve("devices.txt");

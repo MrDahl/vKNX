@@ -44,6 +44,8 @@ public final class WebUi {
 		});
 		server.createContext("/api/press", ex -> action(ex, d -> d.behavior().act("press", 0)));
 		server.createContext("/api/products", this::products);
+		server.createContext("/api/plan", this::plan);
+		server.createContext("/api/layout", this::layout);
 		server.createContext("/api/add", this::add);
 		server.createContext("/api/remove", ex -> {
 			final String n = param(ex.getRequestURI(), "dev", "");
@@ -55,6 +57,78 @@ public final class WebUi {
 				send(ex, 500, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
 			}
 		});
+	}
+
+	private static final java.util.Map<String, String> PLAN_TYPES = java.util.Map.of("png", "image/png", "jpg", "image/jpeg",
+			"jpeg", "image/jpeg", "svg", "image/svg+xml", "webp", "image/webp", "gif", "image/gif");
+	private static final int PLAN_MAX = 12 * 1024 * 1024;
+
+	private java.nio.file.Path planFile() throws IOException {
+		try (var s = java.nio.file.Files.list(registry.dir())) {
+			return s.filter(f -> f.getFileName().toString().startsWith("plan.")
+					&& PLAN_TYPES.containsKey(f.getFileName().toString().substring(5))).findFirst().orElse(null);
+		}
+	}
+
+	/** Floor plan image: GET returns it, POST ?ext=png stores it (replacing the old one), POST ?remove=1 deletes it. */
+	private void plan(final HttpExchange ex) throws IOException {
+		try {
+			if ("GET".equals(ex.getRequestMethod())) {
+				final var f = planFile();
+				if (f == null) {
+					send(ex, 404, "text/plain", "no plan".getBytes(StandardCharsets.UTF_8));
+					return;
+				}
+				final String ext = f.getFileName().toString().substring(5);
+				send(ex, 200, PLAN_TYPES.get(ext), java.nio.file.Files.readAllBytes(f));
+				return;
+			}
+			if (!"POST".equals(ex.getRequestMethod())) {
+				send(ex, 405, "text/plain", "GET or POST".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
+			final var old = planFile();
+			if ("1".equals(param(ex.getRequestURI(), "remove", ""))) {
+				if (old != null)
+					java.nio.file.Files.delete(old);
+				send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
+			final String ext = param(ex.getRequestURI(), "ext", "").toLowerCase();
+			if (!PLAN_TYPES.containsKey(ext)) {
+				send(ex, 400, "text/plain", "unsupported image type".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
+			final byte[] body = ex.getRequestBody().readNBytes(PLAN_MAX + 1);
+			if (body.length > PLAN_MAX || body.length == 0) {
+				send(ex, 400, "text/plain", "image missing or larger than 12 MB".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
+			if (old != null)
+				java.nio.file.Files.delete(old);
+			java.nio.file.Files.write(registry.dir().resolve("plan." + ext), body);
+			send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
+		}
+		catch (final IOException e) {
+			send(ex, 500, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+		}
+	}
+
+	/** Placement of inputs/outputs on the floor plan, stored as opaque JSON text in plan-layout.json. */
+	private void layout(final HttpExchange ex) throws IOException {
+		final var f = registry.dir().resolve("plan-layout.json");
+		if ("POST".equals(ex.getRequestMethod())) {
+			final byte[] body = ex.getRequestBody().readNBytes(1_000_001);
+			if (body.length > 1_000_000) {
+				send(ex, 400, "text/plain", "too large".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
+			java.nio.file.Files.write(f, body);
+			send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
+		}
+		else
+			send(ex, 200, "application/json; charset=utf-8",
+					java.nio.file.Files.exists(f) ? java.nio.file.Files.readAllBytes(f) : "{\"items\":[]}".getBytes(StandardCharsets.UTF_8));
 	}
 
 	private void products(final HttpExchange ex) throws IOException {

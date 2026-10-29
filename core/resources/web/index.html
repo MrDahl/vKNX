@@ -19,7 +19,7 @@ try{var th=localStorage.getItem('vknx-theme')||('dark');document.documentElement
   --accent:#0a67d1;--accent-ink:#fff;--on:#f0a800;--green:#13a05a;--orange:#d9690b;--red:#d03535;--cyan:#0f8fa0;
   --shadow:0 4px 18px rgba(20,33,58,.10);--glass:rgba(10,103,209,.05);
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box} [hidden]{display:none!important}
 html{font-size:clamp(14px,.62vw + 9px,21px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,Roboto,sans-serif;line-height:1.4;min-height:100vh}
 button,select,input{font:inherit;color:inherit}
@@ -119,6 +119,38 @@ details.params dl{margin:.4rem 0 0;display:grid;grid-template-columns:1fr auto;g
 .ia{color:var(--green)} .gad{color:var(--orange)} .svc{color:var(--cyan)}
 .note{color:var(--mute);font-size:.8rem;padding:.6rem 1rem;border-top:1px solid var(--line)}
 
+/* tabs + floor plan */
+.tabs{display:flex;gap:.3rem;background:var(--glass);border:1px solid var(--line);border-radius:.7rem;padding:.2rem}
+.tabs button{border:0;background:transparent;padding:.35rem .9rem} .tabs button.act{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.planview{padding:1rem 1.3rem 0}
+.plan-bar{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-bottom:.8rem}
+.plan-bar label.btn{border:1px solid var(--line);background:var(--panel2);border-radius:.55rem;padding:.45rem .85rem;cursor:pointer}
+.plan-bar label.btn:hover{border-color:var(--accent)} .plan-bar button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.plan-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(14rem,18rem);gap:1rem;align-items:start}
+.plan-canvas{position:relative;background:#fff;border:1px solid var(--line);border-radius:.9rem;box-shadow:var(--shadow);overflow:hidden;min-height:18rem;user-select:none;touch-action:none}
+.plan-canvas.empty{aspect-ratio:16/9;background:repeating-linear-gradient(0deg,transparent 0 31px,var(--line) 31px 32px),repeating-linear-gradient(90deg,transparent 0 31px,var(--line) 31px 32px),var(--bg2)}
+.plan-canvas img{display:block;width:100%;height:auto}
+.plan-canvas .ph{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);text-align:center;padding:2rem}
+#planLayer{position:absolute;inset:0}
+.mk{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:.15rem;z-index:2}
+.edit .mk{cursor:grab;outline:2px dashed var(--accent);outline-offset:3px;border-radius:.6rem;background:color-mix(in srgb,var(--accent) 10%,transparent)} .edit .mk *{pointer-events:none}
+.edit .mk .mkx{pointer-events:auto}
+.mk .mklabel{font-size:.7rem;font-weight:600;color:#14213a;background:rgba(255,255,255,.88);border:1px solid rgba(20,33,58,.2);border-radius:.4rem;padding:0 .35rem;white-space:nowrap;max-width:9rem;overflow:hidden;text-overflow:ellipsis}
+.mk .lamp{width:2.4rem;height:2.4rem;font-size:1.1rem;filter:grayscale(1) opacity(.85);background:rgba(255,255,255,.9)} .mk .lamp.on{filter:none}
+.mk .mkbtn{width:2.3rem;height:2.3rem;border-radius:50%;padding:0;font-size:.9rem;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.mk .mkbtn.down,.mk .mkbtn:active{transform:scale(.92);background:var(--green)}
+.mk .mkwin{width:2.4rem;height:2.8rem;border:2px solid #4a5877;border-radius:.3rem;background:linear-gradient(180deg,#5aa9e6,#bfe3ff);position:relative;overflow:hidden}
+.mk .mkwin i{position:absolute;left:0;right:0;top:0;background:repeating-linear-gradient(#a8936a 0 4px,#8d7a54 4px 6px);border-bottom:2px solid #6e5e3e}
+.mk .mkpill{font:700 .78rem var(--mono);background:#14213a;color:#fff;border-radius:99px;padding:.15rem .6rem;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.mk input[type=range]{width:6rem}
+.mk .pct{font:700 .7rem var(--mono);background:rgba(255,255,255,.9);color:#14213a;border-radius:.3rem;padding:0 .3rem}
+.mkx{position:absolute;top:-.8rem;right:-.8rem;width:1.3rem;height:1.3rem;border-radius:50%;padding:0;line-height:1;font-size:.8rem;background:var(--red);color:#fff;border-color:var(--red);display:none}
+.edit .mkx{display:block}
+.pal{padding:.4rem 0;max-height:70vh;overflow:auto}
+.pal .gh{padding:.3rem 1rem;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.pal .pi{display:flex;align-items:center;gap:.5rem;padding:.4rem 1rem;cursor:grab;border-bottom:1px solid var(--line);font-size:.88rem} .pi:hover{background:var(--glass)}
+.pal .pi .ic{width:1.6rem;text-align:center}
+@media (max-width:1000px){.plan-body{grid-template-columns:1fr}}
 @media (max-width:1200px){.layout{grid-template-columns:minmax(15rem,19rem) minmax(0,1fr)} .layout>.col:last-child{grid-column:1/-1}}
 @media (max-width:800px){.layout{grid-template-columns:1fr}}
 </style>
@@ -129,6 +161,7 @@ details.params dl{margin:.4rem 0 0;display:grid;grid-template-columns:1fr auto;g
     <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="var(--accent)"/><path d="M13 14l11 20 11-20" fill="none" stroke="var(--accent-ink)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <div><b>v<i>KNX</i></b><small id="tag"></small></div>
   </div>
+  <nav class="tabs"><button id="tabDev" class="act" onclick="setView('dev')"></button><button id="tabPlan" onclick="setView('plan')"></button></nav>
   <div class="status" id="status"></div>
   <button class="ghost" id="theme" onclick="toggleTheme()" title="Lyst/mørkt"></button>
   <button id="lang" onclick="toggleLang()">English</button>
@@ -150,6 +183,19 @@ details.params dl{margin:.4rem 0 0;display:grid;grid-template-columns:1fr auto;g
     <section class="panel"><h3><span id="hGa"></span><span class="n" id="nGa">0</span></h3><div id="gas"></div></section>
   </div>
 </div>
+
+<section class="planview" id="planView" hidden>
+  <div class="plan-bar">
+    <label class="btn"><span id="lblLoadPlan"></span><input type="file" id="planFile" accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif" hidden></label>
+    <button id="btnEdit" onclick="toggleEdit()"></button>
+    <button class="ghost" id="btnPlanRm" onclick="removePlan()"></button>
+    <span class="hint" id="planHint"></span>
+  </div>
+  <div class="plan-body">
+    <div class="plan-canvas empty" id="planCanvas"><img id="planImg" alt="" hidden><div class="ph" id="planPh"></div><div id="planLayer"></div></div>
+    <aside class="panel"><h3 id="hPal"></h3><div class="pal" id="palList"></div></aside>
+  </div>
+</section>
 
 <div class="monwrap">
   <section class="panel mon">
@@ -174,6 +220,9 @@ const T={
   relay:"Relæ",closed:"sluttet",open:"åbent",addTitle:"Tilføj enhed",addName:"Navn (fx Lampe2)",add:"Tilføj",remove:"Fjern",confirmRm:"Fjerne enheden og dens gemte konfiguration?",
   upper:"Øverste tast",lower:"Nederste tast",hold:"Hold nede = langt tryk",slider:"Skyder",toggle:"Tryk (tænd/sluk)",level:"Lysstyrke",ramping:"dæmper…",
   blind:"Persienne",position:"Position",sensorHint:"Simulerede målinger – sendes cyklisk efter ETS-parametrene",random:"Seneste tilfældige værdi",cycles:"Sendte cyklusser",
+  tabDev:"Enheder",tabPlan:"Plantegning",loadPlan:"Indlæs plantegning…",editOn:"Færdig med placering",editOff:"Placér udgange og indgange",removePlan:"Fjern plantegning",
+  hintEdit:"Træk punkter fra listen ind på plantegningen, flyt dem rundt, dobbeltklik for at omdøbe, ✕ fjerner.",hintRun:"Her kan du betjene tryk og se lamper, dæmpere, persienner og sensorer – som i en rigtig bolig.",
+  pal:"Ikke placeret",palEmpty:"Alle punkter er placeret.",noPlan:"Ingen plantegning endnu.\nIndlæs et billede (PNG, JPG, SVG) – eller placér bare punkterne på det tomme gitter.",confirmPlanRm:"Fjerne plantegningen? Placeringerne bevares.",rename:"Nyt navn:",
   topo:"Enheder",ga:"Gruppeadresser",gaEmpty:"Ingen gruppeadresser endnu. Download en enhed fra ETS, så vises de her.",line:"Linje",unprog:"Ikke programmeret",
   progMode:"programmeringstilstand",iface:"KNXnet/IP-interface",devs:"Enheder",telegrams:"Telegrammer",on:"tændt",off:"slukket",flagsHint:"K=kommunikation L=læs S=skriv Ü=send O=opdatér"},
  en:{tag:"Virtual KNX installation for teaching",lang:"Dansk",prog:"Programming button",press:"Press",unassigned:"Not programmed",
@@ -183,6 +232,9 @@ const T={
   relay:"Relay",closed:"closed",open:"open",addTitle:"Add device",addName:"Name (e.g. Lamp2)",add:"Add",remove:"Remove",confirmRm:"Remove the device and its stored configuration?",
   upper:"Upper key",lower:"Lower key",hold:"Hold = long press",slider:"Slider",toggle:"Press (on/off)",level:"Brightness",ramping:"dimming…",
   blind:"Blind",position:"Position",sensorHint:"Simulated readings – sent cyclically according to the ETS parameters",random:"Last random value",cycles:"Cycles sent",
+  tabDev:"Devices",tabPlan:"Floor plan",loadPlan:"Load floor plan…",editOn:"Done placing",editOff:"Place outputs and inputs",removePlan:"Remove floor plan",
+  hintEdit:"Drag points from the list onto the plan, move them around, double-click to rename, ✕ removes.",hintRun:"Operate buttons and watch lamps, dimmers, blinds and sensors here – like in a real home.",
+  pal:"Not placed",palEmpty:"All points are placed.",noPlan:"No floor plan yet.\nLoad an image (PNG, JPG, SVG) – or just place the points on the empty grid.",confirmPlanRm:"Remove the floor plan? Placements are kept.",rename:"New name:",
   topo:"Devices",ga:"Group addresses",gaEmpty:"No group addresses yet. Download a device from ETS and they will appear here.",line:"Line",unprog:"Not programmed",
   progMode:"programming mode",iface:"KNXnet/IP interface",devs:"Devices",telegrams:"Telegrams",on:"on",off:"off",flagsHint:"C=communication R=read W=write T=transmit U=update"}
 };
@@ -197,7 +249,7 @@ function themeLbl(){$('theme').textContent=theme==='dark'?'☀ '+(lang==='da'?'L
 function toggleTheme(){theme=theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;themeLbl();try{localStorage.setItem('vknx-theme',theme)}catch(e){}}
 function applyStatic(){document.documentElement.lang=lang;$('tag').textContent=t('tag');$('lang').textContent=t('lang');
  $('monTitle').textContent=t('mon');$('filter').placeholder=t('filter');$('lblBus').textContent=t('bus');$('lblExp').textContent=t('exp');$('btnClear').textContent=t('clear');$('note').textContent=t('note');
- $('hAdd').textContent=t('addTitle');$('addName').placeholder=t('addName');$('btnAdd').textContent=t('add');$('hTopo').textContent=t('topo');$('hGa').textContent=t('ga');themeLbl();fillProducts()}
+ $('hAdd').textContent=t('addTitle');$('addName').placeholder=t('addName');$('btnAdd').textContent=t('add');$('hTopo').textContent=t('topo');$('hGa').textContent=t('ga');$('tabDev').textContent=t('tabDev');$('tabPlan').textContent=t('tabPlan');$('lblLoadPlan').textContent=t('loadPlan');$('btnPlanRm').textContent=t('removePlan');$('hPal').textContent=t('pal');planStatic();themeLbl();fillProducts()}
 async function post(u){await fetch(u,{method:'POST'});poll()}
 
 /* ---------- helpers ---------- */
@@ -240,6 +292,7 @@ function render(s){
   if(d.loaded&&d.params.length){const op=openParams.has(d.name)?' open':'';h+=`<details class="params"${op} ontoggle="toggleParams('${en}',this.open)"><summary>${t('params')}</summary><dl>`+d.params.map(p=>`<dt>${esc(lang==='da'?p.da:p.en)}</dt><dd>${esc(lang==='da'?p.valueDa:p.valueEn)}</dd>`).join('')+`</dl></details>`}
   h+=`</div><div class="ft"><button class="progbtn" onclick="post('/api/prog?dev=${encodeURIComponent(d.name)}')"><span class="led ${d.programming?'on':''}"></span>${t('prog')}</button><span class="grow"></span><span class="pill ${d.loaded?'ok':''}">${d.loaded?t('loaded'):t('notloaded')}</span><span class="pill">${t('dl')}: ${d.downloads}</span></div>`;
   c.innerHTML=h;el.appendChild(c)}
+ if(view==='plan')renderPlan(ds);
 }
 function toggleParams(n,o){o?openParams.add(n):openParams.delete(n)}
 
@@ -263,6 +316,59 @@ function body(d){const v=d.view||{},n=d.name,e=esc(n).replace(/'/g,"\\'");let h=
    <label>${t('random')}</label><b>${v.random??0}</b><label>${t('cycles')}</label><b>${v.cycles??0}</b></div>`;break;
  default: h='';}
  return h}
+/* ================= floor plan ================= */
+let view='dev',editMode=false,layout={items:[]},hasPlan=false,dragging=null,saveTimer=null;
+function setView(v){view=v;$('tabDev').classList.toggle('act',v==='dev');$('tabPlan').classList.toggle('act',v==='plan');document.querySelector('.layout').hidden=v!=='dev';$('planView').hidden=v!=='plan';_lastSig='';if(v==='plan')loadPlan();poll()}
+function planStatic(){$('btnEdit').textContent=editMode?t('editOn'):t('editOff');$('btnEdit').classList.toggle('on',editMode);$('planHint').textContent=editMode?t('hintEdit'):t('hintRun');$('planPh').textContent=t('noPlan');$('btnPlanRm').hidden=!hasPlan}
+function toggleEdit(){editMode=!editMode;planStatic();_lastSig='';poll()}
+function loadPlan(){const img=$('planImg');img.onload=()=>{hasPlan=true;img.hidden=false;$('planCanvas').classList.remove('empty');$('planPh').hidden=true;planStatic()};
+ img.onerror=()=>{hasPlan=false;img.hidden=true;$('planCanvas').classList.add('empty');$('planPh').hidden=false;planStatic()};img.src='/api/plan?'+Date.now()}
+async function removePlan(){if(!confirm(t('confirmPlanRm')))return;await fetch('/api/plan?remove=1',{method:'POST'});loadPlan()}
+$('planFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const ext=(f.name.split('.').pop()||'').toLowerCase();
+ const r=await fetch('/api/plan?ext='+encodeURIComponent(ext),{method:'POST',body:await f.arrayBuffer()});if(!r.ok)alert(await r.text());e.target.value='';loadPlan()});
+async function loadLayout(){try{layout=await (await fetch('/api/layout')).json();if(!layout.items)layout.items=[]}catch(e){layout={items:[]}}}
+function saveLayout(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>fetch('/api/layout',{method:'POST',body:JSON.stringify(layout)}),300)}
+function pointsOf(d){const v=d.view||{},n=d.name,P=[];const add=(k,type,extra)=>P.push(Object.assign({id:n+'|'+k,dev:n,k,type,label:n},extra));
+ switch(d.product){
+  case 'push-button':add('btn','button');break;
+  case 'push-rocker':add('k1','key',{keyNo:1,sym:'▲',label:n+' ▲'});add('k2','key',{keyNo:2,sym:'▼',label:n+' ▼'});break;
+  case 'push-slider':add('btn','button');add('sl','slider',{label:n+' ('+t('slider')+')',val:v.level??0});break;
+  case 'switch-actuator':add('l1','lamp',{on:!!v.lamp});break;
+  case 'switch-actuator-4':case 'switch-actuator-8':[...(v.lamps||'')].forEach((c,i)=>add('l'+(i+1),'lamp',{on:c==='1',label:n+' '+(i+1)}));break;
+  case 'dimmer':add('dim','lamp',{on:v.level>0,pct:v.level});break;
+  case 'blind-2':[1,2].forEach(c=>add('b'+c,'blind',{pos:v['pos'+c]??0,label:n+' '+c}));break;
+  case 'multisensor':SENS.forEach((s,i)=>add('s'+i,'sensor',{text:v['s'+i]+' '+s[1],label:n+' '+s[0]}));break;}
+ return P}
+const ICON={button:'●',key:'▲',slider:'⇆',lamp:'💡',blind:'▤',sensor:'🌡'};
+function markerHtml(p,it){const e=esc(p.dev).replace(/'/g,"\\'");let inner='';
+ switch(p.type){
+  case 'lamp':inner=`<div class="lamp ${p.on?'on':''}" style="${p.on&&p.pct!=null?'opacity:'+(0.45+p.pct/100*0.55):''}">💡</div>${p.pct!=null&&p.on?`<span class="pct">${p.pct} %</span>`:''}`;break;
+  case 'button':inner=`<button class="mkbtn" onclick="act('${e}','press',0)">●</button>`;break;
+  case 'key':inner=`<button class="mkbtn key" onpointerdown="this.setPointerCapture(event.pointerId);this.classList.add('down');key('${e}',${p.keyNo},true)" onpointerup="this.classList.remove('down');key('${e}',${p.keyNo},false)" onpointercancel="this.classList.remove('down');key('${e}',${p.keyNo},false)">${p.sym}</button>`;break;
+  case 'slider':inner=`<input type="range" min="0" max="100" value="${p.val}" oninput="act('${e}','sliderLive',this.value)" onchange="act('${e}','slider',this.value)">`;break;
+  case 'blind':inner=`<div class="mkwin"><i style="height:${p.pos}%"></i></div><span class="pct">${p.pos} %</span>`;break;
+  case 'sensor':inner=`<span class="mkpill">${esc(p.text)}</span>`;break;}
+ return `<div class="mk" data-id="${esc(p.id)}" style="left:${it.x*100}%;top:${it.y*100}%">${inner}<span class="mklabel">${esc(it.label||p.label)}</span><button class="mkx" onclick="unplace('${esc(p.id).replace(/'/g,"\\'")}')">✕</button></div>`}
+function renderPlan(ds){const pts={};for(const d of ds)for(const p of pointsOf(d))pts[p.id]=p;
+ $('planCanvas').classList.toggle('edit',editMode);
+ $('planLayer').innerHTML=layout.items.filter(it=>pts[it.id]).map(it=>markerHtml(pts[it.id],it)).join('');
+ const placed=new Set(layout.items.map(i=>i.id));let h='';
+ for(const d of ds){const free=pointsOf(d).filter(p=>!placed.has(p.id));if(!free.length)continue;
+  h+=`<div class="gh">${esc(d.name)}</div>`+free.map(p=>`<div class="pi" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${esc(p.id).replace(/'/g,"\\'")}')" onclick="placeAt('${esc(p.id).replace(/'/g,"\\'")}',.5,.5)"><span class="ic">${ICON[p.type]}</span>${esc(p.label)}</div>`).join('')}
+ $('palList').innerHTML=h||`<div class="empty">${t('palEmpty')}</div>`}
+function placeAt(id,x,y){if(layout.items.some(i=>i.id===id))return;layout.items.push({id,x:Math.min(.98,Math.max(.02,x)),y:Math.min(.98,Math.max(.02,y))});saveLayout();_lastSig='';poll()}
+function unplace(id){layout.items=layout.items.filter(i=>i.id!==id);saveLayout();_lastSig='';poll()}
+const cv=$('planCanvas');
+cv.addEventListener('dragover',e=>{if(editMode)e.preventDefault()});
+cv.addEventListener('drop',e=>{if(!editMode)return;e.preventDefault();const id=e.dataTransfer.getData('text/plain');const r=cv.getBoundingClientRect();placeAt(id,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height)});
+cv.addEventListener('pointerdown',e=>{if(!editMode)return;const m=e.target.closest?e.target.closest('.mk'):null;if(!m||e.target.closest('.mkx'))return;
+ const it=layout.items.find(i=>i.id===m.dataset.id);if(!it)return;dragging={it,m};cv.setPointerCapture(e.pointerId);e.preventDefault()});
+cv.addEventListener('pointermove',e=>{if(!dragging)return;const r=cv.getBoundingClientRect();
+ dragging.it.x=Math.min(.98,Math.max(.02,(e.clientX-r.left)/r.width));dragging.it.y=Math.min(.98,Math.max(.02,(e.clientY-r.top)/r.height));
+ dragging.m.style.left=dragging.it.x*100+'%';dragging.m.style.top=dragging.it.y*100+'%'});
+cv.addEventListener('pointerup',e=>{if(dragging){dragging=null;saveLayout();_lastSig=''}});
+cv.addEventListener('dblclick',e=>{if(!editMode)return;const m=e.target.closest('.mk');if(!m)return;const it=layout.items.find(i=>i.id===m.dataset.id);if(!it)return;
+ const cur=m.querySelector('.mklabel').textContent;const nn=prompt(t('rename'),cur);if(nn!==null){it.label=nn.trim()||undefined;saveLayout();_lastSig='';poll()}});
 let _lastSig='';
 async function addDevice(){$('addErr').textContent='';const r=await fetch(`/api/add?product=${encodeURIComponent($('addProd').value)}&name=${encodeURIComponent($('addName').value.trim())}`,{method:'POST'});if(r.ok){$('addName').value='';_lastSig='';poll()}else $('addErr').textContent=await r.text()}
 async function rmDev(n){if(!confirm(t('confirmRm')))return;await fetch(`/api/remove?dev=${n}`,{method:'POST'});_lastSig='';poll()}
@@ -277,10 +383,10 @@ function drawLog(){const f=$('filter').value.toLowerCase(),b=$('showBus').checke
   `<div class="ln ${l.cat==='bus'?'bus':'exp'}"><span class="t">${l.t}</span><span class="tag">${l.cat==='bus'?'bus':esc(l.dev)+' · '+esc(l.cat)}</span><span class="${l.cat==='bus'?'':'x'}">${l.cat==='bus'?colorize(l.text):esc(l.text)}</span></div>`).join('');
  if(stick)box.scrollTop=box.scrollHeight}
 async function poll(){try{const s=await (await fetch('/api/state')).json();const sig=JSON.stringify(s)+lang+busCount+sel;
-  if(sig!==_lastSig&&!document.querySelector('.key.down')&&!(document.activeElement&&document.activeElement.type==='range')){_lastSig=sig;render(s)}
+  if(sig!==_lastSig&&!dragging&&!document.querySelector('.key.down')&&!(document.activeElement&&document.activeElement.type==='range')){_lastSig=sig;render(s)}
   const l=await (await fetch('/api/log?since='+since)).json(); if(l.entries.length){for(const x of l.entries){lines.push(x);since=x.seq;if(x.cat==='bus')busCount++} if(lines.length>2000)lines=lines.slice(-1500); drawLog()}}catch(e){}}
 for(const id of ['filter','showBus','showExp'])$(id).addEventListener('input',drawLog);
-applyStatic();poll();setInterval(poll,600);
+loadLayout();applyStatic();poll();setInterval(poll,600);
 </script>
 </body>
 </html>
