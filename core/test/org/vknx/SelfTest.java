@@ -29,6 +29,9 @@ import io.calimero.mgmt.PropertyAccess.PID;
  * sequence. Whether real ETS 6.4 accepts the devices is reported separately (docs/ets-test-guide.md).
  */
 public final class SelfTest {
+	private static final long T0 = System.nanoTime();
+	static String ms() { return String.format("%6d ", (System.nanoTime() - T0) / 1_000_000); }
+
 	static int failed;
 	static final List<String> LOG = new ArrayList<>();
 
@@ -153,11 +156,11 @@ public final class SelfTest {
 		final Path dir = Files.createTempDirectory("vknx-selftest");
 		final List<String> trace = new ArrayList<>();
 		final VirtualDevice.Listener listener = (src, cat, text) -> {
-			synchronized (trace) { trace.add(src.name() + " [" + cat + "] " + text); }
+			synchronized (trace) { trace.add(ms() + src.name() + " [" + cat + "] " + text); }
 		};
 
 		Subnet net = Subnet.inProcess();
-		net.monitor(s -> { synchronized (trace) { trace.add("BUS " + s); } });
+		net.monitor(s -> { synchronized (trace) { trace.add(ms() + "BUS " + s); } });
 		final var pbState = dir.resolve("pb.state");
 		final var saState = dir.resolve("sa.state");
 		VirtualDevice pb = VirtualDevice.create("pb", Products.PUSH_BUTTON, new byte[] { 0, (byte) 0xFA, 0, 0, 0, 1 },
@@ -212,7 +215,7 @@ public final class SelfTest {
 			check("button press switches lamp on (via bus, from 1.1.1)", await(sw::lampLit));
 			synchronized (trace) {
 				check("telegram on the bus came from 1.1.1 to 1/0/1",
-						trace.stream().anyMatch(s -> s.startsWith("BUS device") && s.contains("1.1.1") && s.contains("1/0/1")));
+						trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.1") && s.contains("1/0/1")));
 			}
 			btn.press();
 			check("second press (toggle; status followed) switches lamp off", await(() -> !sw.lampLit()));
@@ -222,7 +225,7 @@ public final class SelfTest {
 			await(sw::lampLit);
 			Thread.sleep(300);
 			check("status telegram sent by actuator from 1.1.2 to 1/0/2",
-					trace.stream().anyMatch(s -> s.startsWith("BUS device") && s.contains("1.1.2") && s.contains("1/0/2")));
+					trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.2") && s.contains("1/0/2")));
 
 			// --- 7: a downloaded parameter changes behaviour (RelayLogic = inverted)
 			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 2 } },
@@ -250,7 +253,7 @@ public final class SelfTest {
 			sa.close();
 			net.close();
 			net = Subnet.inProcess();
-			net.monitor(s -> { synchronized (trace) { trace.add("BUS " + s); } });
+			net.monitor(s -> { synchronized (trace) { trace.add(ms() + "BUS " + s); } });
 			pb = VirtualDevice.create("pb", Products.PUSH_BUTTON, new byte[6], pbState, net, listener);
 			sa = VirtualDevice.create("sa", Products.SWITCH_ACTUATOR, new byte[6], saState, net, listener);
 			check("restart: individual addresses kept", pb.address().equals(new IndividualAddress(1, 1, 1))
