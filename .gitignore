@@ -7,3 +7,4 @@ runtime/
 *.knxproj
 *.xml.bak
 vknx-ios.xml
+.vknx-ios_*.xml
