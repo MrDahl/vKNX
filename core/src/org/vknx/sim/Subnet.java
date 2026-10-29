@@ -45,10 +45,16 @@ public final class Subnet implements AutoCloseable {
 	 */
 	public static Subnet withServer(final Path workDir, final String friendlyName, final int port) throws IOException,
 			InterruptedException {
+		return withServer(workDir, friendlyName, port, 1, 1);
+	}
+
+	/** @param area area of the interface's line (ETS shows tunnel addresses area.line.241 ...) @param lineNo line number */
+	public static Subnet withServer(final Path workDir, final String friendlyName, final int port, final int area,
+			final int lineNo) throws IOException, InterruptedException {
 		System.setProperty("vknx.flatNetwork", "true"); // see third_party/patches: any area/line is reachable
 		Files.createDirectories(workDir);
 		final Path cfg = workDir.resolve("vknx-server.xml");
-		Files.writeString(cfg, serverConfig(friendlyName, port));
+		Files.writeString(cfg, serverConfig(friendlyName, port, area, lineNo));
 		SharedVirtualLink.reset();
 		final var launcher = new Launcher(cfg.toUri().toString());
 		final var t = new Thread(launcher, "vknx-knxnetip-server");
@@ -60,23 +66,23 @@ public final class Subnet implements AutoCloseable {
 		return new Subnet(line, launcher, t);
 	}
 
-	static String serverConfig(final String friendlyName, final int port) {
+	public static String serverConfig(final String friendlyName, final int port, final int area, final int line) {
 		return """
 				<?xml version="1.0" encoding="UTF-8"?>
-				<knxServer name="vknx" friendlyName="%s">
+				<knxServer name="vknx" friendlyName="%1$s">
 				  <discovery listenNetIf="all" outgoingNetIf="all" activate="true" />
-				  <serviceContainer activate="true" routing="false" networkMonitoring="false" udpPort="%d" netif="any">
-				    <knxAddress type="individual">1.1.0</knxAddress>
+				  <serviceContainer activate="true" routing="false" networkMonitoring="false" udpPort="%2$d" netif="any">
+				    <knxAddress type="individual">%3$d.%4$d.0</knxAddress>
 				    <knxSubnet type="user" class="org.vknx.sim.SharedVirtualLink">vknx</knxSubnet>
 				    <additionalAddresses>
-				      <knxAddress type="individual">1.1.241</knxAddress>
-				      <knxAddress type="individual">1.1.242</knxAddress>
-				      <knxAddress type="individual">1.1.243</knxAddress>
-				      <knxAddress type="individual">1.1.244</knxAddress>
+				      <knxAddress type="individual">%3$d.%4$d.241</knxAddress>
+				      <knxAddress type="individual">%3$d.%4$d.242</knxAddress>
+				      <knxAddress type="individual">%3$d.%4$d.243</knxAddress>
+				      <knxAddress type="individual">%3$d.%4$d.244</knxAddress>
 				    </additionalAddresses>
 				  </serviceContainer>
 				</knxServer>
-				""".formatted(friendlyName, port);
+				""".formatted(friendlyName, port, area, line);
 	}
 
 	/** Attaches a new device (or an observer such as the mini ETS) to the line with the given address. */

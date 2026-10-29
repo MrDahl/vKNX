@@ -27,6 +27,9 @@ public final class WebUi {
 	private final DeviceRegistry registry;
 	private final List<VirtualDevice> devices;
 	private final EventLog log;
+	private org.vknx.app.Settings settings;
+	private boolean supervised;
+	private String iface = "";
 
 	public WebUi(final int port, final DeviceRegistry registry, final EventLog log) throws IOException {
 		this.registry = registry;
@@ -45,6 +48,11 @@ public final class WebUi {
 		server.createContext("/api/press", ex -> action(ex, d -> d.behavior().act("press", 0)));
 		server.createContext("/api/products", this::products);
 		server.createContext("/api/plan", this::plan);
+		server.createContext("/api/settings", this::settingsEndpoint);
+		server.createContext("/api/restart", this::restartEndpoint);
+		server.createContext("/api/update/check", this::updateCheck);
+		server.createContext("/api/update/install", this::updateInstall);
+		server.createContext("/api/update/status", this::updateStatus);
 		server.createContext("/api/layout", this::layout);
 		server.createContext("/api/add", this::add);
 		server.createContext("/api/remove", ex -> {
@@ -131,6 +139,75 @@ public final class WebUi {
 					java.nio.file.Files.exists(f) ? java.nio.file.Files.readAllBytes(f) : "{\"items\":[]}".getBytes(StandardCharsets.UTF_8));
 	}
 
+	/** Settings of this instance, whether a launcher supervises the process (restart/update possible) and the shown interface address. */
+	public void configure(final org.vknx.app.Settings settings, final boolean supervised, final String iface) {
+		this.settings = settings;
+		this.supervised = supervised;
+		this.iface = iface;
+	}
+
+	private static byte[] utf8(final String s) { return s.getBytes(StandardCharsets.UTF_8); }
+
+	private void settingsEndpoint(final HttpExchange ex) throws IOException {
+		if (!"POST".equals(ex.getRequestMethod())) {
+			send(ex, 405, "text/plain", utf8("POST only"));
+			return;
+		}
+		try {
+			settings.setLine(param(ex.getRequestURI(), "line", ""));
+			send(ex, 200, "text/plain", utf8("ok"));
+		}
+		catch (final Exception e) {
+			send(ex, 400, "text/plain", utf8(String.valueOf(e.getMessage())));
+		}
+	}
+
+	private void restartEndpoint(final HttpExchange ex) throws IOException {
+		if (!supervised) {
+			send(ex, 409, "text/plain", utf8("not started by the vKNX launcher: close and start the program again"));
+			return;
+		}
+		send(ex, 200, "text/plain", utf8("ok"));
+		new Thread(() -> {
+			try {
+				Thread.sleep(300);
+			}
+			catch (final InterruptedException ignore) {}
+			System.exit(75); // exit code 75 = "restart me" for the launcher
+		}).start();
+	}
+
+	private void updateCheck(final HttpExchange ex) throws IOException {
+		try {
+			final var i = org.vknx.app.Updater.check();
+			send(ex, 200, "application/json; charset=utf-8", utf8("{\"current\":" + q(i.current()) + ",\"latest\":" + q(i.latest())
+					+ ",\"newer\":" + i.newer() + ",\"notes\":" + q(i.notes()) + ",\"page\":" + q(i.page()) + ",\"asset\":" + q(i.asset())
+					+ ",\"canInstall\":" + (supervised && !i.asset().isEmpty()) + "}"));
+		}
+		catch (final Exception e) {
+			send(ex, 502, "text/plain", utf8(String.valueOf(e.getMessage())));
+		}
+	}
+
+	private void updateInstall(final HttpExchange ex) throws IOException {
+		if (!supervised || !"POST".equals(ex.getRequestMethod())) {
+			send(ex, 409, "text/plain", utf8("updates can only be installed from the installed vKNX program"));
+			return;
+		}
+		try {
+			org.vknx.app.Updater.downloadAndInstall(param(ex.getRequestURI(), "asset", ""), () -> System.exit(77));
+			send(ex, 200, "text/plain", utf8("ok"));
+		}
+		catch (final Exception e) {
+			send(ex, 400, "text/plain", utf8(String.valueOf(e.getMessage())));
+		}
+	}
+
+	private void updateStatus(final HttpExchange ex) throws IOException {
+		send(ex, 200, "application/json; charset=utf-8", utf8("{\"state\":" + q(org.vknx.app.Updater.state) + ",\"bytes\":"
+				+ org.vknx.app.Updater.bytes + ",\"total\":" + org.vknx.app.Updater.total + ",\"error\":" + q(org.vknx.app.Updater.error) + "}"));
+	}
+
 	private void products(final HttpExchange ex) throws IOException {
 		final String json = Products.ALL.values().stream().map(p -> "{\"key\":" + q(p.key()) + ",\"da\":" + q(p.nameDa())
 				+ ",\"en\":" + q(p.nameEn()) + "}").collect(Collectors.joining(",", "[", "]"));
@@ -163,7 +240,8 @@ public final class WebUi {
 	}
 
 	private void state(final HttpExchange ex) throws IOException {
-		final var sb = new StringBuilder("{\"devices\":[");
+		final var sb = new StringBuilder("{\"version\":" + q(org.vknx.app.Version.current()) + ",\"line\":" + q(settings == null ? "1.1" : settings.line())
+				+ ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"devices\":[");
 		boolean first = true;
 		for (final VirtualDevice d : devices) {
 			if (!first)

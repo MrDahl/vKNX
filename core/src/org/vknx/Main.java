@@ -24,7 +24,8 @@ public final class Main {
 	public static void main(final String[] args) throws Exception {
 		Path dir = Path.of("runtime");
 		int port = 3671, web = 8080;
-		boolean openBrowser = true;
+		boolean openBrowser = true, supervised = false, consoleLog = false;
+		String lineOverride = null;
 		String friendly = "vKNX simulator";
 		final List<String> specs = new ArrayList<>();
 		for (int i = 0; i < args.length; i++) {
@@ -33,6 +34,9 @@ public final class Main {
 				case "--port" -> port = Integer.parseInt(args[++i]);
 				case "--web" -> web = Integer.parseInt(args[++i]);
 				case "--no-browser" -> openBrowser = false;
+				case "--supervised" -> supervised = true; // started by the vKNX launcher: restart and updates are possible
+				case "--console-log" -> consoleLog = true; // write console output to <dir>/console.log (GUI launcher has no console)
+				case "--line" -> lineOverride = args[++i];
 				case "--name" -> friendly = args[++i];
 				case "--device" -> specs.add(args[++i]);
 				default -> {
@@ -43,9 +47,19 @@ public final class Main {
 		}
 
 		Files.createDirectories(dir);
+		if (consoleLog) {
+			final var ps = new java.io.PrintStream(new java.io.FileOutputStream(dir.resolve("console.log").toFile(), true), true,
+					java.nio.charset.StandardCharsets.UTF_8);
+			System.setOut(ps);
+			System.setErr(ps);
+		}
+		final var settings = new org.vknx.app.Settings(dir);
+		if (lineOverride != null)
+			settings.setLine(lineOverride);
+		System.out.println("vKNX " + org.vknx.app.Version.current());
 		final var log = new EventLog(1000);
 		log.tee(dir.resolve("vknx.log"));
-		final var net = Subnet.withServer(dir, friendly, port);
+		final var net = Subnet.withServer(dir, friendly, port, settings.area(), settings.lineNo());
 		net.monitor(s -> log.add("bus", "", s));
 
 		final var registry = new DeviceRegistry(dir, net, log);
@@ -58,11 +72,12 @@ public final class Main {
 		final var devices = registry.devices();
 
 		final var ui = new WebUi(web, registry, log);
+		ui.configure(settings, supervised, settings.line() + ".241");
 		ui.start();
 		System.out.println();
 		System.out.println("vKNX is running.");
 		System.out.println("  KNXnet/IP interface : \"" + friendly + "\" on UDP/TCP port " + port
-				+ " (visible in ETS under Connections; tunnel addresses 1.1.241-1.1.244)");
+				+ " (visible in ETS under Connections; tunnel addresses " + settings.line() + ".241-244)");
 		System.out.println("  Control panel       : http://localhost:" + web + "/");
 		System.out.println("  Devices             : " + devices);
 		System.out.println("  Local addresses     : " + localAddresses());
