@@ -4,7 +4,7 @@
 # NOTE: ikke afprøvet mod ETS 6.4 endnu - send konsoludskriften tilbage hvis noget fejler.
 param([string]$Producer = "")
 if (-not $Producer) {
-  $cands = @("$env:USERPROFILE\bin\OpenKNXproducer.exe") + (Get-ChildItem -Path $PSScriptRoot -Recurse -Filter "OpenKNXproducer*.exe" -ErrorAction SilentlyContinue | % FullName)
+  $cands = (Get-ChildItem -Path "$env:USERPROFILE\bin" -Filter "OpenKNXproducer*.exe" -ErrorAction SilentlyContinue | % FullName) + (Get-ChildItem -Path $PSScriptRoot -Recurse -Filter "OpenKNXproducer*.exe" -ErrorAction SilentlyContinue | % FullName)
   $Producer = ($cands | Where-Object { Test-Path $_ } | Select-Object -First 1)
   if (-not $Producer -and (Get-Command OpenKNXproducer -ErrorAction SilentlyContinue)) { $Producer = "OpenKNXproducer" }
   if (-not $Producer) { Write-Host "OpenKNXproducer ikke fundet. Angiv sti med -Producer ""C:\sti\OpenKNXproducer-x64.exe""" -ForegroundColor Red; return }

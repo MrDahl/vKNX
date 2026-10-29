@@ -27,5 +27,5 @@ Browseren kan ikke tale UDP/KNXnet/IP. UI = JDK `HttpServer` på `127.0.0.1` + `
 ## D8. CRC-16 / MCB
 `Crc16.ccitt` er uafhængigt implementeret og krydstjekket mod thelsings C-funktion (`core/test/crc-vectors.txt`, 40 vektorer) [T]. At *ETS accepterer* MCB-indholdet er ikke testet [P].
 
-## D9. Licens (afventer brugerens valg)
-Ingen LICENSE-fil er tilføjet. Anbefaling: GPL-3.0 eller GPLv2-eller-senere hvis man vil holde sig tæt på Calimero; permissiv licens er også mulig pga. Classpath-undtagelsen. Beslutningen er ejerens. Zennio-referencekode må aldrig publiceres.
+## D9. Licens (besluttet af ejeren 2026-10-29)
+Ejeren ønskede "så open source som muligt": vKNX's egen kode er **MIT**. Det er muligt, fordi Calimero har Classpath-undtagelse (linkende kode kan have anden licens). Calimero og Java forbliver GPLv2+CPE og er ikke kopieret ind i repoet; se `THIRD-PARTY-NOTICES.md`. OpenKNXproducer (GPL-3.0) bruges kun som eksternt værktøj. Zennio-referencekode må aldrig publiceres. KNX Explorer-kode er ikke genbrugt (kun ejerens egen ikke-kommercielle licens dér).

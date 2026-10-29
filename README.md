@@ -57,4 +57,4 @@ Valg: `--port 3671 --web 8080 --name "vKNX" --dir runtime --device produkt:navn`
 | `docs/limitations.md` | Kendte begrænsninger |
 
 ## Licens
-Endnu ikke valgt (ejeren beslutter; se `docs/decisions.md` D9). Calimero (GPLv2 + Classpath-undtagelse) hentes ved build og er ikke kopieret ind i repoet. KNX og ETS er registrerede varemærker tilhørende KNX Association; vKNX er uafhængigt og ikke certificeret.
+vKNX's egen kode er under **MIT-licensen** (`LICENSE`) – frit at bruge, ændre og dele, også kommercielt. Tredjepartskomponenter (Calimero, Java, OpenKNXproducer) har deres egne licenser, se `THIRD-PARTY-NOTICES.md`. KNX og ETS er registrerede varemærker tilhørende KNX Association; vKNX er uafhængigt og ikke certificeret.
