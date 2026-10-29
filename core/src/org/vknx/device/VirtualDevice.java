@@ -458,6 +458,27 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	/** Timer thread shared by the behaviours (dimming ramps, blind travel, cyclic sending). */
 	ScheduledExecutorService scheduler() { return scheduler; }
 
+	/** Periodic task that survives exceptions: an exception would otherwise silently cancel all later runs. */
+	java.util.concurrent.ScheduledFuture<?> every(final Runnable r, final long initial, final long period,
+			final java.util.concurrent.TimeUnit unit) {
+		return scheduler.scheduleAtFixedRate(guarded(r), initial, period, unit);
+	}
+
+	java.util.concurrent.ScheduledFuture<?> later(final Runnable r, final long delay, final java.util.concurrent.TimeUnit unit) {
+		return scheduler.schedule(guarded(r), delay, unit);
+	}
+
+	private Runnable guarded(final Runnable r) {
+		return () -> {
+			try {
+				r.run();
+			}
+			catch (final Throwable t) {
+				log("error", "timer task failed: " + t);
+			}
+		};
+	}
+
 	/** Whether the application program (parameter area) is currently loaded. */
 	public boolean applicationLoaded() { return loadState(OBJ_APPLICATION) == LS_LOADED; }
 

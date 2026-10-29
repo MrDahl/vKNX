@@ -1,0 +1,15 @@
+diff --git a/src/io/calimero/server/gateway/KnxServerGateway.java b/src/io/calimero/server/gateway/KnxServerGateway.java
+index 0b567f8..c5e3974 100755
+--- a/src/io/calimero/server/gateway/KnxServerGateway.java
++++ b/src/io/calimero/server/gateway/KnxServerGateway.java
+@@ -1486,8 +1486,8 @@ public class KnxServerGateway implements Runnable
+ 
+ 	private static boolean matchesSubnet(final IndividualAddress addr, final IndividualAddress subnetMask)
+ 	{
+-		if (subnetMask == null)
+-			return true;
++		if (subnetMask == null || Boolean.getBoolean("vknx.flatNetwork"))
++			return true; // vKNX patch: one flat virtual installation, reachable from any area/line
+ 		if (subnetMask.getArea() == addr.getArea()) {
+ 			// if we represent an area coupler, line is 0
+ 			return subnetMask.getLine() == 0 || subnetMask.getLine() == addr.getLine();

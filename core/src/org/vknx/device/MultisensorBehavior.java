@@ -49,14 +49,14 @@ public final class MultisensorBehavior extends DeviceBehavior {
 		final int rInt = dev.param("RandomInterval");
 		if (cycle > 0) {
 			dev.log("sensor", "cyclic sending every " + cycle + " s (parameter CycleTime)");
-			cyclic = dev.scheduler().scheduleAtFixedRate(this::sendCycle, 2, cycle, TimeUnit.SECONDS);
+			cyclic = dev.every(this::sendCycle, 2, cycle, TimeUnit.SECONDS);
 		}
 		else
 			dev.log("sensor", "cyclic sending off (parameter CycleTime=0)");
 		if (rInt > 0) {
 			dev.log("sensor", "random value every " + rInt + " s between " + dev.param("RandomMin") + " and "
 					+ dev.param("RandomMax"));
-			random = dev.scheduler().scheduleAtFixedRate(this::sendRandom, 2, rInt, TimeUnit.SECONDS);
+			random = dev.every(this::sendRandom, 2, rInt, TimeUnit.SECONDS);
 		}
 		else
 			dev.log("sensor", "random value off (parameter RandomInterval=0)");

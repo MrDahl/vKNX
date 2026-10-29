@@ -14,5 +14,8 @@ grep -v '^#' third_party/PINS.txt | while read -r name url sha; do
   git -C "$dir" remote add origin "$url"
   git -C "$dir" fetch -q --depth 1 origin "$sha"
   git -C "$dir" checkout -q FETCH_HEAD
+  for pt in third_party/patches/"$name"-*.patch; do   # vKNX patches (see third_party/patches/README.md)
+    [ -f "$pt" ] && git -C "$dir" apply --ignore-whitespace --whitespace=nowarn "$(pwd)/$pt" && echo "  applied $pt"
+  done
   echo "$name -> $(git -C "$dir" rev-parse HEAD)"
 done

@@ -28,3 +28,8 @@ Dæmper, slider-dæmper, persienne, multisensor (cyklisk), linjekobler med filte
 - **Kendt begrænsning:** enhedens max APDU-længde er Calimeros standard 15, så hukommelsesskrivning er maks. 10 databytes pr. telegram (ETS følger egenskaben selv; egen test-ETS skriver 10 bytes ad gangen).
 - Linjekobler (filtertabel, hop count) er ikke bygget.
 - Enheder tilføjes/fjernes i panelet og gemmes i `devices.txt` i data-mappen. `--no-browser` starter uden at åbne browseren.
+
+## Opdatering: vilkårligt område/linje (2026-10-29)
+- Fejl rapporteret af ejeren: download fejler, når en enhed får anden adresse end 1.1.x. Årsag (reproduceret med `TunnelLineTest`): Calimeros KNXnet/IP-server opfører sig som én linje og dropper telegrammer til andre linjer/områder. Rettet med en lille lokal patch (`third_party/patches/`), så hele den virtuelle installation er "flad" og kan have alle adresser. [T uden ETS; skal bekræftes i ETS]
+- Der er stadig ingen rigtig linjekobler (filtertabel, hop count) – alle linjer er direkte forbundet.
+- Timer-opgaver (dæmpning, cyklisk sending, persienner) logger nu fejl i stedet for at stoppe lydløst.

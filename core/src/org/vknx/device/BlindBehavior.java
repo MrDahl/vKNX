@@ -62,7 +62,7 @@ public final class BlindBehavior extends DeviceBehavior {
 		halt(ch);
 		dir[ch] = d;
 		final double delta = 100.0 * TICK_MS / (secs * 1000.0);
-		task[ch] = dev.scheduler().scheduleAtFixedRate(() -> tick(ch, delta), TICK_MS, TICK_MS, TimeUnit.MILLISECONDS);
+		task[ch] = dev.every(() -> tick(ch, delta), TICK_MS, TICK_MS, TimeUnit.MILLISECONDS);
 	}
 
 	private synchronized void tick(final int ch, final double delta) {

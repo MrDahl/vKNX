@@ -13,8 +13,9 @@ foreach ($line in Get-Content third_party/PINS.txt) {
   if ((Test-Path "$dir/.git") -and ((git -C $dir rev-parse HEAD) -eq $sha)) { Write-Host "$name already at $sha"; continue }
   if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }
   New-Item -ItemType Directory -Force $dir | Out-Null
-  git -C $dir init -q; git -C $dir remote add origin $url
+  git -C $dir init -q; git -C $dir config core.autocrlf false; git -C $dir remote add origin $url
   git -C $dir fetch -q --depth 1 origin $sha; git -C $dir checkout -q FETCH_HEAD
+  foreach ($pt in Get-ChildItem "third_party/patches/$name-*.patch" -ErrorAction SilentlyContinue) { git -C $dir apply --ignore-whitespace --whitespace=nowarn $pt.FullName; if ($LASTEXITCODE) { throw "patch $($pt.Name)" } }
 }
 
 # 2. compile

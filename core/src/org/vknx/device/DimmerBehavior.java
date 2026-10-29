@@ -101,7 +101,7 @@ public final class DimmerBehavior extends DeviceBehavior {
 		stopRamp();
 		ramping = true;
 		final double delta = 255.0 * TICK_MS / (secondsFull * 1000.0);
-		task = dev.scheduler().scheduleAtFixedRate(() -> tick(delta), TICK_MS, TICK_MS, TimeUnit.MILLISECONDS);
+		task = dev.every(() -> tick(delta), TICK_MS, TICK_MS, TimeUnit.MILLISECONDS);
 	}
 
 	private synchronized void tick(final double delta) {

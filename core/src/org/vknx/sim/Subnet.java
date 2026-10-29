@@ -45,6 +45,7 @@ public final class Subnet implements AutoCloseable {
 	 */
 	public static Subnet withServer(final Path workDir, final String friendlyName, final int port) throws IOException,
 			InterruptedException {
+		System.setProperty("vknx.flatNetwork", "true"); // see third_party/patches: any area/line is reachable
 		Files.createDirectories(workDir);
 		final Path cfg = workDir.resolve("vknx-server.xml");
 		Files.writeString(cfg, serverConfig(friendlyName, port));

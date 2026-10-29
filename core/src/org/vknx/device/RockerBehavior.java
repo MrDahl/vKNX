@@ -35,7 +35,7 @@ public final class RockerBehavior extends DeviceBehavior {
 			longFired[key] = false;
 			final int ms = LONG_MS[Math.min(2, dev.param("LongPressTime"))];
 			dev.log("button", keyName + " pressed, waiting " + ms + " ms (parameter LongPressTime) to tell short from long press");
-			pending[key] = dev.scheduler().schedule(() -> longPress(key, on), ms, TimeUnit.MILLISECONDS);
+			pending[key] = dev.later(() -> longPress(key, on), ms, TimeUnit.MILLISECONDS);
 		}
 		else if ("up".equals(action) && held[key]) {
 			held[key] = false;
