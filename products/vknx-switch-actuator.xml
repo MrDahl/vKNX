@@ -4,7 +4,7 @@
     <Manufacturer RefId="M-00FA">
       <Catalog>
         <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="da-DK">
-          <CatalogItem Id="M-00FA_H-2562-1_HP-0A02-01-0000_CI-VKNX-SA1-1" Name="vKNX Koblingsaktuator 1-fold" Number="1" ProductRefId="M-00FA_H-2562-1_P-VKNX-SA1" Hardware2ProgramRefId="M-00FA_H-2562-1_HP-0A02-01-0000" DefaultLanguage="da-DK" />
+          <CatalogItem Id="M-00FA_H-2562-1_HP-0A02-01-0000_CI-VKNXSA1-1" Name="vKNX Koblingsaktuator 1-fold" Number="1" ProductRefId="M-00FA_H-2562-1_P-VKNXSA1" Hardware2ProgramRefId="M-00FA_H-2562-1_HP-0A02-01-0000" DefaultLanguage="da-DK" />
         </CatalogSection>
       </Catalog>
       <ApplicationPrograms>
@@ -93,7 +93,7 @@
       <Hardware>
         <Hardware Id="M-00FA_H-2562-1" Name="vKNX Koblingsaktuator 1-fold" SerialNumber="2562" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
           <Products>
-            <Product Id="M-00FA_H-2562-1_P-VKNX-SA1" Text="vKNX Koblingsaktuator 1-fold" OrderNumber="VKNX-SA1" IsRailMounted="false" DefaultLanguage="da-DK">
+            <Product Id="M-00FA_H-2562-1_P-VKNXSA1" Text="vKNX Koblingsaktuator 1-fold" OrderNumber="VKNXSA1" IsRailMounted="false" DefaultLanguage="da-DK">
               <RegistrationInfo RegistrationStatus="Registered" />
             </Product>
           </Products>

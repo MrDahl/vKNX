@@ -16,7 +16,7 @@ public final class Products {
 	public static final int MANUFACTURER_ID = 0x00FA;
 
 	public static final ProductDef PUSH_BUTTON = new ProductDef(
-			"push-button", 0x0A01, 1, "vKNX Tryk 1-fold", "vKNX Push Button 1-fold", "VKNX-PB1", 0x0A01, 4,
+			"push-button", 0x0A01, 1, "vKNX Tryk 1-fold", "vKNX Push Button 1-fold", "VKNXPB1", 0x0A01, 4,
 			List.of(
 				new ParamDef(1, "ButtonFunction", "Tastefunktion", "Button function", 0, 0, 2, 0, List.of(
 					new Choice(0, "Skift (vekselvis tænd/sluk)", "Toggle (alternating on/off)"),
@@ -30,7 +30,7 @@ public final class Products {
 				new ObjDef(2, "Status", "Status", "Status", "Input", 1, "DPST-1-1", false, true, false, true)));
 
 	public static final ProductDef SWITCH_ACTUATOR = new ProductDef(
-			"switch-actuator", 0x0A02, 1, "vKNX Koblingsaktuator 1-fold", "vKNX Switch Actuator 1-fold", "VKNX-SA1",
+			"switch-actuator", 0x0A02, 1, "vKNX Koblingsaktuator 1-fold", "vKNX Switch Actuator 1-fold", "VKNXSA1",
 			0x0A02, 4,
 			List.of(
 				new ParamDef(1, "RelayLogic", "Relæ-logik", "Relay logic", 0, 0, 1, 0, List.of(

@@ -34,13 +34,22 @@ public final class ProductXmlGenerator {
 
 	static String hex(final int v, final int digits) { return String.format(Locale.ROOT, "%0" + digits + "X", v); }
 
+	/** ETS ID rule (as implemented in OpenKNXproducer Program.GetEncoded): special characters become ".XX" (hex). */
+	static String enc(final String in) {
+		final var sb = new StringBuilder();
+		for (final char c : in.toCharArray())
+			if (".% !\"#$&()+-/:;<>=?@[\\]^_{|}".indexOf(c) >= 0) sb.append('.').append(String.format("%02X", (int) c));
+			else sb.append(c);
+		return sb.toString();
+	}
+
 	public static String generate(final ProductDef p) {
 		final String mfr = "M-" + hex(Products.MANUFACTURER_ID, 4);
 		final String aid = mfr + "_A-" + hex(p.appNumber(), 4) + "-" + hex(p.appVersion(), 2) + "-0000";
-		final String hwId = mfr + "_H-" + p.hardwareSerial() + "-1";
-		final String prodId = hwId + "_P-" + p.orderNumber();
+		final String hwId = mfr + "_H-" + enc(String.valueOf(p.hardwareSerial())) + "-1";
+		final String prodId = hwId + "_P-" + enc(p.orderNumber());
 		final String h2p = hwId + "_HP-" + hex(p.appNumber(), 4) + "-" + hex(p.appVersion(), 2) + "-0000";
-		final String ciId = h2p + "_CI-" + p.orderNumber() + "-1";
+		final String ciId = h2p + "_CI-" + enc(p.orderNumber()) + "-1";
 		final String seg = aid + "_RS-04-00000";
 
 		final var x = new StringBuilder();
