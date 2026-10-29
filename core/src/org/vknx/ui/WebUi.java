@@ -50,6 +50,14 @@ public final class WebUi {
 		server.createContext("/api/plan", this::plan);
 		server.createContext("/api/settings", this::settingsEndpoint);
 		server.createContext("/api/restart", this::restartEndpoint);
+		server.createContext("/api/shutdown", ex -> {
+			if (!supervised || !"POST".equals(ex.getRequestMethod())) {
+				send(ex, 409, "text/plain", utf8("only for the launcher"));
+				return;
+			}
+			send(ex, 200, "text/plain", utf8("ok"));
+			new Thread(() -> System.exit(0)).start(); // shutdown hook saves the devices
+		});
 		server.createContext("/api/update/check", this::updateCheck);
 		server.createContext("/api/update/install", this::updateInstall);
 		server.createContext("/api/update/status", this::updateStatus);

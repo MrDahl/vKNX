@@ -2,15 +2,16 @@
 
 Open-source undervisningssimulator til KNX. Mål: elever programmerer **virtuelle enheder fra rigtig ETS** (importér produkter, tildel adresse, sæt parametre og gruppeadresser, tryk programmeringsknap, download) uden fysisk KNX-hardware – og betjener derefter knapper, lamper m.m. i et enkelt browser-kontrolpanel. Kun Windows er målplatform; kun egne generiske undervisningsprodukter.
 
-> ## ⚠ Status: prototype, ikke testet med ETS
-> Backend og download-logik består egne tests (mini-ETS i Java, også via ægte KNXnet/IP-tunnel), men **kompatibilitet med ETS 6.4 er ikke verificeret**. Se `docs/limitations.md` og `docs/ets-test-guide.md`. Intet må beskrives som "testet med ETS", før testen er kørt.
+> ## Status: prototype
+> Bekræftet i ETS 6.4 af ejeren: forbindelse, import, adressering og download for tryk, kontaktaktuator, dæmper, skydetryk og multisensor. Øvrige produkter og installer/auto-opdatering er ikke afprøvet på rigtige elev-pc'er. Se `docs/limitations.md`. Intet må beskrives som "testet med ETS", før testen er kørt.
 
 ## Hvad er med nu
 - Java 21 + [Calimero](https://github.com/calimero-project) (KNXnet/IP-server, virtuelle enheder) – `docs/decisions.md`
-- Produkter: **Tryk (1-fold)** og **Kontakt-aktuator (1-fold)** med parametre (knapfunktion, relælogik, startværdi, statusafsendelse)
+- 9 produkter: tryk, vippe, skydetryk, kontaktaktuator 1/4/8, dæmper, persienne (2 kanaler), multisensor
 - ETS-produkt-XML genereret fra samme produktdefinition som backenden bruger
-- Kontrolpanel (da/en): programmeringsknap + LED, adresse, downloadstatus, tryk-knap, lampe, telegrammonitor med filter og forklaringer
-- Ikke endnu: dæmper, slider, persienne, multisensor, linjekobler, plantegning (se `docs/limitations.md`)
+- Kontrolpanel (da/en, mørkt/lyst): enheder, gruppeadresse-oversigt, telegrammonitor, plantegning med placerbare udgange/indgange
+- Windows-program med installer, eget vindue (WebView2) og "Søg efter opdateringer" – se `CHANGELOG.md`
+- Ikke endnu: linjekobler, scener/miljøpanel (se `docs/limitations.md`)
 
 ## Byg og kør
 Kræver JDK 21 og git (ingen Maven/Gradle).
@@ -21,11 +22,13 @@ tools/build.sh          # henter pinnede Calimero-kilder, kompilerer alt
 tools/selftest.sh       # backend-selvtest (IKKE ETS-test); også: TunnelTest, CrcCrossCheck
 tools/run.sh            # starter simulator + kontrolpanel på http://127.0.0.1:8080/
 ```
-**Windows-exe:** hent `vKNX-windows.zip` fra [Releases](https://github.com/MrDahl/vKNX/releases/tag/latest), udpak til fx Dokumenter, start `vKNX\vKNX.exe` (browseren åbner selv kontrolpanelet; tillad Windows Firewall for privat netværk). Java er indbygget. Prototype – ikke ETS-testet.
+**Windows-program:** hent `vKNX-Setup-<version>.exe` fra [Releases](https://github.com/MrDahl/vKNX/releases/latest) og kør den (ingen administratorrettigheder; Windows kan advare om "ukendt udgiver", fordi programmet ikke er kodesigneret – vælg "Kør alligevel"). Start vKNX fra startmenuen; tillad Windows Firewall for privat netværk, så ETS kan finde interfacet. Java og WebView2-vinduet er med. Opdatering: tandhjulet → "Søg efter opdateringer". Alternativt hentes `vKNX-<version>-windows.zip` (udpakkes og køres uden installation). Data (enheder, plantegning, log) ligger i `%LOCALAPPDATA%\vKNX\data`.
+
+**Udgivelser (til udvikleren):** skriv ændringer i `CHANGELOG.md` under `## [x.y.z]`, og push et tag `vx.y.z` – GitHub Actions bygger, smoke-tester, laver installer og zip og udgiver releasen med teksten fra CHANGELOG.
 
 Windows (PowerShell; bygning er kørt i GitHub Actions på Windows): `tools\build.ps1`, `tools\selftest.ps1`, `tools\start.ps1`, `tools\gen-products.ps1`.
 
-Valg: `--port 3671 --web 8080 --name "vKNX" --dir runtime --device produkt:navn`. Logfil: `runtime/vknx.log`.
+Valg: `--port 3671 --web 8080 --name "vKNX" --dir runtime --line 1.1 --no-browser --device produkt:navn`. Logfil: `runtime/vknx.log`.
 
 ## Hvad vi bruger til hvad
 | Del | Bruges til | Licens / status |

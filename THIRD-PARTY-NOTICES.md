@@ -12,3 +12,5 @@ vKNX's egen kode er under MIT (se `LICENSE`). Følgende er ikke vKNX-kode og har
 
 KNX og ETS er varemærker tilhørende KNX Association. vKNX er uafhængigt og ikke certificeret.
 Ingen kode fra KNX Explorer (ejerens ikke-kommercielle licens) eller Zennio er kopieret ind.
+
+Windows-programmet bruger desuden (kun i installerede udgaver): Microsoft Edge WebView2 (Microsoft Software License Terms; runtime er en del af Windows 10/11) og NuGet-pakken `Microsoft.Web.WebView2` (BSD-3-Clause-lignende licens), samt Inno Setup (Inno Setup License) til installeren.

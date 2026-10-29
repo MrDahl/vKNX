@@ -1,4 +1,6 @@
-name: Windows exe
+name: Windows build and release
+# Push a tag like v0.2.0 to publish a release (installer + zip, notes from CHANGELOG.md).
+# "Run workflow" (workflow_dispatch) builds and smoke-tests everything but publishes only an artifact.
 on:
   workflow_dispatch:
   push:
@@ -12,9 +14,23 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21' }
-      - name: Build (javac, pinned Calimero)
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+
+      - name: Version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag') { $ver = $env:GITHUB_REF_NAME.TrimStart('v') } else { $ver = '0.0.0-dev' }
+          $num = $ver -replace '[-+].*',''
+          "VERSION=$ver" | Add-Content $env:GITHUB_ENV
+          "NUMVER=$num" | Add-Content $env:GITHUB_ENV
+          Set-Content core/resources/version.txt "v$ver" -NoNewline
+          Write-Host "version v$ver (numeric $num)"
+
+      - name: Build (javac, pinned Calimero + local patches)
         shell: pwsh
         run: tools/build.ps1
+
       - name: Self-test (backend only, NOT an ETS test)
         shell: pwsh
         continue-on-error: true
@@ -23,7 +39,7 @@ jobs:
           $ErrorActionPreference = 'Continue'
           cmd /c "powershell -File tools/selftest.ps1 > dist\selftest.log 2>&1"
           "exit=$LASTEXITCODE" | Add-Content dist/selftest.log
-          ipconfig | Add-Content dist/selftest.log
+
       - name: Package modules as jars
         shell: pwsh
         run: |
@@ -31,17 +47,98 @@ jobs:
           foreach ($m in 'core','device','server','vknx') {
             jar --create --file "dist/mods/$m.jar" -C "build/$m" .
           }
-      - name: jpackage (app image with bundled Java runtime)
+
+      - name: jpackage server (no console window, bundled Java runtime)
         shell: pwsh
         run: |
-          jpackage --type app-image --name vKNX --dest dist/out `
+          jpackage --type app-image --name vKNX-Server --dest dist/jp `
             --module-path dist/mods --module org.vknx/org.vknx.Main `
-            --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql,java.desktop `
-            --win-console --app-version 0.1.0
-          Copy-Item products dist/out/vKNX/products -Recurse
-          Copy-Item tools/make-knxprod.ps1 dist/out/vKNX/
-          Copy-Item docs dist/out/vKNX/docs -Recurse
-          Compress-Archive -Path dist/out/vKNX -DestinationPath dist/vKNX-windows.zip
+            --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql,java.desktop,java.net.http `
+            --app-version $env:NUMVER
+          New-Item -ItemType Directory -Force dist/app/server | Out-Null
+          Copy-Item dist/jp/vKNX-Server/* dist/app/server -Recurse
+
+      - name: Build launcher (WinForms + WebView2, .NET Framework 4.8)
+        shell: pwsh
+        run: |
+          dotnet build launcher/vKNX.csproj -c Release -p:Version=$env:NUMVER -o dist/launcher
+          if ($LASTEXITCODE) { throw 'launcher build failed' }
+          Get-ChildItem dist/launcher | Select-Object Name, Length | Format-Table | Out-String | Write-Host
+          Copy-Item dist/launcher/* dist/app -Recurse -Exclude *.pdb
+
+      - name: Assemble app folder
+        shell: pwsh
+        run: |
+          Copy-Item products dist/app/products -Recurse
+          Copy-Item tools/make-knxprod.ps1 dist/app/
+          Copy-Item docs dist/app/docs -Recurse
+          foreach ($f in 'README.md','CHANGELOG.md','LICENSE','THIRD-PARTY-NOTICES.md') { Copy-Item $f dist/app/ }
+          Get-ChildItem dist/app | Select-Object Name | Format-Table | Out-String | Write-Host
+
+      - name: Smoke test 1 - server starts, answers and shuts down (portable)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $log = 'dist/smoke.log'
+          $d = Join-Path $env:RUNNER_TEMP 'vknx-smoke1'
+          $p = Start-Process dist/app/server/vKNX-Server.exe -ArgumentList "--no-browser --supervised --console-log --dir `"$d`" --web 18099" -PassThru
+          $ok = $false
+          for ($i = 0; $i -lt 60; $i++) {
+            Start-Sleep -Seconds 1
+            try { $r = Invoke-WebRequest http://127.0.0.1:18099/api/state -UseBasicParsing -TimeoutSec 2; $ok = $true; break } catch {}
+          }
+          "smoke1 server answers: $ok" | Add-Content $log
+          if ($ok) { ($r.Content.Substring(0, [Math]::Min(160, $r.Content.Length))) | Add-Content $log }
+          try { Invoke-WebRequest http://127.0.0.1:18099/api/shutdown -Method Post -UseBasicParsing -TimeoutSec 5 | Out-Null } catch {}
+          $exited = $p.WaitForExit(15000)
+          "smoke1 server exited after shutdown: $exited (exit code $($p.ExitCode))" | Add-Content $log
+          Get-Content (Join-Path $d 'console.log') -ErrorAction SilentlyContinue | Select-Object -First 30 | Add-Content $log
+          if (-not $ok) { throw 'server did not answer' }
+
+      - name: Installer (Inno Setup)
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress | Out-Null
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & $iscc "/DAppVersion=$env:VERSION" "/DSourceDir=$PWD\dist\app" installer\vKNX.iss
+          if ($LASTEXITCODE) { throw 'iscc failed' }
+          Get-ChildItem dist/*.exe | Select-Object Name, Length | Format-Table | Out-String | Write-Host
+
+      - name: Smoke test 2 - silent install, launcher window + server, close, uninstall
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $log = 'dist/smoke.log'
+          $inst = Join-Path $env:RUNNER_TEMP 'vknx-inst'
+          $env:VKNX_PORT = '18098'
+          $env:VKNX_DATA_DIR = Join-Path $env:RUNNER_TEMP 'vknx-smoke2'
+          $setup = (Get-ChildItem dist/vKNX-Setup-*.exe | Select-Object -First 1).FullName
+          $p = Start-Process $setup -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /DIR=`"$inst`"" -PassThru
+          "smoke2 installer exited: $($p.WaitForExit(180000)) code $($p.ExitCode)" | Add-Content $log
+          "smoke2 launcher present: $(Test-Path "$inst\vKNX.exe")  server present: $(Test-Path "$inst\server\vKNX-Server.exe")  webview loader: $(Test-Path "$inst\runtimes")" | Add-Content $log
+          $ok = $false
+          for ($i = 0; $i -lt 90; $i++) {
+            Start-Sleep -Seconds 1
+            try { $r = Invoke-WebRequest http://127.0.0.1:18098/api/state -UseBasicParsing -TimeoutSec 2; $ok = $true; break } catch {}
+          }
+          "smoke2 launcher started the server (silent install runs the app): $ok" | Add-Content $log
+          $lp = Get-Process vKNX -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($lp) { "smoke2 launcher process: window title '$($lp.MainWindowTitle)'" | Add-Content $log; $lp.CloseMainWindow() | Out-Null; "smoke2 launcher closed: $($lp.WaitForExit(20000))" | Add-Content $log }
+          else { 'smoke2 launcher process not found' | Add-Content $log }
+          Start-Sleep -Seconds 3
+          "smoke2 server still running after close: $([bool](Get-Process vKNX-Server -ErrorAction SilentlyContinue))" | Add-Content $log
+          Get-Content (Join-Path $env:VKNX_DATA_DIR 'console.log') -ErrorAction SilentlyContinue | Select-Object -First 20 | Add-Content $log
+          $un = Get-ChildItem $inst -Filter 'unins*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($un) { Start-Process $un.FullName -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES' -Wait; "smoke2 uninstalled, folder gone: $(-not (Test-Path "$inst\vKNX.exe"))" | Add-Content $log }
+          if (-not $ok) { throw 'launcher did not start the server' }
+
+      - name: Portable zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/zip/vKNX | Out-Null
+          Copy-Item dist/app/* dist/zip/vKNX -Recurse
+          Compress-Archive -Path dist/zip/vKNX -DestinationPath "dist/vKNX-$env:VERSION-windows.zip"
+
       - name: Publish logs to ci-logs branch
         if: always()
         shell: pwsh
@@ -49,12 +146,28 @@ jobs:
           git config user.name ci; git config user.email ci@example.invalid
           git checkout --orphan ci-logs; git rm -rf -q . 2>$null
           Copy-Item dist/selftest.log selftest.log -ErrorAction SilentlyContinue
-          git add selftest.log; git commit -q -m "ci logs"; git push -f origin ci-logs
-      - name: Publish rolling pre-release (download link without Actions login)
+          Copy-Item dist/smoke.log smoke.log -ErrorAction SilentlyContinue
+          git add -A; git commit -q -m "ci logs"; git push -f origin ci-logs
+
+      - name: Release notes from CHANGELOG.md
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        run: |
+          $t = Get-Content CHANGELOG.md -Raw -Encoding UTF8
+          $m = [regex]::Match($t, "(?ms)^## \[$([regex]::Escape($env:VERSION))\][^\n]*\n(.*?)(?=^## \[|\z)")
+          if ($m.Success) { $m.Groups[1].Value.Trim() | Set-Content dist/notes.md -Encoding UTF8 } else { "vKNX $env:VERSION" | Set-Content dist/notes.md }
+          Get-Content dist/notes.md | Write-Host
+
+      - name: Publish release
+        if: github.ref_type == 'tag'
         shell: pwsh
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
-          gh release delete latest --yes --cleanup-tag 2>$null
-          gh release create latest dist/vKNX-windows.zip --prerelease --title "vKNX (seneste bygning, prototype - ikke ETS-testet)" --notes "Pakkes af GitHub Actions. Udpak zip-filen og start vKNX\vKNX.exe. Backend-selvtest er kørt; kompatibilitet med ETS er IKKE testet."
+          gh release create $env:GITHUB_REF_NAME "dist/vKNX-Setup-$env:VERSION.exe" "dist/vKNX-$env:VERSION-windows.zip" --title "vKNX $env:VERSION" --notes-file dist/notes.md
+
       - uses: actions/upload-artifact@v4
-        with: { name: vKNX-windows, path: dist/vKNX-windows.zip }
+        with:
+          name: vKNX-windows
+          path: |
+            dist/vKNX-Setup-*.exe
+            dist/vKNX-*-windows.zip
