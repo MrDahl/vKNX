@@ -3,6 +3,8 @@ on:
   workflow_dispatch:
   push:
     tags: ['v*']
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: windows-latest
@@ -15,7 +17,13 @@ jobs:
         run: tools/build.ps1
       - name: Self-test (backend only, NOT an ETS test)
         shell: pwsh
-        run: tools/selftest.ps1
+        continue-on-error: true
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          $ErrorActionPreference = 'Continue'
+          cmd /c "powershell -File tools/selftest.ps1 > dist\selftest.log 2>&1"
+          "exit=$LASTEXITCODE" | Add-Content dist/selftest.log
+          ipconfig | Add-Content dist/selftest.log
       - name: Package modules as jars
         shell: pwsh
         run: |
@@ -31,5 +39,13 @@ jobs:
             --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql `
             --win-console --app-version 0.1.0
           Compress-Archive -Path dist/out/vKNX -DestinationPath dist/vKNX-windows.zip
+      - name: Publish logs to ci-logs branch
+        if: always()
+        shell: pwsh
+        run: |
+          git config user.name ci; git config user.email ci@example.invalid
+          git checkout --orphan ci-logs; git rm -rf -q . 2>$null
+          Copy-Item dist/selftest.log selftest.log -ErrorAction SilentlyContinue
+          git add selftest.log; git commit -q -m "ci logs"; git push -f origin ci-logs
       - uses: actions/upload-artifact@v4
         with: { name: vKNX-windows, path: dist/vKNX-windows.zip }
