@@ -21,7 +21,9 @@ tools/build.sh          # henter pinnede Calimero-kilder, kompilerer alt
 tools/selftest.sh       # backend-selvtest (IKKE ETS-test); også: TunnelTest, CrcCrossCheck
 tools/run.sh            # starter simulator + kontrolpanel på http://127.0.0.1:8080/
 ```
-Windows (PowerShell, **endnu ikke kørt på Windows**): `tools\build.ps1`, `tools\selftest.ps1`, `tools\start.ps1`, `tools\gen-products.ps1`.
+**Windows-exe:** hent `vKNX-windows.zip` fra [Releases](https://github.com/MrDahl/vKNX/releases/tag/latest), udpak til fx Dokumenter, start `vKNX\vKNX.exe` (browseren åbner selv kontrolpanelet; tillad Windows Firewall for privat netværk). Java er indbygget. Prototype – ikke ETS-testet.
+
+Windows (PowerShell; bygning er kørt i GitHub Actions på Windows): `tools\build.ps1`, `tools\selftest.ps1`, `tools\start.ps1`, `tools\gen-products.ps1`.
 
 Valg: `--port 3671 --web 8080 --name "vKNX" --dir runtime --device produkt:navn`. Logfil: `runtime/vknx.log`.
 

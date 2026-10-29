@@ -36,7 +36,7 @@ jobs:
         run: |
           jpackage --type app-image --name vKNX --dest dist/out `
             --module-path dist/mods --module org.vknx/org.vknx.Main `
-            --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql `
+            --add-modules io.calimero.core,io.calimero.device,io.calimero.server,org.vknx,jdk.httpserver,java.logging,java.xml,java.sql,java.desktop `
             --win-console --app-version 0.1.0
           Compress-Archive -Path dist/out/vKNX -DestinationPath dist/vKNX-windows.zip
       - name: Publish logs to ci-logs branch
@@ -47,5 +47,11 @@ jobs:
           git checkout --orphan ci-logs; git rm -rf -q . 2>$null
           Copy-Item dist/selftest.log selftest.log -ErrorAction SilentlyContinue
           git add selftest.log; git commit -q -m "ci logs"; git push -f origin ci-logs
+      - name: Publish rolling pre-release (download link without Actions login)
+        shell: pwsh
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          gh release delete latest --yes --cleanup-tag 2>$null
+          gh release create latest dist/vKNX-windows.zip --prerelease --title "vKNX (seneste bygning, prototype - ikke ETS-testet)" --notes "Pakkes af GitHub Actions. Udpak zip-filen og start vKNX\vKNX.exe. Backend-selvtest er kørt; kompatibilitet med ETS er IKKE testet."
       - uses: actions/upload-artifact@v4
         with: { name: vKNX-windows, path: dist/vKNX-windows.zip }

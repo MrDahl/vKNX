@@ -3,6 +3,7 @@ module org.vknx {
 	requires io.calimero.device;
 	requires io.calimero.server;
 	requires jdk.httpserver;
+	requires java.desktop;
 
 	exports org.vknx.product;
 	exports org.vknx.device;

@@ -23,6 +23,7 @@ public final class Main {
 	public static void main(final String[] args) throws Exception {
 		Path dir = Path.of("runtime");
 		int port = 3671, web = 8080;
+		boolean openBrowser = true;
 		String friendly = "vKNX simulator";
 		final List<String> specs = new ArrayList<>();
 		for (int i = 0; i < args.length; i++) {
@@ -30,6 +31,7 @@ public final class Main {
 				case "--dir" -> dir = Path.of(args[++i]);
 				case "--port" -> port = Integer.parseInt(args[++i]);
 				case "--web" -> web = Integer.parseInt(args[++i]);
+				case "--no-browser" -> openBrowser = false;
 				case "--name" -> friendly = args[++i];
 				case "--device" -> specs.add(args[++i]);
 				default -> {
@@ -69,6 +71,13 @@ public final class Main {
 		System.out.println("  Control panel       : http://localhost:" + web + "/");
 		System.out.println("  Devices             : " + devices);
 		System.out.println("  Local addresses     : " + localAddresses());
+		if (openBrowser) {
+			try {
+				if (java.awt.Desktop.isDesktopSupported())
+					java.awt.Desktop.getDesktop().browse(java.net.URI.create("http://localhost:" + web + "/"));
+			}
+			catch (final Exception | java.lang.Error e) { /* headless: just use the printed URL */ }
+		}
 		System.out.println("Press Ctrl+C to stop (device configuration is saved on exit).");
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			devices.forEach(VirtualDevice::close);
