@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vKNX</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--mute:#6b7488;--line:#e3e6ec;--accent:#0b6bcb;--on:#f5b301;--red:#d93025;--green:#188038;}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:16px;padding:14px 24px;background:#fff;border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:22px} header .sub{color:var(--mute);flex:1}
+  button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer}
+  button:hover{border-color:var(--accent)} button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  main{padding:20px 24px;display:grid;gap:20px;max-width:1500px;margin:auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .card h2{margin:0 0 2px;font-size:18px} .prod{color:var(--mute);font-size:14px;margin-bottom:10px}
+  .row{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap}
+  .addr{font:600 20px ui-monospace,Consolas,monospace} .addr.un{color:var(--mute)}
+  .led{width:16px;height:16px;border-radius:50%;background:#cfd3dc;border:1px solid #b8bdc9} .led.on{background:var(--red);box-shadow:0 0 10px var(--red)}
+  .pill{font-size:13px;padding:2px 10px;border-radius:99px;background:#eef1f6;color:var(--mute)} .pill.ok{background:#e6f4ea;color:var(--green)}
+  .lamp{width:70px;height:70px;border-radius:50%;background:#e9ebf0;border:2px solid #c9cdd8;display:grid;place-items:center;font-size:30px;transition:.15s}
+  .lamp.on{background:#fff4c2;border-color:var(--on);box-shadow:0 0 28px 6px #ffd95a}
+  .bigbtn{width:100%;padding:18px;font-size:20px;border-radius:12px}
+  dl{margin:8px 0 0;display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:14px} dt{color:var(--mute)} dd{margin:0;font-weight:600}
+  .mon{padding:0} .mon .bar{display:flex;gap:10px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .mon input[type=text]{flex:1;min-width:180px;font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px}
+  #log{height:380px;overflow:auto;font:13px/1.5 ui-monospace,Consolas,monospace;padding:6px 0}
+  .ln{padding:1px 18px;white-space:pre-wrap;border-left:4px solid transparent} .ln .t{color:var(--mute)}
+  .ln.bus{border-left-color:var(--accent);background:#f2f7fd} .ln.exp{border-left-color:#c9cdd8}
+  .ln .tag{display:inline-block;min-width:74px;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+  .ln.bus .tag{color:var(--accent)} .note{color:var(--mute);font-size:13px;padding:8px 18px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <h1>vKNX</h1><div class="sub" id="sub"></div>
+  <button id="lang" onclick="toggleLang()">English</button>
+</header>
+<main>
+  <section class="grid" id="devices"></section>
+  <section class="card mon">
+    <div class="bar">
+      <strong id="monTitle"></strong>
+      <input type="text" id="filter" placeholder="">
+      <label><input type="checkbox" id="showBus" checked> <span id="lblBus"></span></label>
+      <label><input type="checkbox" id="showExp" checked> <span id="lblExp"></span></label>
+      <button onclick="clearLog()" id="btnClear"></button>
+    </div>
+    <div id="log"></div>
+    <div class="note" id="note"></div>
+  </section>
+</main>
+<script>
+const T={
+ da:{sub:"Virtuelle KNX-enheder – programmeres fra ETS",lang:"English",prog:"Programmeringsknap",press:"Tryk",unassigned:"Ikke programmeret",
+  loaded:"Applikation hentet",notloaded:"Ingen applikation",dl:"Downloads",lamp:"Lampe",params:"Parametre fra ETS",
+  mon:"Telegrammonitor og forklaringer",filter:"Filtrer (adresse, tekst, enhed)…",bus:"Rigtige telegrammer",exp:"Enhedens forklaring",clear:"Ryd",
+  note:"Blå linjer er rigtige telegrammer på den virtuelle linje (afsender, modtager, service, rådata). Grå linjer er enhedens egen forklaring på, hvorfor den reagerede eller ignorerede noget – det er undervisningstekst, ikke data fra bussen.",
+  state:"Tilstand",on:"Tændt",off:"Slukket",relay:"Relæ",closed:"sluttet",open:"åbent"},
+ en:{sub:"Virtual KNX devices – programmed from ETS",lang:"Dansk",prog:"Programming button",press:"Press",unassigned:"Not programmed",
+  loaded:"Application loaded",notloaded:"No application",dl:"Downloads",lamp:"Lamp",params:"Parameters from ETS",
+  mon:"Telegram monitor and explanations",filter:"Filter (address, text, device)…",bus:"Real telegrams",exp:"Device explanation",clear:"Clear",
+  note:"Blue lines are real telegrams on the virtual line (source, destination, service, raw data). Grey lines are the device's own explanation of why it reacted or ignored something – teaching text, not bus data.",
+  state:"State",on:"On",off:"Off",relay:"Relay",closed:"closed",open:"open"}
+};
+let lang=localStorage.getItem('vknx-lang')||'da', since=0, lines=[];
+const t=k=>T[lang][k];
+function toggleLang(){lang=lang==='da'?'en':'da';localStorage.setItem('vknx-lang',lang);applyStatic();render(window.__s)}
+function applyStatic(){document.documentElement.lang=lang;sub.textContent=t('sub');document.getElementById('lang').textContent=t('lang');
+ monTitle.textContent=t('mon');filter.placeholder=t('filter');lblBus.textContent=t('bus');lblExp.textContent=t('exp');btnClear.textContent=t('clear');note.textContent=t('note')}
+async function post(u){await fetch(u,{method:'POST'});poll()}
+function render(s){ if(!s)return; window.__s=s; const el=document.getElementById('devices'); el.innerHTML='';
+ for(const d of s.devices){ const c=document.createElement('div'); c.className='card';
+  const prod=lang==='da'?d.productDa:d.productEn;
+  let h=`<h2>${esc(d.name)}</h2><div class="prod">${esc(prod)}</div>
+   <div class="row"><span class="addr ${d.unassigned?'un':''}">${d.unassigned?'15.15.255':esc(d.address)}</span>
+   ${d.unassigned?`<span class="pill">${t('unassigned')}</span>`:''}</div>
+   <div class="row"><span class="led ${d.programming?'on':''}"></span><button onclick="post('/api/prog?dev=${encodeURIComponent(d.name)}')">${t('prog')}</button></div>
+   <div class="row"><span class="pill ${d.loaded?'ok':''}">${d.loaded?t('loaded'):t('notloaded')}</span><span class="pill">${t('dl')}: ${d.downloads}</span></div>`;
+  if(d.product==='push-button') h+=`<div class="row"><button class="bigbtn primary" onclick="post('/api/press?dev=${encodeURIComponent(d.name)}')">${t('press')}</button></div>`;
+  if(d.product==='switch-actuator') h+=`<div class="row"><div class="lamp ${d.view.lamp?'on':''}">💡</div><div>${t('relay')}: <b>${d.loaded?(d.view.relayClosed?t('closed'):t('open')):'–'}</b></div></div>`;
+  if(d.loaded&&d.params.length){h+=`<dl><dt colspan=2><b>${t('params')}</b></dt><dd></dd>`; for(const p of d.params) h+=`<dt>${esc(lang==='da'?p.da:p.en)}</dt><dd>${esc(lang==='da'?p.valueDa:p.valueEn)}</dd>`; h+='</dl>'}
+  c.innerHTML=h; el.appendChild(c)} }
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function clearLog(){lines=[];drawLog()}
+function drawLog(){const f=filter.value.toLowerCase(),b=showBus.checked,e=showExp.checked; const box=document.getElementById('log');
+ const stick=box.scrollTop+box.clientHeight>=box.scrollHeight-30;
+ box.innerHTML=lines.filter(l=>(l.cat==='bus'?b:e)&&(!f||(l.dev+' '+l.text).toLowerCase().includes(f))).map(l=>
+  `<div class="ln ${l.cat==='bus'?'bus':'exp'}"><span class="t">${l.t}</span> <span class="tag">${l.cat==='bus'?'bus':esc(l.dev)+' · '+esc(l.cat)}</span> ${esc(l.text)}</div>`).join('');
+ if(stick)box.scrollTop=box.scrollHeight}
+async function poll(){try{const s=await (await fetch('/api/state')).json();render(s);
+ const l=await (await fetch('/api/log?since='+since)).json(); if(l.entries.length){for(const x of l.entries){lines.push(x);since=x.seq} if(lines.length>2000)lines=lines.slice(-1500); drawLog()}}catch(e){}}
+for(const id of ['filter','showBus','showExp'])document.getElementById(id).addEventListener('input',drawLog);
+applyStatic();poll();setInterval(poll,600);
+</script>
+</body>
+</html>

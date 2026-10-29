@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <Catalog>
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="da-DK">
+          <CatalogItem Id="M-00FA_H-2562-1_HP-0A02-01-0000_CI-VKNX-SA1-1" Name="vKNX Koblingsaktuator 1-fold" Number="1" ProductRefId="M-00FA_H-2562-1_P-VKNX-SA1" Hardware2ProgramRefId="M-00FA_H-2562-1_HP-0A02-01-0000" DefaultLanguage="da-DK" />
+        </CatalogSection>
+      </Catalog>
+      <ApplicationPrograms>
+        <ApplicationProgram Id="M-00FA_A-0A02-01-0000" ApplicationNumber="2562" ApplicationVersion="1" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Koblingsaktuator 1-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="da-DK" DynamicTableManagement="false" Linkable="true" MinEtsVersion="4.0" ReplacesVersions="">
+          <Static>
+            <Code>
+              <RelativeSegment Id="M-00FA_A-0A02-01-0000_RS-04-00000" Name="Parameters" Offset="0" Size="4" LoadStateMachine="4" />
+            </Code>
+            <ParameterTypes>
+              <ParameterType Id="M-00FA_A-0A02-01-0000_PT-RelayLogic" Name="RelayLogic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (tænd = relæ sluttet)" Value="0" Id="M-00FA_A-0A02-01-0000_PT-RelayLogic_EN-0" />
+                  <Enumeration Text="Inverteret (tænd = relæ åbent)" Value="1" Id="M-00FA_A-0A02-01-0000_PT-RelayLogic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-01-0000_PT-StartupState" Name="StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Slukket" Value="0" Id="M-00FA_A-0A02-01-0000_PT-StartupState_EN-0" />
+                  <Enumeration Text="Tændt" Value="1" Id="M-00FA_A-0A02-01-0000_PT-StartupState_EN-1" />
+                  <Enumeration Text="Uændret" Value="2" Id="M-00FA_A-0A02-01-0000_PT-StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-01-0000_PT-SendStatusOnChange" Name="SendStatusOnChange">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Nej" Value="0" Id="M-00FA_A-0A02-01-0000_PT-SendStatusOnChange_EN-0" />
+                  <Enumeration Text="Ja" Value="1" Id="M-00FA_A-0A02-01-0000_PT-SendStatusOnChange_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="M-00FA_A-0A02-01-0000_P-1" Name="RelayLogic" ParameterType="M-00FA_A-0A02-01-0000_PT-RelayLogic" Text="Relæ-logik" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-01-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-01-0000_P-2" Name="StartupState" ParameterType="M-00FA_A-0A02-01-0000_PT-StartupState" Text="Tilstand efter download/genstart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-01-0000_RS-04-00000" Offset="0" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-01-0000_P-3" Name="SendStatusOnChange" ParameterType="M-00FA_A-0A02-01-0000_PT-SendStatusOnChange" Text="Send status ved ændring" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-01-0000_RS-04-00000" Offset="0" BitOffset="3" />
+              </Parameter>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="M-00FA_A-0A02-01-0000_P-1_R-1" RefId="M-00FA_A-0A02-01-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A02-01-0000_P-2_R-2" RefId="M-00FA_A-0A02-01-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A02-01-0000_P-3_R-3" RefId="M-00FA_A-0A02-01-0000_P-3" />
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="M-00FA_A-0A02-01-0000_O-1" Name="Switch" Text="Kontakt" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-01-0000_O-2" Name="Status" Text="Status" Number="2" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="M-00FA_A-0A02-01-0000_O-1_R-1" RefId="M-00FA_A-0A02-01-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A02-01-0000_O-2_R-2" RefId="M-00FA_A-0A02-01-0000_O-2" />
+            </ComObjectRefs>
+            <AddressTable MaxEntries="255" />
+            <AssociationTable MaxEntries="255" />
+            <LoadProcedures>
+              <LoadProcedure MergeId="2">
+                <LdCtrlRelSegment LsmIdx="4" Size="4" Mode="1" Fill="0" AppliesTo="full" />
+                <LdCtrlRelSegment LsmIdx="4" Size="4" Mode="0" Fill="0" AppliesTo="par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="4">
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="4" Verify="true" AppliesTo="full,par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="7">
+                <LdCtrlLoadImageProp ObjIdx="1" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="2" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="3" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="4" PropId="27" />
+              </LoadProcedure>
+            </LoadProcedures>
+            <Options />
+          </Static>
+          <Dynamic>
+            <ChannelIndependentBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-01-0000_PB-1" Name="General" Text="Generelt">
+                <ParameterRefRef RefId="M-00FA_A-0A02-01-0000_P-1_R-1" />
+                <ParameterRefRef RefId="M-00FA_A-0A02-01-0000_P-2_R-2" />
+                <ParameterRefRef RefId="M-00FA_A-0A02-01-0000_P-3_R-3" />
+                <ComObjectRefRef RefId="M-00FA_A-0A02-01-0000_O-1_R-1" />
+                <ComObjectRefRef RefId="M-00FA_A-0A02-01-0000_O-2_R-2" />
+              </ParameterBlock>
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Hardware>
+        <Hardware Id="M-00FA_H-2562-1" Name="vKNX Koblingsaktuator 1-fold" SerialNumber="2562" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+          <Products>
+            <Product Id="M-00FA_H-2562-1_P-VKNX-SA1" Text="vKNX Koblingsaktuator 1-fold" OrderNumber="VKNX-SA1" IsRailMounted="false" DefaultLanguage="da-DK">
+              <RegistrationInfo RegistrationStatus="Registered" />
+            </Product>
+          </Products>
+          <Hardware2Programs>
+            <Hardware2Program Id="M-00FA_H-2562-1_HP-0A02-01-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A02-01-0000" />
+              <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
+            </Hardware2Program>
+          </Hardware2Programs>
+        </Hardware>
+      </Hardware>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

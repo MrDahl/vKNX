@@ -1,0 +1,9 @@
+build/
+third_party/src/
+runtime/
+*.class
+.idea/
+*.knxprod
+*.knxproj
+*.xml.bak
+vknx-ios.xml

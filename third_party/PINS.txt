@@ -1,0 +1,5 @@
+# Pinned upstream commits used for the vKNX build (checked out by tools/fetch-calimero.sh).
+# Bump deliberately; every bump needs a re-run of the self-test and of the ETS end-to-end test.
+calimero-core    https://github.com/calimero-project/calimero-core    66edcc439957c2964c55cbba9f8bb1f805932e1b
+calimero-device  https://github.com/calimero-project/calimero-device  3062293f794f28012411df9a2012c133e447b5c6
+calimero-server  https://github.com/calimero-project/calimero-server  3d6730bd496199e15d5fc0752c56c965439998ab
