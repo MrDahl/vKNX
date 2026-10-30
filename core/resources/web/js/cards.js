@@ -135,17 +135,28 @@ export function createCard(d, handlers) {
       face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; L.cellEl[i].hidden = v['e' + i] === false; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
       break;
     }
-    case 'coupler-line': case 'coupler-area': {
-      const area = d.product === 'coupler-area';
-      const up = area ? 'Backbone' : 'Main line', down = area ? 'Main line' : 'Sub line';
-      L.rows = [['groupDown', 'Group ' + up + ' → ' + down], ['groupUp', 'Group ' + down + ' → ' + up],
-        ['physDown', 'Phys. ' + up + ' → ' + down], ['physUp', 'Phys. ' + down + ' → ' + up]].map(([k, t]) => ({ k, t, v: h('b') }));
+    case 'coupler': {
+      L.rows = [['groupMainSub', 'Group, main → sub'], ['groupSubMain', 'Group, sub → main'],
+        ['physMainSub', 'Individual, main → sub'], ['physSubMain', 'Individual, sub → main']].map(([k, t]) => ({ k, t, v: h('b') }));
+      L.role = h('div.hint'); L.cnt = h('div.hint'); L.filter = h('div.hint'); L.block = h('div.hint');
       const grid = h('div.cp-grid');
       L.rows.forEach(r => grid.append(h('div.cp-row', h('span', r.t), r.v)));
       state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
-      state.append(grid);
-      controls.append(h('div.hint', 'Settings come from ETS. This version does not route telegrams between lines yet.'));
-      face = v => L.rows.forEach(r => setText(r.v, v[r.k] ?? '–'));
+      state.append(L.role, grid, L.cnt, L.filter, L.block);
+      controls.append(h('div.hint', 'Everything shown here comes from the ETS download. Group telegrams in “filter” mode only pass if the group address is in the filter table.'));
+      face = v => {
+        const hi = (a, b) => (a === b ? a : a + ' / ' + b + ' (14-31)');
+        const roleText = v.role === 'area' ? 'Area coupler: main line ↔ backbone' : v.role === 'line' ? 'Line coupler: sub line ↔ main line' : 'Not placed: needs an address like 1.2.0 (line) or 1.0.0 (area) to join the lines';
+        setText(L.role, roleText + (v.loaded ? '' : ' · no download yet'));
+        for (const r of L.rows) {
+          const val = r.k === 'groupMainSub' ? hi(v.groupMainSub, v.groupMainSubHigh) : r.k === 'groupSubMain' ? hi(v.groupSubMain, v.groupSubMainHigh) : v[r.k];
+          setText(r.v, val ?? '–');
+        }
+        setText(L.cnt, `Routed ${v.routedDown ?? 0} down, ${v.routedUp ?? 0} up · blocked ${v.blockedDown ?? 0} down, ${v.blockedUp ?? 0} up`);
+        const f = v.filter || [];
+        setText(L.filter, `Filter table: ${v.filterCount ?? 0} group address(es)` + (f.length ? ' – ' + f.slice(0, 12).join(', ') + (v.filterCount > 12 ? ' …' : '') : ''));
+        setText(L.block, v.lastBlocked ? 'Last blocked: ' + v.lastBlocked : '');
+      };
       break;
     }
     default: face = () => {};
@@ -160,7 +171,7 @@ export function createCard(d, handlers) {
       setText(chip, st.label); chip.className = 'chip ' + st.cls;
       prog.hidden = !dev.programming;
       setCls(root, 'selected', S.selected === dev.name && S.drawer);
-      const live = dev.loaded;
+      const live = dev.loaded || dev.product === 'coupler'; // a coupler routes even before a download (factory state)
       root.dataset.loaded = live ? '1' : '0';
       if (live) face(v); else resetFace(dev);
       setAttr(root, 'aria-label', dev.name);

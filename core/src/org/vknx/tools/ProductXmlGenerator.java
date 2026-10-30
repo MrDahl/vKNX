@@ -44,6 +44,8 @@ public final class ProductXmlGenerator {
 	}
 
 	public static String generate(final ProductDef p) {
+		if (p.coupler())
+			return generateCoupler(p);
 		final String mfr = "M-" + hex(Products.MANUFACTURER_ID, 4);
 		final String aid = mfr + "_A-" + hex(p.appNumber(), 4) + "-" + hex(p.appVersion(), 2) + "-0000";
 		final String hwId = mfr + "_H-" + enc(String.valueOf(p.hardwareSerial())) + "-1";
@@ -190,6 +192,93 @@ public final class ProductXmlGenerator {
 		x.append("              <RegistrationInfo RegistrationStatus=\"Registered\" />\n            </Product>\n          </Products>\n");
 		x.append("          <Hardware2Programs>\n            <Hardware2Program Id=\"").append(h2p)
 				.append("\" MediumTypes=\"MT-0\">\n              <ApplicationProgramRef RefId=\"").append(aid).append("\" />\n");
+		x.append("              <RegistrationInfo RegistrationStatus=\"Registered\" RegistrationNumber=\"0001/11\" />\n");
+		x.append("            </Hardware2Program>\n          </Hardware2Programs>\n");
+		x.append("        </Hardware>\n      </Hardware>\n");
+		x.append("    </Manufacturer>\n  </ManufacturerData>\n</KNX>\n");
+		return x.toString();
+	}
+
+	/**
+	 * The coupler is a TP/TP coupler for ETS (mask MV-0912, as in the KNX Virtual "TP Coupler" application): no code
+	 * segment, no tables, the routing settings are router object properties 54 (main to sub) and 55 (sub to main).
+	 * ETS creates the filter table itself from the group addresses used on each line.
+	 */
+	static String generateCoupler(final ProductDef p) {
+		final String mfr = "M-" + hex(Products.MANUFACTURER_ID, 4);
+		final String aid = mfr + "_A-" + hex(p.appNumber(), 4) + "-" + hex(p.appVersion(), 2) + "-0000";
+		final String hwId = mfr + "_H-" + enc(String.valueOf(p.hardwareSerial())) + "-1";
+		final String prodId = hwId + "_P-" + enc(p.orderNumber());
+		final String h2p = hwId + "_HP-" + hex(p.appNumber(), 4) + "-" + hex(p.appVersion(), 2) + "-0000";
+		final String ciId = h2p + "_CI-" + enc(p.orderNumber()) + "-1";
+		final String pt = aid + "_PT-Routing";
+		final String[][] prm = { // id, name, text, property, bit offset (ETS counts from the most significant bit)
+			{ "1", "MainSubHigh", "Main groups 14-31, main to sub", "54", "4" },
+			{ "2", "MainSub", "Main to sub", "54", "6" },
+			{ "3", "SubMainHigh", "Main groups 14-31, sub to main", "55", "4" },
+			{ "4", "SubMain", "Sub to main", "55", "6" } };
+
+		final var x = new StringBuilder();
+		x.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+		x.append("<KNX xmlns=\"http://knx.org/xml/project/23\">\n");
+		x.append("  <ManufacturerData>\n    <Manufacturer RefId=\"").append(mfr).append("\">\n");
+		x.append("      <Catalog>\n        <CatalogSection Id=\"").append(mfr)
+				.append("_CS-vKNX\" Name=\"vKNX\" Number=\"vKNX\" DefaultLanguage=\"en-US\">\n");
+		x.append("          <CatalogItem Id=\"").append(ciId).append("\" Name=\"").append(esc(p.name()))
+				.append("\" Number=\"1\" ProductRefId=\"").append(prodId).append("\" Hardware2ProgramRefId=\"")
+				.append(h2p).append("\" DefaultLanguage=\"en-US\" />\n");
+		x.append("        </CatalogSection>\n      </Catalog>\n");
+
+		x.append("      <ApplicationPrograms>\n        <ApplicationProgram Id=\"").append(aid)
+				.append("\" ApplicationNumber=\"").append(p.appNumber()).append("\" ApplicationVersion=\"")
+				.append(p.appVersion()).append("\" ProgramType=\"ApplicationProgram\" MaskVersion=\"MV-0912\" Name=\"")
+				.append(esc(p.name())).append("\" LoadProcedureStyle=\"MergedProcedure\" PeiType=\"0\" ")
+				.append("DefaultLanguage=\"en-US\" DynamicTableManagement=\"false\" Linkable=\"false\" MinEtsVersion=\"6.0\">\n");
+		x.append("          <Static>\n            <ParameterTypes>\n              <ParameterType Id=\"").append(pt)
+				.append("\" Name=\"Routing\">\n                <TypeRestriction Base=\"Value\" SizeInBit=\"2\">\n");
+		final String[] en = { "", "Route all", "Block", "Filter (use filter table)" };
+		for (int v = 1; v <= 3; v++)
+			x.append("                  <Enumeration Text=\"").append(en[v]).append("\" Value=\"").append(v).append("\" Id=\"")
+					.append(pt).append("_EN-").append(v).append("\" />\n");
+		x.append("                </TypeRestriction>\n              </ParameterType>\n            </ParameterTypes>\n");
+		x.append("            <Parameters>\n");
+		for (final String[] r : prm)
+			x.append("              <Parameter Id=\"").append(aid).append("_P-").append(r[0]).append("\" Name=\"")
+					.append(r[1]).append("\" ParameterType=\"").append(pt).append("\" Text=\"").append(r[2])
+					.append("\" Value=\"3\">\n                <Property ObjectType=\"6\" PropertyId=\"").append(r[3])
+					.append("\" Offset=\"0\" BitOffset=\"").append(r[4]).append("\" />\n              </Parameter>\n");
+		x.append("            </Parameters>\n            <ParameterRefs>\n");
+		for (final String[] r : prm)
+			x.append("              <ParameterRef Id=\"").append(aid).append("_P-").append(r[0]).append("_R-").append(r[0])
+					.append("\" RefId=\"").append(aid).append("_P-").append(r[0]).append("\"")
+					.append(r[0].equals("2") ? " Text=\"Main line to sub line: \"" : r[0].equals("4") ? " Text=\"Sub line to main line: \"" : "")
+					.append(" />\n");
+		x.append("            </ParameterRefs>\n");
+		x.append("            <Options LineCoupler0912NewProgrammingStyle=\"true\" MaxRoutingApduLength=\"66\" Comparable=\"true\" Reconstructable=\"true\" />\n");
+		x.append("          </Static>\n          <Dynamic>\n            <ChannelIndependentBlock>\n");
+		final String ref2 = aid + "_P-2_R-2", ref4 = aid + "_P-4_R-4";
+		x.append("              <ParameterBlock Id=\"").append(aid).append("_PB-1\" Name=\"GroupTelegramRouting\" Text=\"Group telegram routing\">\n");
+		x.append("                <ParameterRefRef RefId=\"").append(ref2).append("\" />\n");
+		x.append("                <ParameterRefRef RefId=\"").append(ref4).append("\" />\n");
+		for (final String[] pair : new String[][] { { ref2, aid + "_P-1_R-1" }, { ref4, aid + "_P-3_R-3" } }) {
+			x.append("                <choose ParamRefId=\"").append(pair[0]).append("\">\n");
+			for (int v = 1; v <= 3; v++)
+				x.append("                  <when test=\"").append(v).append("\">\n                    <Assign TargetParamRefRef=\"")
+						.append(pair[1]).append("\" Value=\"").append(v).append("\" />\n                  </when>\n");
+			x.append("                </choose>\n");
+		}
+		x.append("              </ParameterBlock>\n            </ChannelIndependentBlock>\n          </Dynamic>\n");
+		x.append("        </ApplicationProgram>\n      </ApplicationPrograms>\n");
+
+		x.append("      <Hardware>\n        <Hardware Id=\"").append(hwId).append("\" Name=\"").append(esc(p.name()))
+				.append("\" SerialNumber=\"").append(p.hardwareSerial()).append("\" VersionNumber=\"1\" BusCurrent=\"10\" ")
+				.append("Tp256=\"true\" HasIndividualAddress=\"true\" HasApplicationProgram=\"true\" IsCoupler=\"true\">\n");
+		x.append("          <Products>\n            <Product Id=\"").append(prodId).append("\" Text=\"").append(esc(p.name()))
+				.append("\" OrderNumber=\"").append(p.orderNumber()).append("\" IsRailMounted=\"false\" DefaultLanguage=\"en-US\">\n");
+		x.append("              <RegistrationInfo RegistrationStatus=\"Registered\" />\n            </Product>\n          </Products>\n");
+		x.append("          <Hardware2Programs>\n            <Hardware2Program Id=\"").append(h2p)
+				.append("\" MediumTypes=\"MT-0\" CouplerCapabilities=\"SegmentCoupler\">\n              <ApplicationProgramRef RefId=\"")
+				.append(aid).append("\" />\n");
 		x.append("              <RegistrationInfo RegistrationStatus=\"Registered\" RegistrationNumber=\"0001/11\" />\n");
 		x.append("            </Hardware2Program>\n          </Hardware2Programs>\n");
 		x.append("        </Hardware>\n      </Hardware>\n");

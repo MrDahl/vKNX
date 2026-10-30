@@ -249,34 +249,19 @@ public final class Products {
 
 	// ------------------------------------------------------------------ couplers
 
-	private static final List<Choice> ROUTING = List.of(new Choice(0, "Block"), new Choice(1, "Route all"),
-			new Choice(2, "Filter (use filter table)"));
-
 	/**
-	 * Line coupler (x.y.0) or area coupler (x.0.0). Step 1: the coupler is a normal System B device for ETS (address,
-	 * parameters, download) and shows its settings in the panel; it does not yet route telegrams between lines.
+	 * The coupler: ONE product for both line couplers (x.y.0) and area couplers (x.0.0); the role follows from the
+	 * address ETS gives it. For ETS it is a TP/TP coupler (mask 0x0912) with a router object and a group filter
+	 * table, not a System B device, so it has no parameter memory, no group objects and no tables. The routing
+	 * settings are router object properties (see {@code ProductXmlGenerator.generateCoupler}).
 	 */
-	private static ProductDef coupler(final boolean area) {
-		final String up = area ? "backbone line" : "main line", down = area ? "main line" : "sub line";
-		final var params = List.of(
-			new ParamDef(1, "GroupDown", "Group telegrams: " + up + " > " + down, 0, 0, 2, 2, ROUTING),
-			new ParamDef(2, "GroupUp", "Group telegrams: " + down + " > " + up, 0, 2, 2, 2, ROUTING),
-			new ParamDef(3, "PhysDown", "Individually addressed telegrams: " + up + " > " + down, 0, 4, 2, 2, ROUTING),
-			new ParamDef(4, "PhysUp", "Individually addressed telegrams: " + down + " > " + up, 0, 6, 2, 2, ROUTING),
-			new ParamDef(5, "Repeat", "Repeat telegrams after transmission errors", 1, 0, 1, 1, NO_YES),
-			new ParamDef(6, "Confirm", "Acknowledge routed group telegrams", 1, 1, 1, 1, NO_YES));
-		return new ProductDef(area ? "coupler-area" : "coupler-line", area ? 0x0A0B : 0x0A0A, V,
-				area ? "vKNX Area Coupler" : "vKNX Line Coupler", area ? "VKNXAC1" : "VKNXLC1", area ? 0x0A0B : 0x0A0A, 2,
-				params, List.of(), true);
-	}
-
-	public static final ProductDef COUPLER_LINE = coupler(false);
-	public static final ProductDef COUPLER_AREA = coupler(true);
+	public static final ProductDef COUPLER = new ProductDef("coupler", 0x0A0C, 1, "vKNX Coupler", "VKNXC1", 0x0A0C, 0,
+			List.of(), List.of(), true);
 
 	public static final Map<String, ProductDef> ALL;
 	static {
 		final var m = new java.util.LinkedHashMap<String, ProductDef>();
-		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, COUPLER_LINE, COUPLER_AREA))
+		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, COUPLER))
 			m.put(p.key(), p);
 		ALL = java.util.Collections.unmodifiableMap(m);
 	}

@@ -61,6 +61,7 @@ public final class Main {
 		final var log = new EventLog(3000);
 		log.tee(dir.resolve("vknx.log"));
 		final var net = Subnet.withServer(dir, friendly, port, settings.area(), settings.lineNo());
+		settings.onLineRouting(net.topology()::setEnabled);
 		net.tap((origin, f) -> {
 			final boolean group = f.getDestination() instanceof io.calimero.GroupAddress;
 			final String svc = FrameFormatter.service(f.getPayload(), group);

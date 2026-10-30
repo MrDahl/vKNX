@@ -3,6 +3,21 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [0.6.0] - 2026-10-30
+**One coupler, real line routing and a real filter table.** Before this version telegrams crossed between lines whether or not a coupler existed or had been downloaded. Now they only do if the couplers are there and let them pass, so a missing coupler download causes the same kind of problem as on a real installation. **Not tried in ETS yet:** the coupler is built like a TP/TP coupler (mask 0912) from the KNX Virtual application and the MV-0912 procedure; only our own tests have run (see "What is checked").
+
+### Changes
+- **One product, "vKNX Coupler"**, replaces the line coupler and the area coupler. The role follows from the address: x.y.0 is a line coupler (line x.y to main line x.0), x.0.0 is an area coupler (main line x.0 to the backbone). A coupler without such an address is not part of the line structure. Import the new `vknx-coupler.xml` / `.knxprod` and remove the two old coupler products; stored devices are reset by the new settings schema (add the coupler again).
+- **ETS settings:** routing of group telegrams per direction (main to sub, sub to main): *route all*, *block* or *filter* (default). In *filter* mode ETS writes the group filter table with the download.
+- **Real routing in the simulator:** a telegram only reaches another line through couplers that exist, are placed on x.y.0 / x.0.0 and let it pass (group: route/block/filter table; individually addressed: ETS' physical setting, filter = only towards the addresses behind the coupler; broadcasts follow the broadcast bits). The hop count is lowered by every coupler (7 = unlimited, 0 = discarded). ETS (the KNXnet/IP interface) is on the interface line from Settings, so it needs the couplers too to reach other lines: download the couplers from the interface line outwards.
+- **Coupler card:** role, the four routing settings, counters (routed / blocked per direction), the group addresses in the filter table and the last blocked telegram with the reason, for example "not in the filter table".
+- **New setting** *Route telegrams between lines through couplers* (Settings, default on). Off = one flat line as in earlier versions; couplers then have no effect.
+- A coupler that has never been downloaded routes everything (factory state). After an ETS *unload* it stays in filter mode with an empty table (this is what ETS writes), so group telegrams are blocked.
+
+### What is checked
+- `TopologyTest` (paths between lines, hop count, missing coupler) and `CouplerTest` (our mini-ETS performs the MV-0912 download: unload, load, properties 52-55, clear and write the 8192-byte filter table, load completed; then empty table blocks, one missing entry blocks, both entries pass, unload blocks, block and route modes, physical filter, restart keeps everything, routing off = flat). All older suites still pass.
+- **Not checked:** the import of the coupler XML in ETS (schema 23, `CouplerCapabilities`), that ETS runs the download exactly like our mini-ETS, and ETS' own filter table calculation. See `docs/limitations.md` and `docs/ets-test-guide.md` (section 6, step 5).
+
 ## [0.5.0] - 2026-10-30
 **Breaking change: fewer products, more channels.** The product range is rebuilt around four multi-channel products. All old products are removed, devices saved by an earlier version are reset (the first start shows a message in the log), and **all `.knxprod` files must be imported into ETS again** (new application version 3). **Not tried in ETS yet:** this is the biggest change so far. The new products use parameters that are shown or hidden depending on other parameters (nested `choose/when`) and text parameters for names; only our own tests have run (see "What is checked" below).
 

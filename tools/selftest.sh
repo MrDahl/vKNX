@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs the backend self-test (mini-ETS, in-process). NOT an ETS compatibility test.
-# Usage: tools/selftest.sh [SelfTest|TunnelTest|CrcCrossCheck]
+# Usage: tools/selftest.sh [SelfTest|TunnelTest|TunnelLineTest|ProductsTest|TopologyTest|CouplerTest|AppTest|CrcCrossCheck]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 B=build

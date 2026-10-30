@@ -42,6 +42,30 @@ public final class Settings {
 		if (!valid(line))
 			throw new IllegalArgumentException("line must look like 2.9 (area 0-15, line 0-15)");
 		p.setProperty("line", line.trim());
+		save();
+	}
+
+	private java.util.function.Consumer<Boolean> routingListener = b -> {};
+
+	/** Called whenever the line routing setting changes (and once with the current value when registered). */
+	public void onLineRouting(final java.util.function.Consumer<Boolean> l) {
+		routingListener = l;
+		l.accept(lineRouting());
+	}
+
+	/**
+	 * Whether telegrams only cross between lines through couplers (default on). Off = one flat line where every device
+	 * hears everything, as in earlier versions.
+	 */
+	public boolean lineRouting() { return !"false".equals(p.getProperty("lineRouting", "true")); }
+
+	public void setLineRouting(final boolean on) throws IOException {
+		p.setProperty("lineRouting", String.valueOf(on));
+		save();
+		routingListener.accept(on);
+	}
+
+	private void save() throws IOException {
 		try (Writer w = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
 			p.store(w, "vKNX settings");
 		}

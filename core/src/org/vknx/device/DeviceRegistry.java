@@ -53,7 +53,7 @@ public final class DeviceRegistry {
 	}
 
 	/** Version of the stored device state. Changed when products were redesigned: older state (download, parameters) is dropped. */
-	private static final String SCHEMA = "3";
+	private static final String SCHEMA = "4";
 
 	private void resetOldSchema() throws IOException {
 		final Path f = dir.resolve("state-schema.txt");

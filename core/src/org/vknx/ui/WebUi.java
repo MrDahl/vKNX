@@ -186,7 +186,11 @@ public final class WebUi {
 			return;
 		}
 		try {
-			settings.setLine(param(ex.getRequestURI(), "line", ""));
+			final String routing = param(ex.getRequestURI(), "routing", "");
+			if (!routing.isEmpty())
+				settings.setLineRouting(Boolean.parseBoolean(routing));
+			else
+				settings.setLine(param(ex.getRequestURI(), "line", ""));
 			send(ex, 200, "text/plain", utf8("ok"));
 		}
 		catch (final Exception e) {
@@ -295,7 +299,7 @@ public final class WebUi {
 
 	private void state(final HttpExchange ex) throws IOException {
 		final var sb = new StringBuilder("{\"version\":" + q(org.vknx.app.Version.current()) + ",\"line\":" + q(settings == null ? "1.1" : settings.line())
-				+ ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"started\":" + started
+				+ ",\"routing\":" + (settings == null || settings.lineRouting()) + ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"started\":" + started
 				+ ",\"plan\":" + hasPlan() + ",\"now\":" + System.currentTimeMillis() + ",\"link\":" + linkJson() + ",\"devices\":[");
 		boolean first = true;
 		for (final VirtualDevice d : devices) {
@@ -440,6 +444,8 @@ public final class WebUi {
 	}
 
 	private static String val(final Object o) {
+		if (o instanceof final java.util.List<?> l)
+			return l.stream().map(WebUi::val).collect(java.util.stream.Collectors.joining(",", "[", "]"));
 		return o instanceof Boolean || o instanceof Number ? String.valueOf(o) : q(String.valueOf(o));
 	}
 

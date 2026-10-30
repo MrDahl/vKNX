@@ -21,10 +21,8 @@ public final class ProductInfo {
 					"Four blinds with move up/down, stop and position status, separate travel times up and down. Each blind can be disabled and named.")),
 			Map.entry("multisensor", new Info("Multisensor", "Sensor", "temp",
 					"CO₂, humidity, brightness, temperature, pressure and wind. Each value has its own object and send settings in ETS and can be disabled.")),
-			Map.entry("coupler-line", new Info("Line coupler", "Coupler", "router",
-					"Connects a sub line to the main line (address area.line.0). Routing settings are set in ETS. This version does not route telegrams yet.")),
-			Map.entry("coupler-area", new Info("Area coupler", "Coupler", "router",
-					"Connects a main line to the backbone (address area.0.0). Routing settings are set in ETS. This version does not route telegrams yet.")));
+			Map.entry("coupler", new Info("Coupler (line / area)", "Coupler", "router",
+					"One coupler for both roles: x.y.0 connects a line to its main line, x.0.0 connects a main line to the backbone. Routing and the filter table come from the ETS download; a missing download shows up as blocked telegrams.")));
 
 	public static Info of(final ProductDef p) {
 		return INFO.getOrDefault(p.key(), new Info(p.name(), "Other", "devices", ""));

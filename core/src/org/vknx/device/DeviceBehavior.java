@@ -19,7 +19,7 @@ public abstract class DeviceBehavior {
 			case "dimmer" -> new DimmerBehavior(dev);
 			case "blind-actuator" -> new BlindBehavior(dev);
 			case "multisensor" -> new MultisensorBehavior(dev);
-			case "coupler-line", "coupler-area" -> new CouplerBehavior(dev, p.key().equals("coupler-area"));
+			case "coupler" -> new CouplerBehavior(dev);
 			default -> throw new IllegalArgumentException("no behaviour for product " + p.key());
 		};
 	}

@@ -84,6 +84,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	private DeviceBehavior behavior;
 	private volatile Tables tables = Tables.EMPTY;
 	private volatile int downloadCount;
+	private org.vknx.sim.Subnet subnet;
 
 	private VirtualDevice(final String name, final ProductDef product, final Path stateFile) {
 		this.name = name;
@@ -106,10 +107,13 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			logic.listeners.add(listener);
 		logic.behavior = DeviceBehavior.forProduct(product, logic);
 
-		final var device = new BaseKnxDevice(name, DD0.TYPE_07B0, logic, logic, stateFile.toUri(), new char[0]);
+		final var device = new BaseKnxDevice(name, product.coupler() ? DD0.TYPE_0912 : DD0.TYPE_07B0, logic, logic,
+				stateFile.toUri(), new char[0]);
 		logic.base = device;
 		if (!restored)
 			logic.initFreshIdentity(serial);
+		if (product.coupler())
+			logic.initRouter(!restored);
 
 		// factory state: unprogrammed address 15.15.255; restored state: the address ETS assigned before
 		final IndividualAddress startAddress = restored
@@ -121,6 +125,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				+ ", address " + device.getAddress());
 		logic.afterTablesChanged();
 		logic.startApplication();
+		if (logic.behavior instanceof final CouplerBehavior cb)
+			uplink.topology().register(cb);
+		logic.subnet = uplink;
 		return logic;
 	}
 
@@ -209,6 +216,14 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	@Override
 	public ServiceResult<byte[]> readProperty(final Destination remote, final int objectIndex, final int propertyId,
 			final int startIndex, final int elements) {
+		if (product.coupler()) {
+			final byte[] v = couplerProperty(objectIndex, propertyId);
+			if (v != null) {
+				log("download", "read router property obj " + objectIndex + " pid " + propertyId + " -> "
+						+ HexFormat.of().formatHex(v));
+				return ServiceResult.of(startIndex == 0 ? new byte[] { 0, 1 } : v);
+			}
+		}
 		if (propertyId == PID.MCB_TABLE && objectIndex >= OBJ_ADDRESS_TABLE && objectIndex <= OBJ_APPLICATION
 				&& startIndex >= 1) {
 			final byte[] mcb = memoryControlBlock(objectIndex);
@@ -222,6 +237,12 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	@SuppressWarnings("unchecked")
 	public ServiceResult<Void> writeProperty(final Destination remote, final int objectIndex, final int propertyId,
 			final int startIndex, final int elements, final byte[] data) {
+		if (product.coupler() && couplerProperty(objectIndex, propertyId) != null) {
+			if (objectIndex == routerIndex && propertyId == PID.LOAD_STATE_CONTROL)
+				return (ServiceResult<Void>) (Object) new ServiceResult<byte[]>(couplerLoadControl(data));
+			setCouplerProperty(objectIndex, propertyId, data);
+			return (ServiceResult<Void>) (Object) new ServiceResult<byte[]>(new byte[0]); // empty result, the notifier echoes the data
+		}
 		if (propertyId == PID.LOAD_STATE_CONTROL && objectIndex >= OBJ_ADDRESS_TABLE && objectIndex <= OBJ_APPLICATION) {
 			final byte state = loadControl(objectIndex, data);
 			// the service notifier answers a LOAD_STATE_CONTROL write with the new state byte
@@ -236,6 +257,12 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	@SuppressWarnings("unchecked")
 	public ServiceResult<byte[]> functionPropertyCommand(final Destination remote, final int objectIndex,
 			final int propertyId, final byte[] command) {
+		if (product.coupler() && objectIndex == routerIndex) {
+			if (propertyId == PID.LOAD_STATE_CONTROL)
+				return new ServiceResult<>(couplerLoadControl(java.util.Arrays.copyOfRange(command, 1, command.length)));
+			if (propertyId == PID_ROUTETABLE_CONTROL)
+				return routeTableControl(command);
+		}
 		if (propertyId == PID.LOAD_STATE_CONTROL && objectIndex >= OBJ_ADDRESS_TABLE
 				&& objectIndex <= OBJ_APPLICATION) {
 			// function property command: first byte is the return code slot, load event follows
@@ -246,8 +273,29 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	}
 
 	@Override
+	public ServiceResult<io.calimero.mgmt.Description> readPropertyDescription(final int objectIndex, final int propertyId,
+			final int propertyIndex) {
+		if (product.coupler() && propertyId > 0 && couplerProperty(objectIndex, propertyId) != null) {
+			final int pdt = propertyId == PID.LOAD_STATE_CONTROL ? 0 : propertyId == PID_MAX_ROUTING_APDU ? 4 : 2;
+			final boolean writable = propertyId != PID_MAX_ROUTING_APDU;
+			final int type = objectIndex == routerIndex ? 6 : 0;
+			return ServiceResult.of(new io.calimero.mgmt.Description(objectIndex, type, propertyId, 0, pdt, writable, 1, 1, 3, 3));
+		}
+		return super.readPropertyDescription(objectIndex, propertyId, propertyIndex);
+	}
+
+	@Override
+	public ServiceResult<byte[]> readMemory(final int startAddress, final int bytes) {
+		if (product.coupler() && startAddress >= 0 && startAddress + bytes < base.deviceMemory().size())
+			return ServiceResult.of(base.deviceMemory().get(startAddress, bytes));
+		return super.readMemory(startAddress, bytes);
+	}
+
+	@Override
 	public ServiceResult<Void> writeMemory(final int startAddress, final byte[] data) {
 		final var r = super.writeMemory(startAddress, data);
+		if (product.coupler() && startAddress >= FILTER_TABLE && startAddress < FILTER_TABLE + FILTER_SIZE)
+			changed();
 		log("download", String.format("memory write 0x%06X, %d bytes -> %s", startAddress, data.length,
 				r.getResult() == null ? "ok" : "ok"));
 		return r;
@@ -448,6 +496,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	}
 
 	private int loadState(final int obj) {
+		if (product.coupler())
+			return base.deviceMemory().get(CFG) & 0xff; // the router object keeps its load state in device memory
 		return base.getInterfaceObjectServer().getProperty(obj, PID.LOAD_STATE_CONTROL, 1, 1)[0] & 0xff;
 	}
 
@@ -455,6 +505,11 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	private void startApplication() {
 		behavior.onStop();
 		if (applicationLoaded()) {
+			if (product.coupler()) {
+				log("download", "coupler configuration active (see coupler log)");
+				behavior.onApplicationLoaded();
+				return;
+			}
 			final byte[] area = parameterArea();
 			final var sb = new StringBuilder();
 			for (final var pd : product.params())
@@ -503,7 +558,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	}
 
 	/** Whether the application program (parameter area) is currently loaded. */
-	public boolean applicationLoaded() { return loadState(OBJ_APPLICATION) == LS_LOADED; }
+	public boolean applicationLoaded() { return loadState(product.coupler() ? routerIndex : OBJ_APPLICATION) == LS_LOADED; }
 
 	public int downloadCount() { return downloadCount; }
 
@@ -514,6 +569,10 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	 */
 	public String downloadState() {
 		try {
+			if (product.coupler()) {
+				final int x = loadState(routerIndex);
+				return x == LS_LOADING ? "loading" : x == LS_ERROR ? "error" : x == LS_LOADED ? "complete" : "empty";
+			}
 			final int[] st = { loadState(OBJ_ADDRESS_TABLE), loadState(OBJ_ASSOC_TABLE), loadState(OBJ_GROUP_OBJECT_TABLE),
 				loadState(OBJ_APPLICATION) };
 			int loaded = 0;
@@ -562,6 +621,154 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			if (!c.values().contains(param(c.param())))
 				return false;
 		return true;
+	}
+
+	// ---------------------------------------------------------------- coupler (mask 0x0912: router object + filter table)
+
+	static final int PID_ROUTETABLE_CONTROL = 56, PID_MAX_ROUTING_APDU = 58;
+	/** Router configuration kept in device memory (so it is saved with the device): lsm, pid 52, 53, 54, 55, 57, 59, run error. */
+	private static final int CFG = 0x01F0;
+	/** Group filter table: one bit per raw group address, set = route (MV-0912 LcFilterMemory 512, 8192 bytes). */
+	static final int FILTER_TABLE = 0x0200, FILTER_SIZE = 8192;
+	private static final int[] ROUTER_PIDS = { PID.LOAD_STATE_CONTROL, 52, 53, 54, 55, 57, 59 };
+	private int routerIndex = -1;
+
+	private void initRouter(final boolean fresh) {
+		final var ios = base.getInterfaceObjectServer();
+		for (final var o : ios.getInterfaceObjects())
+			if (o.getType() == io.calimero.device.ios.InterfaceObject.ROUTER_OBJECT)
+				routerIndex = o.getIndex();
+		if (routerIndex < 0)
+			routerIndex = ios.addInterfaceObject(io.calimero.device.ios.InterfaceObject.ROUTER_OBJECT).getIndex();
+		// the management notifier looks the function property up in the object server before it calls us
+		ios.setDescription(new io.calimero.mgmt.Description(routerIndex, 6, PID_ROUTETABLE_CONTROL, 0,
+				io.calimero.dptxlator.PropertyTypes.PDT_FUNCTION, true, 0, 1, 3, 3), true);
+		if (fresh) {
+			// factory state: nothing loaded, everything routed (modelling choice, see docs/limitations.md), empty filter table
+			base.deviceMemory().set(CFG, (byte) LS_UNLOADED, (byte) 0x15, (byte) 0x15, (byte) 0x15, (byte) 0x15, (byte) 0, (byte) 0, (byte) 0xFF);
+		}
+		log("coupler", "router object at index " + routerIndex);
+	}
+
+	/** Raw router property value, or null if the property is not one of the coupler's. */
+	private byte[] couplerProperty(final int objectIndex, final int pid) {
+		if (objectIndex == 0 && pid == 53)
+			return new byte[] { (byte) base.deviceMemory().get(CFG + 7) };
+		if (objectIndex != routerIndex)
+			return null;
+		if (pid == PID_MAX_ROUTING_APDU)
+			return new byte[] { 0, 66 };
+		for (int i = 0; i < ROUTER_PIDS.length; i++)
+			if (ROUTER_PIDS[i] == pid)
+				return new byte[] { (byte) base.deviceMemory().get(CFG + i) };
+		return null;
+	}
+
+	private void setCouplerProperty(final int objectIndex, final int pid, final byte[] data) {
+		if (data.length == 0)
+			return;
+		if (objectIndex == 0 && pid == 53) {
+			base.deviceMemory().set(CFG + 7, data[0]);
+			return;
+		}
+		for (int i = 1; i < ROUTER_PIDS.length; i++)
+			if (ROUTER_PIDS[i] == pid) {
+				base.deviceMemory().set(CFG + i, data[0]);
+				log("download", "router property " + pid + " = 0x" + HexFormat.of().formatHex(new byte[] { data[0] }));
+				changed();
+			}
+	}
+
+	/** Router configuration byte for a property id (52, 53, 54, 55, 57, 59). */
+	int routerByte(final int pid) {
+		final byte[] v = couplerProperty(routerIndex, pid);
+		return v == null ? 0 : v[0] & 0xff;
+	}
+
+	/** True if the filter table says the raw group address is routed. */
+	boolean filterBit(final int rawGroupAddress) {
+		final int b = base.deviceMemory().get(FILTER_TABLE + (rawGroupAddress >> 3)) & 0xff;
+		return (b >> (rawGroupAddress & 7) & 1) != 0;
+	}
+
+	/** Number of group addresses set in the filter table. */
+	int filterCount() {
+		int n = 0;
+		for (final byte b : base.deviceMemory().get(FILTER_TABLE, FILTER_SIZE))
+			n += Integer.bitCount(b & 0xff);
+		return n;
+	}
+
+	/** The group addresses that are set in the filter table (for the panel; capped). */
+	List<Integer> filterAddresses(final int max) {
+		final var out = new ArrayList<Integer>();
+		final byte[] t = base.deviceMemory().get(FILTER_TABLE, FILTER_SIZE);
+		for (int ga = 0; ga < FILTER_SIZE * 8 && out.size() < max; ga++)
+			if ((t[ga >> 3] >> (ga & 7) & 1) != 0)
+				out.add(ga);
+		return out;
+	}
+
+	private byte couplerLoadControl(final byte[] data) {
+		final int event = data.length > 0 ? data[0] & 0xff : LE_NOOP;
+		int state = loadState(routerIndex);
+		switch (event) {
+			case LE_NOOP -> { }
+			case LE_START_LOADING -> {
+				state = LS_LOADING;
+				log("download", "load event START_LOADING for the router application");
+			}
+			case LE_LOAD_COMPLETED -> {
+				state = LS_LOADED;
+				log("download", "load event LOAD_COMPLETED for the router application -> Loaded");
+			}
+			case LE_UNLOAD -> {
+				state = LS_UNLOADED;
+				log("download", "load event UNLOAD for the router application");
+				behavior.onStop();
+			}
+			default -> log("download", "router load event " + event + " (ignored)");
+		}
+		base.deviceMemory().set(CFG, (byte) state);
+		if (event == LE_LOAD_COMPLETED) {
+			downloadCount++;
+			startApplication();
+		}
+		changed();
+		return (byte) state;
+	}
+
+	/** PID_ROUTETABLE_CONTROL function property: 1 = clear filter table, 2 = set all, 3 = clear range, 4 = set range. */
+	private ServiceResult<byte[]> routeTableControl(final byte[] command) {
+		final int service = command.length > 1 ? command[1] & 0xff : 0;
+		final var mem = base.deviceMemory();
+		switch (service) {
+			case 1, 2 -> {
+				final byte[] t = new byte[FILTER_SIZE];
+				if (service == 2)
+					java.util.Arrays.fill(t, (byte) 0xFF);
+				mem.set(FILTER_TABLE, t);
+				log("download", "filter table " + (service == 1 ? "cleared" : "set to route everything"));
+				changed();
+				return new ServiceResult<>((byte) 0, (byte) service);
+			}
+			case 3, 4 -> {
+				final int from = command.length >= 4 ? ((command[2] & 0xff) << 8) | (command[3] & 0xff) : 0;
+				final int to = command.length >= 6 ? ((command[4] & 0xff) << 8) | (command[5] & 0xff) : 0xFFFF;
+				for (int ga = from; ga <= to; ga++) {
+					final int a = FILTER_TABLE + (ga >> 3), m = 1 << (ga & 7), cur = mem.get(a);
+					mem.set(a, service == 4 ? cur | m : cur & ~m);
+				}
+				log("download", "filter table " + (service == 3 ? "cleared" : "set") + " for raw group addresses " + from + ".." + to);
+				changed();
+				return new ServiceResult<>((byte) 0, (byte) service, command.length > 2 ? command[2] : 0,
+						command.length > 3 ? command[3] : 0, command.length > 4 ? command[4] : (byte) 0xFF,
+						command.length > 5 ? command[5] : (byte) 0xFF);
+			}
+			default -> {
+				return ServiceResult.of(io.calimero.ReturnCode.Error, new byte[0]);
+			}
+		}
 	}
 
 	// ---------------------------------------------------------------- group communication (process communication)
@@ -736,6 +943,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	@Override
 	public void close() {
+		if (behavior instanceof final CouplerBehavior cb && subnet != null)
+			subnet.topology().unregister(cb);
 		behavior.onStop();
 		scheduler.shutdownNow();
 		base.close();

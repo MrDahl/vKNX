@@ -53,5 +53,6 @@ export const api = {
   updateInstall: asset => req('/api/update/install?' + q({ asset }), { method: 'POST' }),
   updateStatus: () => req('/api/update/status'),
   saveLine: v => req('/api/settings?' + q({ line: v }), { method: 'POST' }),
+  saveRouting: v => req('/api/settings?' + q({ routing: String(v) }), { method: 'POST' }),
   restart: () => req('/api/restart', { method: 'POST' }),
 };
