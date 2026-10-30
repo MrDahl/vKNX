@@ -47,7 +47,7 @@ export function openSettings() {
   const line = h('input.input', { type: 'text', size: 6, value: S.state?.line || '1.1', 'aria-label': 'Line', style: 'width:6rem' });
   const themeSeg = h('div.segmented', { role: 'group', 'aria-label': 'Theme' });
   const mk = (t, label, ic) => { const b = h('button', { type: 'button', 'aria-pressed': String(currentTheme() === t), onclick: () => { applyTheme(t, true); for (const x of themeSeg.children) x.setAttribute('aria-pressed', String(x === b)); } }, icon(ic), label); return b; };
-  themeSeg.append(mk('light', 'Light', 'sun'), mk('dark', 'Dark', 'moon'));
+  themeSeg.append(mk('light', 'E-ink (paper)', 'sun'), mk('dark', 'E-ink (dark)', 'moon'));
   const check = h('button.btn.primary', { onclick: checkUpdates }, icon('update'), 'Check for updates');
 
   async function checkUpdates() {
