@@ -81,7 +81,7 @@
             </Product>
           </Products>
           <Hardware2Programs>
-            <Hardware2Program Id="M-00FA_H-2572-1_HP-0A0C-01-0000" MediumTypes="MT-0" CouplerCapabilities="SegmentCoupler">
+            <Hardware2Program Id="M-00FA_H-2572-1_HP-0A0C-01-0000" MediumTypes="MT-0">
               <ApplicationProgramRef RefId="M-00FA_A-0A0C-01-0000" />
               <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
             </Hardware2Program>

@@ -277,7 +277,7 @@ public final class ProductXmlGenerator {
 				.append("\" OrderNumber=\"").append(p.orderNumber()).append("\" IsRailMounted=\"false\" DefaultLanguage=\"en-US\">\n");
 		x.append("              <RegistrationInfo RegistrationStatus=\"Registered\" />\n            </Product>\n          </Products>\n");
 		x.append("          <Hardware2Programs>\n            <Hardware2Program Id=\"").append(h2p)
-				.append("\" MediumTypes=\"MT-0\" CouplerCapabilities=\"SegmentCoupler\">\n              <ApplicationProgramRef RefId=\"")
+				.append("\" MediumTypes=\"MT-0\">\n              <ApplicationProgramRef RefId=\"")
 				.append(aid).append("\" />\n");
 		x.append("              <RegistrationInfo RegistrationStatus=\"Registered\" RegistrationNumber=\"0001/11\" />\n");
 		x.append("            </Hardware2Program>\n          </Hardware2Programs>\n");
