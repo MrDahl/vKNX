@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.vknx.device.VirtualDevice;
 import org.vknx.product.Products;
+import org.vknx.sim.FrameFormatter;
 import org.vknx.sim.Subnet;
 import org.vknx.ui.EventLog;
 import org.vknx.device.DeviceRegistry;
@@ -57,17 +58,11 @@ public final class Main {
 		if (lineOverride != null)
 			settings.setLine(lineOverride);
 		System.out.println("vKNX " + org.vknx.app.Version.current());
-		final var log = new EventLog(1000);
+		final var log = new EventLog(3000);
 		log.tee(dir.resolve("vknx.log"));
 		final var net = Subnet.withServer(dir, friendly, port, settings.area(), settings.lineNo());
 		net.tap((origin, f) -> {
-			String svc;
-			try {
-				svc = io.calimero.DataUnitBuilder.decodeAPCI(io.calimero.DataUnitBuilder.getAPDUService(f.getPayload()));
-			}
-			catch (final RuntimeException e) {
-				svc = "?";
-			}
+			final String svc = FrameFormatter.service(f.getPayload());
 			final var tg = new EventLog.Telegram(origin, f.getSource().toString(), f.getDestination().toString(),
 					f.getDestination() instanceof io.calimero.GroupAddress, svc, java.util.HexFormat.of().formatHex(f.getPayload()),
 					f.getPriority().name(), f.getHopCount());
