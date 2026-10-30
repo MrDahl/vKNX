@@ -3,8 +3,12 @@ package org.vknx.sim;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
+import io.calimero.CloseEvent;
+import io.calimero.FrameEvent;
 import io.calimero.IndividualAddress;
 import io.calimero.cemi.CEMILData;
+import io.calimero.link.KNXNetworkLink;
+import io.calimero.link.NetworkLinkListener;
 import io.calimero.link.medium.TPSettings;
 import io.calimero.server.VirtualLink;
 
@@ -21,6 +25,44 @@ public final class SharedVirtualLink extends VirtualLink {
 	private static final Object LOCK = new Object();
 
 	private final CopyOnWriteArrayList<Consumer<CEMILData>> inboundTaps = new CopyOnWriteArrayList<>();
+	private final Topology topology = new Topology();
+
+	/** Line structure and couplers of this installation. */
+	public Topology topology() { return topology; }
+
+	/**
+	 * Listeners added here (the KNXnet/IP server forwarding to ETS) only get the telegrams that reach the interface line
+	 * through the couplers. The telegram monitor uses {@link #addMonitor} and sees everything.
+	 */
+	@Override
+	public void addLinkListener(final NetworkLinkListener l) {
+		super.addLinkListener(new NetworkLinkListener() {
+			@Override
+			public void indication(final FrameEvent e) {
+				if (e.getFrame() instanceof final CEMILData f) {
+					final CEMILData seen = topology.deliverToUplink(f);
+					if (seen == null)
+						return;
+					l.indication(seen == f ? e : new FrameEvent(e.getSource(), seen));
+				}
+				else
+					l.indication(e);
+			}
+
+			@Override public void confirmation(final FrameEvent e) { l.confirmation(e); }
+
+			@Override public void linkClosed(final CloseEvent e) { l.linkClosed(e); }
+		});
+	}
+
+	/** A listener that sees every telegram on the whole installation, regardless of couplers. */
+	public void addMonitor(final NetworkLinkListener l) { super.addLinkListener(l); }
+
+	/** The link of a device, hearing only what the topology lets through. */
+	@Override
+	public KNXNetworkLink createDeviceLink(final IndividualAddress address) {
+		return new RoutedLink(super.createDeviceLink(address), topology);
+	}
 
 	/** Used by the KNXnet/IP server (reflection, signature fixed by Calimero) and by tests. */
 	public SharedVirtualLink(final Object... args) {

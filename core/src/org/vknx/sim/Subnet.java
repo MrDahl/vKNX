@@ -65,6 +65,7 @@ public final class Subnet implements AutoCloseable {
 			throw new IOException("KNXnet/IP server did not create the virtual line within 15 s");
 		final var net = new Subnet(line, launcher, t);
 		net.port = port;
+		line.topology().setUplinkLine(area, lineNo);
 		return net;
 	}
 
@@ -86,6 +87,9 @@ public final class Subnet implements AutoCloseable {
 				</knxServer>
 				""".formatted(friendlyName, port, area, line);
 	}
+
+	/** Line structure and couplers (see {@link Topology}). */
+	public Topology topology() { return line.topology(); }
 
 	/** Attaches a new device (or an observer such as the mini ETS) to the line with the given address. */
 	public KNXNetworkLink createDeviceLink(final IndividualAddress address) {
@@ -111,7 +115,7 @@ public final class Subnet implements AutoCloseable {
 			lastIpFrame = System.currentTimeMillis();
 			sink.accept(ORIGIN_IP, f);
 		});
-		line.addLinkListener(new NetworkLinkListener() {
+		line.addMonitor(new NetworkLinkListener() {
 			@Override
 			public void indication(final FrameEvent e) {
 				if (e.getFrame() instanceof final CEMILData d)
