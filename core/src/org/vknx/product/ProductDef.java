@@ -32,6 +32,33 @@ public record ProductDef(String key, int appNumber, int appVersion, String name,
 				.orElseThrow(() -> new IllegalArgumentException("no parameter " + name + " in " + key));
 	}
 
+	/** A parameter area with every parameter at its default value. */
+	public byte[] defaultParams() {
+		final byte[] area = new byte[paramAreaSize];
+		for (final ParamDef p : params)
+			if (p.isText())
+				p.writeText(area, p.defaultText());
+			else
+				p.write(area, p.defaultValue());
+		return area;
+	}
+
+	/**
+	 * A parameter area as ETS would write it: defaults, then the given overrides as name, value pairs
+	 * (value an Integer, or a String for text parameters). Used by the tests.
+	 */
+	public byte[] params(final Object... nameValue) {
+		final byte[] area = defaultParams();
+		for (int i = 0; i + 1 < nameValue.length; i += 2) {
+			final ParamDef p = param((String) nameValue[i]);
+			if (nameValue[i + 1] instanceof String s)
+				p.writeText(area, s);
+			else
+				p.write(area, (Integer) nameValue[i + 1]);
+		}
+		return area;
+	}
+
 	/** 5-byte program version as read by ETS: manufacturer(2) + application number(2) + version(1). */
 	public byte[] programVersion(final int manufacturerId) {
 		return new byte[] { (byte) (manufacturerId >> 8), (byte) manufacturerId, (byte) (appNumber >> 8),

@@ -29,12 +29,18 @@ public final class MultisensorBehavior extends DeviceBehavior {
 
 	private String p(final int i, final String what) { return CH.get(i).name() + what; }
 
+	private boolean enabled(final int i) { return dev.param(p(i, "Enable")) == 1; }
+
 	@Override
 	synchronized void onApplicationLoaded() {
 		onStop();
 		for (int i = 0; i < n; i++) {
 			final int ch = i;
 			final Channel c = CH.get(i);
+			if (!enabled(i)) {
+				dev.log("sensor", c.name() + ": disabled (parameter " + p(i, "Enable") + "=No)");
+				continue;
+			}
 			final boolean random = dev.param(p(i, "Mode")) == 1;
 			final int interval = dev.param(p(i, "Interval"));
 			next(i); // set the starting value
@@ -91,7 +97,7 @@ public final class MultisensorBehavior extends DeviceBehavior {
 
 	@Override
 	Integer valueOf(final int go) {
-		if (go < 1 || go > n)
+		if (go < 1 || go > n || !enabled(go - 1))
 			return null;
 		final Channel c = CH.get(go - 1);
 		return Dpt9.encode(Math.round(value[go - 1] / c.unitsPerStep()) * c.toDpt());
@@ -101,6 +107,7 @@ public final class MultisensorBehavior extends DeviceBehavior {
 	public Map<String, Object> view() {
 		final var m = newView();
 		for (int i = 0; i < n; i++) {
+			m.put("e" + i, enabled(i));
 			m.put("s" + i, Math.round(value[i] * 10) / 10.0);
 			m.put("n" + i, sent[i]);
 			final int interval = dev.param(p(i, "Interval"));

@@ -1,4 +1,4 @@
-# Known limitations (status 0.3.0)
+# Known limitations (status 0.5.0)
 
 **Decisive:** a successful build and self-test is *not* proof of ETS compatibility. Only what the owner has tried in ETS counts as confirmed.
 
@@ -7,7 +7,7 @@ Import, addressing and download for push button, switch actuator, dimmer, slider
 
 ## Not yet tried in ETS
 - **Line and area coupler (new, unreleased):** ETS import, placing the coupler on x.y.0 / x.0.0, addressing and download are untested. The products use the same System B base as the other products (mask 07B0) with `IsCoupler="true"`; ETS may refuse that combination or ignore the routing parameters. If so, send the exact ETS message. The product has no group objects, so the object/association tables are empty.
-- Rocker, blind actuator and the 4-/8-channel switch actuators.
+- **All products of 0.5.0 (breaking redesign):** push button with 4 keys, switch actuator with 8 outputs, dimming actuator with 4 channels, blind actuator with 4 channels and the multisensor with enable settings. Specific risks in ETS: (1) parameters shown/hidden through nested `choose/when` blocks, with the same parameter or object listed in several `when` branches; (2) text parameters (`TypeText`, 16 characters) used for names, and how ETS pads/terminates them in memory; (3) a large number of group objects per device (20 for the push button and the dimmer); (4) the parameter bit layout of the new products (the ETS bit order was proven from a log for the old layout; the new layout follows the same rule but has only been checked by our own tests). If ETS refuses the import or a download, send the exact message and the Group monitor.
 - **Version 2 of all products (0.3.0):** English texts, new multisensor with one ETS page per measurement (uses `choose/when` to show only the relevant parameters), `ReplacesVersions="1"`. If ETS complains on import, remove the old catalogue entries and re-import.
 - The fix for partial downloads (ETS writes only changed parameters; before 0.3.0 the unchanged parameters were reset to 0, which could give a dimming step of 0 = "break" and switch status sending off).
 - The Windows installer, the WebView2 window and the update button on real PCs (only smoke-tested on GitHub's Windows runner).

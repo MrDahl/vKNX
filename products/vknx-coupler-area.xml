@@ -4,84 +4,84 @@
     <Manufacturer RefId="M-00FA">
       <Catalog>
         <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
-          <CatalogItem Id="M-00FA_H-2571-1_HP-0A0B-02-0000_CI-VKNXAC1-1" Name="vKNX Area Coupler" Number="1" ProductRefId="M-00FA_H-2571-1_P-VKNXAC1" Hardware2ProgramRefId="M-00FA_H-2571-1_HP-0A0B-02-0000" DefaultLanguage="en-US" />
+          <CatalogItem Id="M-00FA_H-2571-1_HP-0A0B-03-0000_CI-VKNXAC1-1" Name="vKNX Area Coupler" Number="1" ProductRefId="M-00FA_H-2571-1_P-VKNXAC1" Hardware2ProgramRefId="M-00FA_H-2571-1_HP-0A0B-03-0000" DefaultLanguage="en-US" />
         </CatalogSection>
       </Catalog>
       <ApplicationPrograms>
-        <ApplicationProgram Id="M-00FA_A-0A0B-02-0000" ApplicationNumber="2571" ApplicationVersion="2" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Area Coupler" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1">
+        <ApplicationProgram Id="M-00FA_A-0A0B-03-0000" ApplicationNumber="2571" ApplicationVersion="3" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Area Coupler" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2">
           <Static>
             <Code>
-              <RelativeSegment Id="M-00FA_A-0A0B-02-0000_RS-04-00000" Name="Parameters" Offset="0" Size="2" LoadStateMachine="4" />
+              <RelativeSegment Id="M-00FA_A-0A0B-03-0000_RS-04-00000" Name="Parameters" Offset="0" Size="2" LoadStateMachine="4" />
             </Code>
             <ParameterTypes>
-              <ParameterType Id="M-00FA_A-0A0B-02-0000_PT-GroupDown" Name="GroupDown">
+              <ParameterType Id="M-00FA_A-0A0B-03-0000_PT-GroupDown" Name="GroupDown">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Block" Value="0" Id="M-00FA_A-0A0B-02-0000_PT-GroupDown_EN-0" />
-                  <Enumeration Text="Route all" Value="1" Id="M-00FA_A-0A0B-02-0000_PT-GroupDown_EN-1" />
-                  <Enumeration Text="Filter (use filter table)" Value="2" Id="M-00FA_A-0A0B-02-0000_PT-GroupDown_EN-2" />
+                  <Enumeration Text="Block" Value="0" Id="M-00FA_A-0A0B-03-0000_PT-GroupDown_EN-0" />
+                  <Enumeration Text="Route all" Value="1" Id="M-00FA_A-0A0B-03-0000_PT-GroupDown_EN-1" />
+                  <Enumeration Text="Filter (use filter table)" Value="2" Id="M-00FA_A-0A0B-03-0000_PT-GroupDown_EN-2" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A0B-02-0000_PT-GroupUp" Name="GroupUp">
+              <ParameterType Id="M-00FA_A-0A0B-03-0000_PT-GroupUp" Name="GroupUp">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Block" Value="0" Id="M-00FA_A-0A0B-02-0000_PT-GroupUp_EN-0" />
-                  <Enumeration Text="Route all" Value="1" Id="M-00FA_A-0A0B-02-0000_PT-GroupUp_EN-1" />
-                  <Enumeration Text="Filter (use filter table)" Value="2" Id="M-00FA_A-0A0B-02-0000_PT-GroupUp_EN-2" />
+                  <Enumeration Text="Block" Value="0" Id="M-00FA_A-0A0B-03-0000_PT-GroupUp_EN-0" />
+                  <Enumeration Text="Route all" Value="1" Id="M-00FA_A-0A0B-03-0000_PT-GroupUp_EN-1" />
+                  <Enumeration Text="Filter (use filter table)" Value="2" Id="M-00FA_A-0A0B-03-0000_PT-GroupUp_EN-2" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A0B-02-0000_PT-PhysDown" Name="PhysDown">
+              <ParameterType Id="M-00FA_A-0A0B-03-0000_PT-PhysDown" Name="PhysDown">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Block" Value="0" Id="M-00FA_A-0A0B-02-0000_PT-PhysDown_EN-0" />
-                  <Enumeration Text="Route all" Value="1" Id="M-00FA_A-0A0B-02-0000_PT-PhysDown_EN-1" />
-                  <Enumeration Text="Filter (use filter table)" Value="2" Id="M-00FA_A-0A0B-02-0000_PT-PhysDown_EN-2" />
+                  <Enumeration Text="Block" Value="0" Id="M-00FA_A-0A0B-03-0000_PT-PhysDown_EN-0" />
+                  <Enumeration Text="Route all" Value="1" Id="M-00FA_A-0A0B-03-0000_PT-PhysDown_EN-1" />
+                  <Enumeration Text="Filter (use filter table)" Value="2" Id="M-00FA_A-0A0B-03-0000_PT-PhysDown_EN-2" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A0B-02-0000_PT-PhysUp" Name="PhysUp">
+              <ParameterType Id="M-00FA_A-0A0B-03-0000_PT-PhysUp" Name="PhysUp">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Block" Value="0" Id="M-00FA_A-0A0B-02-0000_PT-PhysUp_EN-0" />
-                  <Enumeration Text="Route all" Value="1" Id="M-00FA_A-0A0B-02-0000_PT-PhysUp_EN-1" />
-                  <Enumeration Text="Filter (use filter table)" Value="2" Id="M-00FA_A-0A0B-02-0000_PT-PhysUp_EN-2" />
+                  <Enumeration Text="Block" Value="0" Id="M-00FA_A-0A0B-03-0000_PT-PhysUp_EN-0" />
+                  <Enumeration Text="Route all" Value="1" Id="M-00FA_A-0A0B-03-0000_PT-PhysUp_EN-1" />
+                  <Enumeration Text="Filter (use filter table)" Value="2" Id="M-00FA_A-0A0B-03-0000_PT-PhysUp_EN-2" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A0B-02-0000_PT-Repeat" Name="Repeat">
+              <ParameterType Id="M-00FA_A-0A0B-03-0000_PT-Repeat" Name="Repeat">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A0B-02-0000_PT-Repeat_EN-0" />
-                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A0B-02-0000_PT-Repeat_EN-1" />
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A0B-03-0000_PT-Repeat_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A0B-03-0000_PT-Repeat_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A0B-02-0000_PT-Confirm" Name="Confirm">
+              <ParameterType Id="M-00FA_A-0A0B-03-0000_PT-Confirm" Name="Confirm">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A0B-02-0000_PT-Confirm_EN-0" />
-                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A0B-02-0000_PT-Confirm_EN-1" />
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A0B-03-0000_PT-Confirm_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A0B-03-0000_PT-Confirm_EN-1" />
                 </TypeRestriction>
               </ParameterType>
             </ParameterTypes>
             <Parameters>
-              <Parameter Id="M-00FA_A-0A0B-02-0000_P-1" Name="GroupDown" ParameterType="M-00FA_A-0A0B-02-0000_PT-GroupDown" Text="Group telegrams: backbone line &gt; main line" Value="2">
-                <Memory CodeSegment="M-00FA_A-0A0B-02-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A0B-03-0000_P-1" Name="GroupDown" ParameterType="M-00FA_A-0A0B-03-0000_PT-GroupDown" Text="Group telegrams: backbone line &gt; main line" Value="2">
+                <Memory CodeSegment="M-00FA_A-0A0B-03-0000_RS-04-00000" Offset="0" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A0B-02-0000_P-2" Name="GroupUp" ParameterType="M-00FA_A-0A0B-02-0000_PT-GroupUp" Text="Group telegrams: main line &gt; backbone line" Value="2">
-                <Memory CodeSegment="M-00FA_A-0A0B-02-0000_RS-04-00000" Offset="0" BitOffset="2" />
+              <Parameter Id="M-00FA_A-0A0B-03-0000_P-2" Name="GroupUp" ParameterType="M-00FA_A-0A0B-03-0000_PT-GroupUp" Text="Group telegrams: main line &gt; backbone line" Value="2">
+                <Memory CodeSegment="M-00FA_A-0A0B-03-0000_RS-04-00000" Offset="0" BitOffset="2" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A0B-02-0000_P-3" Name="PhysDown" ParameterType="M-00FA_A-0A0B-02-0000_PT-PhysDown" Text="Individually addressed telegrams: backbone line &gt; main line" Value="2">
-                <Memory CodeSegment="M-00FA_A-0A0B-02-0000_RS-04-00000" Offset="0" BitOffset="4" />
+              <Parameter Id="M-00FA_A-0A0B-03-0000_P-3" Name="PhysDown" ParameterType="M-00FA_A-0A0B-03-0000_PT-PhysDown" Text="Individually addressed telegrams: backbone line &gt; main line" Value="2">
+                <Memory CodeSegment="M-00FA_A-0A0B-03-0000_RS-04-00000" Offset="0" BitOffset="4" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A0B-02-0000_P-4" Name="PhysUp" ParameterType="M-00FA_A-0A0B-02-0000_PT-PhysUp" Text="Individually addressed telegrams: main line &gt; backbone line" Value="2">
-                <Memory CodeSegment="M-00FA_A-0A0B-02-0000_RS-04-00000" Offset="0" BitOffset="6" />
+              <Parameter Id="M-00FA_A-0A0B-03-0000_P-4" Name="PhysUp" ParameterType="M-00FA_A-0A0B-03-0000_PT-PhysUp" Text="Individually addressed telegrams: main line &gt; backbone line" Value="2">
+                <Memory CodeSegment="M-00FA_A-0A0B-03-0000_RS-04-00000" Offset="0" BitOffset="6" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A0B-02-0000_P-5" Name="Repeat" ParameterType="M-00FA_A-0A0B-02-0000_PT-Repeat" Text="Repeat telegrams after transmission errors" Value="1">
-                <Memory CodeSegment="M-00FA_A-0A0B-02-0000_RS-04-00000" Offset="1" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A0B-03-0000_P-5" Name="Repeat" ParameterType="M-00FA_A-0A0B-03-0000_PT-Repeat" Text="Repeat telegrams after transmission errors" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A0B-03-0000_RS-04-00000" Offset="1" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A0B-02-0000_P-6" Name="Confirm" ParameterType="M-00FA_A-0A0B-02-0000_PT-Confirm" Text="Acknowledge routed group telegrams" Value="1">
-                <Memory CodeSegment="M-00FA_A-0A0B-02-0000_RS-04-00000" Offset="1" BitOffset="1" />
+              <Parameter Id="M-00FA_A-0A0B-03-0000_P-6" Name="Confirm" ParameterType="M-00FA_A-0A0B-03-0000_PT-Confirm" Text="Acknowledge routed group telegrams" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A0B-03-0000_RS-04-00000" Offset="1" BitOffset="1" />
               </Parameter>
             </Parameters>
             <ParameterRefs>
-              <ParameterRef Id="M-00FA_A-0A0B-02-0000_P-1_R-1" RefId="M-00FA_A-0A0B-02-0000_P-1" />
-              <ParameterRef Id="M-00FA_A-0A0B-02-0000_P-2_R-2" RefId="M-00FA_A-0A0B-02-0000_P-2" />
-              <ParameterRef Id="M-00FA_A-0A0B-02-0000_P-3_R-3" RefId="M-00FA_A-0A0B-02-0000_P-3" />
-              <ParameterRef Id="M-00FA_A-0A0B-02-0000_P-4_R-4" RefId="M-00FA_A-0A0B-02-0000_P-4" />
-              <ParameterRef Id="M-00FA_A-0A0B-02-0000_P-5_R-5" RefId="M-00FA_A-0A0B-02-0000_P-5" />
-              <ParameterRef Id="M-00FA_A-0A0B-02-0000_P-6_R-6" RefId="M-00FA_A-0A0B-02-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A0B-03-0000_P-1_R-1" RefId="M-00FA_A-0A0B-03-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A0B-03-0000_P-2_R-2" RefId="M-00FA_A-0A0B-03-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A0B-03-0000_P-3_R-3" RefId="M-00FA_A-0A0B-03-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A0B-03-0000_P-4_R-4" RefId="M-00FA_A-0A0B-03-0000_P-4" />
+              <ParameterRef Id="M-00FA_A-0A0B-03-0000_P-5_R-5" RefId="M-00FA_A-0A0B-03-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A0B-03-0000_P-6_R-6" RefId="M-00FA_A-0A0B-03-0000_P-6" />
             </ParameterRefs>
             <AddressTable MaxEntries="255" />
             <AssociationTable MaxEntries="255" />
@@ -104,13 +104,13 @@
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
-              <ParameterBlock Id="M-00FA_A-0A0B-02-0000_PB-1" Name="General" Text="General">
-                <ParameterRefRef RefId="M-00FA_A-0A0B-02-0000_P-1_R-1" />
-                <ParameterRefRef RefId="M-00FA_A-0A0B-02-0000_P-2_R-2" />
-                <ParameterRefRef RefId="M-00FA_A-0A0B-02-0000_P-3_R-3" />
-                <ParameterRefRef RefId="M-00FA_A-0A0B-02-0000_P-4_R-4" />
-                <ParameterRefRef RefId="M-00FA_A-0A0B-02-0000_P-5_R-5" />
-                <ParameterRefRef RefId="M-00FA_A-0A0B-02-0000_P-6_R-6" />
+              <ParameterBlock Id="M-00FA_A-0A0B-03-0000_PB-1" Name="General" Text="General">
+                <ParameterRefRef RefId="M-00FA_A-0A0B-03-0000_P-1_R-1" />
+                <ParameterRefRef RefId="M-00FA_A-0A0B-03-0000_P-2_R-2" />
+                <ParameterRefRef RefId="M-00FA_A-0A0B-03-0000_P-3_R-3" />
+                <ParameterRefRef RefId="M-00FA_A-0A0B-03-0000_P-4_R-4" />
+                <ParameterRefRef RefId="M-00FA_A-0A0B-03-0000_P-5_R-5" />
+                <ParameterRefRef RefId="M-00FA_A-0A0B-03-0000_P-6_R-6" />
               </ParameterBlock>
             </ChannelIndependentBlock>
           </Dynamic>
@@ -124,8 +124,8 @@
             </Product>
           </Products>
           <Hardware2Programs>
-            <Hardware2Program Id="M-00FA_H-2571-1_HP-0A0B-02-0000" MediumTypes="MT-0">
-              <ApplicationProgramRef RefId="M-00FA_A-0A0B-02-0000" />
+            <Hardware2Program Id="M-00FA_H-2571-1_HP-0A0B-03-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A0B-03-0000" />
               <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
             </Hardware2Program>
           </Hardware2Programs>

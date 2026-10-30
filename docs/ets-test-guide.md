@@ -37,10 +37,11 @@ For each point note ✔ / ✘ / not reached.
 5. The generated `.xml`/`.knxprod` files.
 
 ## 6. Testing the products one at a time
-1. Run `make-knxprod.ps1` again (builds all `.knxprod` files (one per product, 12 including the couplers and the blind rocker)). Remove old vKNX products from the catalog and import the new ones.
-2. Start with **Dimming actuator + rocker**: rocker "Relative dimming" and dimmer "Relative dimming" on the same group address; switch objects on another. Download both. Short press = on/off, long press = dim up/down in the chosen step (e.g. 12.5 %).
-3. Then slider push button → dimmer (1 byte, with the status address linked back), blind actuator, switch actuator 4/8.
-   **Blinds:** use the **Blind rocker**, not the dimming rocker. Link its *Move up/down* to the blind actuator's *up/down* object and its *Step / stop* to the *stop* object (two group addresses). Short press = stop/step, hold = move.
+1. Run `make-knxprod.ps1` again (builds all `.knxprod` files, one per product: 8 including the couplers). Remove the old vKNX products from the catalog and import the new ones (version 3).
+2. Start with **Dimming actuator + Push button**: set key 1 of the push button to *Relative dimming* (brighter) and key 2 to *Relative dimming* (darker); link *relative dimming* on a group address to *Relative dimming* of dimmer channel 1, and the *switch* objects to the dimmer's *switch*. Download both. Short press = on/off, long press = dim up/down in the chosen step (e.g. 12.5 %); channel 2-4 of the dimmer can be disabled to check that their objects disappear.
+3. Then slider push button → dimmer (1 byte, with the status address linked back), the blind actuator, the 8-output switch actuator.
+   **Blinds:** set a push button key to function *Blinds*. Link its *Move up/down* to the blind actuator's *up/down* object and its *Step / stop* to the *stop* object (two group addresses). Short press = step/stop, hold = move. Check separate travel times up and down on the blind actuator.
+   **Names and disabling:** give a key/output/channel a name in ETS, disable another one, download, and check that the name appears in the vKNX panel and the disabled item is gone from ETS and the panel.
 4. **Multisensor:** each measurement has its own ETS page. Set a fixed value or a random range and an interval, link each group object to its own group address and watch the Group monitor; change one value and download again (partial download).
 5. **Line coupler / area coupler (new, untested in ETS):** import the two new `.knxprod` files, put a line coupler on line 1.1 (address 1.1.0) and an area coupler at 2.0.0 in the topology, press the programming button on the coupler card, assign the address and download. Report: does ETS accept the product import, does it allow x.y.0, and does the download finish. Telegrams are not routed yet, so the coupler cannot be tested for filtering.
 6. On errors: send the verbatim ETS error, the group monitor, `console.log`/`vknx.log`, and which product it concerned.

@@ -49,12 +49,12 @@ public final class TunnelTest {
 			SelfTest.check("tunnel: address sequence for button", ets.assignAddress(new IndividualAddress(1, 1, 1)));
 			SelfTest.check("tunnel: button addressed", SelfTest.await(() -> pb.address().equals(new IndividualAddress(1, 1, 1))));
 			final int[] gas = { new GroupAddress(1, 0, 1).getRawAddress(), new GroupAddress(1, 0, 2).getRawAddress() };
-			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { 0x17, SelfTest.FLAGS_STATUS_OUT }, new int[] { 0b0001_0000 });
+			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 9 } },
+					new int[] { 0x17, 0, 0, 0, 0, 0, 0, 0, SelfTest.FLAGS_STATUS_OUT }, Products.SWITCH_ACTUATOR.defaultParams());
 			ets.downloadAll(new IndividualAddress(1, 1, 1), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { SelfTest.FLAGS_SEND, SelfTest.FLAGS_STATUS_IN }, new int[] { 0b0010_0000 });
+					new int[] { SelfTest.FLAGS_SEND, SelfTest.FLAGS_STATUS_IN }, Products.PUSH_BUTTON.defaultParams());
 			SelfTest.check("tunnel: both applications loaded", SelfTest.await(() -> sa.applicationLoaded() && pb.applicationLoaded()));
-			((PushButtonBehavior) pb.behavior()).press();
+			pb.behavior().act("press", 1);
 			SelfTest.check("tunnel: button press lights lamp", SelfTest.await(((SwitchActuatorBehavior) sa.behavior())::lampLit));
 			Thread.sleep(300);
 			synchronized (trace) {

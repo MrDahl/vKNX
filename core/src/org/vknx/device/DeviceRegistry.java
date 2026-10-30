@@ -40,10 +40,35 @@ public final class DeviceRegistry {
 			list.addAll(Files.readAllLines(file).stream().map(String::trim).filter(l -> !l.isEmpty()).toList());
 		if (list.isEmpty())
 			list.addAll(List.of("push-button:Tryk1", "switch-actuator:Lampe1"));
+		resetOldSchema();
 		for (final String spec : list) {
 			final String[] p = spec.split(":", 2);
+			if (!Products.ALL.containsKey(p[0])) {
+				log.add("device", p.length > 1 ? p[1] : p[0], "skipped: product " + p[0] + " no longer exists in this vKNX version (add the new product instead)");
+				continue;
+			}
 			add(p[0], p.length > 1 ? p[1] : p[0]);
 		}
+		save();
+	}
+
+	/** Version of the stored device state. Changed when products were redesigned: older state (download, parameters) is dropped. */
+	private static final String SCHEMA = "3";
+
+	private void resetOldSchema() throws IOException {
+		final Path f = dir.resolve("state-schema.txt");
+		if (Files.exists(f) && Files.readString(f).trim().equals(SCHEMA))
+			return;
+		boolean any = false;
+		try (Stream<Path> s = Files.list(dir)) {
+			for (final Path st : s.filter(x -> x.getFileName().toString().contains(".state")).toList()) {
+				Files.deleteIfExists(st);
+				any = true;
+			}
+		}
+		if (any)
+			log.add("device", "-", "stored devices from an older vKNX version were reset: addresses and downloads are gone, download them again from ETS");
+		Files.writeString(f, SCHEMA);
 	}
 
 	public synchronized VirtualDevice add(final String productKey, final String name) throws Exception {

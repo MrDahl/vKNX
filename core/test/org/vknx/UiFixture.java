@@ -16,7 +16,7 @@ import io.calimero.process.ProcessCommunicatorImpl;
 /**
  * Test helper for UI screenshots: acts like ETS against a RUNNING vKNX (KNXnet/IP port, web port as arguments) and gives
  * every device an address and a download, then produces some bus traffic. Not a compatibility test.
- * Devices expected: Button1 Dimmer1 Switch8 Sensor1 Rocker1 Blind1 Slider1 (see tools/ui-test.sh).
+ * Devices expected: Button1 Dimmer1 Switch1 Sensor1 Blind1 Slider1 (see tools/ui-test.sh).
  */
 public final class UiFixture {
 	static final int W = 0x04 | 0x10 | 0x03, SEND = 0x04 | 0x40 | 0x03, STATUS_OUT = 0x04 | 0x08 | 0x40 | 0x03, STATUS_IN = 0x04 | 0x10 | 0x80 | 0x03;
@@ -38,7 +38,7 @@ public final class UiFixture {
 		try (var tunnel = KNXNetworkLinkIP.newTunnelingLink(new InetSocketAddress(host, 0), new InetSocketAddress(host, knxPort), false,
 				new TPSettings(new IndividualAddress(0)))) {
 			final var ets = new SelfTest.EtsLikeClient(tunnel);
-			final String[] names = { "Button1", "Dimmer1", "Switch8", "Sensor1", "Rocker1", "Blind1", "Slider1" };
+			final String[] names = { "Button1", "Dimmer1", "Switch1", "Sensor1", "Blind1", "Slider1" };
 			int h = 1;
 			final var addr = new java.util.HashMap<String, IndividualAddress>();
 			for (final String n : names) {
@@ -49,22 +49,19 @@ public final class UiFixture {
 				addr.put(n, a);
 			}
 			final int gSw = ga(1, 0, 1), gDim = ga(1, 0, 2), gVal = ga(1, 0, 3), gSwSt = ga(1, 0, 4), gValSt = ga(1, 0, 5);
-			ets.downloadAll(addr.get("Button1"), new int[] { gSw, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 } }, new int[] { SEND, STATUS_IN }, new byte[] { 0b0010_0000 });
+			ets.downloadAll(addr.get("Button1"), new int[] { gSw, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 } }, new int[] { SEND, STATUS_IN }, org.vknx.product.Products.PUSH_BUTTON.params("Key2Name", "Hall", "Key3Name", "Stairs"));
 			ets.downloadAll(addr.get("Dimmer1"), new int[] { gSw, gDim, gVal, gSwSt, gValSt }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 } },
-					new int[] { W, W, W, STATUS_OUT, STATUS_OUT }, new byte[] { 0b0010_0100 });
-			ets.downloadAll(addr.get("Rocker1"), new int[] { gSw, gDim, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } }, new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0x00, 0x20 });
+					new int[] { W, W, W, STATUS_OUT, STATUS_OUT }, org.vknx.product.Products.DIMMER.params("Ch1OnLevel", 1, "Ch1DimTime", 0, "Ch2Name", "Desk"));
 			ets.downloadAll(addr.get("Slider1"), new int[] { gVal, gSw, gValSt }, new int[][] { { 1, 2 }, { 2, 1 }, { 3, 3 } }, new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0, 0, 0, 0 });
 			final int gC1 = ga(2, 0, 1), gC2 = ga(2, 0, 2), gC3 = ga(2, 0, 3);
-			ets.downloadAll(addr.get("Switch8"), new int[] { gC1, gC2, gC3 }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } }, new int[] { W, W, W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new byte[] { 0b0000_0000, 0b0010_0000 });
+			ets.downloadAll(addr.get("Switch1"), new int[] { gC1, gC2, gC3 }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } }, new int[] { W, W, W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, org.vknx.product.Products.SWITCH_ACTUATOR.params("Out2Name", "Window", "Out6Enable", 0));
 			final int gTemp = ga(4, 0, 4), gCo2 = ga(4, 0, 7), gLux = ga(4, 0, 5);
-			final byte[] ms = new byte[60];
-			ms[2] = 0; ms[3] = 3; ms[4] = 0x02; ms[5] = (byte) 0x58; // CO2: every 3 s, value 600
-			ms[22] = 0; ms[23] = 4; ms[24] = 0x01; ms[25] = (byte) 0x2C; // illuminance: every 4 s, value 300
-			ms[32] = 0; ms[33] = 2; ms[34] = 0; ms[35] = (byte) 224; // temperature: every 2 s, 22.4
+			final byte[] ms = org.vknx.product.Products.MULTISENSOR.params("CO2Interval", 3, "CO2Value", 600, "IlluminanceInterval", 4,
+					"IlluminanceValue", 300, "TemperatureInterval", 2, "TemperatureValue", 224, "PressureEnable", 0);
 			ets.downloadAll(addr.get("Sensor1"), new int[] { gTemp, gCo2, gLux }, new int[][] { { 1, 4 }, { 2, 1 }, { 3, 3 } }, new int[] { SEND, 0, 0, SEND, 0, 0 }, ms);
 			final int gMove = ga(3, 0, 1), gStop = ga(3, 0, 2), gPos = ga(3, 0, 3);
 			ets.downloadAll(addr.get("Blind1"), new int[] { gMove, gStop, gPos }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } },
-					new int[] { W, W, STATUS_OUT, W, W, STATUS_OUT }, new byte[] { 0x08 });
+					new int[] { W, W, STATUS_OUT }, org.vknx.product.Products.BLIND_ACTUATOR.params("Ch1UpTime", 20, "Ch1DownTime", 20, "Ch3Enable", 0));
 			final var pc = new ProcessCommunicatorImpl(tunnel);
 			System.out.println("fixture ready");
 			// some traffic: switch lamps, dim, group read of unknown address

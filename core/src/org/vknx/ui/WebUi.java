@@ -316,10 +316,10 @@ public final class WebUi {
 				fp = false;
 				final int v = d.param(p.name());
 				final var choice = p.choices().stream().filter(c -> c.value() == v).findFirst();
-				final boolean visible = p.showWhenParam().isEmpty() || d.param(p.showWhenParam()) == p.showWhenValue();
+				final boolean visible = d.visible(p.when());
 				sb.append("{\"text\":").append(q(p.text())).append(",\"group\":").append(q(p.group()))
 						.append(",\"visible\":").append(visible)
-						.append(",\"value\":").append(q(choice.map(c -> c.text()).orElse(String.valueOf(v))))
+						.append(",\"value\":").append(q(p.isText() ? d.paramText(p.name()) : choice.map(c -> c.text()).orElse(String.valueOf(v))))
 						.append('}');
 			}
 			sb.append("],\"assoc\":[");

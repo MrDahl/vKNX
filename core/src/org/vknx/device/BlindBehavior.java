@@ -5,57 +5,67 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Two-channel blind actuator. Per channel c (0/1): object 3c+1 Move (0 = up, 1 = down), 3c+2 Stop,
- * 3c+3 position status (1 byte, 0 % = fully open/up, 100 % = fully closed/down). Travel time is an ETS parameter.
+ * Blind actuator with 4 channels; every channel can be disabled and named in ETS. Per channel c (1..4): object
+ * 3(c-1)+1 Move (0 = up, 1 = down), +2 Stop, +3 position status (1 byte, 0 % = fully open/up, 100 % = fully closed/down).
+ * The travel time up and down is an ETS parameter per channel (Ch1UpTime, Ch1DownTime), SendPosition is global.
  */
 public final class BlindBehavior extends DeviceBehavior {
-	private static final int[] RUN_SECONDS = { 10, 20, 30, 60 };
+	private static final int N = 4;
 	private static final int TICK_MS = 100;
-	private final double[] pos = new double[2]; // 0..100
-	private final int[] dir = new int[2]; // -1 up, 0 stopped, +1 down
-	private final ScheduledFuture<?>[] task = new ScheduledFuture<?>[2];
+	private final double[] pos = new double[N]; // 0..100
+	private final int[] dir = new int[N]; // -1 up, 0 stopped, +1 down
+	private final ScheduledFuture<?>[] task = new ScheduledFuture<?>[N];
 
 	BlindBehavior(final VirtualDevice dev) { super(dev); }
 
-	private int runSeconds(final int ch) { return RUN_SECONDS[Math.min(3, dev.param(ch == 0 ? "Ch1RunTime" : "Ch2RunTime"))]; }
+	private static String pre(final int c) { return "Ch" + (c + 1); }
+
+	private boolean enabled(final int c) { return dev.param(pre(c) + "Enable") == 1; }
+
+	private String who(final int c) { return "blind " + (c + 1) + " (" + dev.paramText(pre(c) + "Name") + ")"; }
 
 	@Override
-	void onApplicationLoaded() {
-		dev.log("blind", "application started: both blinds assumed fully open (0 %)");
-		pos[0] = pos[1] = 0;
-		dir[0] = dir[1] = 0;
-		report(0);
-		report(1);
+	synchronized void onApplicationLoaded() {
+		dev.log("blind", "application started: all blinds assumed fully open (0 %)");
+		for (int c = 0; c < N; c++) {
+			halt(c);
+			pos[c] = 0;
+			if (enabled(c))
+				report(c);
+		}
 	}
 
 	@Override
 	synchronized void onStop() {
-		for (int c = 0; c < 2; c++) {
-			dir[c] = 0;
-			if (task[c] != null)
-				task[c].cancel(false);
-		}
+		for (int c = 0; c < N; c++)
+			halt(c);
 	}
 
 	@Override
 	synchronized void onObjectReceived(final int go, final int value) {
-		final int ch = (go - 1) / 3;
-		final int kind = (go - 1) % 3; // 0 move, 1 stop, 2 status
+		final int ch = (go - 1) / 3, kind = (go - 1) % 3; // 0 move, 1 stop, 2 status
+		if (ch >= N || kind == 2)
+			return;
+		if (!enabled(ch)) {
+			dev.log("blind", "blind " + (ch + 1) + ": telegram ignored, parameter " + pre(ch) + "Enable=No");
+			return;
+		}
 		if (kind == 0) {
 			final int d = (value & 1) != 0 ? 1 : -1;
-			final int secs = runSeconds(ch);
-			dev.log("blind", "blind " + (ch + 1) + " Move=" + (d > 0 ? "DOWN" : "UP") + ", full travel " + secs
-					+ " s (parameter Ch" + (ch + 1) + "RunTime)");
+			final int secs = Math.max(1, dev.param(pre(ch) + (d > 0 ? "DownTime" : "UpTime")));
+			dev.log("blind", who(ch) + " Move=" + (d > 0 ? "DOWN" : "UP") + ", full travel " + secs + " s (parameter " + pre(ch)
+					+ (d > 0 ? "DownTime" : "UpTime") + ")");
 			start(ch, d, secs);
 		}
-		else if (kind == 1) {
+		else {
 			if (dir[ch] != 0)
-				dev.log("blind", "blind " + (ch + 1) + " Stop received at " + Math.round(pos[ch]) + " %");
+				dev.log("blind", who(ch) + " Stop received at " + Math.round(pos[ch]) + " %");
 			else
-				dev.log("blind", "blind " + (ch + 1) + " Stop received, blind was not moving");
+				dev.log("blind", who(ch) + " Stop received, blind was not moving");
 			halt(ch);
 			report(ch);
 		}
+		dev.changed();
 	}
 
 	private void start(final int ch, final int d, final int secs) {
@@ -70,7 +80,7 @@ public final class BlindBehavior extends DeviceBehavior {
 			return;
 		pos[ch] = Math.max(0, Math.min(100, pos[ch] + dir[ch] * delta));
 		if (pos[ch] == 0 || pos[ch] == 100) {
-			dev.log("blind", "blind " + (ch + 1) + " reached the end position (" + Math.round(pos[ch]) + " %)");
+			dev.log("blind", who(ch) + " reached the end position (" + Math.round(pos[ch]) + " %)");
 			halt(ch);
 			report(ch);
 		}
@@ -87,20 +97,23 @@ public final class BlindBehavior extends DeviceBehavior {
 		if (dev.param("SendPosition") == 1)
 			dev.transmit(3 * ch + 3, (int) Math.round(pos[ch] * 255.0 / 100.0));
 		else
-			dev.log("blind", "position not sent: parameter SendPosition=No");
+			dev.log("blind", who(ch) + ": position not sent: parameter SendPosition=No");
 	}
 
 	@Override
 	Integer valueOf(final int go) {
-		return (go - 1) % 3 == 2 ? (int) Math.round(pos[(go - 1) / 3] * 255.0 / 100.0) : null;
+		return go >= 1 && go <= 3 * N && (go - 1) % 3 == 2 ? (int) Math.round(pos[(go - 1) / 3] * 255.0 / 100.0) : null;
 	}
 
 	@Override
 	public Map<String, Object> view() {
 		final var m = newView();
-		for (int c = 0; c < 2; c++) {
-			m.put("pos" + (c + 1), (int) Math.round(pos[c]));
-			m.put("dir" + (c + 1), dir[c]);
+		for (int c = 0; c < N; c++) {
+			final int n = c + 1;
+			m.put("e" + n, enabled(c));
+			m.put("n" + n, dev.paramText(pre(c) + "Name"));
+			m.put("pos" + n, (int) Math.round(pos[c]));
+			m.put("dir" + n, dir[c]);
 		}
 		return m;
 	}

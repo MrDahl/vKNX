@@ -3,11 +3,11 @@
 Open-source teaching simulator for KNX. Goal: students program **virtual devices from real ETS** (import the products, assign an individual address, set parameters and group addresses, press the programming button, download) without any physical KNX hardware – and then operate buttons, lamps, dimmers, blinds and sensors in a single control panel. Windows is the target platform; only our own generic teaching products are included.
 
 > ## Status: prototype
-> Confirmed in ETS 6.4 by the project owner: connection, import, addressing and download for push button, switch actuator, dimmer, slider push button and multisensor (the multisensor was reworked in 0.3.0 and the new version still has to be tried in ETS). The other products and the installer/auto-update have not been tried on real student PCs. See `docs/limitations.md`. Nothing may be described as "tested with ETS" before that test has been run.
+> Confirmed in ETS 6.4 by the project owner (older versions): connection, import, addressing and download for the former single-channel products. **The multi-channel products of 0.5.0 have not been tried in ETS yet.** The installer/auto-update has not been tried on real student PCs. See `docs/limitations.md`. Nothing may be described as "tested with ETS" before that test has been run.
 
 ## What is included
 - Java 21 + [Calimero](https://github.com/calimero-project) (KNXnet/IP server, virtual devices) – see `docs/decisions.md`
-- 11 products: push button, rocker, slider push button, switch actuator 1/4/8, dimming actuator, blind actuator (2 channels), multisensor (6 measurements, each with its own group object and ETS page), line coupler and area coupler (settings only; no routing yet, not tested in ETS)
+- 8 products: push button (4 keys: switch, relative dimming or blinds), slider push button, switch actuator (8 outputs), dimming actuator (4 channels), blind actuator (4 channels), multisensor (6 measurements, each with its own group object and ETS page), line coupler and area coupler (settings only; no routing yet, not tested in ETS). Keys, outputs and channels can be disabled and named in ETS.
 - ETS product XML generated from the same product definition the backend runs on
 - Control panel (light/dark) with three workspaces: *Installation* (catalogue, device details, programming button, parameters, objects), *Simulation* (operating cards or floor plan, compact telegram monitor underneath) and *Monitor* (telegram table with filters, group address overview with configured-vs-observed)
 - Windows application with installer, its own window (WebView2) and "Check for updates" – see `CHANGELOG.md`

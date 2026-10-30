@@ -23,10 +23,12 @@ function setBulb(el, on, pct) {
 
 /** A press-and-hold button: sends down on pointerdown and up on pointerup/cancel, even if the card is re-rendered meanwhile. */
 function holdButton(devName, keyNo, label, iconName) {
-  const b = h('button.btn.press', { type: 'button' }, icon(iconName), h('span', label));
+  const lbl = h('span', label);
+  const b = h('button.btn.press', { type: 'button' }, icon(iconName), lbl);
+  b.lbl = lbl;
   let held = false;
-  const release = () => { if (!held) return; held = false; b.classList.remove('down'); operate(`Key "${label}"`, () => api.act(devName, 'up', keyNo)); };
-  b.addEventListener('pointerdown', e => { if (held) return; held = true; b.setPointerCapture(e.pointerId); b.classList.add('down'); operate(`Key "${label}"`, () => api.act(devName, 'down', keyNo)); });
+  const release = () => { if (!held) return; held = false; b.classList.remove('down'); operate(`Key "${lbl.textContent}"`, () => api.act(devName, 'up', keyNo)); };
+  b.addEventListener('pointerdown', e => { if (held) return; held = true; b.setPointerCapture(e.pointerId); b.classList.add('down'); operate(`Key "${lbl.textContent}"`, () => api.act(devName, 'down', keyNo)); });
   b.addEventListener('pointerup', release);
   b.addEventListener('pointercancel', release);
   b.addEventListener('lostpointercapture', release);
@@ -70,21 +72,15 @@ export function createCard(d, handlers) {
   const L = {}; // value elements
   switch (d.product) {
     case 'push-button': {
-      L.v = h('div.value'); state.append(L.v, h('div.hint', 'last value sent'));
-      controls.append(h('button.btn.primary.press-btn', { type: 'button', onclick: () => operate('Button press', () => api.act(d.name, 'press', 0)) }, icon('button'), 'Press'));
-      face = v => { setText(L.v, onOff(v.state)); };
-      break;
-    }
-    case 'push-rocker': {
-      L.v = h('div.value'); state.append(L.v, h('div.hint', 'switching state'));
-      controls.append(h('div.keys', holdButton(d.name, 1, 'Upper key', 'up'), holdButton(d.name, 2, 'Lower key', 'down')), h('div.hint', 'Hold a key for a long press (relative dimming).'));
-      face = v => setText(L.v, onOff(v.state));
-      break;
-    }
-    case 'push-blind-rocker': {
-      L.v = h('div.value'); state.append(L.v, h('div.hint', 'last command sent'));
-      controls.append(h('div.keys', holdButton(d.name, 1, 'Upper key', 'up'), holdButton(d.name, 2, 'Lower key', 'down')), h('div.hint', 'Short press = step/stop. Hold a key = move up/down.'));
-      face = v => setText(L.v, v.last || '–');
+      L.k = [1, 2, 3, 4].map(i => ({ row: h('div.key-row'), btn: holdButton(d.name, i, 'Key ' + i, 'button'), d: h('div.hint'), l: h('span.mono') }));
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      L.k.forEach(k => { k.row.append(k.btn, h('div.grow', k.d), k.l); state.append(k.row); });
+      controls.append(h('div.hint', 'Press and hold a key for a long press. Functions and names are set in ETS.'));
+      face = v => L.k.forEach((k, i) => {
+        const n = i + 1, en = v['e' + n] !== false;
+        k.row.hidden = !en; setText(k.btn.lbl, v['n' + n] || 'Key ' + n); setText(k.d, v['d' + n] || ''); setText(k.l, v['l' + n] || '');
+        setCls(k.row, 'on', !!v['s' + n]);
+      });
       break;
     }
     case 'push-slider': {
@@ -96,43 +92,47 @@ export function createCard(d, handlers) {
       break;
     }
     case 'switch-actuator': {
-      L.b = bulb(); L.v = h('div.value'); L.r = h('div.hint');
-      state.append(L.b, h('div', L.v, L.r));
-      face = v => { setBulb(L.b, !!v.lamp); setText(L.v, onOff(v.lamp)); setText(L.r, 'Relay ' + (v.relayClosed ? 'closed' : 'open')); };
-      break;
-    }
-    case 'switch-actuator-4': case 'switch-actuator-8': {
       L.cells = [];
       const grid = h('div.lamp-grid');
-      const n = +d.product.slice(-1);
-      for (let i = 0; i < n; i++) { const b = bulb(); const t = h('b'); L.cells.push({ b, t }); grid.append(h('div.lamp-cell', b, h('span', 'Out ' + (i + 1)), t)); }
+      for (let i = 0; i < 8; i++) { const b = bulb(); const nm = h('span'); const t = h('b'); const cell = h('div.lamp-cell', b, nm, t); L.cells.push({ cell, b, nm, t }); grid.append(cell); }
       L.sum = h('div.hint');
       state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
       state.append(grid, L.sum);
-      face = v => { const l = v.lamps || ''; L.cells.forEach((c, i) => { setBulb(c.b, l[i] === '1'); setText(c.t, l[i] === '1' ? 'On' : 'Off'); }); setText(L.sum, `${[...l].filter(c => c === '1').length} of ${n} outputs on`); };
+      face = v => {
+        const l = v.lamps || ''; let on = 0, en = 0;
+        L.cells.forEach((c, i) => { const e = v['e' + (i + 1)] !== false; c.cell.hidden = !e; if (e) en++; const o = l[i] === '1'; if (o) on++; setBulb(c.b, o); setText(c.t, o ? 'On' : 'Off'); setText(c.nm, v['n' + (i + 1)] || 'Output ' + (i + 1)); });
+        setText(L.sum, `${on} of ${en} outputs on`);
+      };
       break;
     }
     case 'dimmer': {
-      L.b = bulb(); L.v = h('div.value'); L.m = h('i'); L.r = h('div.hint');
-      state.append(L.b, h('div.grow', L.v, h('div.meter', L.m), L.r));
-      face = v => { const lv = v.level ?? 0; setBulb(L.b, lv > 0, lv); setText(L.v, lv + ' %'); setCls(L.v, 'dim-off', lv === 0); setStyle(L.m, 'width', lv + '%'); setText(L.r, v.ramping ? 'dimming…' : lv > 0 ? 'on' : 'off'); };
+      L.cells = [];
+      const grid = h('div.lamp-grid');
+      for (let i = 0; i < 4; i++) { const b = bulb(); const nm = h('span'); const t = h('b'); const m = h('i'); const cell = h('div.lamp-cell', b, nm, t, h('div.meter', m)); L.cells.push({ cell, b, nm, t, m }); grid.append(cell); }
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(grid);
+      face = v => L.cells.forEach((c, i) => {
+        const n = i + 1, lv = v['level' + n] ?? 0;
+        c.cell.hidden = v['e' + n] === false; setBulb(c.b, lv > 0, lv); setText(c.t, lv + ' %'); setStyle(c.m, 'width', lv + '%');
+        setText(c.nm, v['n' + n] || 'Channel ' + n);
+      });
       break;
     }
-    case 'blind-2': {
-      L.c = [1, 2].map(i => ({ w: h('i'), v: h('div.v'), dir: h('div.hint') }));
+    case 'blind-actuator': {
+      L.c = [1, 2, 3, 4].map(() => ({ w: h('i'), v: h('div.v'), dir: h('div.hint'), nm: h('div.hint') }));
       const blinds = h('div.blinds');
-      L.c.forEach((c, i) => blinds.append(h('div.blind', h('div.hint', 'Blind ' + (i + 1)), h('div.window', c.w), c.v, c.dir)));
+      L.c.forEach(c => { c.box = h('div.blind', c.nm, h('div.window', c.w), c.v, c.dir); blinds.append(c.box); });
       state.append(blinds);
-      face = v => L.c.forEach((c, i) => { const p = v['pos' + (i + 1)] ?? 0, dr = v['dir' + (i + 1)] ?? 0; setStyle(c.w, 'height', p + '%'); setText(c.v, p + ' % closed'); setText(c.dir, dr > 0 ? '↓ moving down' : dr < 0 ? '↑ moving up' : 'stopped'); });
+      face = v => L.c.forEach((c, i) => { const n = i + 1, p = v['pos' + n] ?? 0, dr = v['dir' + n] ?? 0; c.box.hidden = v['e' + n] === false; setText(c.nm, v['n' + n] || 'Blind ' + n); setStyle(c.w, 'height', p + '%'); setText(c.v, p + ' % closed'); setText(c.dir, dr > 0 ? '↓ moving down' : dr < 0 ? '↑ moving up' : 'stopped'); });
       break;
     }
     case 'multisensor': {
       L.n = SENSORS.map(s => h('span.n'));
       const grid = h('div.sens-grid');
-      SENSORS.forEach((s, i) => grid.append(h('div.sens', h('div.l', icon(s.icon), s.name), L.n[i])));
+      L.cellEl = SENSORS.map((s, i) => { const c = h('div.sens', h('div.l', icon(s.icon), s.name), L.n[i]); grid.append(c); return c; });
       state.append(grid);
       controls.append(h('div.hint', 'Values are set in ETS. They cannot be changed here.'));
-      face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
+      face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; L.cellEl[i].hidden = v['e' + i] === false; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
       break;
     }
     case 'coupler-line': case 'coupler-area': {
@@ -169,8 +169,8 @@ export function createCard(d, handlers) {
 
   function resetFace(dev) {
     // not programmed: show neutral placeholders instead of stale values
-    face({ state: false, lamp: false, lamps: '0'.repeat(8), level: 0, relayClosed: false, pos1: 0, pos2: 0 });
+    face({ lamps: '0'.repeat(8) });
     if (dev.product === 'multisensor') L.n.forEach(n => { n.dataset.v = ''; n.textContent = '–'; });
-    if (dev.product === 'blind-2') L.c.forEach(c => setText(c.v, '–'));
+    if (dev.product === 'blind-actuator') L.c.forEach(c => setText(c.v, '–'));
   }
 }

@@ -8,7 +8,7 @@ These steps need Windows, the installed program and ETS; they were **not** run b
 4. **Programming:** select the device, press *Programming button*. The red indicator and the text "Programming mode is ON" appear. In ETS, assign the physical address; the indicator goes out and the address shows in the details.
 5. **Download from ETS:** the status chip changes from *No address* to *No application* to *Ready*. Check that *Download* in the details says "Complete".
 6. **ETS parameters / objects:** the details list the parameters ETS wrote and the group addresses per object. The *Group addresses* chips jump to the Monitor.
-7. **Simulation:** operate a button; the lamp card follows. Move the slider card while the dimmer card is changing: neither must jump. Hold the rocker key (long press) and release.
+7. **Simulation:** operate a button; the lamp card follows. Move the slider card while the dimmer card is changing: neither must jump. Hold a push-button key set to relative dimming (long press) and release.
 8. **Telegram monitor:** open it under the simulation (*Telegram monitor*), drag the divider to resize, hide it again. In *Monitor*: filter on one device, on one group address, *Pause* while pressing buttons (the counter shows new telegrams), *Resume live*, *Clear view* (the file `vknx.log` in the data folder must be unchanged).
 9. **ETS group monitor next to vKNX:** values shown for known DPTs must match ETS; an address no device uses shows "Unknown DPT" and raw data.
 10. **Floor plan:** *Floor plan* → *Edit plan* → upload an image → place symbols, drag, rename in the properties panel → *Operate*. Quit and restart vKNX: the placements must still be there. Press symbols; the ⓘ button must open details without operating.

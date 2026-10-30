@@ -2,69 +2,71 @@ package org.vknx.device;
 
 import java.util.Map;
 
-/** One-channel switch actuator driving a relay (and the lamp wired to it). */
+/**
+ * Switch actuator with 8 outputs; every output can be disabled and named in ETS. Objects: 1..8 switch, 9..16 status.
+ * ETS parameters: Out1Enable.., Out1Logic.. (relay logic), StartupState, SendStatus.
+ */
 public final class SwitchActuatorBehavior extends DeviceBehavior {
-	private volatile int objectValue; // logical value of the Switch object (1 = "on" telegram)
-	private volatile boolean initialized;
+	static final int N = 8;
+	private final int[] obj = new int[N]; // logical value of each Switch object
 
 	SwitchActuatorBehavior(final VirtualDevice dev) { super(dev); }
 
-	/** True when the relay contact is closed, i.e. the lamp is lit. Depends on the downloaded RelayLogic parameter. */
-	public boolean relayClosed() {
-		final boolean inverted = dev.param("RelayLogic") == 1;
-		return (objectValue == 1) != inverted;
-	}
+	private boolean enabled(final int ch) { return dev.param("Out" + (ch + 1) + "Enable") == 1; }
 
-	/** Lamp state shown in the UI: only meaningful when an application is loaded. */
-	public boolean lampLit() { return dev.applicationLoaded() && relayClosed(); }
+	private boolean closed(final int ch) { return enabled(ch) && (obj[ch] == 1) != (dev.param("Out" + (ch + 1) + "Logic") == 1); }
 
 	@Override
 	void onApplicationLoaded() {
 		final int startup = dev.param("StartupState");
-		switch (startup) {
-			case 0 -> objectValue = 0;
-			case 1 -> objectValue = 1;
-			default -> { /* unchanged */ }
-		}
-		initialized = true;
-		dev.log("relay", "application loaded, StartupState=" + switch (startup) {
-			case 0 -> "off";
-			case 1 -> "on";
-			default -> "unchanged";
-		} + " -> relay " + (relayClosed() ? "closed (lamp on)" : "open (lamp off)"));
-		reportStatus();
+		if (startup < 2)
+			java.util.Arrays.fill(obj, startup);
+		dev.log("relay", "application started, StartupState=" + (startup == 0 ? "off" : startup == 1 ? "on" : "unchanged"));
+		for (int c = 0; c < N; c++)
+			status(c);
 	}
 
 	@Override
 	void onObjectReceived(final int go, final int value) {
-		if (go != 1)
+		if (go < 1 || go > N)
 			return;
-		final int v = value & 1;
-		final boolean before = relayClosed();
-		objectValue = v;
-		final boolean after = relayClosed();
-		dev.log("relay", "Switch=" + (v == 1 ? "ON" : "OFF") + ", parameter RelayLogic="
-				+ (dev.param("RelayLogic") == 1 ? "inverted" : "normal") + " -> relay " + (after ? "closed" : "open")
-				+ " (lamp " + (after ? "ON" : "OFF") + ")");
-		if (before != after || !initialized)
-			reportStatus();
-		initialized = true;
+		final int c = go - 1;
+		if (!enabled(c)) {
+			dev.log("relay", "output " + go + ": telegram ignored, parameter Out" + go + "Enable=No");
+			return;
+		}
+		final boolean before = closed(c);
+		obj[c] = value & 1;
+		dev.log("relay", "output " + go + " (" + dev.paramText("Out" + go + "Name") + "): Switch=" + (obj[c] == 1 ? "ON" : "OFF")
+				+ ", parameter Out" + go + "Logic=" + (dev.param("Out" + go + "Logic") == 1 ? "inverted" : "normal")
+				+ " -> relay " + (closed(c) ? "closed" : "open"));
+		if (before != closed(c))
+			status(c);
 	}
 
-	private void reportStatus() {
-		if (dev.param("SendStatusOnChange") == 1)
-			dev.transmit(2, objectValue);
-		else
-			dev.log("relay", "status not sent: parameter SendStatusOnChange=No");
+	private void status(final int c) {
+		if (enabled(c) && dev.param("SendStatus") == 1)
+			dev.transmit(N + 1 + c, obj[c]);
 	}
 
-	@Override Integer valueOf(final int go) { return go == 2 || go == 1 ? objectValue : null; }
+	/** True while output {@code out} (1..8) has its relay closed (lamp lit). */
+	public boolean lampLit(final int out) { return dev.applicationLoaded() && closed(out - 1); }
+
+	/** Output 1 (tests). */
+	public boolean lampLit() { return lampLit(1); }
+
+	@Override Integer valueOf(final int go) { return go >= 1 && go <= 2 * N ? obj[(go - 1) % N] : null; }
 
 	@Override
 	public Map<String, Object> view() {
 		final var m = newView();
-		m.put("relayClosed", relayClosed());
-		m.put("lamp", lampLit());
+		final var lamps = new StringBuilder();
+		for (int c = 0; c < N; c++) {
+			lamps.append(dev.applicationLoaded() && closed(c) ? '1' : '0');
+			m.put("e" + (c + 1), enabled(c));
+			m.put("n" + (c + 1), dev.paramText("Out" + (c + 1) + "Name"));
+		}
+		m.put("lamps", lamps.toString());
 		return m;
 	}
 }

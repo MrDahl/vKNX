@@ -233,13 +233,17 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .lamp-cell .bulb { width: 2.4rem; height: 2.4rem; }
 .lamp-cell .bulb .ic { width: 1.3rem; height: 1.3rem; }
 .lamp-cell b { font-weight: 600; color: var(--text); font-size: .8rem; }
+.key-row { display: flex; align-items: center; gap: .6rem; padding: .15rem 0; }
+.key-row .btn.press { min-width: 9rem; justify-content: flex-start; }
+.key-row.on .btn.press { border-color: var(--lamp); }
+.lamp-cell span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .meter { height: 8px; border-radius: 4px; background: var(--surface-3); overflow: hidden; width: 100%; }
 .meter > i { display: block; height: 100%; background: var(--accent); transition: width .25s; }
-.blinds { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; }
+.blinds { display: grid; grid-template-columns: repeat(4, 1fr); gap: .8rem; width: 100%; }
 .blind { display: grid; gap: .25rem; }
 .window { height: 3.6rem; border: 2px solid var(--border-strong); border-radius: 4px; background: var(--surface-3); position: relative; overflow: hidden; }
 .window > i { position: absolute; left: 0; right: 0; top: 0; background: repeating-linear-gradient(180deg, var(--muted) 0 3px, transparent 3px 6px); opacity: .55; transition: height .3s; }
-.blind .v { font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.blind .v { font-size: 1.2rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .sens-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .5rem .9rem; width: 100%; }
 .sens { display: grid; gap: 0; }
 .sens .l { color: var(--muted); font-size: .85rem; display: flex; gap: .3rem; align-items: center; }

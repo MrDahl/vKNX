@@ -458,8 +458,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			final byte[] area = parameterArea();
 			final var sb = new StringBuilder();
 			for (final var pd : product.params())
-				if (pd.showWhenParam().isEmpty() || param(pd.showWhenParam()) == pd.showWhenValue())
-					sb.append(sb.length() == 0 ? "" : ", ").append(pd.name()).append('=').append(param(pd.name()));
+				if (visible(pd.when()))
+					sb.append(sb.length() == 0 ? "" : ", ").append(pd.name()).append('=')
+							.append(pd.isText() ? paramText(pd.name()) : String.valueOf(param(pd.name())));
 			log("download", "application started; parameter memory " + HexFormat.of().formatHex(area) + " -> " + sb);
 			behavior.onApplicationLoaded();
 		}
@@ -546,6 +547,21 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		final ParamDef p = product.param(paramName);
 		final byte[] area = parameterArea();
 		return area.length == 0 ? p.defaultValue() : p.read(area);
+	}
+
+	/** Current value of a text parameter (names of keys, outputs, channels): the downloaded text or the product default. */
+	public String paramText(final String paramName) {
+		final ParamDef p = product.param(paramName);
+		final byte[] area = parameterArea();
+		return area.length == 0 ? p.defaultText() : p.readText(area);
+	}
+
+	/** True while all conditions hold (the item is shown in ETS, so it matters to the simulation). */
+	public boolean visible(final java.util.List<org.vknx.product.Cond> when) {
+		for (final var c : when)
+			if (!c.values().contains(param(c.param())))
+				return false;
+		return true;
 	}
 
 	// ---------------------------------------------------------------- group communication (process communication)

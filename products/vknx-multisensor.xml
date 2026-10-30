@@ -4,264 +4,324 @@
     <Manufacturer RefId="M-00FA">
       <Catalog>
         <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
-          <CatalogItem Id="M-00FA_H-2569-1_HP-0A09-02-0000_CI-VKNXMS1-1" Name="vKNX Multisensor" Number="1" ProductRefId="M-00FA_H-2569-1_P-VKNXMS1" Hardware2ProgramRefId="M-00FA_H-2569-1_HP-0A09-02-0000" DefaultLanguage="en-US" />
+          <CatalogItem Id="M-00FA_H-2569-1_HP-0A09-03-0000_CI-VKNXMS1-1" Name="vKNX Multisensor" Number="1" ProductRefId="M-00FA_H-2569-1_P-VKNXMS1" Hardware2ProgramRefId="M-00FA_H-2569-1_HP-0A09-03-0000" DefaultLanguage="en-US" />
         </CatalogSection>
       </Catalog>
       <ApplicationPrograms>
-        <ApplicationProgram Id="M-00FA_A-0A09-02-0000" ApplicationNumber="2569" ApplicationVersion="2" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Multisensor" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1">
+        <ApplicationProgram Id="M-00FA_A-0A09-03-0000" ApplicationNumber="2569" ApplicationVersion="3" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Multisensor" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2">
           <Static>
             <Code>
-              <RelativeSegment Id="M-00FA_A-0A09-02-0000_RS-04-00000" Name="Parameters" Offset="0" Size="60" LoadStateMachine="4" />
+              <RelativeSegment Id="M-00FA_A-0A09-03-0000_RS-04-00000" Name="Parameters" Offset="0" Size="60" LoadStateMachine="4" />
             </Code>
             <ParameterTypes>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-CO2Mode" Name="CO2Mode">
-                <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-02-0000_PT-CO2Mode_EN-0" />
-                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-02-0000_PT-CO2Mode_EN-1" />
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-CO2Enable" Name="CO2Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A09-03-0000_PT-CO2Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A09-03-0000_PT-CO2Enable_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-CO2Interval" Name="CO2Interval">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-CO2Mode" Name="CO2Mode">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-03-0000_PT-CO2Mode_EN-0" />
+                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-03-0000_PT-CO2Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-CO2Interval" Name="CO2Interval">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-CO2Value" Name="CO2Value">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-CO2Value" Name="CO2Value">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="5000" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-CO2Min" Name="CO2Min">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-CO2Min" Name="CO2Min">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="5000" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-CO2Max" Name="CO2Max">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-CO2Max" Name="CO2Max">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="5000" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-HumidityMode" Name="HumidityMode">
-                <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-02-0000_PT-HumidityMode_EN-0" />
-                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-02-0000_PT-HumidityMode_EN-1" />
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-HumidityEnable" Name="HumidityEnable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A09-03-0000_PT-HumidityEnable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A09-03-0000_PT-HumidityEnable_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-HumidityInterval" Name="HumidityInterval">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-HumidityMode" Name="HumidityMode">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-03-0000_PT-HumidityMode_EN-0" />
+                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-03-0000_PT-HumidityMode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-HumidityInterval" Name="HumidityInterval">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-HumidityValue" Name="HumidityValue">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-HumidityValue" Name="HumidityValue">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-HumidityMin" Name="HumidityMin">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-HumidityMin" Name="HumidityMin">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-HumidityMax" Name="HumidityMax">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-HumidityMax" Name="HumidityMax">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-IlluminanceMode" Name="IlluminanceMode">
-                <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-02-0000_PT-IlluminanceMode_EN-0" />
-                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-02-0000_PT-IlluminanceMode_EN-1" />
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-IlluminanceEnable" Name="IlluminanceEnable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A09-03-0000_PT-IlluminanceEnable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A09-03-0000_PT-IlluminanceEnable_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-IlluminanceInterval" Name="IlluminanceInterval">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-IlluminanceMode" Name="IlluminanceMode">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-03-0000_PT-IlluminanceMode_EN-0" />
+                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-03-0000_PT-IlluminanceMode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-IlluminanceInterval" Name="IlluminanceInterval">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-IlluminanceValue" Name="IlluminanceValue">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-IlluminanceValue" Name="IlluminanceValue">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65000" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-IlluminanceMin" Name="IlluminanceMin">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-IlluminanceMin" Name="IlluminanceMin">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65000" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-IlluminanceMax" Name="IlluminanceMax">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-IlluminanceMax" Name="IlluminanceMax">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65000" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-TemperatureMode" Name="TemperatureMode">
-                <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-02-0000_PT-TemperatureMode_EN-0" />
-                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-02-0000_PT-TemperatureMode_EN-1" />
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-TemperatureEnable" Name="TemperatureEnable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A09-03-0000_PT-TemperatureEnable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A09-03-0000_PT-TemperatureEnable_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-TemperatureInterval" Name="TemperatureInterval">
-                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
-              </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-TemperatureValue" Name="TemperatureValue">
-                <TypeNumber SizeInBit="16" Type="signedInt" minInclusive="-300" maxInclusive="600" />
-              </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-TemperatureMin" Name="TemperatureMin">
-                <TypeNumber SizeInBit="16" Type="signedInt" minInclusive="-300" maxInclusive="600" />
-              </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-TemperatureMax" Name="TemperatureMax">
-                <TypeNumber SizeInBit="16" Type="signedInt" minInclusive="-300" maxInclusive="600" />
-              </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-PressureMode" Name="PressureMode">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-TemperatureMode" Name="TemperatureMode">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-02-0000_PT-PressureMode_EN-0" />
-                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-02-0000_PT-PressureMode_EN-1" />
+                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-03-0000_PT-TemperatureMode_EN-0" />
+                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-03-0000_PT-TemperatureMode_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-PressureInterval" Name="PressureInterval">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-TemperatureInterval" Name="TemperatureInterval">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-PressureValue" Name="PressureValue">
-                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="300" maxInclusive="1100" />
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-TemperatureValue" Name="TemperatureValue">
+                <TypeNumber SizeInBit="16" Type="signedInt" minInclusive="-300" maxInclusive="600" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-PressureMin" Name="PressureMin">
-                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="300" maxInclusive="1100" />
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-TemperatureMin" Name="TemperatureMin">
+                <TypeNumber SizeInBit="16" Type="signedInt" minInclusive="-300" maxInclusive="600" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-PressureMax" Name="PressureMax">
-                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="300" maxInclusive="1100" />
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-TemperatureMax" Name="TemperatureMax">
+                <TypeNumber SizeInBit="16" Type="signedInt" minInclusive="-300" maxInclusive="600" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-WindSpeedMode" Name="WindSpeedMode">
-                <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-02-0000_PT-WindSpeedMode_EN-0" />
-                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-02-0000_PT-WindSpeedMode_EN-1" />
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-PressureEnable" Name="PressureEnable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A09-03-0000_PT-PressureEnable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A09-03-0000_PT-PressureEnable_EN-1" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-WindSpeedInterval" Name="WindSpeedInterval">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-PressureMode" Name="PressureMode">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-03-0000_PT-PressureMode_EN-0" />
+                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-03-0000_PT-PressureMode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-PressureInterval" Name="PressureInterval">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-WindSpeedValue" Name="WindSpeedValue">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-PressureValue" Name="PressureValue">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="300" maxInclusive="1100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-PressureMin" Name="PressureMin">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="300" maxInclusive="1100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-PressureMax" Name="PressureMax">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="300" maxInclusive="1100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-WindSpeedEnable" Name="WindSpeedEnable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A09-03-0000_PT-WindSpeedEnable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A09-03-0000_PT-WindSpeedEnable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-WindSpeedMode" Name="WindSpeedMode">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Fixed value" Value="0" Id="M-00FA_A-0A09-03-0000_PT-WindSpeedMode_EN-0" />
+                  <Enumeration Text="Random value between minimum and maximum" Value="1" Id="M-00FA_A-0A09-03-0000_PT-WindSpeedMode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-WindSpeedInterval" Name="WindSpeedInterval">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-WindSpeedValue" Name="WindSpeedValue">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="500" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-WindSpeedMin" Name="WindSpeedMin">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-WindSpeedMin" Name="WindSpeedMin">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="500" />
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A09-02-0000_PT-WindSpeedMax" Name="WindSpeedMax">
+              <ParameterType Id="M-00FA_A-0A09-03-0000_PT-WindSpeedMax" Name="WindSpeedMax">
                 <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="500" />
               </ParameterType>
             </ParameterTypes>
             <Parameters>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-1" Name="CO2Mode" ParameterType="M-00FA_A-0A09-02-0000_PT-CO2Mode" Text="Send" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-1" Name="CO2Enable" ParameterType="M-00FA_A-0A09-03-0000_PT-CO2Enable" Text="Enable co2" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="1" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-2" Name="CO2Interval" ParameterType="M-00FA_A-0A09-02-0000_PT-CO2Interval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="2" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-2" Name="CO2Mode" ParameterType="M-00FA_A-0A09-03-0000_PT-CO2Mode" Text="Send" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="0" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-3" Name="CO2Value" ParameterType="M-00FA_A-0A09-02-0000_PT-CO2Value" Text="Value (ppm)" Value="600">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="4" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-3" Name="CO2Interval" ParameterType="M-00FA_A-0A09-03-0000_PT-CO2Interval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="2" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-4" Name="CO2Min" ParameterType="M-00FA_A-0A09-02-0000_PT-CO2Min" Text="Random minimum" Value="300">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="6" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-4" Name="CO2Value" ParameterType="M-00FA_A-0A09-03-0000_PT-CO2Value" Text="Value (ppm)" Value="600">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="4" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-5" Name="CO2Max" ParameterType="M-00FA_A-0A09-02-0000_PT-CO2Max" Text="Random maximum" Value="900">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="8" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-5" Name="CO2Min" ParameterType="M-00FA_A-0A09-03-0000_PT-CO2Min" Text="Random minimum" Value="300">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="6" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-6" Name="HumidityMode" ParameterType="M-00FA_A-0A09-02-0000_PT-HumidityMode" Text="Send" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="10" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-6" Name="CO2Max" ParameterType="M-00FA_A-0A09-03-0000_PT-CO2Max" Text="Random maximum" Value="900">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="8" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-7" Name="HumidityInterval" ParameterType="M-00FA_A-0A09-02-0000_PT-HumidityInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="12" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-7" Name="HumidityEnable" ParameterType="M-00FA_A-0A09-03-0000_PT-HumidityEnable" Text="Enable humidity" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="11" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-8" Name="HumidityValue" ParameterType="M-00FA_A-0A09-02-0000_PT-HumidityValue" Text="Value (%)" Value="45">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="14" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-8" Name="HumidityMode" ParameterType="M-00FA_A-0A09-03-0000_PT-HumidityMode" Text="Send" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="10" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-9" Name="HumidityMin" ParameterType="M-00FA_A-0A09-02-0000_PT-HumidityMin" Text="Random minimum" Value="22">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="16" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-9" Name="HumidityInterval" ParameterType="M-00FA_A-0A09-03-0000_PT-HumidityInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="12" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-10" Name="HumidityMax" ParameterType="M-00FA_A-0A09-02-0000_PT-HumidityMax" Text="Random maximum" Value="67">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="18" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-10" Name="HumidityValue" ParameterType="M-00FA_A-0A09-03-0000_PT-HumidityValue" Text="Value (%)" Value="45">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="14" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-11" Name="IlluminanceMode" ParameterType="M-00FA_A-0A09-02-0000_PT-IlluminanceMode" Text="Send" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="20" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-11" Name="HumidityMin" ParameterType="M-00FA_A-0A09-03-0000_PT-HumidityMin" Text="Random minimum" Value="22">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="16" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-12" Name="IlluminanceInterval" ParameterType="M-00FA_A-0A09-02-0000_PT-IlluminanceInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="22" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-12" Name="HumidityMax" ParameterType="M-00FA_A-0A09-03-0000_PT-HumidityMax" Text="Random maximum" Value="67">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="18" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-13" Name="IlluminanceValue" ParameterType="M-00FA_A-0A09-02-0000_PT-IlluminanceValue" Text="Value (lux)" Value="300">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="24" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-13" Name="IlluminanceEnable" ParameterType="M-00FA_A-0A09-03-0000_PT-IlluminanceEnable" Text="Enable illuminance" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="21" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-14" Name="IlluminanceMin" ParameterType="M-00FA_A-0A09-02-0000_PT-IlluminanceMin" Text="Random minimum" Value="150">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="26" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-14" Name="IlluminanceMode" ParameterType="M-00FA_A-0A09-03-0000_PT-IlluminanceMode" Text="Send" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="20" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-15" Name="IlluminanceMax" ParameterType="M-00FA_A-0A09-02-0000_PT-IlluminanceMax" Text="Random maximum" Value="450">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="28" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-15" Name="IlluminanceInterval" ParameterType="M-00FA_A-0A09-03-0000_PT-IlluminanceInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="22" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-16" Name="TemperatureMode" ParameterType="M-00FA_A-0A09-02-0000_PT-TemperatureMode" Text="Send" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="30" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-16" Name="IlluminanceValue" ParameterType="M-00FA_A-0A09-03-0000_PT-IlluminanceValue" Text="Value (lux)" Value="300">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="24" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-17" Name="TemperatureInterval" ParameterType="M-00FA_A-0A09-02-0000_PT-TemperatureInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="32" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-17" Name="IlluminanceMin" ParameterType="M-00FA_A-0A09-03-0000_PT-IlluminanceMin" Text="Random minimum" Value="150">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="26" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-18" Name="TemperatureValue" ParameterType="M-00FA_A-0A09-02-0000_PT-TemperatureValue" Text="Value (0.1 °C, 215 = 21.5 °C)" Value="215">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="34" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-18" Name="IlluminanceMax" ParameterType="M-00FA_A-0A09-03-0000_PT-IlluminanceMax" Text="Random maximum" Value="450">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="28" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-19" Name="TemperatureMin" ParameterType="M-00FA_A-0A09-02-0000_PT-TemperatureMin" Text="Random minimum" Value="-300">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="36" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-19" Name="TemperatureEnable" ParameterType="M-00FA_A-0A09-03-0000_PT-TemperatureEnable" Text="Enable temperature" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="31" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-20" Name="TemperatureMax" ParameterType="M-00FA_A-0A09-02-0000_PT-TemperatureMax" Text="Random maximum" Value="322">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="38" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-20" Name="TemperatureMode" ParameterType="M-00FA_A-0A09-03-0000_PT-TemperatureMode" Text="Send" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="30" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-21" Name="PressureMode" ParameterType="M-00FA_A-0A09-02-0000_PT-PressureMode" Text="Send" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="40" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-21" Name="TemperatureInterval" ParameterType="M-00FA_A-0A09-03-0000_PT-TemperatureInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="32" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-22" Name="PressureInterval" ParameterType="M-00FA_A-0A09-02-0000_PT-PressureInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="42" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-22" Name="TemperatureValue" ParameterType="M-00FA_A-0A09-03-0000_PT-TemperatureValue" Text="Value (0.1 °C, 215 = 21.5 °C)" Value="215">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="34" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-23" Name="PressureValue" ParameterType="M-00FA_A-0A09-02-0000_PT-PressureValue" Text="Value (hPa)" Value="1013">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="44" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-23" Name="TemperatureMin" ParameterType="M-00FA_A-0A09-03-0000_PT-TemperatureMin" Text="Random minimum" Value="-300">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="36" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-24" Name="PressureMin" ParameterType="M-00FA_A-0A09-02-0000_PT-PressureMin" Text="Random minimum" Value="506">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="46" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-24" Name="TemperatureMax" ParameterType="M-00FA_A-0A09-03-0000_PT-TemperatureMax" Text="Random maximum" Value="322">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="38" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-25" Name="PressureMax" ParameterType="M-00FA_A-0A09-02-0000_PT-PressureMax" Text="Random maximum" Value="1519">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="48" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-25" Name="PressureEnable" ParameterType="M-00FA_A-0A09-03-0000_PT-PressureEnable" Text="Enable air pressure" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="41" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-26" Name="WindSpeedMode" ParameterType="M-00FA_A-0A09-02-0000_PT-WindSpeedMode" Text="Send" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="50" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-26" Name="PressureMode" ParameterType="M-00FA_A-0A09-03-0000_PT-PressureMode" Text="Send" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="40" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-27" Name="WindSpeedInterval" ParameterType="M-00FA_A-0A09-02-0000_PT-WindSpeedInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="52" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-27" Name="PressureInterval" ParameterType="M-00FA_A-0A09-03-0000_PT-PressureInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="42" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-28" Name="WindSpeedValue" ParameterType="M-00FA_A-0A09-02-0000_PT-WindSpeedValue" Text="Value (0.1 m/s, 30 = 3.0 m/s)" Value="30">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="54" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-28" Name="PressureValue" ParameterType="M-00FA_A-0A09-03-0000_PT-PressureValue" Text="Value (hPa)" Value="1013">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="44" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-29" Name="WindSpeedMin" ParameterType="M-00FA_A-0A09-02-0000_PT-WindSpeedMin" Text="Random minimum" Value="15">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="56" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-29" Name="PressureMin" ParameterType="M-00FA_A-0A09-03-0000_PT-PressureMin" Text="Random minimum" Value="506">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="46" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A09-02-0000_P-30" Name="WindSpeedMax" ParameterType="M-00FA_A-0A09-02-0000_PT-WindSpeedMax" Text="Random maximum" Value="45">
-                <Memory CodeSegment="M-00FA_A-0A09-02-0000_RS-04-00000" Offset="58" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-30" Name="PressureMax" ParameterType="M-00FA_A-0A09-03-0000_PT-PressureMax" Text="Random maximum" Value="1519">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="48" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-31" Name="WindSpeedEnable" ParameterType="M-00FA_A-0A09-03-0000_PT-WindSpeedEnable" Text="Enable wind speed" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="51" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-32" Name="WindSpeedMode" ParameterType="M-00FA_A-0A09-03-0000_PT-WindSpeedMode" Text="Send" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="50" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-33" Name="WindSpeedInterval" ParameterType="M-00FA_A-0A09-03-0000_PT-WindSpeedInterval" Text="Send cyclically every (seconds, 0 = never)" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="52" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-34" Name="WindSpeedValue" ParameterType="M-00FA_A-0A09-03-0000_PT-WindSpeedValue" Text="Value (0.1 m/s, 30 = 3.0 m/s)" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="54" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-35" Name="WindSpeedMin" ParameterType="M-00FA_A-0A09-03-0000_PT-WindSpeedMin" Text="Random minimum" Value="15">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="56" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A09-03-0000_P-36" Name="WindSpeedMax" ParameterType="M-00FA_A-0A09-03-0000_PT-WindSpeedMax" Text="Random maximum" Value="45">
+                <Memory CodeSegment="M-00FA_A-0A09-03-0000_RS-04-00000" Offset="58" BitOffset="0" />
               </Parameter>
             </Parameters>
             <ParameterRefs>
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-1_R-1" RefId="M-00FA_A-0A09-02-0000_P-1" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-2_R-2" RefId="M-00FA_A-0A09-02-0000_P-2" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-3_R-3" RefId="M-00FA_A-0A09-02-0000_P-3" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-4_R-4" RefId="M-00FA_A-0A09-02-0000_P-4" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-5_R-5" RefId="M-00FA_A-0A09-02-0000_P-5" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-6_R-6" RefId="M-00FA_A-0A09-02-0000_P-6" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-7_R-7" RefId="M-00FA_A-0A09-02-0000_P-7" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-8_R-8" RefId="M-00FA_A-0A09-02-0000_P-8" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-9_R-9" RefId="M-00FA_A-0A09-02-0000_P-9" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-10_R-10" RefId="M-00FA_A-0A09-02-0000_P-10" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-11_R-11" RefId="M-00FA_A-0A09-02-0000_P-11" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-12_R-12" RefId="M-00FA_A-0A09-02-0000_P-12" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-13_R-13" RefId="M-00FA_A-0A09-02-0000_P-13" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-14_R-14" RefId="M-00FA_A-0A09-02-0000_P-14" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-15_R-15" RefId="M-00FA_A-0A09-02-0000_P-15" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-16_R-16" RefId="M-00FA_A-0A09-02-0000_P-16" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-17_R-17" RefId="M-00FA_A-0A09-02-0000_P-17" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-18_R-18" RefId="M-00FA_A-0A09-02-0000_P-18" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-19_R-19" RefId="M-00FA_A-0A09-02-0000_P-19" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-20_R-20" RefId="M-00FA_A-0A09-02-0000_P-20" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-21_R-21" RefId="M-00FA_A-0A09-02-0000_P-21" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-22_R-22" RefId="M-00FA_A-0A09-02-0000_P-22" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-23_R-23" RefId="M-00FA_A-0A09-02-0000_P-23" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-24_R-24" RefId="M-00FA_A-0A09-02-0000_P-24" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-25_R-25" RefId="M-00FA_A-0A09-02-0000_P-25" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-26_R-26" RefId="M-00FA_A-0A09-02-0000_P-26" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-27_R-27" RefId="M-00FA_A-0A09-02-0000_P-27" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-28_R-28" RefId="M-00FA_A-0A09-02-0000_P-28" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-29_R-29" RefId="M-00FA_A-0A09-02-0000_P-29" />
-              <ParameterRef Id="M-00FA_A-0A09-02-0000_P-30_R-30" RefId="M-00FA_A-0A09-02-0000_P-30" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-1_R-1" RefId="M-00FA_A-0A09-03-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-2_R-2" RefId="M-00FA_A-0A09-03-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-3_R-3" RefId="M-00FA_A-0A09-03-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-4_R-4" RefId="M-00FA_A-0A09-03-0000_P-4" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-5_R-5" RefId="M-00FA_A-0A09-03-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-6_R-6" RefId="M-00FA_A-0A09-03-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-7_R-7" RefId="M-00FA_A-0A09-03-0000_P-7" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-8_R-8" RefId="M-00FA_A-0A09-03-0000_P-8" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-9_R-9" RefId="M-00FA_A-0A09-03-0000_P-9" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-10_R-10" RefId="M-00FA_A-0A09-03-0000_P-10" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-11_R-11" RefId="M-00FA_A-0A09-03-0000_P-11" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-12_R-12" RefId="M-00FA_A-0A09-03-0000_P-12" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-13_R-13" RefId="M-00FA_A-0A09-03-0000_P-13" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-14_R-14" RefId="M-00FA_A-0A09-03-0000_P-14" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-15_R-15" RefId="M-00FA_A-0A09-03-0000_P-15" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-16_R-16" RefId="M-00FA_A-0A09-03-0000_P-16" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-17_R-17" RefId="M-00FA_A-0A09-03-0000_P-17" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-18_R-18" RefId="M-00FA_A-0A09-03-0000_P-18" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-19_R-19" RefId="M-00FA_A-0A09-03-0000_P-19" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-20_R-20" RefId="M-00FA_A-0A09-03-0000_P-20" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-21_R-21" RefId="M-00FA_A-0A09-03-0000_P-21" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-22_R-22" RefId="M-00FA_A-0A09-03-0000_P-22" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-23_R-23" RefId="M-00FA_A-0A09-03-0000_P-23" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-24_R-24" RefId="M-00FA_A-0A09-03-0000_P-24" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-25_R-25" RefId="M-00FA_A-0A09-03-0000_P-25" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-26_R-26" RefId="M-00FA_A-0A09-03-0000_P-26" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-27_R-27" RefId="M-00FA_A-0A09-03-0000_P-27" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-28_R-28" RefId="M-00FA_A-0A09-03-0000_P-28" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-29_R-29" RefId="M-00FA_A-0A09-03-0000_P-29" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-30_R-30" RefId="M-00FA_A-0A09-03-0000_P-30" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-31_R-31" RefId="M-00FA_A-0A09-03-0000_P-31" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-32_R-32" RefId="M-00FA_A-0A09-03-0000_P-32" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-33_R-33" RefId="M-00FA_A-0A09-03-0000_P-33" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-34_R-34" RefId="M-00FA_A-0A09-03-0000_P-34" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-35_R-35" RefId="M-00FA_A-0A09-03-0000_P-35" />
+              <ParameterRef Id="M-00FA_A-0A09-03-0000_P-36_R-36" RefId="M-00FA_A-0A09-03-0000_P-36" />
             </ParameterRefs>
             <ComObjectTable>
-              <ComObject Id="M-00FA_A-0A09-02-0000_O-1" Name="CO2" Text="CO2 (ppm)" Number="1" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-8" />
-              <ComObject Id="M-00FA_A-0A09-02-0000_O-2" Name="Humidity" Text="Humidity (%)" Number="2" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-7" />
-              <ComObject Id="M-00FA_A-0A09-02-0000_O-3" Name="Illuminance" Text="Illuminance (lux)" Number="3" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-4" />
-              <ComObject Id="M-00FA_A-0A09-02-0000_O-4" Name="Temperature" Text="Temperature (°C)" Number="4" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-1" />
-              <ComObject Id="M-00FA_A-0A09-02-0000_O-5" Name="Pressure" Text="Air pressure (hPa)" Number="5" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-6" />
-              <ComObject Id="M-00FA_A-0A09-02-0000_O-6" Name="WindSpeed" Text="Wind speed (m/s)" Number="6" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-5" />
+              <ComObject Id="M-00FA_A-0A09-03-0000_O-1" Name="CO2" Text="CO2 (ppm)" Number="1" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-8" />
+              <ComObject Id="M-00FA_A-0A09-03-0000_O-2" Name="Humidity" Text="Humidity (%)" Number="2" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-7" />
+              <ComObject Id="M-00FA_A-0A09-03-0000_O-3" Name="Illuminance" Text="Illuminance (lux)" Number="3" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-4" />
+              <ComObject Id="M-00FA_A-0A09-03-0000_O-4" Name="Temperature" Text="Temperature (°C)" Number="4" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-1" />
+              <ComObject Id="M-00FA_A-0A09-03-0000_O-5" Name="Pressure" Text="Air pressure (hPa)" Number="5" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-6" />
+              <ComObject Id="M-00FA_A-0A09-03-0000_O-6" Name="WindSpeed" Text="Wind speed (m/s)" Number="6" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-5" />
             </ComObjectTable>
             <ComObjectRefs>
-              <ComObjectRef Id="M-00FA_A-0A09-02-0000_O-1_R-1" RefId="M-00FA_A-0A09-02-0000_O-1" />
-              <ComObjectRef Id="M-00FA_A-0A09-02-0000_O-2_R-2" RefId="M-00FA_A-0A09-02-0000_O-2" />
-              <ComObjectRef Id="M-00FA_A-0A09-02-0000_O-3_R-3" RefId="M-00FA_A-0A09-02-0000_O-3" />
-              <ComObjectRef Id="M-00FA_A-0A09-02-0000_O-4_R-4" RefId="M-00FA_A-0A09-02-0000_O-4" />
-              <ComObjectRef Id="M-00FA_A-0A09-02-0000_O-5_R-5" RefId="M-00FA_A-0A09-02-0000_O-5" />
-              <ComObjectRef Id="M-00FA_A-0A09-02-0000_O-6_R-6" RefId="M-00FA_A-0A09-02-0000_O-6" />
+              <ComObjectRef Id="M-00FA_A-0A09-03-0000_O-1_R-1" RefId="M-00FA_A-0A09-03-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A09-03-0000_O-2_R-2" RefId="M-00FA_A-0A09-03-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A09-03-0000_O-3_R-3" RefId="M-00FA_A-0A09-03-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A09-03-0000_O-4_R-4" RefId="M-00FA_A-0A09-03-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0A09-03-0000_O-5_R-5" RefId="M-00FA_A-0A09-03-0000_O-5" />
+              <ComObjectRef Id="M-00FA_A-0A09-03-0000_O-6_R-6" RefId="M-00FA_A-0A09-03-0000_O-6" />
             </ComObjectRefs>
             <AddressTable MaxEntries="255" />
             <AssociationTable MaxEntries="255" />
@@ -284,125 +344,275 @@
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
-              <ParameterBlock Id="M-00FA_A-0A09-02-0000_PB-1" Name="CO2" Text="CO2">
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-1_R-1" />
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-2_R-2" />
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-1_R-1">
-                  <when test="0">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-3_R-3" />
-                  </when>
-                </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-1_R-1">
+              <ParameterBlock Id="M-00FA_A-0A09-03-0000_PB-1" Name="CO2" Text="CO2">
+                <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-1_R-1" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-1_R-1">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-4_R-4" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-2_R-2" />
                   </when>
                 </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-1_R-1">
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-1_R-1">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-5_R-5" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-3_R-3" />
                   </when>
                 </choose>
-                <ComObjectRefRef RefId="M-00FA_A-0A09-02-0000_O-1_R-1" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-1_R-1">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-2_R-2">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-4_R-4" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-1_R-1">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-2_R-2">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-5_R-5" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-1_R-1">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-2_R-2">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-6_R-6" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A09-03-0000_O-1_R-1" />
+                  </when>
+                </choose>
               </ParameterBlock>
-              <ParameterBlock Id="M-00FA_A-0A09-02-0000_PB-2" Name="Humidity" Text="Humidity">
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-6_R-6" />
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-7_R-7" />
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-6_R-6">
-                  <when test="0">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-8_R-8" />
-                  </when>
-                </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-6_R-6">
+              <ParameterBlock Id="M-00FA_A-0A09-03-0000_PB-2" Name="Humidity" Text="Humidity">
+                <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-7_R-7" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-7_R-7">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-9_R-9" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-8_R-8" />
                   </when>
                 </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-6_R-6">
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-7_R-7">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-10_R-10" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-9_R-9" />
                   </when>
                 </choose>
-                <ComObjectRefRef RefId="M-00FA_A-0A09-02-0000_O-2_R-2" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-7_R-7">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-8_R-8">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-10_R-10" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-7_R-7">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-8_R-8">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-11_R-11" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-7_R-7">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-8_R-8">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-12_R-12" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A09-03-0000_O-2_R-2" />
+                  </when>
+                </choose>
               </ParameterBlock>
-              <ParameterBlock Id="M-00FA_A-0A09-02-0000_PB-3" Name="Illuminance" Text="Illuminance">
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-11_R-11" />
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-12_R-12" />
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-11_R-11">
-                  <when test="0">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-13_R-13" />
-                  </when>
-                </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-11_R-11">
+              <ParameterBlock Id="M-00FA_A-0A09-03-0000_PB-3" Name="Illuminance" Text="Illuminance">
+                <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-13_R-13" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-13_R-13">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-14_R-14" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-14_R-14" />
                   </when>
                 </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-11_R-11">
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-13_R-13">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-15_R-15" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-15_R-15" />
                   </when>
                 </choose>
-                <ComObjectRefRef RefId="M-00FA_A-0A09-02-0000_O-3_R-3" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-13_R-13">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-14_R-14">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-16_R-16" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-13_R-13">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-14_R-14">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-17_R-17" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-13_R-13">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-14_R-14">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-18_R-18" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A09-03-0000_O-3_R-3" />
+                  </when>
+                </choose>
               </ParameterBlock>
-              <ParameterBlock Id="M-00FA_A-0A09-02-0000_PB-4" Name="Temperature" Text="Temperature">
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-16_R-16" />
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-17_R-17" />
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-16_R-16">
-                  <when test="0">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-18_R-18" />
-                  </when>
-                </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-16_R-16">
+              <ParameterBlock Id="M-00FA_A-0A09-03-0000_PB-4" Name="Temperature" Text="Temperature">
+                <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-19_R-19" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-19_R-19">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-19_R-19" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-20_R-20" />
                   </when>
                 </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-16_R-16">
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-19_R-19">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-20_R-20" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-21_R-21" />
                   </when>
                 </choose>
-                <ComObjectRefRef RefId="M-00FA_A-0A09-02-0000_O-4_R-4" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-19_R-19">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-20_R-20">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-22_R-22" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-19_R-19">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-20_R-20">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-23_R-23" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-19_R-19">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-20_R-20">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-24_R-24" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A09-03-0000_O-4_R-4" />
+                  </when>
+                </choose>
               </ParameterBlock>
-              <ParameterBlock Id="M-00FA_A-0A09-02-0000_PB-5" Name="Airpressure" Text="Air pressure">
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-21_R-21" />
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-22_R-22" />
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-21_R-21">
-                  <when test="0">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-23_R-23" />
-                  </when>
-                </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-21_R-21">
+              <ParameterBlock Id="M-00FA_A-0A09-03-0000_PB-5" Name="Airpressure" Text="Air pressure">
+                <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-25_R-25" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-25_R-25">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-24_R-24" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-26_R-26" />
                   </when>
                 </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-21_R-21">
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-25_R-25">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-25_R-25" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-27_R-27" />
                   </when>
                 </choose>
-                <ComObjectRefRef RefId="M-00FA_A-0A09-02-0000_O-5_R-5" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-25_R-25">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-26_R-26">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-28_R-28" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-25_R-25">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-26_R-26">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-29_R-29" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-25_R-25">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-26_R-26">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-30_R-30" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-25_R-25">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A09-03-0000_O-5_R-5" />
+                  </when>
+                </choose>
               </ParameterBlock>
-              <ParameterBlock Id="M-00FA_A-0A09-02-0000_PB-6" Name="Windspeed" Text="Wind speed">
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-26_R-26" />
-                <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-27_R-27" />
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-26_R-26">
-                  <when test="0">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-28_R-28" />
-                  </when>
-                </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-26_R-26">
+              <ParameterBlock Id="M-00FA_A-0A09-03-0000_PB-6" Name="Windspeed" Text="Wind speed">
+                <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-31_R-31" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-31_R-31">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-29_R-29" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-32_R-32" />
                   </when>
                 </choose>
-                <choose ParamRefId="M-00FA_A-0A09-02-0000_P-26_R-26">
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-31_R-31">
                   <when test="1">
-                    <ParameterRefRef RefId="M-00FA_A-0A09-02-0000_P-30_R-30" />
+                    <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-33_R-33" />
                   </when>
                 </choose>
-                <ComObjectRefRef RefId="M-00FA_A-0A09-02-0000_O-6_R-6" />
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-31_R-31">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-32_R-32">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-34_R-34" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-31_R-31">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-32_R-32">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-35_R-35" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-31_R-31">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A09-03-0000_P-32_R-32">
+                      <when test="1">
+                        <ParameterRefRef RefId="M-00FA_A-0A09-03-0000_P-36_R-36" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A09-03-0000_P-31_R-31">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A09-03-0000_O-6_R-6" />
+                  </when>
+                </choose>
               </ParameterBlock>
             </ChannelIndependentBlock>
           </Dynamic>
@@ -416,8 +626,8 @@
             </Product>
           </Products>
           <Hardware2Programs>
-            <Hardware2Program Id="M-00FA_H-2569-1_HP-0A09-02-0000" MediumTypes="MT-0">
-              <ApplicationProgramRef RefId="M-00FA_A-0A09-02-0000" />
+            <Hardware2Program Id="M-00FA_H-2569-1_HP-0A09-03-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A09-03-0000" />
               <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
             </Hardware2Program>
           </Hardware2Programs>

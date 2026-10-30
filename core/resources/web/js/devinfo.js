@@ -29,15 +29,14 @@ export const DOWNLOAD_TEXT = {
 export function pointsOf(d) {
   const v = d.view || {}, n = d.name, P = [];
   const add = (k, type, extra) => P.push({ id: n + '|' + k, dev: n, k, type, label: n, ...extra });
+  const on = i => v['e' + i] !== false;
   switch (d.product) {
-    case 'push-button': add('btn', 'button', { name: 'Button' }); break;
-    case 'push-rocker': case 'push-blind-rocker': add('k1', 'key', { keyNo: 1, sym: 'up', label: n + ' (upper)', name: 'Upper key' }); add('k2', 'key', { keyNo: 2, sym: 'down', label: n + ' (lower)', name: 'Lower key' }); break;
+    case 'push-button': for (let i = 1; i <= 4; i++) if (on(i)) add('k' + i, 'key', { keyNo: i, sym: 'button', label: n + ' ' + (v['n' + i] || 'Key ' + i), name: v['n' + i] || 'Key ' + i }); break;
     case 'push-slider': add('btn', 'button', { name: 'Button' }); add('sl', 'slider', { label: n + ' (slider)', name: 'Slider', val: v.level ?? 0 }); break;
-    case 'switch-actuator': add('l1', 'lamp', { name: 'Output 1', on: !!v.lamp }); break;
-    case 'switch-actuator-4': case 'switch-actuator-8': [...(v.lamps || '')].forEach((c, i) => add('l' + (i + 1), 'lamp', { on: c === '1', label: n + ' ' + (i + 1), name: 'Output ' + (i + 1) })); break;
-    case 'dimmer': add('dim', 'lamp', { name: 'Light', on: v.level > 0, pct: v.level }); break;
-    case 'blind-2': [1, 2].forEach(c => add('b' + c, 'blind', { pos: v['pos' + c] ?? 0, label: n + ' ' + c, name: 'Blind ' + c })); break;
-    case 'multisensor': SENSORS.forEach((s, i) => add('s' + i, 'sensor', { text: (v['s' + i] ?? '–') + ' ' + s.unit, label: n + ' ' + s.name, name: s.name, sensor: i })); break;
+    case 'switch-actuator': for (let i = 1; i <= 8; i++) if (on(i)) add('l' + i, 'lamp', { on: (v.lamps || '')[i - 1] === '1', label: n + ' ' + (v['n' + i] || 'Output ' + i), name: v['n' + i] || 'Output ' + i }); break;
+    case 'dimmer': for (let i = 1; i <= 4; i++) if (on(i)) add('d' + i, 'lamp', { on: (v['level' + i] ?? 0) > 0, pct: v['level' + i] ?? 0, label: n + ' ' + (v['n' + i] || 'Channel ' + i), name: v['n' + i] || 'Channel ' + i }); break;
+    case 'blind-actuator': for (let i = 1; i <= 4; i++) if (on(i)) add('b' + i, 'blind', { pos: v['pos' + i] ?? 0, label: n + ' ' + (v['n' + i] || 'Blind ' + i), name: v['n' + i] || 'Blind ' + i }); break;
+    case 'multisensor': SENSORS.forEach((s, i) => { if (v['e' + i] !== false) add('s' + i, 'sensor', { text: (v['s' + i] ?? '–') + ' ' + s.unit, label: n + ' ' + s.name, name: s.name, sensor: i }); }); break;
   }
   return P;
 }
@@ -47,8 +46,9 @@ export function objectsOfPoint(d, p) {
   const all = (S.cat[d.product]?.objects || []).map(o => o.number);
   const n = +(p.k.match(/\d+$/)?.[0] || 0);
   switch (d.product) {
-    case 'switch-actuator-4': case 'switch-actuator-8': { const cnt = +d.product.slice(-1); return [n, cnt + n]; }
-    case 'blind-2': return [3 * (n - 1) + 1, 3 * (n - 1) + 2, 3 * (n - 1) + 3];
+    case 'push-button': case 'dimmer': return [1, 2, 3, 4, 5].map(i => 5 * (n - 1) + i);
+    case 'switch-actuator': return [n, 8 + n];
+    case 'blind-actuator': return [3 * (n - 1) + 1, 3 * (n - 1) + 2, 3 * (n - 1) + 3];
     case 'multisensor': return [p.sensor + 1];
     default: return all;
   }

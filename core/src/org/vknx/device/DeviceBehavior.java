@@ -15,13 +15,9 @@ public abstract class DeviceBehavior {
 		return switch (p.key()) {
 			case "push-button" -> new PushButtonBehavior(dev);
 			case "switch-actuator" -> new SwitchActuatorBehavior(dev);
-			case "push-rocker" -> new RockerBehavior(dev);
-			case "push-blind-rocker" -> new BlindRockerBehavior(dev);
 			case "push-slider" -> new SliderPushBehavior(dev);
 			case "dimmer" -> new DimmerBehavior(dev);
-			case "blind-2" -> new BlindBehavior(dev);
-			case "switch-actuator-4" -> new SwitchActuatorNBehavior(dev, 4);
-			case "switch-actuator-8" -> new SwitchActuatorNBehavior(dev, 8);
+			case "blind-actuator" -> new BlindBehavior(dev);
 			case "multisensor" -> new MultisensorBehavior(dev);
 			case "coupler-line", "coupler-area" -> new CouplerBehavior(dev, p.key().equals("coupler-area"));
 			default -> throw new IllegalArgumentException("no behaviour for product " + p.key());

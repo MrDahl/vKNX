@@ -4,51 +4,51 @@
     <Manufacturer RefId="M-00FA">
       <Catalog>
         <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
-          <CatalogItem Id="M-00FA_H-2564-1_HP-0A04-02-0000_CI-VKNXSL1-1" Name="vKNX Slider push 1-fold" Number="1" ProductRefId="M-00FA_H-2564-1_P-VKNXSL1" Hardware2ProgramRefId="M-00FA_H-2564-1_HP-0A04-02-0000" DefaultLanguage="en-US" />
+          <CatalogItem Id="M-00FA_H-2564-1_HP-0A04-03-0000_CI-VKNXSL1-1" Name="vKNX Slider push 1-fold" Number="1" ProductRefId="M-00FA_H-2564-1_P-VKNXSL1" Hardware2ProgramRefId="M-00FA_H-2564-1_HP-0A04-03-0000" DefaultLanguage="en-US" />
         </CatalogSection>
       </Catalog>
       <ApplicationPrograms>
-        <ApplicationProgram Id="M-00FA_A-0A04-02-0000" ApplicationNumber="2564" ApplicationVersion="2" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Slider push 1-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1">
+        <ApplicationProgram Id="M-00FA_A-0A04-03-0000" ApplicationNumber="2564" ApplicationVersion="3" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Slider push 1-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2">
           <Static>
             <Code>
-              <RelativeSegment Id="M-00FA_A-0A04-02-0000_RS-04-00000" Name="Parameters" Offset="0" Size="1" LoadStateMachine="4" />
+              <RelativeSegment Id="M-00FA_A-0A04-03-0000_RS-04-00000" Name="Parameters" Offset="0" Size="1" LoadStateMachine="4" />
             </Code>
             <ParameterTypes>
-              <ParameterType Id="M-00FA_A-0A04-02-0000_PT-ButtonFunction" Name="ButtonFunction">
+              <ParameterType Id="M-00FA_A-0A04-03-0000_PT-ButtonFunction" Name="ButtonFunction">
                 <TypeRestriction Base="Value" SizeInBit="2">
-                  <Enumeration Text="Toggle (alternating on/off)" Value="0" Id="M-00FA_A-0A04-02-0000_PT-ButtonFunction_EN-0" />
-                  <Enumeration Text="On only" Value="1" Id="M-00FA_A-0A04-02-0000_PT-ButtonFunction_EN-1" />
-                  <Enumeration Text="Off only" Value="2" Id="M-00FA_A-0A04-02-0000_PT-ButtonFunction_EN-2" />
+                  <Enumeration Text="Toggle (alternating on/off)" Value="0" Id="M-00FA_A-0A04-03-0000_PT-ButtonFunction_EN-0" />
+                  <Enumeration Text="On only" Value="1" Id="M-00FA_A-0A04-03-0000_PT-ButtonFunction_EN-1" />
+                  <Enumeration Text="Off only" Value="2" Id="M-00FA_A-0A04-03-0000_PT-ButtonFunction_EN-2" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="M-00FA_A-0A04-02-0000_PT-SliderSend" Name="SliderSend">
+              <ParameterType Id="M-00FA_A-0A04-03-0000_PT-SliderSend" Name="SliderSend">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Only when released" Value="0" Id="M-00FA_A-0A04-02-0000_PT-SliderSend_EN-0" />
-                  <Enumeration Text="Continuously while sliding" Value="1" Id="M-00FA_A-0A04-02-0000_PT-SliderSend_EN-1" />
+                  <Enumeration Text="Only when released" Value="0" Id="M-00FA_A-0A04-03-0000_PT-SliderSend_EN-0" />
+                  <Enumeration Text="Continuously while sliding" Value="1" Id="M-00FA_A-0A04-03-0000_PT-SliderSend_EN-1" />
                 </TypeRestriction>
               </ParameterType>
             </ParameterTypes>
             <Parameters>
-              <Parameter Id="M-00FA_A-0A04-02-0000_P-1" Name="ButtonFunction" ParameterType="M-00FA_A-0A04-02-0000_PT-ButtonFunction" Text="Button function" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A04-02-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              <Parameter Id="M-00FA_A-0A04-03-0000_P-1" Name="ButtonFunction" ParameterType="M-00FA_A-0A04-03-0000_PT-ButtonFunction" Text="Button function" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A04-03-0000_RS-04-00000" Offset="0" BitOffset="0" />
               </Parameter>
-              <Parameter Id="M-00FA_A-0A04-02-0000_P-2" Name="SliderSend" ParameterType="M-00FA_A-0A04-02-0000_PT-SliderSend" Text="Slider sends" Value="0">
-                <Memory CodeSegment="M-00FA_A-0A04-02-0000_RS-04-00000" Offset="0" BitOffset="2" />
+              <Parameter Id="M-00FA_A-0A04-03-0000_P-2" Name="SliderSend" ParameterType="M-00FA_A-0A04-03-0000_PT-SliderSend" Text="Slider sends" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A04-03-0000_RS-04-00000" Offset="0" BitOffset="2" />
               </Parameter>
             </Parameters>
             <ParameterRefs>
-              <ParameterRef Id="M-00FA_A-0A04-02-0000_P-1_R-1" RefId="M-00FA_A-0A04-02-0000_P-1" />
-              <ParameterRef Id="M-00FA_A-0A04-02-0000_P-2_R-2" RefId="M-00FA_A-0A04-02-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A04-03-0000_P-1_R-1" RefId="M-00FA_A-0A04-03-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A04-03-0000_P-2_R-2" RefId="M-00FA_A-0A04-03-0000_P-2" />
             </ParameterRefs>
             <ComObjectTable>
-              <ComObject Id="M-00FA_A-0A04-02-0000_O-1" Name="Switch" Text="Switch" Number="1" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
-              <ComObject Id="M-00FA_A-0A04-02-0000_O-2" Name="Brightness" Text="Brightness (value)" Number="2" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
-              <ComObject Id="M-00FA_A-0A04-02-0000_O-3" Name="BrightnessStatus" Text="Brightness status" Number="3" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A04-03-0000_O-1" Name="Switch" Text="Switch" Number="1" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A04-03-0000_O-2" Name="Brightness" Text="Brightness (value)" Number="2" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A04-03-0000_O-3" Name="BrightnessStatus" Text="Brightness status" Number="3" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
             </ComObjectTable>
             <ComObjectRefs>
-              <ComObjectRef Id="M-00FA_A-0A04-02-0000_O-1_R-1" RefId="M-00FA_A-0A04-02-0000_O-1" />
-              <ComObjectRef Id="M-00FA_A-0A04-02-0000_O-2_R-2" RefId="M-00FA_A-0A04-02-0000_O-2" />
-              <ComObjectRef Id="M-00FA_A-0A04-02-0000_O-3_R-3" RefId="M-00FA_A-0A04-02-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A04-03-0000_O-1_R-1" RefId="M-00FA_A-0A04-03-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A04-03-0000_O-2_R-2" RefId="M-00FA_A-0A04-03-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A04-03-0000_O-3_R-3" RefId="M-00FA_A-0A04-03-0000_O-3" />
             </ComObjectRefs>
             <AddressTable MaxEntries="255" />
             <AssociationTable MaxEntries="255" />
@@ -71,12 +71,12 @@
           </Static>
           <Dynamic>
             <ChannelIndependentBlock>
-              <ParameterBlock Id="M-00FA_A-0A04-02-0000_PB-1" Name="General" Text="General">
-                <ParameterRefRef RefId="M-00FA_A-0A04-02-0000_P-1_R-1" />
-                <ParameterRefRef RefId="M-00FA_A-0A04-02-0000_P-2_R-2" />
-                <ComObjectRefRef RefId="M-00FA_A-0A04-02-0000_O-1_R-1" />
-                <ComObjectRefRef RefId="M-00FA_A-0A04-02-0000_O-2_R-2" />
-                <ComObjectRefRef RefId="M-00FA_A-0A04-02-0000_O-3_R-3" />
+              <ParameterBlock Id="M-00FA_A-0A04-03-0000_PB-1" Name="General" Text="General">
+                <ParameterRefRef RefId="M-00FA_A-0A04-03-0000_P-1_R-1" />
+                <ParameterRefRef RefId="M-00FA_A-0A04-03-0000_P-2_R-2" />
+                <ComObjectRefRef RefId="M-00FA_A-0A04-03-0000_O-1_R-1" />
+                <ComObjectRefRef RefId="M-00FA_A-0A04-03-0000_O-2_R-2" />
+                <ComObjectRefRef RefId="M-00FA_A-0A04-03-0000_O-3_R-3" />
               </ParameterBlock>
             </ChannelIndependentBlock>
           </Dynamic>
@@ -90,8 +90,8 @@
             </Product>
           </Products>
           <Hardware2Programs>
-            <Hardware2Program Id="M-00FA_H-2564-1_HP-0A04-02-0000" MediumTypes="MT-0">
-              <ApplicationProgramRef RefId="M-00FA_A-0A04-02-0000" />
+            <Hardware2Program Id="M-00FA_H-2564-1_HP-0A04-03-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A04-03-0000" />
               <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
             </Hardware2Program>
           </Hardware2Programs>

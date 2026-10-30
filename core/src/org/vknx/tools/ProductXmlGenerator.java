@@ -80,6 +80,10 @@ public final class ProductXmlGenerator {
 		for (final ParamDef pr : p.params()) {
 			x.append("              <ParameterType Id=\"").append(aid).append("_PT-").append(pr.name()).append("\" Name=\"")
 					.append(pr.name()).append("\">\n");
+			if (pr.isText()) {
+				x.append("                <TypeText SizeInBit=\"").append(pr.bits()).append("\" />\n              </ParameterType>\n");
+				continue;
+			}
 			if (pr.choices().isEmpty()) {
 				x.append("                <TypeNumber SizeInBit=\"").append(pr.bits()).append("\" Type=\"").append(pr.min() < 0 ? "signedInt" : "unsignedInt").append("\" minInclusive=\"")
 						.append(pr.min()).append("\" maxInclusive=\"").append(pr.max()).append("\" />\n              </ParameterType>\n");
@@ -98,7 +102,8 @@ public final class ProductXmlGenerator {
 		for (final ParamDef pr : p.params())
 			x.append("              <Parameter Id=\"").append(aid).append("_P-").append(pr.id()).append("\" Name=\"")
 					.append(pr.name()).append("\" ParameterType=\"").append(aid).append("_PT-").append(pr.name())
-					.append("\" Text=\"").append(esc(pr.text())).append("\" Value=\"").append(pr.defaultValue())
+					.append("\" Text=\"").append(esc(pr.text())).append("\" Value=\"")
+					.append(pr.isText() ? esc(pr.defaultText()) : String.valueOf(pr.defaultValue()))
 					.append("\">\n                <Memory CodeSegment=\"").append(seg).append("\" Offset=\"")
 					.append(pr.byteOffset()).append("\" BitOffset=\"").append(pr.bitOffset())
 					.append("\" />\n              </Parameter>\n");
@@ -165,21 +170,11 @@ public final class ProductXmlGenerator {
 			for (final ParamDef pr : p.params()) {
 				if (!pr.group().equals(page))
 					continue;
-				final String ref = aid + "_P-" + pr.id() + "_R-" + pr.id();
-				if (pr.showWhenParam().isEmpty())
-					x.append("                <ParameterRefRef RefId=\"").append(ref).append("\" />\n");
-				else {
-					final ParamDef other = p.param(pr.showWhenParam());
-					x.append("                <choose ParamRefId=\"").append(aid).append("_P-").append(other.id()).append("_R-")
-							.append(other.id()).append("\">\n                  <when test=\"").append(pr.showWhenValue())
-							.append("\">\n                    <ParameterRefRef RefId=\"").append(ref)
-							.append("\" />\n                  </when>\n                </choose>\n");
-				}
+				guarded(x, p, aid, pr.when(), "<ParameterRefRef RefId=\"" + aid + "_P-" + pr.id() + "_R-" + pr.id() + "\" />");
 			}
 			for (final ObjDef o : p.objects())
 				if (o.group().equals(page))
-					x.append("                <ComObjectRefRef RefId=\"").append(aid).append("_O-").append(o.number()).append("_R-")
-							.append(o.number()).append("\" />\n");
+					guarded(x, p, aid, o.when(), "<ComObjectRefRef RefId=\"" + aid + "_O-" + o.number() + "_R-" + o.number() + "\" />");
 			x.append("              </ParameterBlock>\n");
 		}
 		x.append("            </ChannelIndependentBlock>\n          </Dynamic>\n");
@@ -200,6 +195,34 @@ public final class ProductXmlGenerator {
 		x.append("        </Hardware>\n      </Hardware>\n");
 		x.append("    </Manufacturer>\n  </ManufacturerData>\n</KNX>\n");
 		return x.toString();
+	}
+
+	/**
+	 * Writes {@code element} inside nested choose/when blocks, one per condition (all must hold). A condition with several
+	 * values gets one when per value (plain equality tests only, as in the KNX Virtual programs).
+	 */
+	private static void guarded(final StringBuilder x, final ProductDef p, final String aid, final java.util.List<org.vknx.product.Cond> conds,
+			final String element) {
+		guarded(x, p, aid, conds, 0, 16, element);
+	}
+
+	private static void guarded(final StringBuilder x, final ProductDef p, final String aid, final java.util.List<org.vknx.product.Cond> conds,
+			final int i, final int indent, final String element) {
+		final String pad = " ".repeat(indent);
+		if (i == conds.size()) {
+			x.append(pad).append(element).append('\n');
+			return;
+		}
+		final var c = conds.get(i);
+		final ParamDef other = p.param(c.param());
+		x.append(pad).append("<choose ParamRefId=\"").append(aid).append("_P-").append(other.id()).append("_R-").append(other.id())
+				.append("\">\n");
+		for (final int v : c.values()) {
+			x.append(pad).append("  <when test=\"").append(v).append("\">\n");
+			guarded(x, p, aid, conds, i + 1, indent + 4, element);
+			x.append(pad).append("  </when>\n");
+		}
+		x.append(pad).append("</choose>\n");
 	}
 
 	/** Versions this application replaces: "0" for version 1, otherwise 1..version-1 (so ETS can update devices in place). */

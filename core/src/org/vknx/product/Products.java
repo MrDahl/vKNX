@@ -16,62 +16,106 @@ public final class Products {
 	public static final int MANUFACTURER_ID = 0x00FA;
 
 	/** Application version of every product in this release (bumped when texts or the parameter layout change). */
-	static final int V = 2;
+	static final int V = 3;
 
 	private static final List<Choice> NO_YES = List.of(new Choice(0, "No"), new Choice(1, "Yes"));
 	private static final List<Choice> STARTUP = List.of(new Choice(0, "Off"), new Choice(1, "On"), new Choice(2, "Unchanged"));
 	private static final List<Choice> BUTTON_FUNCTION = List.of(new Choice(0, "Toggle (alternating on/off)"),
 			new Choice(1, "On only"), new Choice(2, "Off only"));
 
-	/** Push button: one key, switch + status. */
-	public static final ProductDef PUSH_BUTTON = new ProductDef(
-			"push-button", 0x0A01, V, "vKNX Push Button 1-fold", "VKNXPB1", 0x0A01, 4,
-			List.of(
-				new ParamDef(1, "ButtonFunction", "Button function", 0, 0, 2, 0, BUTTON_FUNCTION),
-				new ParamDef(2, "FollowStatus", "Follow status object", 0, 2, 1, 1, NO_YES)),
-			List.of(
-				new ObjDef(1, "Switch", "Switch", "Output", 1, "DPST-1-1", false, false, true, false),
-				new ObjDef(2, "Status", "Status", "Input", 1, "DPST-1-1", false, true, false, true)));
+	/** Bytes per channel block (key, output, dimmer or blind channel) in the parameter area. */
+	static final int STRIDE = 20;
+	/** Characters of a channel name text parameter. */
+	public static final int NAME_CHARS = 16;
 
-	public static final ProductDef SWITCH_ACTUATOR = new ProductDef(
-			"switch-actuator", 0x0A02, V, "vKNX Switch Actuator 1-fold", "VKNXSA1", 0x0A02, 4,
-			List.of(
-				new ParamDef(1, "RelayLogic", "Relay logic", 0, 0, 1, 0, List.of(
-					new Choice(0, "Normal (on = relay closed)"), new Choice(1, "Inverted (on = relay open)"))),
-				new ParamDef(2, "StartupState", "State after download/restart", 0, 1, 2, 0, STARTUP),
-				new ParamDef(3, "SendStatusOnChange", "Send status on change", 0, 3, 1, 1, NO_YES)),
-			List.of(
-				new ObjDef(1, "Switch", "Switch", "Input", 1, "DPST-1-1", false, true, false, false),
-				new ObjDef(2, "Status", "Status", "Output", 1, "DPST-1-1", true, false, true, false)));
+	private static ParamDef enable(final int id, final String pre, final int b, final String label, final String page) {
+		return new ParamDef(id, pre + "Enable", label, b, 0, 1, 1, NO_YES).inGroup(page);
+	}
 
-	/** Double push button / rocker: short press switches, long press dims. */
-	public static final ProductDef PUSH_ROCKER = new ProductDef(
-			"push-rocker", 0x0A03, V, "vKNX Rocker (double push) 1-fold", "VKNXRK1", 0x0A03, 2,
-			List.of(
-				new ParamDef(1, "Orientation", "Upper key sends", 0, 0, 1, 0, List.of(
-					new Choice(0, "On / brighter (lower: off / darker)"),
-					new Choice(1, "Off / darker (lower: on / brighter)"))),
-				new ParamDef(2, "LongPressTime", "Long-press time", 0, 1, 2, 1, List.of(
-					new Choice(0, "0.4 s"), new Choice(1, "0.6 s"), new Choice(2, "1.0 s"))),
-				new ParamDef(3, "DimStep", "Dimming step (relative dimming)", 1, 0, 3, 1,
-					List.of(new Choice(1, "100 % (run to end)"), new Choice(2, "50 %"), new Choice(3, "25 %"),
-						new Choice(4, "12.5 %"), new Choice(5, "6.25 %")))),
-			List.of(
-				new ObjDef(1, "Switch", "Switch", "Output", 1, "DPST-1-1", false, false, true, false),
-				new ObjDef(2, "Dimming", "Relative dimming", "Output", 4, "DPST-3-7", false, false, true, false),
-				new ObjDef(3, "Status", "Status", "Input", 1, "DPST-1-1", false, true, false, true)));
+	private static ParamDef nameParam(final int id, final String pre, final int b, final String defaultName, final String page) {
+		return ParamDef.text(id, pre + "Name", "Name", b + 2, NAME_CHARS, defaultName).inGroup(page).showWhen(pre + "Enable", 1);
+	}
 
-	/** Blind rocker: short press = step/stop, long press = move up/down (1 bit each, DPT 1.007 / 1.008). */
-	public static final ProductDef PUSH_BLIND_ROCKER = new ProductDef(
-			"push-blind-rocker", 0x0A0C, V, "vKNX Blind Rocker (double push) 1-fold", "VKNXBR1", 0x0A0C, 1,
-			List.of(
-				new ParamDef(1, "Orientation", "Upper key sends", 0, 0, 1, 0, List.of(
-					new Choice(0, "Up (lower key: down)"), new Choice(1, "Down (lower key: up)"))),
-				new ParamDef(2, "LongPressTime", "Long-press time", 0, 1, 2, 1, List.of(
-					new Choice(0, "0.4 s"), new Choice(1, "0.6 s"), new Choice(2, "1.0 s")))),
-			List.of(
-				new ObjDef(1, "Move", "Move up/down", "Output", 1, "DPST-1-8", false, false, true, false),
-				new ObjDef(2, "StepStop", "Step / stop", "Output", 1, "DPST-1-7", false, false, true, false)));
+	// ------------------------------------------------------------------ push button (4 keys)
+
+	/**
+	 * Push button with four keys. Every key can be disabled and named and has one function: Switch, Relative dimming or
+	 * Blinds. Per key (block of {@link #STRIDE} bytes): byte 0 = Enable, Function, SwitchMode, FollowStatus, DimDir;
+	 * byte 1 = BlindMode, BlindDir, LongPress, DimStep; bytes 2-17 = name. Objects per key: 5 (switch, status, dimming,
+	 * move, step/stop), shown by function.
+	 */
+	private static ProductDef pushButton() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		for (int k = 1; k <= 4; k++) {
+			final String pre = "Key" + k, page = "Key " + k, en = pre + "Enable", fn = pre + "Function";
+			final int b = (k - 1) * STRIDE, o = (k - 1) * 5;
+			params.add(enable(id++, pre, b, "Enable key", page));
+			params.add(nameParam(id++, pre, b, "Key " + k, page));
+			params.add(new ParamDef(id++, fn, "Function", b, 1, 2, 0, List.of(new Choice(0, "Switch"),
+					new Choice(1, "Relative dimming"), new Choice(2, "Blinds"))).inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "SwitchMode", "Key sends", b, 3, 2, 2, List.of(new Choice(0, "On"),
+					new Choice(1, "Off"), new Choice(2, "Alternating on / off"))).inGroup(page).showWhen(en, 1).showWhen(fn, 0));
+			params.add(new ParamDef(id++, pre + "FollowStatus", "Follow status object", b, 5, 1, 1, NO_YES)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 0));
+			params.add(new ParamDef(id++, pre + "DimDir", "Direction", b, 6, 1, 0, List.of(
+					new Choice(0, "Brighter (short press: on)"), new Choice(1, "Darker (short press: off)")))
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 1));
+			params.add(new ParamDef(id++, pre + "DimStep", "Dimming step", b + 1, 5, 3, 1, List.of(
+					new Choice(1, "100 % (run to end)"), new Choice(2, "50 %"), new Choice(3, "25 %"), new Choice(4, "12.5 %"),
+					new Choice(5, "6.25 %"))).inGroup(page).showWhen(en, 1).showWhen(fn, 1));
+			params.add(new ParamDef(id++, pre + "BlindMode", "Key sends", b + 1, 0, 2, 2, List.of(new Choice(0, "Up"),
+					new Choice(1, "Down"), new Choice(2, "Up / Down (alternating)"), new Choice(3, "Steps")))
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 2));
+			params.add(new ParamDef(id++, pre + "BlindDir", "Step direction", b + 1, 2, 1, 0, List.of(new Choice(0, "Up"),
+					new Choice(1, "Down"))).inGroup(page).showWhen(en, 1).showWhen(fn, 2).showWhen(pre + "BlindMode", 3));
+			params.add(new ParamDef(id++, pre + "LongPress", "Long-press time", b + 1, 3, 2, 1, List.of(
+					new Choice(0, "0.4 s"), new Choice(1, "0.6 s"), new Choice(2, "1.0 s"))).inGroup(page).showWhen(en, 1).showWhen(fn, 1, 2));
+			final String t = page + ": ";
+			objs.add(new ObjDef(o + 1, pre + "Switch", t + "switch", "Output", 1, "DPST-1-1", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 0, 1));
+			objs.add(new ObjDef(o + 2, pre + "Status", t + "status", "Input", 1, "DPST-1-1", false, true, false, true)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 0, 1));
+			objs.add(new ObjDef(o + 3, pre + "Dimming", t + "relative dimming", "Output", 4, "DPST-3-7", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 1));
+			objs.add(new ObjDef(o + 4, pre + "Move", t + "blind move up/down", "Output", 1, "DPST-1-8", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 2));
+			objs.add(new ObjDef(o + 5, pre + "StepStop", t + "blind step / stop", "Output", 1, "DPST-1-7", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 2));
+		}
+		return new ProductDef("push-button", 0x0A01, V, "vKNX Push Button 4-fold", "VKNXPB4", 0x0A01, 4 * STRIDE, params, objs);
+	}
+
+	public static final ProductDef PUSH_BUTTON = pushButton();
+
+	// ------------------------------------------------------------------ switch actuator (8 outputs)
+
+	/** Switch actuator with 8 outputs; each can be disabled and named. Globals after the blocks: startup state, send status. */
+	private static ProductDef switchActuator() {
+		final int n = 8, g = n * STRIDE;
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		for (int c = 1; c <= n; c++) {
+			final String pre = "Out" + c, page = "Output " + c;
+			final int b = (c - 1) * STRIDE;
+			params.add(enable(id++, pre, b, "Enable output", page));
+			params.add(nameParam(id++, pre, b, "Output " + c, page));
+			params.add(new ParamDef(id++, pre + "Logic", "Relay logic", b, 1, 1, 0, List.of(
+					new Choice(0, "Normal (on = relay closed)"), new Choice(1, "Inverted (on = relay open)")))
+					.inGroup(page).showWhen(pre + "Enable", 1));
+			objs.add(new ObjDef(c, pre + "Switch", page + ": switch", "Input", 1, "DPST-1-1", false, true, false, false)
+					.inGroup(page).showWhen(pre + "Enable", 1));
+			objs.add(new ObjDef(n + c, pre + "Status", page + ": status", "Output", 1, "DPST-1-1", true, false, true, false)
+					.inGroup(page).showWhen(pre + "Enable", 1));
+		}
+		params.add(new ParamDef(id++, "StartupState", "State after download/restart", g, 0, 2, 0, STARTUP));
+		params.add(new ParamDef(id++, "SendStatus", "Send status on change", g, 2, 1, 1, NO_YES));
+		return new ProductDef("switch-actuator", 0x0A02, V, "vKNX Switch Actuator 8-fold", "VKNXSA8", 0x0A02, g + 1, params, objs);
+	}
+
+	public static final ProductDef SWITCH_ACTUATOR = switchActuator();
 
 	/** Push button with a slider: switch + 1-byte brightness value. */
 	public static final ProductDef PUSH_SLIDER = new ProductDef(
@@ -85,59 +129,71 @@ public final class Products {
 				new ObjDef(2, "Brightness", "Brightness (value)", "Output", 8, "DPST-5-1", false, false, true, false),
 				new ObjDef(3, "BrightnessStatus", "Brightness status", "Input", 8, "DPST-5-1", false, true, false, true)));
 
-	/** One-channel dimming actuator. */
-	public static final ProductDef DIMMER = new ProductDef(
-			"dimmer", 0x0A05, V, "vKNX Dimming Actuator 1-fold", "VKNXDM1", 0x0A05, 1,
-			List.of(
-				new ParamDef(1, "DimTime", "Time 0-100 % for relative dimming", 0, 0, 2, 1,
-					List.of(new Choice(0, "2 s"), new Choice(1, "5 s"), new Choice(2, "10 s"), new Choice(3, "20 s"))),
-				new ParamDef(2, "OnLevel", "Level when switched on", 0, 2, 1, 0, List.of(
-					new Choice(0, "Last level"), new Choice(1, "100 %"))),
-				new ParamDef(3, "StartupState", "State after download/restart", 0, 3, 2, 0, STARTUP),
-				new ParamDef(4, "SendStatus", "Send status", 0, 5, 1, 1, NO_YES)),
-			List.of(
-				new ObjDef(1, "Switch", "Switch", "Input", 1, "DPST-1-1", false, true, false, false),
-				new ObjDef(2, "RelativeDimming", "Relative dimming (4 bit)", "Input", 4, "DPST-3-7", false, true, false, false),
-				new ObjDef(3, "BrightnessValue", "Brightness (value)", "Input", 8, "DPST-5-1", false, true, false, false),
-				new ObjDef(4, "SwitchStatus", "Switch status", "Output", 1, "DPST-1-1", true, false, true, false),
-				new ObjDef(5, "BrightnessStatus", "Brightness status", "Output", 8, "DPST-5-1", true, false, true, false)));
+	// ------------------------------------------------------------------ dimming actuator (4 channels)
 
-	private static List<Choice> runTimes() {
-		return List.of(new Choice(0, "10 s"), new Choice(1, "20 s"), new Choice(2, "30 s"), new Choice(3, "60 s"));
-	}
-
-	/** Two-channel blind actuator. */
-	public static final ProductDef BLIND_2 = new ProductDef(
-			"blind-2", 0x0A06, V, "vKNX Blind Actuator 2-fold", "VKNXBL2", 0x0A06, 1,
-			List.of(
-				new ParamDef(1, "Ch1RunTime", "Blind 1: travel time", 0, 0, 2, 1, runTimes()),
-				new ParamDef(2, "Ch2RunTime", "Blind 2: travel time", 0, 2, 2, 1, runTimes()),
-				new ParamDef(3, "SendPosition", "Send position as status", 0, 4, 1, 1, NO_YES)),
-			List.of(
-				new ObjDef(1, "Ch1Move", "Blind 1: up/down", "Input", 1, "DPST-1-8", false, true, false, false),
-				new ObjDef(2, "Ch1Stop", "Blind 1: stop", "Input", 1, "DPST-1-7", false, true, false, false),
-				new ObjDef(3, "Ch1Position", "Blind 1: position status", "Output", 8, "DPST-5-1", true, false, true, false),
-				new ObjDef(4, "Ch2Move", "Blind 2: up/down", "Input", 1, "DPST-1-8", false, true, false, false),
-				new ObjDef(5, "Ch2Stop", "Blind 2: stop", "Input", 1, "DPST-1-7", false, true, false, false),
-				new ObjDef(6, "Ch2Position", "Blind 2: position status", "Output", 8, "DPST-5-1", true, false, true, false)));
-
-	private static ProductDef switchActuator(final int n, final int app, final String order) {
+	/** Dimming actuator with 4 channels; each can be disabled and named and has its own dimming time and startup state. */
+	private static ProductDef dimmer() {
 		final var params = new ArrayList<ParamDef>();
-		for (int c = 1; c <= n; c++)
-			params.add(new ParamDef(c, "Ch" + c + "Logic", "Output " + c + ": relay logic", 0, c - 1, 1, 0,
-					List.of(new Choice(0, "Normal (on = relay closed)"), new Choice(1, "Inverted (on = relay open)"))));
-		params.add(new ParamDef(n + 1, "StartupState", "State after download/restart", 1, 0, 2, 0, STARTUP));
-		params.add(new ParamDef(n + 2, "SendStatus", "Send status on change", 1, 2, 1, 1, NO_YES));
 		final var objs = new ArrayList<ObjDef>();
-		for (int c = 1; c <= n; c++)
-			objs.add(new ObjDef(c, "Ch" + c + "Switch", "Output " + c + ": switch", "Input", 1, "DPST-1-1", false, true, false, false));
-		for (int c = 1; c <= n; c++)
-			objs.add(new ObjDef(n + c, "Ch" + c + "Status", "Output " + c + ": status", "Output", 1, "DPST-1-1", true, false, true, false));
-		return new ProductDef("switch-actuator-" + n, app, V, "vKNX Switch Actuator " + n + "-fold", order, app, 2, params, objs);
+		int id = 1;
+		for (int c = 1; c <= 4; c++) {
+			final String pre = "Ch" + c, page = "Channel " + c, en = pre + "Enable";
+			final int b = (c - 1) * STRIDE, o = (c - 1) * 5;
+			params.add(enable(id++, pre, b, "Enable channel", page));
+			params.add(nameParam(id++, pre, b, "Channel " + c, page));
+			params.add(new ParamDef(id++, pre + "DimTime", "Time 0-100 % for relative dimming", b, 1, 2, 1,
+					List.of(new Choice(0, "2 s"), new Choice(1, "5 s"), new Choice(2, "10 s"), new Choice(3, "20 s")))
+					.inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "OnLevel", "Level when switched on", b, 3, 1, 0, List.of(
+					new Choice(0, "Last level"), new Choice(1, "100 %"))).inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "StartupState", "State after download/restart", b, 4, 2, 0, STARTUP)
+					.inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "SendStatus", "Send status", b, 6, 1, 1, NO_YES).inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 1, pre + "Switch", page + ": switch", "Input", 1, "DPST-1-1", false, true, false, false)
+					.inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 2, pre + "RelativeDimming", page + ": relative dimming (4 bit)", "Input", 4, "DPST-3-7", false, true, false, false)
+					.inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 3, pre + "BrightnessValue", page + ": brightness (value)", "Input", 8, "DPST-5-1", false, true, false, false)
+					.inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 4, pre + "SwitchStatus", page + ": switch status", "Output", 1, "DPST-1-1", true, false, true, false)
+					.inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 5, pre + "BrightnessStatus", page + ": brightness status", "Output", 8, "DPST-5-1", true, false, true, false)
+					.inGroup(page).showWhen(en, 1));
+		}
+		return new ProductDef("dimmer", 0x0A05, V, "vKNX Dimming Actuator 4-fold", "VKNXDM4", 0x0A05, 4 * STRIDE, params, objs);
 	}
 
-	public static final ProductDef SWITCH_ACTUATOR_4 = switchActuator(4, 0x0A07, "VKNXSA4");
-	public static final ProductDef SWITCH_ACTUATOR_8 = switchActuator(8, 0x0A08, "VKNXSA8");
+	public static final ProductDef DIMMER = dimmer();
+
+	// ------------------------------------------------------------------ blind actuator (4 channels)
+
+	/** Blind actuator with 4 channels; per channel its own travel time up and down. Global after the blocks: send position. */
+	private static ProductDef blindActuator() {
+		final int g = 4 * STRIDE;
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		for (int c = 1; c <= 4; c++) {
+			final String pre = "Ch" + c, page = "Blind " + c, en = pre + "Enable";
+			final int b = (c - 1) * STRIDE, o = (c - 1) * 3;
+			params.add(enable(id++, pre, b, "Enable blind", page));
+			params.add(ParamDef.number(id++, pre + "UpTime", "Travel time up (seconds)", b + 1, 8, 30, 1, 255)
+					.inGroup(page).showWhen(en, 1));
+			params.add(ParamDef.number(id++, pre + "DownTime", "Travel time down (seconds)", b + 2, 8, 30, 1, 255)
+					.inGroup(page).showWhen(en, 1));
+			params.add(ParamDef.text(id++, pre + "Name", "Name", b + 3, NAME_CHARS, "Blind " + c).inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 1, pre + "Move", page + ": up/down", "Input", 1, "DPST-1-8", false, true, false, false)
+					.inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 2, pre + "Stop", page + ": stop", "Input", 1, "DPST-1-7", false, true, false, false)
+					.inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 3, pre + "Position", page + ": position status", "Output", 8, "DPST-5-1", true, false, true, false)
+					.inGroup(page).showWhen(en, 1));
+		}
+		params.add(new ParamDef(id++, "SendPosition", "Send position as status", g, 0, 1, 1, NO_YES));
+		return new ProductDef("blind-actuator", 0x0A06, V, "vKNX Blind Actuator 4-fold", "VKNXBL4", 0x0A06, g + 1, params, objs);
+	}
+
+	public static final ProductDef BLIND_ACTUATOR = blindActuator();
 
 	// ------------------------------------------------------------------ multisensor
 
@@ -169,18 +225,20 @@ public final class Products {
 			final Channel c = CHANNELS.get(i);
 			final int b = i * CHANNEL_BYTES;
 			final String pre = c.name();
+			params.add(new ParamDef(id++, pre + "Enable", "Enable " + c.page().toLowerCase(), b + 1, 0, 1, 1, NO_YES).inGroup(c.page()));
 			params.add(new ParamDef(id++, pre + "Mode", "Send", b, 0, 2, 0,
-					List.of(new Choice(0, "Fixed value"), new Choice(1, "Random value between minimum and maximum"))).inGroup(c.page()));
+					List.of(new Choice(0, "Fixed value"), new Choice(1, "Random value between minimum and maximum")))
+					.inGroup(c.page()).showWhen(pre + "Enable", 1));
 			params.add(ParamDef.number(id++, pre + "Interval", "Send cyclically every (seconds, 0 = never)", b + 2, 16, 30, 0, 65535)
-					.inGroup(c.page()));
+					.inGroup(c.page()).showWhen(pre + "Enable", 1));
 			params.add(ParamDef.number(id++, pre + "Value", c.valueText(), b + 4, 16, c.def(), c.min(), c.max())
-					.inGroup(c.page()).showWhen(pre + "Mode", 0));
+					.inGroup(c.page()).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 0));
 			params.add(ParamDef.number(id++, pre + "Min", "Random minimum", b + 6, 16, c.min() < 0 ? c.min() : c.def() / 2, c.min(), c.max())
-					.inGroup(c.page()).showWhen(pre + "Mode", 1));
+					.inGroup(c.page()).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 1));
 			params.add(ParamDef.number(id++, pre + "Max", "Random maximum", b + 8, 16, c.def() + Math.max(1, Math.abs(c.def()) / 2),
-					c.min(), c.max()).inGroup(c.page()).showWhen(pre + "Mode", 1));
+					c.min(), c.max()).inGroup(c.page()).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 1));
 			objs.add(new ObjDef(i + 1, pre, c.page() + " (" + c.unit() + ")", "Output", 16, c.dpt(), true, false, true, false)
-					.inGroup(c.page()));
+					.inGroup(c.page()).showWhen(pre + "Enable", 1));
 		}
 		return new ProductDef("multisensor", 0x0A09, V, "vKNX Multisensor", "VKNXMS1", 0x0A09, CHANNELS.size() * CHANNEL_BYTES,
 				params, objs);
@@ -218,8 +276,7 @@ public final class Products {
 	public static final Map<String, ProductDef> ALL;
 	static {
 		final var m = new java.util.LinkedHashMap<String, ProductDef>();
-		for (final var p : List.of(PUSH_BUTTON, PUSH_ROCKER, PUSH_BLIND_ROCKER, PUSH_SLIDER, SWITCH_ACTUATOR, SWITCH_ACTUATOR_4, SWITCH_ACTUATOR_8,
-				DIMMER, BLIND_2, MULTISENSOR, COUPLER_LINE, COUPLER_AREA))
+		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, COUPLER_LINE, COUPLER_AREA))
 			m.put(p.key(), p);
 		ALL = java.util.Collections.unmodifiableMap(m);
 	}

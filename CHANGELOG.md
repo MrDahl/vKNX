@@ -3,6 +3,30 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [0.5.0] - 2026-10-30
+**Breaking change: fewer products, more channels.** The product range is rebuilt around four multi-channel products. All old products are removed, devices saved by an earlier version are reset (the first start shows a message in the log), and **all `.knxprod` files must be imported into ETS again** (new application version 3). **Not tried in ETS yet:** this is the biggest change so far. The new products use parameters that are shown or hidden depending on other parameters (nested `choose/when`) and text parameters for names; only our own tests have run (see "What is checked" below).
+
+### New and changed products
+- **Push button, 4 keys** (replaces push button, rocker and blind rocker). Every key can be disabled, given a name and one function: *Switch* (on, off or alternating on/off, optionally following its status object), *Relative dimming* (short press switches, long press dims, release sends stop; direction and step are set per key) or *Blinds* (Up, Down, Up/Down alternating, or Steps; short press = step/stop, long press = move). An alternating blind key starts with DOWN.
+- **Switch actuator, 8 outputs** (replaces the 1-/4-/8-fold actuators). Each output has a switch and a status object, can be disabled and named, and has its own relay logic. Startup state and "send status" are common.
+- **Dimming actuator, 4 channels.** Each channel has switch, relative dimming (4 bit), brightness value (1 byte) and switch/brightness status objects, its own dimming time, on level, startup state and status setting, and can be disabled and named.
+- **Blind actuator, 4 channels** (was 2). Each blind has up/down, stop and position status, its **own travel time up and its own travel time down** (1-255 seconds), and can be disabled and named.
+- **Multisensor:** unchanged, but every measurement can now be disabled (the object and the settings disappear in ETS).
+- **Slider push button, line coupler and area coupler:** unchanged.
+- Disabled keys, outputs, channels and blinds disappear from ETS (no objects, no settings), are ignored by the simulator and are hidden in the control panel and on the floor plan.
+- **Names are set in ETS** (text parameter, up to 16 characters) and shown in the control panel, in the log and on the floor plan. They are not copied to the object names in ETS.
+
+### Control panel
+- New cards: four keys with their names and functions, eight outputs, four dimmer channels with level bars, four blinds. Each key, output, channel and blind can be placed separately on the floor plan. Saved floor plan symbols of the removed products are not carried over.
+
+### Upgrading
+- Import the new `.knxprod` files (`products/` or the zip). Remove the old vKNX products from the ETS catalogue first.
+- The device list is reset on the first start: add the new products again.
+
+### What is checked
+- Our own tests (mini-ETS, in-process and over a real KNXnet/IP tunnel) pass for all products, including disabled channels, names, per-key functions, alternating blind key, partial downloads, and a default parameter round-trip for every parameter of every product.
+- The generated product XML is well-formed. It has **not** been imported into ETS.
+
 ## [0.4.2] - 2026-10-30
 Fixes the in-program update that closed vKNX but left the old version installed. **Not tried on Windows yet** (the release build runs an automatic silent install test, but updating from inside the program has to be tried by hand).
 

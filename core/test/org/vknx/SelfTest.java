@@ -197,6 +197,9 @@ public final class SelfTest {
 		}
 	}
 
+	/** Switch actuator object flags: object 1 = switch (write), object 9 = status of output 1 (read, transmit). */
+	static final int[] SA_FLAGS = { 0x04 | 0x10 | 0x03, 0, 0, 0, 0, 0, 0, 0, FLAGS_STATUS_OUT };
+
 	static byte[] groupWrite(final int value) { return new byte[] { 0x00, (byte) (0x80 | value) }; }
 
 	public static void main(final String[] args) throws Exception {
@@ -249,34 +252,33 @@ public final class SelfTest {
 
 			// --- full download from "ETS": GA 1/0/1 switch, GA 1/0/2 status; normal relay logic, status on change
 			final int[] gas = { gaSwitch.getRawAddress(), gaStatus.getRawAddress() };
-			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { 0x04 | 0x10 | 0x03, FLAGS_STATUS_OUT },
-					new int[] { 0b0001_0000 /* RelayLogic=0, Startup=0, SendStatus=1 (bits counted from the top, as ETS does) */ });
+			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 9 } },
+					SA_FLAGS, Products.SWITCH_ACTUATOR.defaultParams() /* Out1Logic normal, Startup off, SendStatus yes */);
 			ets.downloadAll(new IndividualAddress(1, 1, 1), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { FLAGS_SEND, FLAGS_STATUS_IN }, new int[] { 0b0010_0000 /* Toggle, FollowStatus=1 */ });
+					new int[] { FLAGS_SEND, FLAGS_STATUS_IN }, Products.PUSH_BUTTON.defaultParams() /* Key 1: switch, alternating, follow status */);
 			check("actuator application loaded", await(saF::applicationLoaded));
 			check("push button application loaded", await(pbF::applicationLoaded));
 
 			// --- 6/8/9: pressing the button sends from the button's address; the actuator reacts
-			btn.press();
+			btn.act("press", 1);
 			check("button press switches lamp on (via bus, from 1.1.1)", await(sw::lampLit));
 			synchronized (trace) {
 				check("telegram on the bus came from 1.1.1 to 1/0/1",
 						trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.1") && s.contains("1/0/1")));
 			}
-			btn.press();
+			btn.act("press", 1);
 			check("second press (toggle; status followed) switches lamp off", await(() -> !sw.lampLit()));
 
 			// --- 10: status feedback reaches the button (FollowStatus=Yes) via 1/0/2
-			btn.press(); // ON again
+			btn.act("press", 1); // ON again
 			await(sw::lampLit);
 			Thread.sleep(300);
 			check("status telegram sent by actuator from 1.1.2 to 1/0/2",
 					trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.2") && s.contains("1/0/2")));
 
 			// --- 7: a downloaded parameter changes behaviour (RelayLogic = inverted)
-			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { 0x04 | 0x10 | 0x03, FLAGS_STATUS_OUT }, new int[] { 0b1001_0000 });
+			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 9 } },
+					SA_FLAGS, Products.SWITCH_ACTUATOR.params("Out1Logic", 1));
 			Thread.sleep(300);
 			etsLink.sendRequestWait(gaSwitch, Priority.LOW, groupWrite(1));
 			check("inverted relay logic: ON telegram now opens the relay (lamp off)", await(() -> !sw.lampLit()));
@@ -286,8 +288,7 @@ public final class SelfTest {
 			// --- 6: changed association changes real communication (move actuator to 1/0/3)
 			final var gaNew = new GroupAddress(1, 0, 3);
 			ets.downloadAll(new IndividualAddress(1, 1, 2), new int[] { gaNew.getRawAddress(), gaStatus.getRawAddress() },
-					new int[][] { { 1, 1 }, { 2, 2 } }, new int[] { 0x04 | 0x10 | 0x03, FLAGS_STATUS_OUT },
-					new int[] { 0b0001_0000 });
+					new int[][] { { 1, 1 }, { 2, 9 } }, SA_FLAGS, Products.SWITCH_ACTUATOR.defaultParams());
 			Thread.sleep(300);
 			etsLink.sendRequestWait(gaSwitch, Priority.LOW, groupWrite(1));
 			Thread.sleep(300);
@@ -306,8 +307,8 @@ public final class SelfTest {
 			check("restart: individual addresses kept", pb.address().equals(new IndividualAddress(1, 1, 1))
 					&& sa.address().equals(new IndividualAddress(1, 1, 2)));
 			check("restart: applications still loaded", pb.applicationLoaded() && sa.applicationLoaded());
-			check("restart: downloaded parameter kept (RelayLogic normal, status on)", sa.param("RelayLogic") == 0
-					&& sa.param("SendStatusOnChange") == 1);
+			check("restart: downloaded parameter kept (Out1Logic normal, status on)", sa.param("Out1Logic") == 0
+					&& sa.param("SendStatus") == 1);
 			final var etsLink2 = net.createDeviceLink(new IndividualAddress(0, 2, 255));
 			final var sw2 = (SwitchActuatorBehavior) sa.behavior();
 			etsLink2.sendRequestWait(gaNew, Priority.LOW, groupWrite(1));
