@@ -7,7 +7,7 @@ const MAX_ROWS = 400;
 const SERVICES = [['', 'All services'], ['write', 'Group write'], ['read', 'Group read'], ['response', 'Group response'], ['other', 'Other services']];
 
 export const svcKind = s => /GroupValue.*Write/i.test(s) ? 'write' : /GroupValue.*Read/i.test(s) ? 'read' : /GroupValue.*Response/i.test(s) ? 'response' : 'other';
-const svcLabel = s => s.replace('A_', '').replace(/GroupValue/, 'Group ').replace(/_/g, ' ').trim() || s;
+const svcLabel = s => { if (/^T_/.test(s)) return s; const t = s.replace(/^A_/, '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_.]/g, ' ').trim().toLowerCase(); return t.charAt(0).toUpperCase() + t.slice(1); };
 
 /** Raw data bytes of a group value telegram, from the TPDU (display only - never used to guess a type). */
 export function rawData(tg) {
@@ -65,9 +65,9 @@ export function createMonitor({ compact }) {
   const selOrg = h('select.select', { 'aria-label': 'Filter by origin' },
     [['', 'All origins'], ['ip', 'From ETS / IP clients'], ['device', 'From virtual devices']].map(([v, t]) => h('option', { value: v }, t)));
   selOrg.addEventListener('change', () => setFilter({ origin: selOrg.value }));
-  const bReset = h('button.btn', { type: 'button', onclick: resetFilter }, icon('restart'), h('span', 'Reset filters'));
-  const bClear = h('button.btn', { type: 'button', title: 'Empties this list only. The simulation keeps running and the log file vknx.log is not changed.', onclick: clearView }, icon('trash'), h('span', 'Clear view'));
-  const tools = h('div.mon-tools', tabs, bPause, newBadge, bFollow, h('span.grow'), search, selDev, selSvc, selOrg, bReset, bClear);
+  const bReset = h('button.btn.sm', { type: 'button', onclick: resetFilter }, icon('restart'), h('span', 'Reset filters'));
+  const bClear = h('button.btn', { type: 'button', 'aria-label': 'Clear view', title: 'Clear view: empties this list only. The simulation keeps running and the log file vknx.log is not changed.', onclick: clearView }, icon('trash'), compact ? null : h('span', 'Clear view'));
+  const tools = h('div.mon-tools', tabs, bPause, newBadge, bFollow, h('span.grow'), search, selDev, selSvc, compact ? null : selOrg, bClear);
   const chips = h('div.mon-filters');
   const thead = h('thead', h('tr', ['Time', 'Source', 'Destination', 'Service', 'Value'].map(t => h('th', t))));
   const tbody = h('tbody');
@@ -162,11 +162,11 @@ export function createMonitor({ compact }) {
     table.hidden = !isTg; logTable.hidden = isTg;
     for (const el of [bPause, bFollow, selSvc, selOrg]) el.hidden = !isTg;
     const af = activeFilters();
-    bReset.disabled = !af.length;
     chips.hidden = !af.length && !st.paused;
     chips.replaceChildren(...af.map(([k, v]) => h('span.chip.info', `${{ text: 'Text', device: 'Device', service: 'Type', origin: 'Origin', ga: 'Group address' }[k]}: ${v}`,
       h('button.btn.quiet.sm', { style: 'height:20px;padding:0 4px', 'aria-label': 'Remove this filter', onclick: () => { setFilter({ [k]: '' }); if (k === 'ga') selectGa(null); } }, icon('close')))),
-      st.paused ? h('span.chip.warn', icon('pause'), 'Paused – the simulation keeps running; new telegrams are collected') : null);
+      st.paused ? h('span.chip.warn', icon('pause'), 'Paused – the simulation keeps running; new telegrams are collected') : null,
+      af.length ? bReset : null);
 
     if (isTg) {
       const all = filtered();

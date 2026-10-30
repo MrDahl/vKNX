@@ -94,6 +94,15 @@ public final class WebUi {
 			"jpeg", "image/jpeg", "svg", "image/svg+xml", "webp", "image/webp", "gif", "image/gif");
 	private static final int PLAN_MAX = 12 * 1024 * 1024;
 
+	private boolean hasPlan() {
+		try {
+			return planFile() != null;
+		}
+		catch (final IOException e) {
+			return false;
+		}
+	}
+
 	private java.nio.file.Path planFile() throws IOException {
 		try (var s = java.nio.file.Files.list(registry.dir())) {
 			return s.filter(f -> f.getFileName().toString().startsWith("plan.")
@@ -287,7 +296,7 @@ public final class WebUi {
 	private void state(final HttpExchange ex) throws IOException {
 		final var sb = new StringBuilder("{\"version\":" + q(org.vknx.app.Version.current()) + ",\"line\":" + q(settings == null ? "1.1" : settings.line())
 				+ ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"started\":" + started
-				+ ",\"now\":" + System.currentTimeMillis() + ",\"link\":" + linkJson() + ",\"devices\":[");
+				+ ",\"plan\":" + hasPlan() + ",\"now\":" + System.currentTimeMillis() + ",\"link\":" + linkJson() + ",\"devices\":[");
 		boolean first = true;
 		for (final VirtualDevice d : devices) {
 			if (!first)

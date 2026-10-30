@@ -19,9 +19,11 @@ export const S = {
   filter: { text: '', device: '', service: '', origin: '', ga: '' },
   planEdit: false,
 };
+/** Set by main.js: fetches the state right now (after add/remove/upload) instead of waiting for the next poll. */
+export const hooks = { refresh: async () => {} };
 export function device(name) { return S.state?.devices.find(d => d.name === name); }
 export function setFilter(patch) { Object.assign(S.filter, patch); emit('filter'); }
-export function resetFilter() { S.filter = { text: '', device: '', service: '', origin: '', ga: '' }; emit('filter'); }
+export function resetFilter() { S.filter = { text: '', device: '', service: '', origin: '', ga: '' }; const had = S.gaSel; S.gaSel = null; emit('filter'); if (had) emit('ga'); }
 
 import { setPref } from './util.js';
 export function navigate(view) { S.view = view; setPref('view', view); emit('nav'); }

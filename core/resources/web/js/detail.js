@@ -1,6 +1,6 @@
 import { h, icon, setText, setCls, setAttr, naturalCmp } from './util.js';
 import { api } from './api.js';
-import { S, emit, device, showTelegrams, showGroupAddress, selectDevice } from './bus.js';
+import { S, emit, device, showTelegrams, showGroupAddress, selectDevice, hooks } from './bus.js';
 import { statusOf, productOf, DOWNLOAD_TEXT } from './devinfo.js';
 import { confirmDialog, menuButton, toast } from './dialogs.js';
 import { operate } from './cards.js';
@@ -16,6 +16,7 @@ export async function removeDevice(name) {
   if (await operate(`Removing "${name}"`, () => api.remove(name))) {
     toast(`"${name}" was removed.`, 'ok');
     if (S.selected === name) selectDevice(null, { drawer: false });
+    await hooks.refresh();
     emit('devices');
   }
 }
@@ -78,8 +79,7 @@ export function createDetail({ onBack, onClose } = {}) {
     setAttr(els.progBtn, 'aria-pressed', d.programming ? 'true' : 'false');
     setCls(els.progBox, 'active', d.programming);
     setCls(els.progBtn.firstChild, 'on', d.programming);
-    setText(els.progBtn.querySelector('.t'), d.programming ? 'Programming mode on – press to switch off' : 'Programming button – press to switch on');
-    setText(els.progTxt, d.programming ? 'The red indicator is lit. ETS can now assign the physical address to this device.' : 'Switch the programming mode on, then assign the physical address from ETS.');
+    setText(els.progTxt, d.programming ? 'Programming mode is ON (red indicator lit). ETS can now assign the physical address. Press the button again to switch it off.' : 'Programming mode is off. Press the button, then assign the physical address from ETS.');
     setText(els.addr, d.unassigned ? 'Missing (15.15.255 = not assigned)' : d.address);
     setText(els.app, d.loaded ? 'Loaded' : 'Missing – download the application from ETS');
     setText(els.dl, DOWNLOAD_TEXT[d.downloadState] || d.downloadState);

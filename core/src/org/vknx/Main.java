@@ -62,9 +62,10 @@ public final class Main {
 		log.tee(dir.resolve("vknx.log"));
 		final var net = Subnet.withServer(dir, friendly, port, settings.area(), settings.lineNo());
 		net.tap((origin, f) -> {
-			final String svc = FrameFormatter.service(f.getPayload());
+			final boolean group = f.getDestination() instanceof io.calimero.GroupAddress;
+			final String svc = FrameFormatter.service(f.getPayload(), group);
 			final var tg = new EventLog.Telegram(origin, f.getSource().toString(), f.getDestination().toString(),
-					f.getDestination() instanceof io.calimero.GroupAddress, svc, java.util.HexFormat.of().formatHex(f.getPayload()),
+					group, svc, java.util.HexFormat.of().formatHex(f.getPayload()),
 					f.getPriority().name(), f.getHopCount());
 			log.add("bus", "", (origin.equals(Subnet.ORIGIN_IP) ? "ETS/IP -> bus  " : "device -> bus   ")
 					+ org.vknx.sim.FrameFormatter.format(f), tg);

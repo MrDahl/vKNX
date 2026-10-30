@@ -28,11 +28,19 @@ final class TelegramDecoder {
 			if (asdu.length == 0 || (t.getTypeSize() > 0 && asdu.length != Math.max(1, t.getTypeSize())))
 				return new Result(pretty(dpt), null);
 			t.setData(asdu);
-			return new Result(pretty(dpt), t.getValue());
+			return new Result(pretty(dpt), tidy(t.getValue()));
 		}
 		catch (final Exception e) {
 			return new Result(pretty(dpt), null);
 		}
+	}
+
+	/** Removes floating point noise ("22.400000000000002 \u00b0C" -> "22.4 \u00b0C"); DPT values have at most 2 decimals here. */
+	static String tidy(final String v) {
+		final var m = java.util.regex.Pattern.compile("^(-?\\d+\\.\\d{3,})(.*)$").matcher(v);
+		if (!m.matches())
+			return v;
+		return new java.math.BigDecimal(m.group(1)).setScale(2, java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString() + m.group(2);
 	}
 
 	/** "DPST-9-1" -> "9.001" */

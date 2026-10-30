@@ -1,6 +1,6 @@
 import { h, icon } from './util.js';
 import { api } from './api.js';
-import { S, emit, selectDevice } from './bus.js';
+import { S, emit, selectDevice, hooks } from './bus.js';
 import { modal, toast } from './dialogs.js';
 
 const PREFIX = { 'push-button': 'Button', 'push-rocker': 'Rocker', 'push-slider': 'Slider', 'switch-actuator': 'Switch', 'switch-actuator-4': 'Switch4',
@@ -51,6 +51,7 @@ export function openAddDevice() {
       await api.add(chosen.key, n);
       close();
       toast(`"${n}" was added. Assign its address from ETS (switch on its programming button first).`, 'ok');
+      await hooks.refresh();
       emit('devices');
       selectDevice(n, { drawer: S.view === 'simulation' });
     } catch (e) {

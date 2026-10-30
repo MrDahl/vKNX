@@ -1,6 +1,6 @@
 import { h, icon, setText, setCls } from './util.js';
 import { api, conn } from './api.js';
-import { S, on, emit, navigate } from './bus.js';
+import { S, on, emit, navigate, hooks } from './bus.js';
 import { toast } from './dialogs.js';
 import { applyTheme, currentTheme, linkSummary, openConnection, openSettings } from './settings.js';
 import { createInstallation } from './views/installation.js';
@@ -92,15 +92,17 @@ async function loadCatalog() {
 }
 let busy = false;
 async function tick() {
-  if (busy) return; busy = true;
+  while (busy) await busy;
+  let done; busy = new Promise(r => { done = r; });
   try {
     const st = await api.state();
     if (!S.catalog.length) await loadCatalog(); // before the first render, so icons and titles are right from the start
     ingest(st);
     ingestLog(await api.log(S.since));
   } catch (e) { header(); }
-  finally { busy = false; }
+  finally { busy = false; done(); }
 }
+hooks.refresh = tick;
 (function loop() { tick().finally(() => setTimeout(loop, document.hidden ? 2500 : 600)); })();
 
 showView(); header();

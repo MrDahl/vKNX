@@ -14,7 +14,7 @@ const MIN_Z = 20, MAX_Z = 300;
 export function createPlan() {
   const root = h('div.view', { hidden: true });
   let layout = { items: [], zoom: 100, size: 1 };
-  let loaded = false, hasImg = false, sel = null, dragging = null, panning = null;
+  let loaded = false, hasImg = false, planKnown = null, sel = null, dragging = null, panning = null;
 
   const save = debounce(async () => {
     try { await api.saveLayout({ items: layout.items, zoom: layout.zoom, size: layout.size }); } catch (e) { toast(`The floor plan layout could not be saved: ${e.message}`, 'error'); }
@@ -92,14 +92,14 @@ export function createPlan() {
   async function upload() {
     const f = file.files[0]; if (!f) return;
     const ext = (f.name.split('.').pop() || '').toLowerCase();
-    try { await api.planUpload(ext, await f.arrayBuffer()); toast('The floor plan image was uploaded.', 'ok'); delete layout.fitted; loadImg(); }
+    try { await api.planUpload(ext, await f.arrayBuffer()); toast('The floor plan image was uploaded.', 'ok'); delete layout.fitted; planKnown = true; loadImg(); }
     catch (e) { toast(`The plan image could not be uploaded: ${e.message}`, 'error'); }
     file.value = '';
   }
   async function removePlanImage() {
     const ok = await confirmDialog({ title: 'Remove plan image', danger: true, confirmLabel: 'Remove image', message: 'Remove the floor plan image? The symbol placements are kept, so a new image can be used with the same layout.' });
     if (!ok) return;
-    try { await api.planRemove(); loadImg(); toast('The plan image was removed.', 'ok'); } catch (e) { toast(`The plan image could not be removed: ${e.message}`, 'error'); }
+    try { await api.planRemove(); planKnown = false; img.onerror(); toast('The plan image was removed.', 'ok'); } catch (e) { toast(`The plan image could not be removed: ${e.message}`, 'error'); }
   }
 
   // ----- markers -----
@@ -201,8 +201,13 @@ export function createPlan() {
   function selectMarker(id) { sel = id; update(); }
 
   // ----- palette -----
-  function placeAt(id, x, y) {
+  function placeAt(id, x, y, cascade) {
     if (itemOf(id)) return;
+    if (cascade) { // several symbols placed from the list must not end up exactly on top of each other
+      let n = 0;
+      while (layout.items.some(i => Math.abs(i.x - (x + n * .075)) < .03 && Math.abs(i.y - (y + n * .07)) < .03) && n < 10) n++;
+      x += n * .075; y += n * .07;
+    }
     layout.items.push({ id, x: clamp(x, .02, .98), y: clamp(y, .02, .98) });
     sel = id; save(); update();
   }
@@ -218,7 +223,7 @@ export function createPlan() {
       const free = pointsOf(d).filter(p => !placed.has(p.id) && (!q || (d.name + ' ' + p.name).toLowerCase().includes(q)));
       if (!free.length) continue;
       blocks.push(h('div.pal-group', d.name), ...free.map(p => {
-        const b = h('button.pal-item', { type: 'button', draggable: true, title: 'Click to place, or drag onto the plan', onclick: () => placeAt(p.id, ...viewCenter()) }, icon(p.type === 'lamp' ? 'lampOff' : p.type === 'sensor' ? SENSORS[p.sensor].icon : p.type === 'key' ? p.sym : p.type), p.name);
+        const b = h('button.pal-item', { type: 'button', draggable: true, title: 'Click to place, or drag onto the plan', onclick: () => placeAt(p.id, ...viewCenter(), true) }, icon(p.type === 'lamp' ? 'lampOff' : p.type === 'sensor' ? SENSORS[p.sensor].icon : p.type === 'key' ? p.sym : p.type), p.name);
         b.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', p.id));
         return b;
       }));
@@ -282,12 +287,14 @@ export function createPlan() {
     if (loaded) return; loaded = true;
     try { const l = await api.layout(); layout = { items: [], zoom: 100, size: 1, ...l }; if (!layout.items) layout.items = []; } catch (e) { toast(`The floor plan layout could not be loaded: ${e.message}`, 'error'); loaded = false; return; }
     if (layout.zoom) layout.zoomSet = layout.zoom !== 100 || undefined;
-    applyZoom(); applySize(); loadImg();
+    applyZoom(); applySize(); planKnown = !!S.state?.plan; if (planKnown) loadImg(); else img.onerror();
   }
 
   function update() {
     if (root.parentElement && root.hidden) return;
     ensureLoaded();
+    const hp = !!S.state?.plan;
+    if (loaded && hp !== planKnown) { planKnown = hp; if (hp) loadImg(); else img.onerror(); }
     bOp.setAttribute('aria-pressed', String(!S.planEdit)); bEd.setAttribute('aria-pressed', String(S.planEdit));
     palette.hidden = !S.planEdit; props.hidden = !S.planEdit;
     for (const el of [bUp]) el.hidden = !S.planEdit;
