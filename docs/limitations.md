@@ -14,6 +14,16 @@ Import, addressing and download for push button, switch actuator, dimmer, slider
 ## Verified by our own tests (without ETS) [T]
 `tools/selftest.sh` (mini-ETS in Java), `TunnelTest`/`TunnelLineTest` (real KNXnet/IP tunnel, other areas/lines), `ProductsTest` (all products, partial download, multisensor parameters), `AppTest` (settings, update parsing), and a browser test of the panel and floor plan.
 
+## Control panel redesign (unreleased) - what is tested and what is not
+- **Tested without Windows/ETS** (headless Chromium against the running app, `tools/` fixture that acts like ETS): navigation, installation list/search, catalogue and add/remove with confirmation, programming button, press / held rocker key / slider while live updates run, details, dock (resize, pause/resume, filters, clear view), floor plan (upload, place, drag, rename, reload, operate vs. edit, remove from plan), group address overview, connection loss and recovery (simulated by blocking the API), light/dark theme, sizes 1366x768, 1920x1080, about 1093x614 and 911x512 (Windows scaling 125 % / 150 %) and 600x400.
+- **Not tested:** the WebView2 window itself (same engine family as Chromium but not run), real ETS sessions with the new panel, a real Windows installation, touch screens.
+- **Status wording:** "ETS / IP client connected" means the KNXnet/IP server reports an open connection. It does not prove that a download will succeed. "Interface ready" only means the server is running.
+- **Download status** is derived from the load states of the device's four tables (empty / in progress / partial / complete / error). It says nothing about how far ETS is.
+- **DPT decoding** uses the types declared in the product definitions. A group address used by devices with different types, or by none, is shown as "Unknown DPT" with raw data. Telegrams that ETS sends to addresses no device uses are therefore not decoded.
+- **Device filter in the monitor** shows telegrams sent by the device or addressed to one of its configured group addresses. The second kind is not proof that the device received them.
+- The monitor keeps the latest 3000 telegrams in memory; older ones are only in `vknx.log`.
+- Rooms and room filters are not part of this version.
+
 ## Functional limits
 - No line coupler (filter table, hop count): all lines are directly connected.
 - No scenes, rooms or simulation rules; no ETS project import.

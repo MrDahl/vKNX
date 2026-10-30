@@ -9,7 +9,7 @@ Open-source teaching simulator for KNX. Goal: students program **virtual devices
 - Java 21 + [Calimero](https://github.com/calimero-project) (KNXnet/IP server, virtual devices) – see `docs/decisions.md`
 - 9 products: push button, rocker, slider push button, switch actuator 1/4/8, dimming actuator, blind actuator (2 channels), multisensor (6 measurements, each with its own group object and ETS page)
 - ETS product XML generated from the same product definition the backend runs on
-- Control panel (dark/light): devices, group address overview, telegram monitor, floor plan with placeable outputs and inputs
+- Control panel (light/dark) with three workspaces: *Installation* (catalogue, device details, programming button, parameters, objects), *Simulation* (operating cards or floor plan, compact telegram monitor underneath) and *Monitor* (telegram table with filters, group address overview with configured-vs-observed)
 - Windows application with installer, its own window (WebView2) and "Check for updates" – see `CHANGELOG.md`
 - Not yet: line coupler, scenes/environment panel (see `docs/limitations.md`)
 

@@ -53,6 +53,7 @@ export function createInstallation() {
     setCls(root, 'has-sel', !!S.selected);
     detail.update();
   }
-  on('state', update); on('select', update); on('ga', update); on('devices', update);
+  const live = () => { if (S.view === 'installation') update(); };
+  on('state', live); on('select', live); on('ga', live); on('devices', live);
   return { el: root, update };
 }

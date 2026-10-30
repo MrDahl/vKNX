@@ -60,7 +60,8 @@ export function createSimulation() {
     } else plan.update();
     if (!drawer.hidden) drawerDetail.update();
   }
-  on('state', update); on('select', update); on('ga', update); on('dock', update); on('devices', update);
+  const live = () => { if (S.view === 'simulation') update(); };
+  on('state', live); on('select', live); on('ga', live); on('dock', live); on('devices', live);
   window.addEventListener('resize', () => { if (S.dockOpen && S.view === 'simulation') applyDockHeight(); });
   return { el: root, update, onShow: () => { update(); dockMon.update(); } };
 }

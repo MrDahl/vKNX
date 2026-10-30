@@ -49,6 +49,24 @@ public final class AppTest {
 		final String cfg = Subnet.serverConfig("vKNX simulator", 3671, 2, 9);
 		SelfTest.check("server config uses 2.9.x addresses", cfg.contains(">2.9.0<") && cfg.contains(">2.9.241<") && cfg.contains("udpPort=\"3671\"")
 				&& cfg.contains("friendlyName=\"vKNX simulator\"") && !cfg.contains("1.1."));
+		// ---- telegram decoding: only with a DPT known from the product data, never guessed from the length
+		final var on = org.vknx.ui.TelegramDecoder.decode("0081", "GroupValueWrite", java.util.Set.of("DPST-1-1"));
+		SelfTest.check("DPT 1.001 write 1 decodes to on", on.dpt().equals("1.001") && "on".equalsIgnoreCase(on.value()));
+		final var scaled = org.vknx.ui.TelegramDecoder.decode("008040", "GroupValueWrite", java.util.Set.of("DPST-5-1"));
+		SelfTest.check("DPT 5.001 0x40 decodes to ~25 %", scaled.value() != null && scaled.value().startsWith("25"));
+		final var temp = org.vknx.ui.TelegramDecoder.decode("00800c33", "GroupValueWrite", java.util.Set.of("DPST-9-1"));
+		SelfTest.check("DPT 9.001 0x0C33 decodes to 21.5 \u00b0C without float noise", temp.value() != null && temp.value().startsWith("21.5"));
+		SelfTest.check("no DPT known: no value (raw data only)", org.vknx.ui.TelegramDecoder.decode("0081", "GroupValueWrite", java.util.Set.of()).value() == null);
+		SelfTest.check("devices disagree on the DPT: no value", org.vknx.ui.TelegramDecoder.decode("0081", "GroupValueWrite", java.util.Set.of("DPST-1-1", "DPST-5-1")).value() == null);
+		SelfTest.check("data length does not fit the DPT: no value", org.vknx.ui.TelegramDecoder.decode("00800c33", "GroupValueWrite", java.util.Set.of("DPST-1-1")).value() == null);
+		SelfTest.check("group read has no value", org.vknx.ui.TelegramDecoder.decode("0000", "GroupValueRead", java.util.Set.of("DPST-1-1")).value() == null);
+		SelfTest.check("tidy removes float noise", org.vknx.ui.TelegramDecoder.tidy("22.400000000000002 \u00b0C").equals("22.4 \u00b0C"));
+		SelfTest.check("service names: group write/read/response, transport control",
+				org.vknx.sim.FrameFormatter.service(new byte[] { 0, (byte) 0x81 }, true).equals("GroupValueWrite")
+						&& org.vknx.sim.FrameFormatter.service(new byte[] { 0, 0 }, true).equals("GroupValueRead")
+						&& org.vknx.sim.FrameFormatter.service(new byte[] { 0, 0x41 }, true).equals("GroupValueResponse")
+						&& org.vknx.sim.FrameFormatter.service(new byte[] { (byte) 0x80 }).equals("T_Connect")
+						&& org.vknx.sim.FrameFormatter.service(new byte[] { (byte) 0xC2 }).equals("T_ACK"));
 		System.out.println(SelfTest.failed == 0 ? "APP TEST PASSED" : "APP TEST FAILED");
 		System.exit(SelfTest.failed == 0 ? 0 : 1);
 	}

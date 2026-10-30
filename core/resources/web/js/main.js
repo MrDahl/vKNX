@@ -90,7 +90,7 @@ async function loadCatalog() {
   if (S.catalog.length) return;
   try { S.catalog = await api.catalog(); S.cat = Object.fromEntries(S.catalog.map(p => [p.key, p])); emit('state'); } catch (e) { /* retried on the next tick */ }
 }
-let busy = false;
+let busy = false, shown = false;
 async function tick() {
   while (busy) await busy;
   let done; busy = new Promise(r => { done = r; });
@@ -98,6 +98,7 @@ async function tick() {
     const st = await api.state();
     if (!S.catalog.length) await loadCatalog(); // before the first render, so icons and titles are right from the start
     ingest(st);
+    if (!shown) { shown = true; showView(); }
     ingestLog(await api.log(S.since));
   } catch (e) { header(); }
   finally { busy = false; done(); }
@@ -106,6 +107,4 @@ hooks.refresh = tick;
 (function loop() { tick().finally(() => setTimeout(loop, document.hidden ? 2500 : 600)); })();
 
 showView(); header();
-// first load: show the workspace as soon as the first state arrived
-on('state', function first() { if (S.state && S.catalog.length) { showView(); } });
 window.vknx = { S, emit, navigate }; // handy for tests and debugging
