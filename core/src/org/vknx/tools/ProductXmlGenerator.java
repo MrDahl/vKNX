@@ -110,6 +110,7 @@ public final class ProductXmlGenerator {
 					.append(pr.id()).append("\" RefId=\"").append(aid).append("_P-").append(pr.id()).append("\" />\n");
 		x.append("            </ParameterRefs>\n");
 
+		if (!p.objects().isEmpty()) {
 		x.append("            <ComObjectTable>\n");
 		for (final ObjDef o : p.objects())
 			x.append("              <ComObject Id=\"").append(aid).append("_O-").append(o.number()).append("\" Name=\"")
@@ -125,6 +126,7 @@ public final class ProductXmlGenerator {
 			x.append("              <ComObjectRef Id=\"").append(aid).append("_O-").append(o.number()).append("_R-")
 					.append(o.number()).append("\" RefId=\"").append(aid).append("_O-").append(o.number()).append("\" />\n");
 		x.append("            </ComObjectRefs>\n");
+		}
 
 		x.append("            <AddressTable MaxEntries=\"255\" />\n");
 		x.append("            <AssociationTable MaxEntries=\"255\" />\n");
@@ -185,7 +187,8 @@ public final class ProductXmlGenerator {
 
 		x.append("      <Hardware>\n        <Hardware Id=\"").append(hwId).append("\" Name=\"").append(esc(p.name()))
 				.append("\" SerialNumber=\"").append(p.hardwareSerial())
-				.append("\" VersionNumber=\"1\" BusCurrent=\"10\" HasIndividualAddress=\"true\" HasApplicationProgram=\"true\">\n");
+				.append("\" VersionNumber=\"1\" BusCurrent=\"10\" HasIndividualAddress=\"true\" HasApplicationProgram=\"true\"")
+				.append(p.coupler() ? " IsCoupler=\"true\"" : "").append(">\n");
 		x.append("          <Products>\n            <Product Id=\"").append(prodId).append("\" Text=\"")
 				.append(esc(p.name())).append("\" OrderNumber=\"").append(p.orderNumber())
 				.append("\" IsRailMounted=\"false\" DefaultLanguage=\"en-US\">\n");

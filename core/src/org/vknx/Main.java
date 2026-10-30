@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.vknx.device.VirtualDevice;
 import org.vknx.product.Products;
+import org.vknx.sim.FrameFormatter;
 import org.vknx.sim.Subnet;
 import org.vknx.ui.EventLog;
 import org.vknx.device.DeviceRegistry;
@@ -57,10 +58,18 @@ public final class Main {
 		if (lineOverride != null)
 			settings.setLine(lineOverride);
 		System.out.println("vKNX " + org.vknx.app.Version.current());
-		final var log = new EventLog(1000);
+		final var log = new EventLog(3000);
 		log.tee(dir.resolve("vknx.log"));
 		final var net = Subnet.withServer(dir, friendly, port, settings.area(), settings.lineNo());
-		net.monitor(s -> log.add("bus", "", s));
+		net.tap((origin, f) -> {
+			final boolean group = f.getDestination() instanceof io.calimero.GroupAddress;
+			final String svc = FrameFormatter.service(f.getPayload(), group);
+			final var tg = new EventLog.Telegram(origin, f.getSource().toString(), f.getDestination().toString(),
+					group, svc, java.util.HexFormat.of().formatHex(f.getPayload()),
+					f.getPriority().name(), f.getHopCount());
+			log.add("bus", "", (origin.equals(Subnet.ORIGIN_IP) ? "ETS/IP -> bus  " : "device -> bus   ")
+					+ org.vknx.sim.FrameFormatter.format(f), tg);
+		});
 
 		final var registry = new DeviceRegistry(dir, net, log);
 		for (final String spec : specs)
@@ -73,6 +82,7 @@ public final class Main {
 
 		final var ui = new WebUi(web, registry, log);
 		ui.configure(settings, supervised, settings.line() + ".241");
+		ui.setNet(net);
 		ui.start();
 		System.out.println();
 		System.out.println("vKNX is running.");

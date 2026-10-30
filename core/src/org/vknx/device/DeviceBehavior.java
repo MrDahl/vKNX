@@ -22,6 +22,7 @@ public abstract class DeviceBehavior {
 			case "switch-actuator-4" -> new SwitchActuatorNBehavior(dev, 4);
 			case "switch-actuator-8" -> new SwitchActuatorNBehavior(dev, 8);
 			case "multisensor" -> new MultisensorBehavior(dev);
+			case "coupler-line", "coupler-area" -> new CouplerBehavior(dev, p.key().equals("coupler-area"));
 			default -> throw new IllegalArgumentException("no behaviour for product " + p.key());
 		};
 	}

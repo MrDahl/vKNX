@@ -12,7 +12,11 @@ import java.util.List;
 
 /** Bounded in-memory log shared by the telegram monitor and the device explanations. */
 public final class EventLog {
-	public record Entry(long seq, String time, String category, String device, String text) {}
+	/** Structured fields of a real bus telegram (so the UI never has to parse display text). */
+	public record Telegram(String origin, String source, String destination, boolean group, String service, String tpdu,
+			String priority, int hops) {}
+
+	public record Entry(long seq, long ts, String time, String category, String device, String text, Telegram telegram) {}
 
 	private static final DateTimeFormatter T = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 	private final int capacity;
@@ -25,8 +29,10 @@ public final class EventLog {
 
 	public EventLog(final int capacity) { this.capacity = capacity; }
 
-	public synchronized void add(final String category, final String device, final String text) {
-		final var e = new Entry(++seq, LocalTime.now().format(T), category, device, text);
+	public void add(final String category, final String device, final String text) { add(category, device, text, null); }
+
+	public synchronized void add(final String category, final String device, final String text, final Telegram tg) {
+		final var e = new Entry(++seq, System.currentTimeMillis(), LocalTime.now().format(T), category, device, text, tg);
 		entries.add(e);
 		if (file != null) {
 			try {

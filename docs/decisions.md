@@ -23,7 +23,7 @@ Run: `java -p build/core:build/device:build/server:build/vknx -m org.vknx/org.vk
 Calimero's server acts as one line and drops frames to other lines/areas. A small local patch (`third_party/patches/`) makes the network "flat", so devices can have any area/line. The interface address is configurable (Settings → Interface for ETS) because ETS cannot write it on our server. A real line coupler (filter table, hop count) is a later phase.
 
 ## D7. Web UI via local backend
-A browser cannot speak UDP/KNXnet/IP. UI = JDK `HttpServer` on `127.0.0.1` + `index.html`, shown in a WebView2 window by the Windows launcher. Blue lines = real telegrams; grey = the device's own explanation. [T]
+A browser cannot speak UDP/KNXnet/IP. UI = JDK `HttpServer` on `127.0.0.1` + static files (`index.html`, `css/`, `js/` ES modules, no build step), shown in a WebView2 window by the Windows launcher. Blue lines = real telegrams; grey = the device's own explanation. [T]
 
 ## D8. CRC-16 / MCB
 `Crc16.ccitt` is implemented independently and cross-checked against thelsing's C function (`core/test/crc-vectors.txt`, 40 vectors) [T].
