@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [0.4.2] - unreleased
+## [0.4.2] - 2026-10-30
 Fixes the in-program update that closed vKNX but left the old version installed. **Not tried on Windows yet** (the release build runs an automatic silent install test, but updating from inside the program has to be tried by hand).
 
 ### Fixed: update from the settings dialog
