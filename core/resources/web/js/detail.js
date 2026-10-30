@@ -106,6 +106,7 @@ export function createDetail({ onBack, onClose } = {}) {
     const objs = S.cat[d.product]?.objects || [];
     const byObj = new Map();
     for (const a of d.assoc || []) { if (!byObj.has(a.obj)) byObj.set(a.obj, []); byObj.get(a.obj).push(a.ga); }
+    if (!objs.length) { els.objs.replaceChildren(h('p.hint', { style: 'margin:.6rem' }, 'This product has no group objects. It is configured with parameters only.')); return; }
     const rows = objs.map(o => h('tr',
       h('td', o.number), h('td', o.text), h('td.mute', o.function), h('td', o.size), h('td', o.dpt || '–'),
       h('td.flags', [...o.flags].map(f => h('span', { title: { R: 'Read', W: 'Write', T: 'Transmit', U: 'Update' }[f] }, f))),

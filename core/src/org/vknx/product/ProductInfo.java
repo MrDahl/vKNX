@@ -26,7 +26,11 @@ public final class ProductInfo {
 			Map.entry("blind-2", new Info("Blind actuator, 2 channels", "Actuator", "blind",
 					"Drives two blinds with move up/down, stop and position feedback.")),
 			Map.entry("multisensor", new Info("Multisensor", "Sensor", "temp",
-					"CO₂, humidity, brightness, temperature, pressure and wind. Each value has its own object and send settings in ETS.")));
+					"CO₂, humidity, brightness, temperature, pressure and wind. Each value has its own object and send settings in ETS.")),
+			Map.entry("coupler-line", new Info("Line coupler", "Coupler", "router",
+					"Connects a sub line to the main line (address area.line.0). Routing settings are set in ETS. This version does not route telegrams yet.")),
+			Map.entry("coupler-area", new Info("Area coupler", "Coupler", "router",
+					"Connects a main line to the backbone (address area.0.0). Routing settings are set in ETS. This version does not route telegrams yet.")));
 
 	public static Info of(final ProductDef p) {
 		return INFO.getOrDefault(p.key(), new Info(p.name(), "Other", "devices", ""));

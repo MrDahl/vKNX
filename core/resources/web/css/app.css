@@ -343,3 +343,8 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 }
 .back-only { display: none; }
 #app.stale .mk-body, #app.stale .bulb, #app.stale .meter, #app.stale .window, #app.stale .sens-grid, #app.stale .lamp-grid, #app.stale .blinds { opacity: .5; }
+
+/* coupler card: routing settings as label/value rows */
+.cp-grid { display: grid; gap: .3rem; width: 100%; }
+.cp-row { display: flex; justify-content: space-between; gap: .75rem; font-size: .85rem; }
+.cp-row span { color: var(--muted); }

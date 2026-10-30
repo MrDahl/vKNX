@@ -198,6 +198,35 @@ public final class ProductsTest {
 			mb.act("s3", 305);
 			check("the panel cannot change a multisensor value (ETS only)", Math.abs((Double) mb.view().get("s3") - 21.5) < 0.01);
 
+			// ---------------- couplers: addresses x.y.0 / x.0.0, ETS parameters decoded, no group objects
+			final var lc = VirtualDevice.create("lc", Products.COUPLER_LINE, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("lc.state"), net, listener);
+			final var ac = VirtualDevice.create("ac", Products.COUPLER_AREA, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("ac.state"), net, listener);
+			lc.toggleProgrammingMode();
+			final var lcAddr = new IndividualAddress(1, 1, 0);
+			check("line coupler accepts address 1.1.0", ets.assignAddress(lcAddr) && await(3000, () -> lc.address().equals(lcAddr)));
+			ac.toggleProgrammingMode();
+			final var acAddr = new IndividualAddress(2, 0, 0);
+			check("area coupler accepts address 2.0.0", ets.assignAddress(acAddr) && await(3000, () -> ac.address().equals(acAddr)));
+			// GroupDown=filter(2) GroupUp=route(1) PhysDown=block(0) PhysUp=filter(2) | Repeat=no Confirm=yes
+			final byte[] cpl = { (byte) 0b10_00_01_10, 0b10 };
+			ets.downloadAll(lc.address(), new int[0], new int[0][], new int[0], cpl);
+			ets.downloadAll(ac.address(), new int[0], new int[0][], new int[0], cpl);
+			check("couplers load an application without group objects", await(3000, () -> lc.applicationLoaded() && ac.applicationLoaded()));
+			final var lcv = lc.behavior().view();
+			check("line coupler settings decoded from the ETS parameter area", "line".equals(lcv.get("kind"))
+					&& "filter".equals(lcv.get("groupDown")) && "route all".equals(lcv.get("groupUp"))
+					&& "block".equals(lcv.get("physDown")) && "filter".equals(lcv.get("physUp"))
+					&& Boolean.FALSE.equals(lcv.get("repeat")) && Boolean.TRUE.equals(lcv.get("confirm")));
+			check("area coupler reports kind area; routing is honestly reported as not active",
+					"area".equals(ac.behavior().view().get("kind")) && Boolean.FALSE.equals(ac.behavior().view().get("routing")));
+			check("coupler products are flagged and produce IsCoupler hardware XML",
+					Products.COUPLER_LINE.coupler() && !Products.DIMMER.coupler()
+							&& org.vknx.tools.ProductXmlGenerator.generate(Products.COUPLER_LINE).contains("IsCoupler=\"true\"")
+							&& !org.vknx.tools.ProductXmlGenerator.generate(Products.DIMMER).contains("IsCoupler")
+							&& !org.vknx.tools.ProductXmlGenerator.generate(Products.COUPLER_AREA).contains("<ComObjectTable>"));
+
 			// ---------------- partial download keeps parameters that did not change
 			ets.partialWrite(rocker.address(), 4, 2, 1, new byte[] { 4 }); // ETS changes only DimStep -> 12.5 %
 			check("partial download writes the changed parameter (DimStep 12.5 % = 4)", await(2000, () -> rocker.param("DimStep") == 4));

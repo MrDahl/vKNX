@@ -9,7 +9,14 @@ import java.util.Optional;
  * from exactly the same data, so ETS and simulator cannot drift apart.
  */
 public record ProductDef(String key, int appNumber, int appVersion, String name, String orderNumber,
-		int hardwareSerial, int paramAreaSize, List<ParamDef> params, List<ObjDef> objects) {
+		int hardwareSerial, int paramAreaSize, List<ParamDef> params, List<ObjDef> objects, boolean coupler) {
+
+	/** A normal (non-coupler) product. */
+	public ProductDef(final String key, final int appNumber, final int appVersion, final String name,
+			final String orderNumber, final int hardwareSerial, final int paramAreaSize, final List<ParamDef> params,
+			final List<ObjDef> objects) {
+		this(key, appNumber, appVersion, name, orderNumber, hardwareSerial, paramAreaSize, params, objects, false);
+	}
 
 	public ProductDef {
 		params = List.copyOf(params);
