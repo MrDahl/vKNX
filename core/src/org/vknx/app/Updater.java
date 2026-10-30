@@ -118,8 +118,13 @@ public final class Updater {
 					}
 				}
 				state = "installing";
-				new ProcessBuilder(tmp.toString(), "/SILENT", "/CLOSEAPPLICATIONS", "/NORESTART", "/SUPPRESSMSGBOXES").start();
-				Thread.sleep(800);
+				final Process installer = new ProcessBuilder(tmp.toString(), "/SILENT", "/CLOSEAPPLICATIONS", "/NORESTART",
+						"/SUPPRESSMSGBOXES").start();
+				Thread.sleep(1500);
+				// if the installer ended at once it did not run (blocked, damaged): say so instead of closing the program silently
+				if (!installer.isAlive() && installer.exitValue() != 0)
+					throw new IOException("the installer stopped immediately (exit code " + installer.exitValue()
+							+ "); it may have been blocked by Windows or antivirus. Download " + assetUrl + " and run it by hand.");
 				beforeExit.run();
 			}
 			catch (final Exception e) {

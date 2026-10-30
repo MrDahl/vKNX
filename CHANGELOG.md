@@ -3,6 +3,14 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [0.4.2] - 2026-10-30
+Fixes the in-program update that closed vKNX but left the old version installed. **Not tried on Windows yet** (the release build runs an automatic silent install test, but updating from inside the program has to be tried by hand).
+
+### Fixed: update from the settings dialog
+- The installer now closes a running vKNX itself: it asks the launcher to close (which saves the server), waits up to 10 seconds, and ends whatever is still running before it replaces the files. Before, files still in use could stop the installation without any message, so the old version stayed.
+- If the installer ends immediately, the program now shows an error with the download link instead of closing silently.
+- This installer change also works when updating *from* 0.4.0 or 0.4.1, because the installer script is part of the new installer.
+
 ## [0.4.1] - 2026-10-30
 Fixes the status objects that did not send, and adds a blind rocker. Found from a real ETS group-monitor log. **Not yet tried in real ETS:** the new blind rocker product (it must be imported as a new `.knxprod`); the parameter fix is checked against the bytes ETS actually wrote, but only by our own tests.
 
