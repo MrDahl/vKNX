@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Calimero 3 KNX property definitions -->
+<propertyDefinitions>
+    <object type="global">
+        <property pid="1" pidName="PID_OBJECT_TYPE" name="Interface Object Type" pdt="4" dpt="7.010" rw="R" writeEnabled="0" accessPolicy="155/155">
+            <usage>Object type of the interface object</usage>
+        </property>
+        <property pid="2" pidName="PID_OBJECT_NAME" name="Interface Object Name" pdt="2" rw="R(/W)" writeEnabled="0/1" accessPolicy="155/155">
+            <usage>Name of the Interface Object</usage>
+        </property>
+        <property pid="3" pidName="PID_SEMAPHOR" name="Semaphor" pdt="-" rw="" writeEnabled="">
+            <usage></usage>
+        </property>
+        <property pid="4" pidName="PID_GROUP_OBJECT_REFERENCE" name="Group Object Reference" pdt="-" rw="" writeEnabled="">
+            <usage></usage>
+        </property>
+        <property pid="5" pidName="PID_LOAD_STATE_CONTROL" name="Load State Control" pdt="0" rw="3/2" writeEnabled="1" accessPolicy="15F/15F">
+            <usage>Access to load state machines</usage>
+        </property>
+        <property pid="6" pidName="PID_RUN_STATE_CONTROL" name="Run Control" pdt="0" rw="R(/W)" writeEnabled="1">
+            <usage>Access to run state machines</usage>
+        </property>
+        <property pid="7" pidName="PID_TABLE_REFERENCE" name="Table Reference" pdt="9" rw="R" writeEnabled="">
+            <usage></usage>
+        </property>
+        <property pid="8" pidName="PID_SERVICE_CONTROL" name="Service Control" pdt="4" rw="R(/W)" writeEnabled="0/1">
+            <usage>Service Control, Permanent Control field for the Device</usage>
+        </property>
+        <property pid="9" pidName="PID_FIRMWARE_REVISION" name="Firmware Revision" pdt="2" rw="R" writeEnabled="0">
+            <usage>Revision number of the Firmware</usage>
+        </property>
+        <property pid="10" pidName="PID_SERVICES_SUPPORTED" name="" pdt="-" rw="" writeEnabled="">
+            <usage>Supported Services</usage>
+        </property>
+        <property pid="11" pidName="PID_SERIAL_NUMBER" name="KNX Serial Number" pdt="22" rw="R" writeEnabled="0">
+            <usage>KNX Serial Number of the device</usage>
+        </property>
+        <property pid="12" pidName="PID_MANUFACTURER_ID" name="Manufacturer Identifier" pdt="4" rw="R" writeEnabled="0">
+            <usage>Manufacturer code</usage>
+        </property>
+        <property pid="13" pidName="PID_PROGRAM_VERSION" name="Application Version" pdt="21" rw="R(/W)" writeEnabled="1">
+            <usage>Version of the Application Program</usage>
+        </property>
+        <property pid="14" pidName="PID_DEVICE_CONTROL" name="Device Control" pdt="51" dpt="21.002" rw="R/W" writeEnabled="1">
+            <usage>Device Control, Temporary Control field for the Device</usage>
+        </property>
+        <property pid="15" pidName="PID_ORDER_INFO" name="Order Info" pdt="26" rw="R" writeEnabled="0">
+            <usage>OrderInfo, Manufacturer specific Order ID</usage>
+        </property>
+        <property pid="16" pidName="PID_PEI_TYPE" name="PEI Type" pdt="2" rw="R" writeEnabled="0">
+            <usage>Connected or required PEI-type</usage>
+        </property>
+        <property pid="17" pidName="PID_PORT_CONFIGURATION" name="PortADDR" pdt="2" rw="R(/W)" writeEnabled="0/1">
+            <usage>PortAddr, Direction bits for Port A</usage>
+        </property>
+        <property pid="18" pidName="PID_POLL_GROUP_SETTINGS" name="Pollgroup Settings" pdt="13" rw="R/W" writeEnabled="1">
+            <usage>Pollgroup settings, 2 octet Polling Group 1 Byte Slot number</usage>
+        </property>
+        <property pid="19" pidName="PID_MANUFACTURER_DATA" name="Manufacturer Data" pdt="20" rw="R(/W)" writeEnabled="0/1">
+            <usage>Manufacturer Data</usage>
+        </property>
+        <property pid="20" pidName="PID_ENABLE" name="" pdt="-" rw="" writeEnabled="">
+            <usage></usage>
+        </property>
+        <property pid="21" pidName="PID_DESCRIPTION" name="Description" pdt="2" rw="R(/W)" writeEnabled="0/1">
+            <usage>Description, Description of the device</usage>
+        </property>
+        <property pid="22" pidName="PID_FILE" name="" pdt="-" rw="" writeEnabled="">
+            <usage></usage>
+        </property>
+        <property pid="23" pidName="PID_TABLE" name="Address/Association Table" pdt="18" rw="R/W" writeEnabled="1" accessPolicy="15D/15D">
+            <usage>Group Address Table, Association Table</usage>
+        </property>
+        <property pid="24" pidName="PID_ENROL" name="Interface Object Link" pdt="62" rw="" writeEnabled="">
+            <usage>enrolment status, A-Mode enrolment</usage>
+        </property>
+        <property pid="25" pidName="PID_VERSION" name="Version" pdt="48" rw="R" writeEnabled="0">
+            <usage>Generic version information (U6U6U6)</usage>
+        </property>
+        <property pid="26" pidName="PID_GROUP_OBJECT_LINK" name="Group Address Assignment" pdt="62" rw="&lt;tbd&gt;" writeEnabled="">
+            <usage>Group Address Assignment</usage>
+        </property>
+        <property pid="27" pidName="PID_MCB_TABLE" name="Memory Control Table" pdt="24" rw="R/W" writeEnabled="1">
+            <usage>subsegmentation of memory space and checksum</usage>
+        </property>
+        <property pid="28" pidName="PID_ERROR_CODE" name="Error code" pdt="17" rw="R" writeEnabled="0">
+            <usage>error code when load state machine indicates "error"</usage>
+        </property>
+        <property pid="29" pidName="PID_OBJECT_INDEX" name="Object Index" pdt="2" dpt="5.010" rw="(3/x)" writeEnabled="0">
+            <usage>Object index of the interface object in which it is located</usage>
+        </property>
+        <property pid="30" pidName="PID_DOWNLOAD_COUNTER" name="Download Counter" pdt="4" dpt="7.010" rw="(3/x)" writeEnabled="0">
+            <usage>Download Counter</usage>
+        </property>
+    </object>
+    <object type="0">
+        <property pid="51" pidName="PID_ROUTING_COUNT" name="Routing Count" pdt="2" rw="R(/W)" writeEnabled="0/1">
+            <usage>Routing Count, Default Value of Routing count</usage>
+        </property>
+        <property pid="52" pidName="PID_MAX_RETRY_COUNT" name="MaxRetryCount" pdt="2" rw="R(/W)" writeEnabled="0/1">
+            <usage>MaxRetryCount, Value for NAK/BUSY Retries</usage>
+        </property>
+        <property pid="53" pidName="PID_ERROR_FLAGS" name="Error Flags" pdt="2" rw="R(/W)" writeEnabled="0/1">
+            <usage>Errorflags</usage>
+        </property>
+        <property pid="54" pidName="PID_PROGMODE" name="Programming Mode" pdt="51" dpt="1.011" rw="R/W" writeEnabled="1">
+            <usage>Programming mode, Bit 0 = programming mode</usage>
+        </property>
+        <property pid="55" pidName="PID_PRODUCT_ID" name="Product Identification" pdt="26" rw="R" writeEnabled="0">
+            <usage>Product Identification, Manufacturer Specific Device type</usage>
+        </property>
+        <property pid="56" pidName="PID_MAX_APDULENGTH" name="Max. APDU Length" pdt="4" rw="R" writeEnabled="0" accessPolicy="3FF/1FF">
+            <usage>Maximum APDU Length</usage>
+        </property>
+        <property pid="57" pidName="PID_SUBNET_ADDR" name="Subnetwork Address" pdt="2" rw="R" writeEnabled="0" accessPolicy="3FF/00C">
+            <usage>SubNetAddress, High octet of Individual Address</usage>
+        </property>
+        <property pid="58" pidName="PID_DEVICE_ADDR" name="Device Address" pdt="2" rw="R" writeEnabled="0" accessPolicy="3FF/00C">
+            <usage>DeviceAddress, Low octet of Individual Address</usage>
+        </property>
+        <property pid="59" pidName="PID_PB_CONFIG" name="Config Link" pdt="20" rw="" writeEnabled="" accessPolicy="3FF/00C">
+            <usage>Pushbutton Configuration</usage>
+        </property>
+        <property pid="60" pidName="PID_ADDR_REPORT" name="Address report" pdt="22" rw="" writeEnabled="">
+            <usage>AddressReport</usage>
+        </property>
+        <property pid="61" pidName="PID_ADDR_CHECK" name="Address Check" pdt="17" rw="" writeEnabled="">
+            <usage>Address Check</usage>
+        </property>
+        <property pid="62" pidName="PID_OBJECT_VALUE" name="Object Value" pdt="62" rw="R/W" writeEnabled="0/1">
+            <usage>access to a group object value</usage>
+        </property>
+        <property pid="63" pidName="PID_OBJECTLINK" name="Object Link" pdt="62" rw="R/W" writeEnabled="0/1">
+            <usage>function call, set and delete links</usage>
+        </property>
+        <property pid="64" pidName="PID_APPLICATION" name="Application" pdt="62" rw="R/W" writeEnabled="0/1">
+            <usage>change active application</usage>
+        </property>
+        <property pid="65" pidName="PID_PARAMETER" name="Parameter" pdt="62" rw="R/W" writeEnabled="0/1">
+            <usage>access to parameters</usage>
+        </property>
+        <property pid="66" pidName="PID_OBJECTADDRESS" name="Object Address" pdt="62" rw="R/W" writeEnabled="0/1">
+            <usage>read group object addresses</usage>
+        </property>
+        <property pid="67" pidName="PID_PSU_TYPE" name="PSU Type" pdt="4" dpt="7.012" rw="R" writeEnabled="0">
+            <usage>nominal current of device providing distributed power supply, device information; real data</usage>
+        </property>
+        <property pid="68" pidName="PID_PSU_STATUS" name="PSU Status" pdt="50" dpt="1.001" rw="R" writeEnabled="0">
+            <usage>status of DPSU in device, device information; real data</usage>
+        </property>
+        <property pid="69" pidName="PID_PSU_ENABLE" name="PSU Enable" pdt="53" dpt="20.008" rw="R/W" writeEnabled="0/1">
+            <usage>control over DPSU functionality in the device, device information: real data</usage>
+        </property>
+        <property pid="70" pidName="PID_DOMAIN_ADDRESS" name="Domain Address" pdt="4" rw="R/W" writeEnabled="0/1" accessPolicy="3FF/00C">
+            <usage>Domain Address of a device</usage>
+        </property>
+        <property pid="71" pidName="PID_IO_LIST" name="Interface Object List" pdt="4" rw="R/W" writeEnabled="1">
+            <usage>Array with the interface object types implemented in the device</usage>
+        </property>
+        <property pid="72" pidName="PID_MGT_DESCRIPTOR_01" name="Management Descriptor 1" pdt="26" rw="R" writeEnabled="0">
+            <usage>Extended device descriptor</usage>
+        </property>
+        <property pid="73" pidName="PID_PL110_PARAM" name="PL110 Parameters" pdt="17" rw="R/W" writeEnabled="1">
+            <usage>Frequency setting, Indication of whether a repeater is present, Indication of whether the device is a repeater or not</usage>
+        </property>
+        <property pid="74" pidName="PID_RF_REPEAT_COUNTER" name="RF Repeat Counter" pdt="2" rw="R/W" writeEnabled="W">
+            <usage>To be completed</usage>
+        </property>
+        <property pid="75" pidName="PID_RECEIVE_BLOCK_TABLE" name="BiBat Receive Block Table" pdt="2" rw="R/W" writeEnabled="">
+            <usage>Settings for a RF BiBat Slave in which synchronous blocks it shall receive</usage>
+        </property>
+        <property pid="76" pidName="PID_RANDOM_PAUSE_TABLE" name="BiBat Random Pause Table" pdt="2" rw="R/W" writeEnabled="">
+            <usage>Random pause table in a RF BiBat domain</usage>
+        </property>
+        <property pid="77" pidName="PID_RECEIVE_BLOCK_NR" name="BiBat Receive Block Number" pdt="2" rw="R" writeEnabled="0">
+            <usage>Number or receive blocks supported by the RF BiBat slave</usage>
+        </property>
+        <property pid="78" pidName="PID_HARDWARE_TYPE" name="Hardware Type" pdt="22" rw="R" writeEnabled="0">
+            <usage>Property identifying the hardware, allowing differentiation between hardware types of the same mask, introduced for a check possibility for ETS</usage>
+        </property>
+        <property pid="79" pidName="PID_RETRANSMITTER_NUMBER" name="BiBat Retransmitter Number" pdt="2" rw="R/W" writeEnabled="">
+            <usage>Defines the time delay for the retransmitter</usage>
+        </property>
+        <property pid="80" pidName="PID_SERIAL_NR_TABLE" name="Serial Number Table" pdt="22" rw="R/W" writeEnabled="">
+            <usage>Table containing the KNX Serial Number of the BiBat Master and optionally other devices</usage>
+        </property>
+        <property pid="81" pidName="PID_BIBATMASTER_ADDRESS" name="BiBat Master Individual Address" pdt="4" rw="R/W" writeEnabled="">
+            <usage>Individual Address of the BiBat Master, used by BiBat Slave in help call</usage>
+        </property>
+        <property pid="82" pidName="PID_RF_DOMAIN_ADDRESS" name="RF Domain Address" pdt="22" rw="R/W" writeEnabled="1" accessPolicy="3FF/00C">
+            <usage>RF Domain Address for cEMI server filtering and sending</usage>
+        </property>
+        <property pid="83" pidName="PID_DEVICE_DESCRIPTOR" name="Device Descriptor" pdt="18" rw="R" writeEnabled="0">
+            <usage>Device Descriptor for KNXnet/IP devices</usage>
+        </property>
+        <property pid="84" pidName="PID_METERING_FILTER_TABLE" name="Metering Filter Table" pdt="24" rw="R/W" writeEnabled="1">
+            <usage>Metering Filter Table for RF M-Bus Repeater and for the M-Bus Data Collector</usage>
+        </property>
+        <property pid="85" pidName="PID_GROUP_TELEGR_RATE_LIMIT_TIME_BASE" name="Group telegram rate limitation time base" pdt="4" rw="R/W" writeEnabled="1">
+            <usage>Telegram rate limitation time base</usage>
+        </property>
+        <property pid="86" pidName="PID_GROUP_TELEGR_RATE_LIMIT_NO_OF_TELEGR" name="Group telegram rate limitation number of telegrams" pdt="4" rw="R/W" writeEnabled="1">
+            <usage>Telegram rate limitation number</usage>
+        </property>
+        <property pid="89" pidName="PID_FEATURES_SUPPORTED" name="Supported Features" pdt="26" rw="3/1" writeEnabled="0" accessPolicy="3FF/0CC">
+            <usage>Indicates the functionality of a device</usage>
+        </property>
+        <property pid="101" pidName="PID_CHANNEL_01_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 1 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="102" pidName="PID_CHANNEL_02_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 2 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="103" pidName="PID_CHANNEL_03_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 3 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="104" pidName="PID_CHANNEL_04_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 4 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="105" pidName="PID_CHANNEL_05_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 5 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="106" pidName="PID_CHANNEL_06_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 6 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="107" pidName="PID_CHANNEL_07_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 7 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="108" pidName="PID_CHANNEL_08_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 8 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="109" pidName="PID_CHANNEL_09_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 9 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="110" pidName="PID_CHANNEL_10_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 10 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="111" pidName="PID_CHANNEL_11_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 11 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="112" pidName="PID_CHANNEL_12_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 12 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="113" pidName="PID_CHANNEL_13_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 13 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="114" pidName="PID_CHANNEL_14_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 14 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="115" pidName="PID_CHANNEL_15_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 15 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="116" pidName="PID_CHANNEL_16_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 16 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="117" pidName="PID_CHANNEL_17_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 17 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="118" pidName="PID_CHANNEL_18_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 18 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="119" pidName="PID_CHANNEL_19_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 19 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="120" pidName="PID_CHANNEL_20_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 20 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="121" pidName="PID_CHANNEL_21_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 21 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="122" pidName="PID_CHANNEL_22_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 22 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="123" pidName="PID_CHANNEL_23_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 23 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="124" pidName="PID_CHANNEL_24_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 24 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="125" pidName="PID_CHANNEL_25_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 25 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="126" pidName="PID_CHANNEL_26_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 26 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="127" pidName="PID_CHANNEL_27_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 27 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="128" pidName="PID_CHANNEL_28_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 28 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="129" pidName="PID_CHANNEL_29_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 29 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="130" pidName="PID_CHANNEL_30_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 30 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="131" pidName="PID_CHANNEL_31_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 31 Param, Easy configuration channel parameter</usage>
+        </property>
+        <property pid="132" pidName="PID_CHANNEL_32_PARAM" name="&lt;tbd&gt;" pdt="17" rw="" writeEnabled="">
+            <usage>Channel 32 Param, Easy configuration channel parameter</usage>
+        </property>
+    </object>
+    <object type="1">
+        <property pid="51" pidName="PID_EXT_FRAMEFORMAT" name="Extended Frame Format" pdt="2" rw="R/W" writeEnabled="1">
+            <usage>Frame format, Extended Frame Format 0001bin - 1111bin</usage>
+        </property>
+        <property pid="52" pidName="PID_ADDRTAB1" name="Address Table Format 1" pdt="20" rw="R/W" writeEnabled="1">
+            <usage>Address Table Format-1</usage>
+        </property>
+        <property pid="53" pidName="PID_GROUP_RESPONSER_TABLE" name="PL110 Group Responser Table" pdt="51" rw="R/W" writeEnabled="1">
+            <usage>PL110 Group Responser Table</usage>
+        </property>
+    </object>
+    <object type="2">
+        <property pid="52" pidName="PID_TABLE" name="Association Table Format 1" pdt="19" rw="&lt;tbd&gt;" writeEnabled="">
+            <usage>Association Table for Extended Group Addreses</usage>
+        </property>
+    </object>
+    <object type="3">
+        <property pid="51" pidName="PID_PARAM_REFERENCE" name="Parameter Reference" pdt="4" rw="R" writeEnabled="0">
+            <usage>Pointer to the Easy Configuration Paramter Block</usage>
+        </property>
+        <property pid="52" pidName="PID_OPERATION_MODE" name="Operation Mode" pdt="0x3E" rw="R/W" writeEnabled="1" accessPolicy="3FF/00C">
+            <usage>Set and read the behavior of the application program</usage>
+        </property>
+    </object>
+    <object type="6">
+        <property pid="51" pidName="PID_MEDIUM_STATUS" name="Medium Status" pdt="17" rw="3/-" writeEnabled="1" accessPolicy="3FF/1FF">
+            <usage>Status of the communication medium</usage>
+        </property>
+        <property pid="52" pidName="PID_MAIN_LCCONFIG" name="Line Coupler Configuration for Main Line" pdt="17" rw="3/3" writeEnabled="1">
+            <usage>Defines the handling of point-to-point addressed and broadcast frames from the primary side</usage>
+        </property>
+        <property pid="53" pidName="PID_SUB_LCCONFIG" name="Line Coupler Configuration for Subline" pdt="17" rw="3/3" writeEnabled="1">
+            <usage>Defines the handling of point-to-point addressed and broadcast frames from the secondary side</usage>
+        </property>
+        <property pid="54" pidName="PID_MAIN_LCGRPCONFIG" name="Line Coupler Configuration for multicast from Main Line" pdt="17" rw="3/3" writeEnabled="1">
+            <usage>Defines the handling of multicast frames from the primary side</usage>
+        </property>
+        <property pid="55" pidName="PID_SUB_LCGRPCONFIG" name="Line Coupler Configuration for multicast from Subline" pdt="17" rw="3/3" writeEnabled="1">
+            <usage>Defines the handling of multicast frames from the secondary side</usage>
+        </property>
+        <property pid="56" pidName="PID_ROUTETABLE_CONTROL" name="Routing Table Control" pdt="62" rw="3/0" writeEnabled="0">
+            <usage>Set of methods to modify the routing table</usage>
+        </property>
+        <property pid="57" pidName="PID_COUPL_SERV_CONTROL" name="Coupler Services Control" pdt="51" rw="3/0" writeEnabled="0">
+            <usage>Control of mechanisms for inconsistencies and Subnetwork Address mechanisms</usage>
+        </property>
+        <property pid="58" pidName="PID_MAX_APDU_LENGTH" name="Max. APDU-Length" pdt="4" rw="R" writeEnabled="0" accessPolicy="3FF/1FF">
+            <usage>Max. APDU-Length</usage>
+        </property>
+        <property pid="61" pidName="PID_HOP_COUNT" name="Hop Count" pdt="4" rw="3/2" writeEnabled="1">
+            <usage>Default hop count that the coupler shall use if it forwards a frame</usage>
+        </property>
+        <property pid="63" pidName="PID_MEDIUM" name="Medium" pdt="0x35" rw="3/x" writeEnabled="0">
+            <usage>KNX communication medium that is used for the subnetwork</usage>
+        </property>
+        <property pid="67" pidName="PID_FILTER_TABLE_USE" name="Filter Table Use" pdt="0x32" rw="3/2" writeEnabled="1">
+            <usage>Indicate whether the filter table shall be used or not</usage>
+        </property>
+        <property pid="80" pidName="PID_PTP_CONFIG" name="Point-to-point Routing Configuration" pdt="0x33" rw="2/2" writeEnabled="1" accessPolicy="3FF/00C">
+            <usage>Controls routing of p2p messages to be sent on the corresponding medium interface</usage>
+        </property>
+        <property pid="81" pidName="PID_SECURITY_PROXY_GRP_KEY_TABLE" name="Security Proxy Group Key Table" pdt="0x23" rw="2/2" writeEnabled="1" accessPolicy="00C/00C">
+            <usage>Contains the group addresses, security keys and security settings to proxy secure group communication</usage>
+        </property>
+        <property pid="82" pidName="PID_BC_CONFIG" name="Broadcast Routing Configuration" pdt="0x33" rw="2/2" writeEnabled="1" accessPolicy="3FF/00C">
+            <usage>Controls routing of (system) broadcast messages to be sent on the corresponding medium interface</usage>
+        </property>
+        <property pid="83" pidName="PID_PTP_ROUTING_TEMP" name="Temporary Point-to-point Routing" pdt="0x3E" rw="2/2" writeEnabled="1" accessPolicy="3FF/0CC">
+            <usage>Temporary p2p routing</usage>
+        </property>
+        <property pid="84" pidName="PID_BC_ROUTING_TEMP" name="Temporary Broadcast Routing" pdt="0x3E" rw="3/2" writeEnabled="1" accessPolicy="3FF/0CC">
+            <usage>Temporary broadcast routing</usage>
+        </property>
+        <property pid="120" pidName="PID_IP_SBC_CONTROL" name="IP System Broadcast Routing" pdt="0x3E" rw="2/2" writeEnabled="1" accessPolicy="3FF/00C">
+            <usage>Enable and disable the IP System Broadcast Routing Mode</usage>
+        </property>
+		<!-- Enertex-specific -->
+		<property pid="201" pidName="PID_MAIN_LCGRPCONFIG_HIGH"
+			name="Extended filter for multicasts from main line" pdt="0x02" rw="3/0" writeEnabled="0">
+			<usage>Defines a filter for each main group [0..31] for IP to KNX</usage>
+		</property>
+		<property pid="202" pidName="PID_SUB_LCGRPCONFIG_HIGH"
+			name="Extended filter for multicasts from sub line" pdt="0x02" rw="3/0" writeEnabled="0">
+			<usage>Defines a filter for each main group [0..31] for KNX to IP</usage>
+		</property>
+		<property pid="203" pidName="PID_ENX_SYSTEMBC" name="Compatibility mode for system broadcasts" pdt="0x32" dpt="1.001"
+			rw="3/3" writeEnabled="1">
+			<usage>With IP routing, set specific bits in system broadcasts for communication with older devices</usage>
+		</property>
+		<property pid="206" pidName="PID_ENX_SEND_ALAWAYS_ACK" name="ACK every telegram" pdt="0x32" dpt="1.001"
+			rw="3/3" writeEnabled="1">
+			<usage>Every received telegram is acknowledged</usage>
+		</property>
+		<property pid="208" pidName="PID_ENX_LOCK_PROGKNX" name="Lock programming from KNX side" pdt="0x32"
+			dpt="1.001" rw="3/3" writeEnabled="1">
+			<usage>The interface can be locked to not be programmed over the KNX bus</usage>
+		</property>
+		<property pid="209" pidName="PID_ENX_LEGACY_ROUTING" name="Enable legacy routing algorithm" pdt="0x32"
+			dpt="1.001" rw="3/3" writeEnabled="1">
+			<usage>Routing count algorithm for hop count 7 according to pre-2018 specification</usage>
+		</property>
+    </object>
+    <object type="7">
+        <property pid="51" pidName="PID_LTE_ROUTESELECT" name="LTE Frames Routing Selection" pdt="17" rw="3/0" writeEnabled="0">
+            <usage>Defines the general handling of LTE frames</usage>
+        </property>
+        <property pid="52" pidName="PID_LTE_ROUTETABLE" name="LTE Routing Table" pdt="21" rw="3/0" writeEnabled="0">
+            <usage>LTE Routing Table</usage>
+        </property>
+    </object>
+    <object type="8">
+        <property pid="51" pidName="PID_MEDIUM_TYPE" name="Medium Type" pdt="52" dpt="22.1000" rw="R" writeEnabled="0" accessPolicy="3FF/1FF">
+            <usage>Medium types supported by the cEMI server</usage>
+        </property>
+        <property pid="52" pidName="PID_COMM_MODE" name="Communication Mode" pdt="53" dpt="20.1000" rw="R/W" writeEnabled="1" accessPolicy="3FF/1FF">
+            <usage>cEMI server communication mode</usage>
+        </property>
+        <property pid="53" pidName="PID_MEDIUM_AVAILABILITY" name="Medium Availability" pdt="52" dpt="22.1000" rw="R" writeEnabled="0" accessPolicy="3FF/1FF">
+            <usage>Available media in the cEMI server</usage>
+        </property>
+        <property pid="54" pidName="PID_ADD_INFO_TYPES" name="Additional Information Types" pdt="53" dpt="20.1001" rw="R" writeEnabled="0">
+            <usage>cEMI supported Additional Information Types</usage>
+        </property>
+        <property pid="55" pidName="PID_TIME_BASE" name="Time Base" pdt="4" rw="R" writeEnabled="0">
+            <usage>Time base used by the cEMI Server for the extended relative timestamp</usage>
+        </property>
+        <property pid="56" pidName="PID_TRANSP_ENABLE" name="cEMI Server Link Layer Transparency Control" pdt="50" dpt="1.003" rw="R/W" writeEnabled="1">
+            <usage>Enables the transparency mode of the cEMI Server Data Link Layer</usage>
+        </property>
+        <property pid="57" pidName="PID_CLIENT_SNA" name="cEMI Client Subnetwork Address" pdt="2" rw="r/w" writeEnabled="1" accessPolicy="3FF/1FF">
+            <usage>cEMI Server</usage>
+        </property>
+        <property pid="58" pidName="PID_CLIENT_DEVICE_ADDRESS" name="cEMI Client Device Address" pdt="2" rw="r/w" writeEnabled="1" accessPolicy="3FF/1FF">
+            <usage>cEMI Server</usage>
+        </property>
+        <property pid="59" pidName="PID_BIBAT_NEXTBLOCK" name="BiBat Next Block" pdt="2" dpt="5.010" rw="R" writeEnabled="0">
+            <usage>Number of the next BiBat block used by a cEMI Server BiBat Master</usage>
+        </property>
+        <property pid="60" pidName="PID_RF_MODE_SELECT" name="Selected RF Communication Mode" pdt="53" rw="R/W" writeEnabled="1">
+            <usage>Selects the RF communication mode of the cEMI Server</usage>
+        </property>
+        <property pid="61" pidName="PID_RF_MODE_SUPPORT" name="Supported RF Communication Modes" pdt="51" rw="R" writeEnabled="0">
+            <usage>Shows the supported RF communication mode(s) of the cEMI Server</usage>
+        </property>
+        <property pid="62" pidName="PID_RF_FILTERING_MODE_SELECT" name="Selected RF Filtering Mode" pdt="53" rw="R/W" writeEnabled="1">
+            <usage>Specifies the RF filtering mode for received RF frames in the cEMI Server</usage>
+        </property>
+        <property pid="63" pidName="PID_RF_FILTERING_MODE_SUPPORT" name="Supported RF Filtering Mode" pdt="51" rw="R" writeEnabled="0">
+            <usage>Shows the supported RF filtering mode(s) of the cEMI Server</usage>
+        </property>
+        <property pid="64" pidName="PID_COMM_MODES_SUPPORTED" name="cEMI Supported Communication Modes" pdt="52" rw="(3/x)" writeEnabled="0">
+            <usage>Allow discovering the Communication Modes supported by the cEMI Server</usage>
+        </property>
+        <property pid="65" pidName="PID_FILTERING_MODE_SUPPORT" name="Supported Filtering Modes" pdt="52" rw="(3/x)" writeEnabled="0">
+            <usage>Supported filtering mode(s) of the cEMI Data Link Layer</usage>
+        </property>
+        <property pid="66" pidName="PID_FILTERING_MODE_SELECT" name="Filtering Mode Selection" pdt="52" rw="(3/x)" writeEnabled="1">
+            <usage>Control filtering of received frames by the cEMI Data Link Layer</usage>
+        </property>
+        <property pid="68" pidName="PID_MAX_INTERFACE_APDU_LENGTH" name="APDU length for subnet access" pdt="4" rw="3/x" writeEnabled="0" accessPolicy="3FF/1FF">
+            <usage>Maximum length of the APDU over KNXnet/IP Tunneling to the field-level medium</usage>
+        </property>
+        <property pid="69" pidName="PID_MAX_LOCAL_APDU_LENGTH" name="APDU length for local management" pdt="4" rw="3/x" writeEnabled="0" accessPolicy="155/155">
+            <usage>Maximum length of the APDU over KNXnet/IP Tunneling to the own management in the cEMI interface device</usage>
+        </property>
+    </object>
+    <object type="9">
+        <property pid="51" pidName="PID_GRPOBJTABLE" name="Object Table" pdt="22" rw="R(/W)" writeEnabled="0/1">
+            <usage>Object Table (U16U16U16)</usage>
+        </property>
+        <property pid="52" pidName="PID_EXT_GRPOBJREFERENCE" name="Extended Group Object Reference" pdt="24" rw="R" writeEnabled="0">
+            <usage>Extended Group Object Reference</usage>
+        </property>
+        <property pid="66" pidName="PID_GO_DIAGNOSTICS" name="Group object diagnostics" pdt="62" rw="3/3" writeEnabled="1">
+            <usage>Set or read GO value, request transmission or reading of the GO value on the bus</usage>
+        </property>
+    </object>
+    <object type="10">
+        <property pid="51" pidName="PID_POLLING_STATE" name="Polling State" pdt="-" rw="" writeEnabled="">
+            <usage>Polling State</usage>
+        </property>
+        <property pid="52" pidName="PID_POLLING_SLAVE_ADDR" name="Polling Slave Address" pdt="-" rw="" writeEnabled="">
+            <usage>Polling Slave Address</usage>
+        </property>
+        <property pid="53" pidName="PID_POLL_CYCLE" name="Polling Cycle" pdt="-" rw="" writeEnabled="">
+            <usage>Polling Cycle</usage>
+        </property>
+    </object>
+    <object type="11">
+        <property pid="51" pidName="PID_PROJECT_INSTALLATION_ID" name="Project Installation Identification" pdt="4" rw="R/W" writeEnabled="1">
+            <usage>Identification of the project and the installation within in which this KNXnet/IP device resides</usage>
+        </property>
+        <property pid="52" pidName="PID_KNX_INDIVIDUAL_ADDRESS" name="KNX Individual Address" pdt="4" rw="R/W" writeEnabled="1">
+            <usage>Individual Address of the KNXnet/IP server</usage>
+        </property>
+        <property pid="53" pidName="PID_ADDITIONAL_INDIVIDUAL_ADDRESSES" name="Additional Individual Addresses" pdt="4" rw="R/W" writeEnabled="1">
+            <usage>Sorted list of additional KNX Individual Addresses for KNXnet/IP Routers and Tunneling Servers</usage>
+        </property>
+        <property pid="54" pidName="PID_CURRENT_IP_ASSIGNMENT_METHOD" name="Current IP Assignment Method" pdt="2" rw="R" writeEnabled="0">
+            <usage>Used IP address assignment method</usage>
+        </property>
+        <property pid="55" pidName="PID_IP_ASSIGNMENT_METHOD" name="IP Assignment Method" pdt="2" rw="R/W" writeEnabled="1">
+            <usage>Enabled IP assignment methods that can be used</usage>
+        </property>
+        <property pid="56" pidName="PID_IP_CAPABILITIES" name="IP Capabilities" pdt="51" rw="R" writeEnabled="0">
+            <usage>Capabilities of the KNXnet/IP device for obtaining an IP address</usage>
+        </property>
+        <property pid="57" pidName="PID_CURRENT_IP_ADDRESS" name="Current IP Address" pdt="9" rw="R" writeEnabled="0">
+            <usage>Currently used IP address</usage>
+        </property>
+        <property pid="58" pidName="PID_CURRENT_SUBNET_MASK" name="Current Subnet Mask" pdt="9" rw="R" writeEnabled="0">
+            <usage>Currently used IP subnet mask</usage>
+        </property>
+        <property pid="59" pidName="PID_CURRENT_DEFAULT_GATEWAY" name="Current Default Gateway" pdt="9" rw="R" writeEnabled="0">
+            <usage>IP Address of the KNXnet/IP device's default gateway</usage>
+        </property>
+        <property pid="60" pidName="PID_IP_ADDRESS" name="IP Address" pdt="9" rw="R/W" writeEnabled="1">
+            <usage>Configured fixed IP Address</usage>
+        </property>
+        <property pid="61" pidName="PID_SUBNET_MASK" name="Subnet Mask" pdt="9" rw="R/W" writeEnabled="1">
+            <usage>Configured IP subnet mask</usage>
+        </property>
+        <property pid="62" pidName="PID_DEFAULT_GATEWAY" name="Default Gateway" pdt="9" rw="R/W" writeEnabled="1">
+            <usage>Configured IP address of the default gateway</usage>
+        </property>
+        <property pid="63" pidName="PID_DHCP_BOOTP_SERVER" name="DHCP/BootP Server" pdt="9" rw="R" writeEnabled="0">
+            <usage>IP address of the DHCP or BootP server from which the KNXnet/IP device received its IP address</usage>
+        </property>
+        <property pid="64" pidName="PID_MAC_ADDRESS" name="MAC Address" pdt="22" rw="R" writeEnabled="0">
+            <usage>MAC address of the KNXnet/IP device</usage>
+        </property>
+        <property pid="65" pidName="PID_SYSTEM_SETUP_MULTICAST_ADDRESS" name="System Setup Multicast Address" pdt="9" rw="R" writeEnabled="0">
+            <usage>KNXnet/IP system set-up multicast address. Value is fixed to 224.0.23.12</usage>
+        </property>
+        <property pid="66" pidName="PID_ROUTING_MULTICAST_ADDRESS" name="Routing Multicast Address" pdt="9" rw="R/W" writeEnabled="1">
+            <usage>Routing multicast address</usage>
+        </property>
+        <property pid="67" pidName="PID_TTL" name="Time To Live" pdt="2" rw="R/W" writeEnabled="1">
+            <usage>TTL value to be used by KNXnet/IP devices</usage>
+        </property>
+        <property pid="68" pidName="PID_KNXNETIP_DEVICE_CAPABILITIES" name="KNXnet/IP Device Capabilities" pdt="52" rw="R" writeEnabled="0">
+            <usage>KNXnet/IP protocols supported by the KNXnet/IP device</usage>
+        </property>
+        <property pid="69" pidName="PID_KNXNETIP_DEVICE_STATE" name="KNXnet/IP Device State" pdt="2" rw="R" writeEnabled="0">
+            <usage>Various KNXnet/IP device status info, like KNX or IP network connection failure</usage>
+        </property>
+        <property pid="70" pidName="PID_KNXNETIP_ROUTING_CAPABILITIES" name="KNXnet/IP Routing Capabilities" pdt="2" rw="R" writeEnabled="0">
+            <usage>Supported features by the KNXnet/IP Router</usage>
+        </property>
+        <property pid="71" pidName="PID_PRIORITY_FIFO_ENABLED" name="Priority FIFO Enabled" pdt="2" rw="R/W" writeEnabled="0">
+            <usage>Indication of whether the priority FIFO is enabled of disabled</usage>
+        </property>
+        <property pid="72" pidName="PID_QUEUE_OVERFLOW_TO_IP" name="Queue Overflow to IP" pdt="4" rw="R" writeEnabled="0">
+            <usage>Number of telegrams lost due to overflow of queue to IP</usage>
+        </property>
+        <property pid="73" pidName="PID_QUEUE_OVERFLOW_TO_KNX" name="Queue overflow to KNX" pdt="4" rw="R" writeEnabled="0">
+            <usage>Number of telegrams lost due to overflow of queue to KNX</usage>
+        </property>
+        <property pid="74" pidName="PID_MSG_TRANSMIT_TO_IP" name="Telegrams Transmitted to IP" pdt="9" rw="R" writeEnabled="0">
+            <usage>Number of telegrams successfully transmitted to IP</usage>
+        </property>
+        <property pid="75" pidName="PID_MSG_TRANSMIT_TO_KNX" name="Telegrams Transmitted to KNX" pdt="9" rw="R" writeEnabled="0">
+            <usage>Number of telegrams successfully transmitted to KNX</usage>
+        </property>
+        <property pid="76" pidName="PID_FRIENDLY_NAME" name="Friendly Name" pdt="2" rw="R/W" writeEnabled="1">
+            <usage>Human Readable Friendly Name</usage>
+        </property>
+        <property pid="78" pidName="PID_ROUTING_BUSY_WAIT_TIME" name="Routing busy wait time" pdt="4" rw="3/1" writeEnabled="1">
+            <usage>Value of the wait time sent with a routing busy frame (in milliseconds)</usage>
+        </property>
+        <property pid="79" pidName="PID_TUNNELING_ADDRESSES" name="Tunneling addresses" pdt="2" rw="3/x" writeEnabled="0" accessPolicy="15F/04C">
+            <usage>Individual addresses the MaS will use for tunneling connections</usage>
+        </property>
+        <property pid="91" pidName="PID_BACKBONE_KEY" name="KNX IP secure group key" pdt="32" rw="x/2" writeEnabled="0" accessPolicy="008/008">
+            <usage>Key for encryption, decryption and MAC in secure group communication</usage>
+        </property>
+        <property pid="92" pidName="PID_DEVICE_AUTHENTICATION_CODE" name="KNX IP device authentication code" pdt="32" rw="x/2" writeEnabled="0"
+            accessPolicy="008/008">
+            <usage>Device authentication code for authentication in secure unicast communication</usage>
+        </property>
+        <property pid="93" pidName="PID_PASSWORD_HASHES" name="KNX IP secure password hashes" pdt="32" rw="x/2" writeEnabled="0" accessPolicy="008/008">
+            <usage>Password hashes for authenticating clients during secure unicast connection setup</usage>
+        </property>
+        <property pid="94" pidName="PID_SECURED_SERVICE_FAMILIES" name="KNX IP secured services" pdt="62" rw="3/2" writeEnabled="1"
+            accessPolicy="15D/15D">
+            <usage>Indicates the services for which communication security is enforced</usage>
+        </property>
+        <property pid="95" pidName="PID_MULTICAST_LATENCY_TOLERANCE" name="KNX IP secure multicast latency tolerance" pdt="4" dpt="7.002" rw="3/2"
+            writeEnabled="0" accessPolicy="15D/15D">
+            <usage>Length of the acceptance window for accepting incoming multicast frames with a past timestamp</usage>
+        </property>
+        <property pid="96" pidName="PID_SYNC_LATENCY_FRACTION" name="KNX IP secure sync latency fraction" pdt="54" dpt="5.001" rw="3/2"
+            writeEnabled="0" accessPolicy="15D/15D">
+            <usage>Fraction of the latency tolerance within devices are considered to be in sync</usage>
+        </property>
+        <property pid="97" pidName="PID_TUNNELING_USERS" name="Tunneling users" pdt="18" rw="2/2" writeEnabled="0" accessPolicy="00C/00C">
+            <usage>List of tunneling users</usage>
+	    </property>
+		<!-- Enertex-specific -->
+		<property pid="204" pidName="PID_ENX_TUNNELING_REQUEST_TIMEOUT"
+			name="Tunneling request timeout" pdt="0x02" rw="3/3" writeEnabled="1">
+			<usage>Expected maximum response time for UDP based tunneling [1.0 .. 10.0]</usage>
+		</property>
+		<property pid="207" pidName="PID_ENX_TUNNELING_UDP"
+			name="UDP-only tunneling connection" pdt="0x02" dpt="1.001" rw="3/3" writeEnabled="1">
+			<usage>Force clients to use a UDP connection for tunneling (and not TCP)</usage>
+		</property>
+		<property pid="205" pidName="PID_ENX_BASICCRI_TUNNELING_PREFERRED_IP"
+			name="Preferred tunnel for an IP address" pdt="0x09" rw="3/3" writeEnabled="1">
+			<usage>Assigns the tunnel used with a basic connection request to a IP address</usage>
+		</property>
+    </object>
+    <object type="12">
+        <property pid="51" pidName="PID_AR_TYPE_REPORT" name="" pdt="19" rw="" writeEnabled="">
+            <usage></usage>
+        </property>
+    </object>
+    <object type="17">
+        <property pid="51" pidName="PID_SECURITY_MODE" name="Security Mode" pdt="62" rw="2/2" writeEnabled="1" accessPolicy="1DD/1DD">
+            <usage>Enable and disable the Security Mode</usage>
+        </property>
+        <property pid="52" pidName="PID_P2P_KEY_TABLE" name="Point-to-point Key Table" pdt="36" rw="2/2" writeEnabled="1" accessPolicy="00C/00C">
+            <usage>Security keys used for securing point-to-point and broadcast communication</usage>
+        </property>
+        <property pid="53" pidName="PID_GRP_KEY_TABLE" name="Group Key Table" pdt="34" rw="2/2" writeEnabled="1" accessPolicy="00C/00C">
+            <usage>Security keys used for securing standard mode group communication</usage>
+        </property>
+        <property pid="54" pidName="PID_SECURITY_INDIVIDUAL_ADDRESS_TABLE" name="Security Individual Address Table" pdt="24" rw="2/2" writeEnabled="1"
+            accessPolicy="00C/00C">
+            <usage>IAs and last valid sequence numbers of communication partners with secure links</usage>
+        </property>
+        <property pid="55" pidName="PID_SECURITY_FAILURES_LOG" name="Security Failures Log" pdt="62" rw="3/2" writeEnabled="1" accessPolicy="15D/15D">
+            <usage>Provides security failure information</usage>
+        </property>
+        <property pid="56" pidName="PID_TOOL_KEY" name="Tool Key" pdt="32" rw="x/2" writeEnabled="1" accessPolicy="008/008">
+            <usage>Stores the security information for the central MaC in S-Mode and Ctrl-Mode</usage>
+        </property>
+        <property pid="57" pidName="PID_SECURITY_REPORT" name="Security Report" pdt="51" dpt="21.1002" rw="3/2" writeEnabled="1" accessPolicy="15D/15D">
+            <usage>KNX Data Security-related status and diagnostic information</usage>
+        </property>
+        <property pid="58" pidName="PID_SECURITY_REPORT_CONTROL" name="Security Report Control" pdt="50" dpt="1.003" rw="2/2" writeEnabled="1"
+            accessPolicy="00C/00C">
+            <usage>Control the spontaneous communication of the security report through DMP_InterfaceObject-InfoReport_RCl</usage>
+        </property>
+        <property pid="59" pidName="PID_SEQUENCE_NUMBER_SENDING" name="Sequence Number Sending" pdt="22" rw="2/2" writeEnabled="1"
+            accessPolicy="00C/00C">
+            <usage>Sequence Number used for the next outgoing secure communication</usage>
+        </property>
+        <property pid="60" pidName="PID_ZONE_KEY_TABLE" name="LTE Mode Zone Key Table" pdt="35" rw="2/2" writeEnabled="1" accessPolicy="00C/00C">
+            <usage>Security keys used for securing zone addressing communication</usage>
+        </property>
+        <property pid="61" pidName="PID_GO_SECURITY_FLAGS" name="Group Object Security Flags" pdt="17" rw="2/2" writeEnabled="1" accessPolicy="00C/00C">
+            <usage>Defines the required security requirements for each group object</usage>
+        </property>
+        <property pid="62" pidName="PID_ROLE_TABLE" name="Role Table" pdt="17" rw="3/x" writeEnabled="1" accessPolicy="15D/15D">
+            <usage>Role table</usage>
+        </property>
+    </object>
+   <object type="19">
+        <property pid="51" pidName="PID_RF_MULTI_TYPE" name="RF Multi type" pdt="0x33" rw="3/2" writeEnabled="1">
+            <usage>Sets the KNX RF type to Ready or Multi</usage>
+        </property>
+        <property pid="52" pidName="PID_RF_MULTI_PHYSICAL_FEATURES" name="RF Multi physical features" pdt="0x33" rw="3/0" writeEnabled="0" accessPolicy="155/155">
+            <usage>Supported features of KNX RF Multi</usage>
+        </property>
+        <property pid="53" pidName="PID_RF_MULTI_CALL_CHANNEL" name="RF Multi call channel" pdt="" rw="0x11" writeEnabled="1">
+            <usage>Call channel for KNX RF Multi fast and slow frequencies</usage>
+        </property>
+        <property pid="54" pidName="PID_RF_MULTI_OBJECT_LINK" name="RF Multi object link" pdt="0x3E" rw="3/3" writeEnabled="1">
+            <usage>Group address management of the KNX RF Multi-specific features</usage>
+        </property>
+        <property pid="55" pidName="PID_RF_MULTI_EXT_GA_REPEATED" name="RF Multi extended group address repeated" pdt="0x3E" rw="" writeEnabled="1">
+            <usage>Management of repeated KNX RF Multi group address (obsolete)</usage>
+        </property>
+        <property pid="56" pidName="PID_RF_DOMAIN_ADDRESS" name="RF domain address" pdt="0x16" rw="3/2" writeEnabled="1" accessPolicy="3FF/1FF">
+            <usage>RF domain address</usage>
+        </property>
+        <property pid="57" pidName="PID_RF_RETRANSMITTER" name="Retransmitter mode" dpt="1.003" pdt="0x32" rw="3/2" writeEnabled="1">
+            <usage>Controls whether the RF retransmitter function is active</usage>
+        </property>
+        <property pid="58" pidName="PID_RF_FILTERING_MODE_SUPPORT" name="Supported RF filtering modes" pdt="0x33" rw="3/2" writeEnabled="1">
+            <usage></usage>
+        </property>
+        <property pid="59" pidName="PID_RF_FILTERING_MODE_SELECT" name="RF filtering mode selection" pdt="0x35" rw="3/2" writeEnabled="1">
+            <usage></usage>
+        </property>
+        <property pid="60" pidName="PID_RF_BIDIR_TIMEOUT" name="Bidirectional mode time-out" pdt="0x3E" rw="" writeEnabled="1">
+            <usage>Allows to retrigger the time-out for the bidirectional mode to keep the bidirectional mode active</usage>
+        </property>
+        <property pid="61" pidName="PID_RF_DIAG_SA_FILTER_TABLE" name="RF diagnose source address filter table" pdt="0x13" rw="3/2" writeEnabled="1">
+            <usage>Individual addresses of the RF devices for which the device shall measure the link budget</usage>
+        </property>
+        <property pid="62" pidName="PID_RF_DIAG_BUDGET_TABLE" name="RF diagnose budget table" pdt="0x14" rw="3/x" writeEnabled="0">
+            <usage>Contains for each source address the calculated link budget information based on the received and filtered telegrams</usage>
+        </property>
+        <property pid="63" pidName="PID_RF_DIAG_PROBE" name="RF diagnose probe" pdt="0x3E" rw="" writeEnabled="1">
+            <usage>Allows to trigger transmission of this property state to the network, so other devices can measure the signal strength and calculate the link budget</usage>
+        </property>
+        <property pid="70" pidName="PID_TRANSMISSION_MODE" name="Transmission mode" pdt="0x35" rw="" writeEnabled="1">
+            <usage>KNX RF Multi transmission mode of the physical layer</usage>
+        </property>
+        <property pid="71" pidName="PID_RECEPTION_MODE" name="Reception mode" pdt="0x35" rw="" writeEnabled="1">
+            <usage>KNX RF Multi reception mode of the physical layer</usage>
+        </property>
+        <property pid="72" pidName="PID_TEST_SIGNAL" name="Test signal" pdt="0x12" rw="" writeEnabled="1">
+            <usage>Control frequency and form of a test signal for transmission</usage>
+        </property>
+        <property pid="73" pidName="PID_FAST_ACK" name="Fast ack" pdt="0x12" rw="" writeEnabled="1">
+            <usage>Fast ack in reception</usage>
+        </property>
+        <property pid="74" pidName="PID_FAST_ACK_ACTIVATE" name="Fast ack activate" pdt="0x32" rw="" writeEnabled="1">
+            <usage>Activate or deactivate fast ack in reception</usage>
+        </property>
+        <property pid="76" pidName="PID_GRP_TX_MULTI_INFO_TABLE" name="Group Tx Multi information table" pdt="0x1B" rw="2/2" writeEnabled="1" accessPolicy="3FF/05C">
+            <usage>Contains the RF Multi information that the MaS shall use for sending group objects using RF Multi communication (A_GroupValue_Write service in transmission)</usage>
+        </property>
+        <property pid="77" pidName="PID_GRP_RX_MULTI_INFO_TABLE" name="Group Rx Multi information table" pdt="0x13" rw="2/2" writeEnabled="1" accessPolicy="3FF/05C">
+            <usage>Contains the RF Multi information that the MaS shall use for receiving group object values using RF Multi communication (A_GroupValue_Write service in reception or A_GroupValue_Read in transmission)</usage>
+        </property>
+        <property pid="78" pidName="PID_RF_MULTI_MEDIA_COUPLER_TYPE" name="RF Multi media coupler type" pdt="0x11" rw="2/2" writeEnabled="1" accessPolicy="3FF/00C">
+            <usage>Contains the current type of RF Multi media coupler</usage>
+        </property>
+        <property pid="79" pidName="PID_RF_MULTI_UNICAST_CONTROL" name="RF Multi unicast communication control" pdt="0x3E" rw="2/2" writeEnabled="1" accessPolicy="3FF/00C">
+            <usage>Defines the behaviour of the media coupler concerning which RF channel to be used (ready, fast, slow) for unicast communication</usage>
+        </property>
+        <property pid="80" pidName="PID_RF_MULTI_BROADCAST_CONTROL" name="RF Multi broadcast communication control" pdt="0x3E" rw="2/2" writeEnabled="1" accessPolicy="3FF/00C">
+            <usage>Defines the behaviour of the media coupler concerning which RF channel to be used (ready, fast, slow) for broadcast communication</usage>
+        </property>
+        <property pid="81" pidName="PID_RF_SMART_RETRANSMITTER" name="RF smart retransmitter" pdt="0x1B" rw="2/2" writeEnabled="1" accessPolicy="3FF/0FC">
+            <usage>Configures the behaviour of the retransmitter using rules that use range of IA, GA, RF link quality, and an associated action</usage>
+        </property>
+        <property pid="82" pidName="PID_GRP_TP_RF_MULTICAST_TABLE" name="Group TP1 RF multicast table" pdt="0x1B" rw="2/2" writeEnabled="1" accessPolicy="3FF/05C">
+            <usage>Contains the RF Multi/Ready information that the MaS shall use for sending group objects from TP to RF using RF Multi communication</usage>
+        </property>
+        <property pid="83" pidName="PID_GRP_RF_TP_MULTICAST_TABLE" name="Group RF TP multicast table" pdt="0x13" rw="2/2" writeEnabled="1" accessPolicy="3FF/05C">
+            <usage>Contains the RF Multi information (use of fast ack) that the MaS shall use when receiving group objects from RF using RF Multi communication</usage>
+        </property>
+        <property pid="84" pidName="PID_RF_MULTI_FAST_SLOW_COMM" name="RF Multi fast/slow communication" pdt="0x3E" rw="2/2" writeEnabled="1" accessPolicy="3FF/05C">
+            <usage></usage>
+        </property>
+        <property pid="85" pidName="PID_RF_MULTI_FAST_MC_IA" name="RF Multi fast media coupler individual address" pdt="0x04" rw="2/2" writeEnabled="1" accessPolicy="3FF/05C">
+            <usage>Contains the individual address of the fast media coupler</usage>
+        </property>
+        <property pid="86" pidName="PID_RF_MULTI_SLOW_EXTENDER_IA" name="RF Multi slow extender individual address" pdt="0x04" rw="2/2" writeEnabled="1" accessPolicy="3FF/05C">
+            <usage>Contains the individual address of the slow extender</usage>
+        </property>
+       <property pid="87" pidName="PID_GRP_MULTICAST_TABLE" name="Group multicast table" pdt="0x3E" rw="2/2" writeEnabled="1" accessPolicy="15D/15D">
+            <usage>Group multicast table</usage>
+       </property>
+    </object>
+    <!-- Enertex-specific -->
+    <object type="50001" name="Enertex device">
+        <property pid="209" pidName="PID_ENX_BLOCKFILTER" name="Block group filters" pdt="0x32" dpt="1.001" rw="3/3" writeEnabled="1">
+            <usage>Disable all group address filters (forward everything)</usage>
+        </property>
+        <property pid="211" pidName="PID_ENX_TELEGRAMMRATE_LIMIT" name="Telegram rate limit" pdt="0x02" rw="3/3" writeEnabled="1">
+            <usage>Telegram rate</usage>
+        </property>
+    </object>
+</propertyDefinitions>

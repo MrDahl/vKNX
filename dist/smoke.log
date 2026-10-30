@@ -1,0 +1,62 @@
+smoke1 server answers: True
+{"version":"v0.6.1","line":"1.1","routing":true,"iface":"1.1.241","supervised":true,"started":1793399975528,"plan":false,"now":1793399976102,"link":{"server":"R
+smoke1 UI files served from the packaged jar: main.js HTTP 200 5589 bytes, app.css HTTP 200 29851 bytes, catalogue HTTP 200
+smoke1 update check (TLS to GitHub from the bundled runtime): HTTP 200 {"current":"v0.6.1","latest":"v0.6.0","newer":false,"notes":"**One coupler, real line routing and a real filte
+smoke1 server exited after shutdown: True (exit code 0)
+vKNX v0.6.1
+Oct 30, 2026 10:39:35 PM io.calimero.server.Launcher <init>
+INFO: Calimero KNX IP server 3.0-SNAPSHOT
+Oct 30, 2026 10:39:35 PM io.calimero.server.Launcher <init>
+INFO: use configuration 'vKNX simulator'
+discovery: listen on [all], send on [all] interfaces
+service container vknx:
+	server: listen on any (UDP/TCP port 3671)
+	        KNX IP routing disabled
+	User vknx connection: TP1 medium, device 1.1.0
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_0
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_1
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_2
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_3
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_4
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_5
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_6
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_32768
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_32769
+Oct 30, 2026 10:39:35 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_32770
+smoke2 installer exited: True code 0
+smoke2 launcher present: True  server present: True  webview loader: True
+smoke2 launcher started the server (silent install runs the app): True
+smoke2 launcher process: window title 'vKNX'
+smoke2 launcher closed: True
+smoke2 server still running after close: False
+vKNX v0.6.1
+Oct 30, 2026 10:40:09 PM io.calimero.server.Launcher <init>
+INFO: Calimero KNX IP server 3.0-SNAPSHOT
+Oct 30, 2026 10:40:09 PM io.calimero.server.Launcher <init>
+INFO: use configuration 'vKNX simulator'
+discovery: listen on [all], send on [all] interfaces
+service container vknx:
+	server: listen on any (UDP/TCP port 3671)
+	        KNX IP routing disabled
+	User vknx connection: TP1 medium, device 1.1.0
+Oct 30, 2026 10:40:10 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_0
+Oct 30, 2026 10:40:10 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_1
+Oct 30, 2026 10:40:10 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_2
+Oct 30, 2026 10:40:10 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_3
+Oct 30, 2026 10:40:10 PM io.calimero.server.knxnetip.DiscoveryService joinOnInterfaces
+WARNING: KNXnet/IP discovery join fails with no IP address bound to interface ethernet_4
+smoke2 uninstalled, folder gone: True

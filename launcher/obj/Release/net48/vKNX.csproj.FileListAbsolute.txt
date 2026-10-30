@@ -1,0 +1,13 @@
+D:\a\vKNX\vKNX\dist\launcher\runtimes\win-x86\native\WebView2Loader.dll
+D:\a\vKNX\vKNX\dist\launcher\vKNX.exe.config
+D:\a\vKNX\vKNX\dist\launcher\vKNX.exe
+D:\a\vKNX\vKNX\dist\launcher\vKNX.pdb
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.csproj.AssemblyReference.cache
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.GeneratedMSBuildEditorConfig.editorconfig
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.AssemblyInfoInputs.cache
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.AssemblyInfo.cs
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.csproj.CoreCompileInputs.cache
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.sourcelink.json
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.csproj.Up2Date
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.exe
+D:\a\vKNX\vKNX\launcher\obj\Release\net48\vKNX.pdb

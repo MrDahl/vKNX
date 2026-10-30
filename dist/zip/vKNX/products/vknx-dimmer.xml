@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <Catalog>
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
+          <CatalogItem Id="M-00FA_H-2565-1_HP-0A05-03-0000_CI-VKNXDM4-1" Name="vKNX Dimming Actuator 4-fold" Number="1" ProductRefId="M-00FA_H-2565-1_P-VKNXDM4" Hardware2ProgramRefId="M-00FA_H-2565-1_HP-0A05-03-0000" DefaultLanguage="en-US" />
+        </CatalogSection>
+      </Catalog>
+      <ApplicationPrograms>
+        <ApplicationProgram Id="M-00FA_A-0A05-03-0000" ApplicationNumber="2565" ApplicationVersion="3" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Dimming Actuator 4-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2">
+          <Static>
+            <Code>
+              <RelativeSegment Id="M-00FA_A-0A05-03-0000_RS-04-00000" Name="Parameters" Offset="0" Size="80" LoadStateMachine="4" />
+            </Code>
+            <ParameterTypes>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch1Enable" Name="Ch1Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch1Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch1Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch1Name" Name="Ch1Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch1DimTime" Name="Ch1DimTime">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="2 s" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch1DimTime_EN-0" />
+                  <Enumeration Text="5 s" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch1DimTime_EN-1" />
+                  <Enumeration Text="10 s" Value="2" Id="M-00FA_A-0A05-03-0000_PT-Ch1DimTime_EN-2" />
+                  <Enumeration Text="20 s" Value="3" Id="M-00FA_A-0A05-03-0000_PT-Ch1DimTime_EN-3" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch1OnLevel" Name="Ch1OnLevel">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Last level" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch1OnLevel_EN-0" />
+                  <Enumeration Text="100 %" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch1OnLevel_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch1StartupState" Name="Ch1StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch1StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch1StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A05-03-0000_PT-Ch1StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch1SendStatus" Name="Ch1SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch1SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch1SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch2Enable" Name="Ch2Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch2Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch2Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch2Name" Name="Ch2Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch2DimTime" Name="Ch2DimTime">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="2 s" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch2DimTime_EN-0" />
+                  <Enumeration Text="5 s" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch2DimTime_EN-1" />
+                  <Enumeration Text="10 s" Value="2" Id="M-00FA_A-0A05-03-0000_PT-Ch2DimTime_EN-2" />
+                  <Enumeration Text="20 s" Value="3" Id="M-00FA_A-0A05-03-0000_PT-Ch2DimTime_EN-3" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch2OnLevel" Name="Ch2OnLevel">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Last level" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch2OnLevel_EN-0" />
+                  <Enumeration Text="100 %" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch2OnLevel_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch2StartupState" Name="Ch2StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch2StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch2StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A05-03-0000_PT-Ch2StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch2SendStatus" Name="Ch2SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch2SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch2SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch3Enable" Name="Ch3Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch3Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch3Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch3Name" Name="Ch3Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch3DimTime" Name="Ch3DimTime">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="2 s" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch3DimTime_EN-0" />
+                  <Enumeration Text="5 s" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch3DimTime_EN-1" />
+                  <Enumeration Text="10 s" Value="2" Id="M-00FA_A-0A05-03-0000_PT-Ch3DimTime_EN-2" />
+                  <Enumeration Text="20 s" Value="3" Id="M-00FA_A-0A05-03-0000_PT-Ch3DimTime_EN-3" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch3OnLevel" Name="Ch3OnLevel">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Last level" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch3OnLevel_EN-0" />
+                  <Enumeration Text="100 %" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch3OnLevel_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch3StartupState" Name="Ch3StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch3StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch3StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A05-03-0000_PT-Ch3StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch3SendStatus" Name="Ch3SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch3SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch3SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch4Enable" Name="Ch4Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch4Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch4Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch4Name" Name="Ch4Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch4DimTime" Name="Ch4DimTime">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="2 s" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch4DimTime_EN-0" />
+                  <Enumeration Text="5 s" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch4DimTime_EN-1" />
+                  <Enumeration Text="10 s" Value="2" Id="M-00FA_A-0A05-03-0000_PT-Ch4DimTime_EN-2" />
+                  <Enumeration Text="20 s" Value="3" Id="M-00FA_A-0A05-03-0000_PT-Ch4DimTime_EN-3" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch4OnLevel" Name="Ch4OnLevel">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Last level" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch4OnLevel_EN-0" />
+                  <Enumeration Text="100 %" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch4OnLevel_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch4StartupState" Name="Ch4StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch4StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch4StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A05-03-0000_PT-Ch4StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-03-0000_PT-Ch4SendStatus" Name="Ch4SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-03-0000_PT-Ch4SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-03-0000_PT-Ch4SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-1" Name="Ch1Enable" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch1Enable" Text="Enable channel" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-2" Name="Ch1Name" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch1Name" Text="Name" Value="Channel 1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="2" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-3" Name="Ch1DimTime" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch1DimTime" Text="Time 0-100 % for relative dimming" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="0" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-4" Name="Ch1OnLevel" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch1OnLevel" Text="Level when switched on" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="0" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-5" Name="Ch1StartupState" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch1StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="0" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-6" Name="Ch1SendStatus" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch1SendStatus" Text="Send status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="0" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-7" Name="Ch2Enable" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch2Enable" Text="Enable channel" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="20" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-8" Name="Ch2Name" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch2Name" Text="Name" Value="Channel 2">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="22" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-9" Name="Ch2DimTime" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch2DimTime" Text="Time 0-100 % for relative dimming" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="20" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-10" Name="Ch2OnLevel" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch2OnLevel" Text="Level when switched on" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="20" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-11" Name="Ch2StartupState" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch2StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="20" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-12" Name="Ch2SendStatus" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch2SendStatus" Text="Send status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="20" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-13" Name="Ch3Enable" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch3Enable" Text="Enable channel" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="40" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-14" Name="Ch3Name" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch3Name" Text="Name" Value="Channel 3">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="42" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-15" Name="Ch3DimTime" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch3DimTime" Text="Time 0-100 % for relative dimming" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="40" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-16" Name="Ch3OnLevel" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch3OnLevel" Text="Level when switched on" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="40" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-17" Name="Ch3StartupState" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch3StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="40" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-18" Name="Ch3SendStatus" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch3SendStatus" Text="Send status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="40" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-19" Name="Ch4Enable" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch4Enable" Text="Enable channel" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="60" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-20" Name="Ch4Name" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch4Name" Text="Name" Value="Channel 4">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="62" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-21" Name="Ch4DimTime" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch4DimTime" Text="Time 0-100 % for relative dimming" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="60" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-22" Name="Ch4OnLevel" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch4OnLevel" Text="Level when switched on" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="60" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-23" Name="Ch4StartupState" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch4StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="60" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-03-0000_P-24" Name="Ch4SendStatus" ParameterType="M-00FA_A-0A05-03-0000_PT-Ch4SendStatus" Text="Send status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-03-0000_RS-04-00000" Offset="60" BitOffset="6" />
+              </Parameter>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-1_R-1" RefId="M-00FA_A-0A05-03-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-2_R-2" RefId="M-00FA_A-0A05-03-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-3_R-3" RefId="M-00FA_A-0A05-03-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-4_R-4" RefId="M-00FA_A-0A05-03-0000_P-4" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-5_R-5" RefId="M-00FA_A-0A05-03-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-6_R-6" RefId="M-00FA_A-0A05-03-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-7_R-7" RefId="M-00FA_A-0A05-03-0000_P-7" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-8_R-8" RefId="M-00FA_A-0A05-03-0000_P-8" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-9_R-9" RefId="M-00FA_A-0A05-03-0000_P-9" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-10_R-10" RefId="M-00FA_A-0A05-03-0000_P-10" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-11_R-11" RefId="M-00FA_A-0A05-03-0000_P-11" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-12_R-12" RefId="M-00FA_A-0A05-03-0000_P-12" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-13_R-13" RefId="M-00FA_A-0A05-03-0000_P-13" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-14_R-14" RefId="M-00FA_A-0A05-03-0000_P-14" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-15_R-15" RefId="M-00FA_A-0A05-03-0000_P-15" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-16_R-16" RefId="M-00FA_A-0A05-03-0000_P-16" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-17_R-17" RefId="M-00FA_A-0A05-03-0000_P-17" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-18_R-18" RefId="M-00FA_A-0A05-03-0000_P-18" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-19_R-19" RefId="M-00FA_A-0A05-03-0000_P-19" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-20_R-20" RefId="M-00FA_A-0A05-03-0000_P-20" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-21_R-21" RefId="M-00FA_A-0A05-03-0000_P-21" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-22_R-22" RefId="M-00FA_A-0A05-03-0000_P-22" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-23_R-23" RefId="M-00FA_A-0A05-03-0000_P-23" />
+              <ParameterRef Id="M-00FA_A-0A05-03-0000_P-24_R-24" RefId="M-00FA_A-0A05-03-0000_P-24" />
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-1" Name="Ch1Switch" Text="Channel 1: switch" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-2" Name="Ch1RelativeDimming" Text="Channel 1: relative dimming (4 bit)" Number="2" FunctionText="Input" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-3" Name="Ch1BrightnessValue" Text="Channel 1: brightness (value)" Number="3" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-4" Name="Ch1SwitchStatus" Text="Channel 1: switch status" Number="4" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-5" Name="Ch1BrightnessStatus" Text="Channel 1: brightness status" Number="5" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-6" Name="Ch2Switch" Text="Channel 2: switch" Number="6" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-7" Name="Ch2RelativeDimming" Text="Channel 2: relative dimming (4 bit)" Number="7" FunctionText="Input" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-8" Name="Ch2BrightnessValue" Text="Channel 2: brightness (value)" Number="8" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-9" Name="Ch2SwitchStatus" Text="Channel 2: switch status" Number="9" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-10" Name="Ch2BrightnessStatus" Text="Channel 2: brightness status" Number="10" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-11" Name="Ch3Switch" Text="Channel 3: switch" Number="11" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-12" Name="Ch3RelativeDimming" Text="Channel 3: relative dimming (4 bit)" Number="12" FunctionText="Input" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-13" Name="Ch3BrightnessValue" Text="Channel 3: brightness (value)" Number="13" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-14" Name="Ch3SwitchStatus" Text="Channel 3: switch status" Number="14" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-15" Name="Ch3BrightnessStatus" Text="Channel 3: brightness status" Number="15" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-16" Name="Ch4Switch" Text="Channel 4: switch" Number="16" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-17" Name="Ch4RelativeDimming" Text="Channel 4: relative dimming (4 bit)" Number="17" FunctionText="Input" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-18" Name="Ch4BrightnessValue" Text="Channel 4: brightness (value)" Number="18" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-19" Name="Ch4SwitchStatus" Text="Channel 4: switch status" Number="19" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-03-0000_O-20" Name="Ch4BrightnessStatus" Text="Channel 4: brightness status" Number="20" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-1_R-1" RefId="M-00FA_A-0A05-03-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-2_R-2" RefId="M-00FA_A-0A05-03-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-3_R-3" RefId="M-00FA_A-0A05-03-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-4_R-4" RefId="M-00FA_A-0A05-03-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-5_R-5" RefId="M-00FA_A-0A05-03-0000_O-5" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-6_R-6" RefId="M-00FA_A-0A05-03-0000_O-6" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-7_R-7" RefId="M-00FA_A-0A05-03-0000_O-7" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-8_R-8" RefId="M-00FA_A-0A05-03-0000_O-8" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-9_R-9" RefId="M-00FA_A-0A05-03-0000_O-9" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-10_R-10" RefId="M-00FA_A-0A05-03-0000_O-10" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-11_R-11" RefId="M-00FA_A-0A05-03-0000_O-11" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-12_R-12" RefId="M-00FA_A-0A05-03-0000_O-12" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-13_R-13" RefId="M-00FA_A-0A05-03-0000_O-13" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-14_R-14" RefId="M-00FA_A-0A05-03-0000_O-14" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-15_R-15" RefId="M-00FA_A-0A05-03-0000_O-15" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-16_R-16" RefId="M-00FA_A-0A05-03-0000_O-16" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-17_R-17" RefId="M-00FA_A-0A05-03-0000_O-17" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-18_R-18" RefId="M-00FA_A-0A05-03-0000_O-18" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-19_R-19" RefId="M-00FA_A-0A05-03-0000_O-19" />
+              <ComObjectRef Id="M-00FA_A-0A05-03-0000_O-20_R-20" RefId="M-00FA_A-0A05-03-0000_O-20" />
+            </ComObjectRefs>
+            <AddressTable MaxEntries="255" />
+            <AssociationTable MaxEntries="255" />
+            <LoadProcedures>
+              <LoadProcedure MergeId="2">
+                <LdCtrlRelSegment LsmIdx="4" Size="80" Mode="1" Fill="0" AppliesTo="full" />
+                <LdCtrlRelSegment LsmIdx="4" Size="80" Mode="0" Fill="0" AppliesTo="par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="4">
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="80" Verify="true" AppliesTo="full,par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="7">
+                <LdCtrlLoadImageProp ObjIdx="1" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="2" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="3" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="4" PropId="27" />
+              </LoadProcedure>
+            </LoadProcedures>
+            <Options />
+          </Static>
+          <Dynamic>
+            <ChannelIndependentBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-03-0000_PB-1" Name="Channel1" Text="Channel 1">
+                <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-1_R-1" />
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-2_R-2" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-3_R-3" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-4_R-4" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-5_R-5" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-6_R-6" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-1_R-1" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-2_R-2" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-3_R-3" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-4_R-4" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-5_R-5" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-03-0000_PB-2" Name="Channel2" Text="Channel 2">
+                <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-7_R-7" />
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-8_R-8" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-9_R-9" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-10_R-10" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-11_R-11" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-12_R-12" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-6_R-6" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-7_R-7" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-8_R-8" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-9_R-9" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-10_R-10" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-03-0000_PB-3" Name="Channel3" Text="Channel 3">
+                <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-13_R-13" />
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-14_R-14" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-15_R-15" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-16_R-16" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-17_R-17" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-18_R-18" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-11_R-11" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-12_R-12" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-13_R-13" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-14_R-14" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-15_R-15" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-03-0000_PB-4" Name="Channel4" Text="Channel 4">
+                <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-19_R-19" />
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-20_R-20" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-21_R-21" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-22_R-22" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-23_R-23" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-03-0000_P-24_R-24" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-16_R-16" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-17_R-17" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-18_R-18" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-19_R-19" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-03-0000_O-20_R-20" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Hardware>
+        <Hardware Id="M-00FA_H-2565-1" Name="vKNX Dimming Actuator 4-fold" SerialNumber="2565" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+          <Products>
+            <Product Id="M-00FA_H-2565-1_P-VKNXDM4" Text="vKNX Dimming Actuator 4-fold" OrderNumber="VKNXDM4" IsRailMounted="false" DefaultLanguage="en-US">
+              <RegistrationInfo RegistrationStatus="Registered" />
+            </Product>
+          </Products>
+          <Hardware2Programs>
+            <Hardware2Program Id="M-00FA_H-2565-1_HP-0A05-03-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A05-03-0000" />
+              <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
+            </Hardware2Program>
+          </Hardware2Programs>
+        </Hardware>
+      </Hardware>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

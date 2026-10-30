@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <Catalog>
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
+          <CatalogItem Id="M-00FA_H-2562-1_HP-0A02-03-0000_CI-VKNXSA8-1" Name="vKNX Switch Actuator 8-fold" Number="1" ProductRefId="M-00FA_H-2562-1_P-VKNXSA8" Hardware2ProgramRefId="M-00FA_H-2562-1_HP-0A02-03-0000" DefaultLanguage="en-US" />
+        </CatalogSection>
+      </Catalog>
+      <ApplicationPrograms>
+        <ApplicationProgram Id="M-00FA_A-0A02-03-0000" ApplicationNumber="2562" ApplicationVersion="3" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Switch Actuator 8-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2">
+          <Static>
+            <Code>
+              <RelativeSegment Id="M-00FA_A-0A02-03-0000_RS-04-00000" Name="Parameters" Offset="0" Size="161" LoadStateMachine="4" />
+            </Code>
+            <ParameterTypes>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out1Enable" Name="Out1Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out1Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out1Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out1Name" Name="Out1Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out1Logic" Name="Out1Logic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out1Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out1Logic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out2Enable" Name="Out2Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out2Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out2Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out2Name" Name="Out2Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out2Logic" Name="Out2Logic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out2Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out2Logic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out3Enable" Name="Out3Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out3Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out3Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out3Name" Name="Out3Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out3Logic" Name="Out3Logic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out3Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out3Logic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out4Enable" Name="Out4Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out4Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out4Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out4Name" Name="Out4Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out4Logic" Name="Out4Logic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out4Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out4Logic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out5Enable" Name="Out5Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out5Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out5Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out5Name" Name="Out5Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out5Logic" Name="Out5Logic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out5Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out5Logic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out6Enable" Name="Out6Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out6Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out6Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out6Name" Name="Out6Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out6Logic" Name="Out6Logic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out6Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out6Logic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out7Enable" Name="Out7Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out7Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out7Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out7Name" Name="Out7Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out7Logic" Name="Out7Logic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out7Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out7Logic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out8Enable" Name="Out8Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out8Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out8Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out8Name" Name="Out8Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-Out8Logic" Name="Out8Logic">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Normal (on = relay closed)" Value="0" Id="M-00FA_A-0A02-03-0000_PT-Out8Logic_EN-0" />
+                  <Enumeration Text="Inverted (on = relay open)" Value="1" Id="M-00FA_A-0A02-03-0000_PT-Out8Logic_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-StartupState" Name="StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A02-03-0000_PT-StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A02-03-0000_PT-StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A02-03-0000_PT-StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A02-03-0000_PT-SendStatus" Name="SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A02-03-0000_PT-SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A02-03-0000_PT-SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-1" Name="Out1Enable" ParameterType="M-00FA_A-0A02-03-0000_PT-Out1Enable" Text="Enable output" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-2" Name="Out1Name" ParameterType="M-00FA_A-0A02-03-0000_PT-Out1Name" Text="Name" Value="Output 1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="2" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-3" Name="Out1Logic" ParameterType="M-00FA_A-0A02-03-0000_PT-Out1Logic" Text="Relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="0" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-4" Name="Out2Enable" ParameterType="M-00FA_A-0A02-03-0000_PT-Out2Enable" Text="Enable output" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="20" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-5" Name="Out2Name" ParameterType="M-00FA_A-0A02-03-0000_PT-Out2Name" Text="Name" Value="Output 2">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="22" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-6" Name="Out2Logic" ParameterType="M-00FA_A-0A02-03-0000_PT-Out2Logic" Text="Relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="20" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-7" Name="Out3Enable" ParameterType="M-00FA_A-0A02-03-0000_PT-Out3Enable" Text="Enable output" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="40" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-8" Name="Out3Name" ParameterType="M-00FA_A-0A02-03-0000_PT-Out3Name" Text="Name" Value="Output 3">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="42" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-9" Name="Out3Logic" ParameterType="M-00FA_A-0A02-03-0000_PT-Out3Logic" Text="Relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="40" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-10" Name="Out4Enable" ParameterType="M-00FA_A-0A02-03-0000_PT-Out4Enable" Text="Enable output" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="60" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-11" Name="Out4Name" ParameterType="M-00FA_A-0A02-03-0000_PT-Out4Name" Text="Name" Value="Output 4">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="62" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-12" Name="Out4Logic" ParameterType="M-00FA_A-0A02-03-0000_PT-Out4Logic" Text="Relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="60" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-13" Name="Out5Enable" ParameterType="M-00FA_A-0A02-03-0000_PT-Out5Enable" Text="Enable output" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="80" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-14" Name="Out5Name" ParameterType="M-00FA_A-0A02-03-0000_PT-Out5Name" Text="Name" Value="Output 5">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="82" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-15" Name="Out5Logic" ParameterType="M-00FA_A-0A02-03-0000_PT-Out5Logic" Text="Relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="80" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-16" Name="Out6Enable" ParameterType="M-00FA_A-0A02-03-0000_PT-Out6Enable" Text="Enable output" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="100" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-17" Name="Out6Name" ParameterType="M-00FA_A-0A02-03-0000_PT-Out6Name" Text="Name" Value="Output 6">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="102" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-18" Name="Out6Logic" ParameterType="M-00FA_A-0A02-03-0000_PT-Out6Logic" Text="Relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="100" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-19" Name="Out7Enable" ParameterType="M-00FA_A-0A02-03-0000_PT-Out7Enable" Text="Enable output" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="120" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-20" Name="Out7Name" ParameterType="M-00FA_A-0A02-03-0000_PT-Out7Name" Text="Name" Value="Output 7">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="122" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-21" Name="Out7Logic" ParameterType="M-00FA_A-0A02-03-0000_PT-Out7Logic" Text="Relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="120" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-22" Name="Out8Enable" ParameterType="M-00FA_A-0A02-03-0000_PT-Out8Enable" Text="Enable output" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="140" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-23" Name="Out8Name" ParameterType="M-00FA_A-0A02-03-0000_PT-Out8Name" Text="Name" Value="Output 8">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="142" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-24" Name="Out8Logic" ParameterType="M-00FA_A-0A02-03-0000_PT-Out8Logic" Text="Relay logic" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="140" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-25" Name="StartupState" ParameterType="M-00FA_A-0A02-03-0000_PT-StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="160" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A02-03-0000_P-26" Name="SendStatus" ParameterType="M-00FA_A-0A02-03-0000_PT-SendStatus" Text="Send status on change" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A02-03-0000_RS-04-00000" Offset="160" BitOffset="2" />
+              </Parameter>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-1_R-1" RefId="M-00FA_A-0A02-03-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-2_R-2" RefId="M-00FA_A-0A02-03-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-3_R-3" RefId="M-00FA_A-0A02-03-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-4_R-4" RefId="M-00FA_A-0A02-03-0000_P-4" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-5_R-5" RefId="M-00FA_A-0A02-03-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-6_R-6" RefId="M-00FA_A-0A02-03-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-7_R-7" RefId="M-00FA_A-0A02-03-0000_P-7" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-8_R-8" RefId="M-00FA_A-0A02-03-0000_P-8" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-9_R-9" RefId="M-00FA_A-0A02-03-0000_P-9" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-10_R-10" RefId="M-00FA_A-0A02-03-0000_P-10" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-11_R-11" RefId="M-00FA_A-0A02-03-0000_P-11" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-12_R-12" RefId="M-00FA_A-0A02-03-0000_P-12" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-13_R-13" RefId="M-00FA_A-0A02-03-0000_P-13" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-14_R-14" RefId="M-00FA_A-0A02-03-0000_P-14" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-15_R-15" RefId="M-00FA_A-0A02-03-0000_P-15" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-16_R-16" RefId="M-00FA_A-0A02-03-0000_P-16" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-17_R-17" RefId="M-00FA_A-0A02-03-0000_P-17" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-18_R-18" RefId="M-00FA_A-0A02-03-0000_P-18" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-19_R-19" RefId="M-00FA_A-0A02-03-0000_P-19" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-20_R-20" RefId="M-00FA_A-0A02-03-0000_P-20" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-21_R-21" RefId="M-00FA_A-0A02-03-0000_P-21" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-22_R-22" RefId="M-00FA_A-0A02-03-0000_P-22" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-23_R-23" RefId="M-00FA_A-0A02-03-0000_P-23" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-24_R-24" RefId="M-00FA_A-0A02-03-0000_P-24" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-25_R-25" RefId="M-00FA_A-0A02-03-0000_P-25" />
+              <ParameterRef Id="M-00FA_A-0A02-03-0000_P-26_R-26" RefId="M-00FA_A-0A02-03-0000_P-26" />
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-1" Name="Out1Switch" Text="Output 1: switch" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-9" Name="Out1Status" Text="Output 1: status" Number="9" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-2" Name="Out2Switch" Text="Output 2: switch" Number="2" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-10" Name="Out2Status" Text="Output 2: status" Number="10" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-3" Name="Out3Switch" Text="Output 3: switch" Number="3" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-11" Name="Out3Status" Text="Output 3: status" Number="11" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-4" Name="Out4Switch" Text="Output 4: switch" Number="4" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-12" Name="Out4Status" Text="Output 4: status" Number="12" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-5" Name="Out5Switch" Text="Output 5: switch" Number="5" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-13" Name="Out5Status" Text="Output 5: status" Number="13" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-6" Name="Out6Switch" Text="Output 6: switch" Number="6" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-14" Name="Out6Status" Text="Output 6: status" Number="14" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-7" Name="Out7Switch" Text="Output 7: switch" Number="7" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-15" Name="Out7Status" Text="Output 7: status" Number="15" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-8" Name="Out8Switch" Text="Output 8: switch" Number="8" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A02-03-0000_O-16" Name="Out8Status" Text="Output 8: status" Number="16" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-1_R-1" RefId="M-00FA_A-0A02-03-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-9_R-9" RefId="M-00FA_A-0A02-03-0000_O-9" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-2_R-2" RefId="M-00FA_A-0A02-03-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-10_R-10" RefId="M-00FA_A-0A02-03-0000_O-10" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-3_R-3" RefId="M-00FA_A-0A02-03-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-11_R-11" RefId="M-00FA_A-0A02-03-0000_O-11" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-4_R-4" RefId="M-00FA_A-0A02-03-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-12_R-12" RefId="M-00FA_A-0A02-03-0000_O-12" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-5_R-5" RefId="M-00FA_A-0A02-03-0000_O-5" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-13_R-13" RefId="M-00FA_A-0A02-03-0000_O-13" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-6_R-6" RefId="M-00FA_A-0A02-03-0000_O-6" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-14_R-14" RefId="M-00FA_A-0A02-03-0000_O-14" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-7_R-7" RefId="M-00FA_A-0A02-03-0000_O-7" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-15_R-15" RefId="M-00FA_A-0A02-03-0000_O-15" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-8_R-8" RefId="M-00FA_A-0A02-03-0000_O-8" />
+              <ComObjectRef Id="M-00FA_A-0A02-03-0000_O-16_R-16" RefId="M-00FA_A-0A02-03-0000_O-16" />
+            </ComObjectRefs>
+            <AddressTable MaxEntries="255" />
+            <AssociationTable MaxEntries="255" />
+            <LoadProcedures>
+              <LoadProcedure MergeId="2">
+                <LdCtrlRelSegment LsmIdx="4" Size="161" Mode="1" Fill="0" AppliesTo="full" />
+                <LdCtrlRelSegment LsmIdx="4" Size="161" Mode="0" Fill="0" AppliesTo="par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="4">
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="161" Verify="true" AppliesTo="full,par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="7">
+                <LdCtrlLoadImageProp ObjIdx="1" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="2" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="3" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="4" PropId="27" />
+              </LoadProcedure>
+            </LoadProcedures>
+            <Options />
+          </Static>
+          <Dynamic>
+            <ChannelIndependentBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-1" Name="Output1" Text="Output 1">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-1_R-1" />
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-2_R-2" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-3_R-3" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-1_R-1" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-9_R-9" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-2" Name="Output2" Text="Output 2">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-4_R-4" />
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-4_R-4">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-5_R-5" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-4_R-4">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-6_R-6" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-4_R-4">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-2_R-2" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-4_R-4">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-10_R-10" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-3" Name="Output3" Text="Output 3">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-7_R-7" />
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-8_R-8" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-9_R-9" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-3_R-3" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-11_R-11" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-4" Name="Output4" Text="Output 4">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-10_R-10" />
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-10_R-10">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-11_R-11" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-10_R-10">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-12_R-12" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-10_R-10">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-4_R-4" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-10_R-10">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-12_R-12" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-5" Name="Output5" Text="Output 5">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-13_R-13" />
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-14_R-14" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-15_R-15" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-5_R-5" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-13_R-13" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-6" Name="Output6" Text="Output 6">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-16_R-16" />
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-16_R-16">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-17_R-17" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-16_R-16">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-18_R-18" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-16_R-16">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-6_R-6" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-16_R-16">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-14_R-14" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-7" Name="Output7" Text="Output 7">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-19_R-19" />
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-20_R-20" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-21_R-21" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-7_R-7" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-15_R-15" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-8" Name="Output8" Text="Output 8">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-22_R-22" />
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-22_R-22">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-23_R-23" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-22_R-22">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-24_R-24" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-22_R-22">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-8_R-8" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A02-03-0000_P-22_R-22">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A02-03-0000_O-16_R-16" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A02-03-0000_PB-9" Name="General" Text="General">
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-25_R-25" />
+                <ParameterRefRef RefId="M-00FA_A-0A02-03-0000_P-26_R-26" />
+              </ParameterBlock>
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Hardware>
+        <Hardware Id="M-00FA_H-2562-1" Name="vKNX Switch Actuator 8-fold" SerialNumber="2562" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+          <Products>
+            <Product Id="M-00FA_H-2562-1_P-VKNXSA8" Text="vKNX Switch Actuator 8-fold" OrderNumber="VKNXSA8" IsRailMounted="false" DefaultLanguage="en-US">
+              <RegistrationInfo RegistrationStatus="Registered" />
+            </Product>
+          </Products>
+          <Hardware2Programs>
+            <Hardware2Program Id="M-00FA_H-2562-1_HP-0A02-03-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A02-03-0000" />
+              <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
+            </Hardware2Program>
+          </Hardware2Programs>
+        </Hardware>
+      </Hardware>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

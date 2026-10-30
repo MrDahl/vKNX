@@ -1,0 +1,58 @@
+Oct 30, 2026 10:38:05 PM io.calimero.device.KnxDeviceServiceLogic setDeviceAddress
+INFO: set new device address 1.1.2 (old 15.15.255)
+Oct 30, 2026 10:38:10 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+Oct 30, 2026 10:38:13 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  only the device in programming mode answers; ETS-style address sequence works
+PASS  actuator took address 1.1.2
+PASS  push button kept factory address
+PASS  actuator left programming mode after the sequence (restart)
+Oct 30, 2026 10:38:24 PM io.calimero.device.KnxDeviceServiceLogic setDeviceAddress
+INFO: set new device address 1.1.1 (old 15.15.255)
+Oct 30, 2026 10:38:29 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+Oct 30, 2026 10:38:29 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  second address sequence on the button
+PASS  push button took address 1.1.1
+PASS  actuator address unchanged by second assignment
+Oct 30, 2026 10:38:35 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+PASS  device descriptor is 0x07B0 (System B)
+Oct 30, 2026 10:38:35 PM io.calimero.device.ManagementServiceNotifier send
+WARNING: 1.1.2->0.2.255 A_Device-desc.response 43 40 07 b0: 0.2.255 disconnected while awaiting ACK, destination 0.2.255 (TL 15.15.255) Destroyed
+Oct 30, 2026 10:38:35 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  unprogrammed actuator ignores GroupValueWrite
+Oct 30, 2026 10:38:35 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+Oct 30, 2026 10:38:36 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+  (download to 1.1.1 retried after: 1.1.1 disconnected while awaiting ACK)
+Oct 30, 2026 10:38:45 PM io.calimero.device.ManagementServiceNotifier send
+WARNING: 1.1.1->0.2.255 A_Property.response 7b d6 04 1b 10 01 00 00 00 50 00 ff e0 1e: 0.2.255 disconnected while awaiting ACK, destination 0.2.255 (TL 15.15.255) Destroyed
+Oct 30, 2026 10:38:46 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+Oct 30, 2026 10:38:46 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  actuator application loaded
+PASS  push button application loaded
+PASS  button press switches lamp on (via bus, from 1.1.1)
+PASS  telegram on the bus came from 1.1.1 to 1/0/1
+PASS  second press (toggle; status followed) switches lamp off
+PASS  status telegram sent by actuator from 1.1.2 to 1/0/2
+Oct 30, 2026 10:38:52 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  inverted relay logic: ON telegram now opens the relay (lamp off)
+PASS  inverted relay logic: OFF telegram closes the relay (lamp on)
+Oct 30, 2026 10:38:58 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  old group address no longer reaches the actuator
+PASS  new group address now switches the actuator
+PASS  restart: individual addresses kept
+PASS  restart: applications still loaded
+PASS  restart: downloaded parameter kept (Out1Logic normal, status on)
+PASS  restart: downloaded association still drives the actuator
+ALL PASSED
+exit=0

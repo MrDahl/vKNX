@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "se3MWET4eGI=",
+  "success": true,
+  "projectFilePath": "D:\\a\\vKNX\\vKNX\\launcher\\vKNX.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\runneradmin\\.nuget\\packages\\microsoft.web.webview2\\1.0.2592.51\\microsoft.web.webview2.1.0.2592.51.nupkg.sha512"
+  ],
+  "logs": []
+}

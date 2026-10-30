@@ -1,0 +1,2 @@
+JAVA_VERSION="21.0.12.1"
+MODULES="java.base java.xml io.calimero.core io.calimero.device io.calimero.server java.datatransfer java.prefs java.desktop java.logging java.net.http java.transaction.xa java.sql jdk.crypto.ec jdk.crypto.cryptoki jdk.httpserver org.vknx"
