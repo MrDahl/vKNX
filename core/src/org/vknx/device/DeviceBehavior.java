@@ -16,6 +16,7 @@ public abstract class DeviceBehavior {
 			case "push-button" -> new PushButtonBehavior(dev);
 			case "switch-actuator" -> new SwitchActuatorBehavior(dev);
 			case "push-rocker" -> new RockerBehavior(dev);
+			case "push-blind-rocker" -> new BlindRockerBehavior(dev);
 			case "push-slider" -> new SliderPushBehavior(dev);
 			case "dimmer" -> new DimmerBehavior(dev);
 			case "blind-2" -> new BlindBehavior(dev);

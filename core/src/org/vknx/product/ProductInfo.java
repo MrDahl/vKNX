@@ -13,6 +13,8 @@ public final class ProductInfo {
 					"One button. A short press switches, a long press can dim. What it sends is set in ETS.")),
 			Map.entry("push-rocker", new Info("Rocker (two keys)", "Input", "up",
 					"Upper and lower key for switching and relative dimming (4 bit).")),
+			Map.entry("push-blind-rocker", new Info("Blind rocker (two keys)", "Input", "up",
+					"Upper and lower key for blinds: a short press sends step/stop (1 bit), a long press sends move up/down (1 bit).")),
 			Map.entry("push-slider", new Info("Slider push button", "Input", "slider",
 					"A button plus a slider that sends a brightness value (1 byte).")),
 			Map.entry("switch-actuator", new Info("Switch actuator, 1 output", "Actuator", "lamp",

@@ -49,13 +49,13 @@ public final class UiFixture {
 				addr.put(n, a);
 			}
 			final int gSw = ga(1, 0, 1), gDim = ga(1, 0, 2), gVal = ga(1, 0, 3), gSwSt = ga(1, 0, 4), gValSt = ga(1, 0, 5);
-			ets.downloadAll(addr.get("Button1"), new int[] { gSw, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 } }, new int[] { SEND, STATUS_IN }, new byte[] { 0b0000_0100 });
+			ets.downloadAll(addr.get("Button1"), new int[] { gSw, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 } }, new int[] { SEND, STATUS_IN }, new byte[] { 0b0010_0000 });
 			ets.downloadAll(addr.get("Dimmer1"), new int[] { gSw, gDim, gVal, gSwSt, gValSt }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 } },
 					new int[] { W, W, W, STATUS_OUT, STATUS_OUT }, new byte[] { 0b0010_0100 });
-			ets.downloadAll(addr.get("Rocker1"), new int[] { gSw, gDim, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } }, new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0b000, 0x01 });
+			ets.downloadAll(addr.get("Rocker1"), new int[] { gSw, gDim, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } }, new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0x00, 0x20 });
 			ets.downloadAll(addr.get("Slider1"), new int[] { gVal, gSw, gValSt }, new int[][] { { 1, 2 }, { 2, 1 }, { 3, 3 } }, new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0, 0, 0, 0 });
 			final int gC1 = ga(2, 0, 1), gC2 = ga(2, 0, 2), gC3 = ga(2, 0, 3);
-			ets.downloadAll(addr.get("Switch8"), new int[] { gC1, gC2, gC3 }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } }, new int[] { W, W, W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new byte[] { 0b0000_0000, 0b0000_0100 });
+			ets.downloadAll(addr.get("Switch8"), new int[] { gC1, gC2, gC3 }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } }, new int[] { W, W, W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new byte[] { 0b0000_0000, 0b0010_0000 });
 			final int gTemp = ga(4, 0, 4), gCo2 = ga(4, 0, 7), gLux = ga(4, 0, 5);
 			final byte[] ms = new byte[60];
 			ms[2] = 0; ms[3] = 3; ms[4] = 0x02; ms[5] = (byte) 0x58; // CO2: every 3 s, value 600
@@ -64,7 +64,7 @@ public final class UiFixture {
 			ets.downloadAll(addr.get("Sensor1"), new int[] { gTemp, gCo2, gLux }, new int[][] { { 1, 4 }, { 2, 1 }, { 3, 3 } }, new int[] { SEND, 0, 0, SEND, 0, 0 }, ms);
 			final int gMove = ga(3, 0, 1), gStop = ga(3, 0, 2), gPos = ga(3, 0, 3);
 			ets.downloadAll(addr.get("Blind1"), new int[] { gMove, gStop, gPos }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } },
-					new int[] { W, W, STATUS_OUT, W, W, STATUS_OUT }, new byte[] { 0x10 });
+					new int[] { W, W, STATUS_OUT, W, W, STATUS_OUT }, new byte[] { 0x08 });
 			final var pc = new ProcessCommunicatorImpl(tunnel);
 			System.out.println("fixture ready");
 			// some traffic: switch lamps, dim, group read of unknown address

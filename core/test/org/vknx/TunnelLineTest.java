@@ -50,9 +50,9 @@ public final class TunnelLineTest {
 			SelfTest.check("tunnel: button addressed", SelfTest.await(() -> pb.address().equals(new IndividualAddress(3, 5, 6))));
 			final int[] gas = { new GroupAddress(1, 0, 1).getRawAddress(), new GroupAddress(1, 0, 2).getRawAddress() };
 			ets.downloadAll(new IndividualAddress(2, 3, 4), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { 0x17, SelfTest.FLAGS_STATUS_OUT }, new int[] { 0b1000 });
+					new int[] { 0x17, SelfTest.FLAGS_STATUS_OUT }, new int[] { 0b0001_0000 });
 			ets.downloadAll(new IndividualAddress(3, 5, 6), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { SelfTest.FLAGS_SEND, SelfTest.FLAGS_STATUS_IN }, new int[] { 0b0100 });
+					new int[] { SelfTest.FLAGS_SEND, SelfTest.FLAGS_STATUS_IN }, new int[] { 0b0010_0000 });
 			SelfTest.check("tunnel: both applications loaded", SelfTest.await(() -> sa.applicationLoaded() && pb.applicationLoaded()));
 			((PushButtonBehavior) pb.behavior()).press();
 			SelfTest.check("tunnel: button press lights lamp", SelfTest.await(((SwitchActuatorBehavior) sa.behavior())::lampLit));

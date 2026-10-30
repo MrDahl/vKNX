@@ -251,9 +251,9 @@ public final class SelfTest {
 			final int[] gas = { gaSwitch.getRawAddress(), gaStatus.getRawAddress() };
 			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 2 } },
 					new int[] { 0x04 | 0x10 | 0x03, FLAGS_STATUS_OUT },
-					new int[] { 0b0000_1000 /* RelayLogic=0, Startup=0, SendStatus=1 */ });
+					new int[] { 0b0001_0000 /* RelayLogic=0, Startup=0, SendStatus=1 (bits counted from the top, as ETS does) */ });
 			ets.downloadAll(new IndividualAddress(1, 1, 1), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { FLAGS_SEND, FLAGS_STATUS_IN }, new int[] { 0b0000_0100 /* Toggle, FollowStatus=1 */ });
+					new int[] { FLAGS_SEND, FLAGS_STATUS_IN }, new int[] { 0b0010_0000 /* Toggle, FollowStatus=1 */ });
 			check("actuator application loaded", await(saF::applicationLoaded));
 			check("push button application loaded", await(pbF::applicationLoaded));
 
@@ -276,7 +276,7 @@ public final class SelfTest {
 
 			// --- 7: a downloaded parameter changes behaviour (RelayLogic = inverted)
 			ets.downloadAll(new IndividualAddress(1, 1, 2), gas, new int[][] { { 1, 1 }, { 2, 2 } },
-					new int[] { 0x04 | 0x10 | 0x03, FLAGS_STATUS_OUT }, new int[] { 0b0000_1001 });
+					new int[] { 0x04 | 0x10 | 0x03, FLAGS_STATUS_OUT }, new int[] { 0b1001_0000 });
 			Thread.sleep(300);
 			etsLink.sendRequestWait(gaSwitch, Priority.LOW, groupWrite(1));
 			check("inverted relay logic: ON telegram now opens the relay (lamp off)", await(() -> !sw.lampLit()));
@@ -287,7 +287,7 @@ public final class SelfTest {
 			final var gaNew = new GroupAddress(1, 0, 3);
 			ets.downloadAll(new IndividualAddress(1, 1, 2), new int[] { gaNew.getRawAddress(), gaStatus.getRawAddress() },
 					new int[][] { { 1, 1 }, { 2, 2 } }, new int[] { 0x04 | 0x10 | 0x03, FLAGS_STATUS_OUT },
-					new int[] { 0b0000_1000 });
+					new int[] { 0b0001_0000 });
 			Thread.sleep(300);
 			etsLink.sendRequestWait(gaSwitch, Priority.LOW, groupWrite(1));
 			Thread.sleep(300);
