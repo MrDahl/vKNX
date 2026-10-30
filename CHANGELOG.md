@@ -3,13 +3,20 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.4.0] - 2026-10-30
+New control panel with an e-ink look, and line/area coupler products. **Not yet tried in real ETS:** the new panel together with ETS, the coupler products, rocker, blinds and the 4-/8-channel switch actuators. Known problem being investigated: status objects and blind movement are reported not to work in ETS (log requested).
+
 ### New: e-ink look
 - The panel now looks like an e-ink display: warm paper background, dark ink text, flat surfaces with thin borders, no shadows, no glow and no animations. The dark theme is a matching low-contrast "E-ink (dark)" variant. Lamp yellow, the red programming indicator and the status colours keep their hues. A theme chosen earlier is kept (Light = paper, Dark = dark).
 
+
+### New: line coupler and area coupler (step 1, no routing yet)
+- Two new products, **Line coupler** (address area.line.0) and **Area coupler** (address area.0.0). They are flagged as couplers in the ETS product data (`IsCoupler`), so ETS lets them be placed on a line/area address. ETS parameters: block / route all / filter for group and for individually addressed telegrams in both directions, repeat on errors, acknowledge.
+- The settings that ETS downloads are decoded and shown on the device card and in the details.
+- **Not included yet:** the coupler does **not** route or filter telegrams. The simulated network is still one flat line (see `docs/limitations.md`). The coupler products are **not tested in ETS** (our own tests only).
 ### New: redesigned control panel
 - **Three workspaces:** *Installation* (device list with search, product catalogue, details), *Simulation* (operating cards or floor plan, with an optional telegram monitor docked below) and *Monitor* (full telegram monitor with group address overview). Settings, light/dark theme, version and connection status are separate from the navigation.
-- **Light theme by default** (a theme you chose earlier is kept); calmer neutral surfaces, larger values, consistent spacing and buttons, visible keyboard focus, text next to every status colour.
+- **Paper (e-ink) theme by default** (a theme you chose earlier is kept); calmer neutral surfaces, larger values, consistent spacing and buttons, visible keyboard focus, text next to every status colour.
 - **Device cards:** name and symbol, the current value large (dimmer 65 %, relay on/off, temperature 22.4 °C, blind position and direction), only the controls the device really has, address as secondary information. A stable grid: live updates never move or rebuild a card, so sliders, held keys and keyboard focus are not disturbed. Delete is now *Remove device…* in the **⋯** menu, with a confirmation.
 - **Device details:** product, physical address, a programming button with a red indicator, status (address / application / download), ETS parameters, communication objects with their group addresses, and *Show telegrams for this device*.
 - **Add device** from a catalogue with readable names, icons and a one-line description; concrete error messages.

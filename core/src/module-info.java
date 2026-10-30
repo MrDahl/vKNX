@@ -11,6 +11,7 @@ module org.vknx {
 	exports org.vknx.product;
 	exports org.vknx.device;
 	exports org.vknx.sim;
+	exports org.vknx.tools;
 	// Calimero's KNXnet/IP server instantiates the shared virtual line by class name
 	opens org.vknx.sim to io.calimero.server;
 }

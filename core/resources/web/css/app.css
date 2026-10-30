@@ -349,3 +349,7 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 
 /* e-ink: flat glow-free "on" states (a thicker coloured border instead of a glow) */
 .bulb.on, .mk.on .mk-body { box-shadow: none; border-width: 3px; }
+/* coupler card: routing settings as label/value rows */
+.cp-grid { display: grid; gap: .3rem; width: 100%; }
+.cp-row { display: flex; justify-content: space-between; gap: .75rem; font-size: .85rem; }
+.cp-row span { color: var(--muted); }

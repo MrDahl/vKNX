@@ -4,7 +4,7 @@ import { S, emit, selectDevice, hooks } from './bus.js';
 import { modal, toast } from './dialogs.js';
 
 const PREFIX = { 'push-button': 'Button', 'push-rocker': 'Rocker', 'push-slider': 'Slider', 'switch-actuator': 'Switch', 'switch-actuator-4': 'Switch4',
-  'switch-actuator-8': 'Switch8', dimmer: 'Dimmer', 'blind-2': 'Blind', multisensor: 'Sensor' };
+  'switch-actuator-8': 'Switch8', dimmer: 'Dimmer', 'blind-2': 'Blind', multisensor: 'Sensor', 'coupler-line': 'LC', 'coupler-area': 'AC' };
 const NAME_RE = /^[A-Za-z0-9_-]{1,20}$/;
 
 function suggest(key) {
@@ -25,8 +25,8 @@ export function openAddDevice() {
   const grid = h('div');
   const cats = new Map();
   for (const p of S.catalog) { if (!cats.has(p.category)) cats.set(p.category, []); cats.get(p.category).push(p); }
-  for (const [cat, list] of [...cats].sort((a, b) => ['Input', 'Actuator', 'Sensor'].indexOf(a[0]) - ['Input', 'Actuator', 'Sensor'].indexOf(b[0]))) {
-    grid.append(h('div.cat-title', cat === 'Input' ? 'Inputs (push buttons)' : cat === 'Actuator' ? 'Actuators' : cat === 'Sensor' ? 'Sensors' : cat));
+  for (const [cat, list] of [...cats].sort((a, b) => ['Input', 'Actuator', 'Sensor', 'Coupler'].indexOf(a[0]) - ['Input', 'Actuator', 'Sensor', 'Coupler'].indexOf(b[0]))) {
+    grid.append(h('div.cat-title', cat === 'Input' ? 'Inputs (push buttons)' : cat === 'Actuator' ? 'Actuators' : cat === 'Sensor' ? 'Sensors' : cat === 'Coupler' ? 'Couplers (line and area)' : cat));
     const g = h('div.catalog');
     for (const p of list) {
       const b = h('button.cat-item', { type: 'button', 'aria-pressed': 'false', onclick: () => choose(p) },

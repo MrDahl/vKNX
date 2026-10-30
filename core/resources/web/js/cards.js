@@ -129,6 +129,19 @@ export function createCard(d, handlers) {
       face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
       break;
     }
+    case 'coupler-line': case 'coupler-area': {
+      const area = d.product === 'coupler-area';
+      const up = area ? 'Backbone' : 'Main line', down = area ? 'Main line' : 'Sub line';
+      L.rows = [['groupDown', 'Group ' + up + ' → ' + down], ['groupUp', 'Group ' + down + ' → ' + up],
+        ['physDown', 'Phys. ' + up + ' → ' + down], ['physUp', 'Phys. ' + down + ' → ' + up]].map(([k, t]) => ({ k, t, v: h('b') }));
+      const grid = h('div.cp-grid');
+      L.rows.forEach(r => grid.append(h('div.cp-row', h('span', r.t), r.v)));
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(grid);
+      controls.append(h('div.hint', 'Settings come from ETS. This version does not route telegrams between lines yet.'));
+      face = v => L.rows.forEach(r => setText(r.v, v[r.k] ?? '–'));
+      break;
+    }
     default: face = () => {};
   }
 
