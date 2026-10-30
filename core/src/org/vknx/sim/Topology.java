@@ -159,17 +159,32 @@ public final class Topology {
 	 * filtered, hop count used up). The hop count is lowered by every coupler crossed, as on a real installation.
 	 */
 	public CEMILData deliver(final CEMILData f, final IndividualAddress receiver) {
-		if (!enabled)
+		if (!enabled || management(f))
 			return f;
 		return deliverToLines(f, linesOf(receiver));
 	}
 
 	/** Same for the KNXnet/IP interface (ETS). */
 	public CEMILData deliverToUplink(final CEMILData f) {
-		if (!enabled)
+		if (!enabled || management(f))
 			return f;
 		return deliverToLines(f, new Line[] { uplink });
 	}
+
+	/**
+	 * ETS' own management traffic (addressing, programming mode, downloads: broadcasts and individually addressed
+	 * telegrams from or to a tunnel address) is not stopped by couplers. Reason: in a simulator a device "moves" to its
+	 * line as soon as it has an address, before ETS could read the address back; ETS could then never finish. Group
+	 * telegrams and telegrams between devices are routed for real.
+	 */
+	private static boolean management(final CEMILData f) {
+		final KNXAddress dst = f.getDestination();
+		if (dst instanceof final io.calimero.GroupAddress g)
+			return g.getRawAddress() == 0;
+		return isTunnel(f.getSource()) || isTunnel((IndividualAddress) dst);
+	}
+
+	private static boolean isTunnel(final IndividualAddress a) { return a.getDevice() >= 241 && a.getDevice() <= 244; }
 
 	private CEMILData deliverToLines(final CEMILData f, final Line[] lines) {
 		final var reach = reach(f);

@@ -93,6 +93,19 @@ public final class TopologyTest {
 		b.got.clear(); c.got.clear();
 		send(a, "1/1/1", 7);
 		SelfTest.check("hop count 7 = unlimited, stays 7", c.got.size() == 1 && c.got.get(0).getHopCount() == 7);
+		// ETS management traffic (tunnel address 241-244) and broadcasts are not stopped by couplers
+		final var ets = node(line, "1.1.241");
+		b.got.clear(); c.got.clear(); d.got.clear();
+		topo.unregister(lc12); topo.unregister(lc11);
+		ets.link.send(new CEMILData(CEMILData.MC_LDATA_REQ, new IndividualAddress("1.1.241"), new IndividualAddress("1.2.5"),
+				new byte[] { 0x00 }, Priority.LOW, false, 6), false);
+		Thread.sleep(50);
+		SelfTest.check("tunnel address reaches another line without couplers (individually addressed)", b.got.size() == 1);
+		send(a, "0/0/0", 6);
+		SelfTest.check("broadcast reaches other lines without couplers", c.got.size() == 1);
+		b.got.clear(); c.got.clear(); d.got.clear();
+		send(a, "1/1/1", 6);
+		SelfTest.check("group telegrams between devices are still stopped without couplers", d.got.size() == 1 && c.got.isEmpty() && b.got.isEmpty());
 		System.out.println("topology tests done");
 	}
 }

@@ -122,7 +122,7 @@ public final class CouplerTest {
 		final var net = Subnet.inProcess();
 		net.monitor(s -> { synchronized (trace) { trace.add(SelfTest.ms() + "BUS " + s); } });
 		net.topology().setEnabled(true); // lines are real from the start
-		final var ets = new SelfTest.EtsLikeClient(net.createDeviceLink(new IndividualAddress(1, 1, 250)));
+		final var ets = new SelfTest.EtsLikeClient(net.createDeviceLink(new IndividualAddress(1, 1, 241)));
 		int serial = 40;
 		try {
 			final var lc11 = VirtualDevice.create("lc11", Products.COUPLER, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
@@ -215,9 +215,9 @@ public final class CouplerTest {
 
 			// ---- physical filter decision (ETS inline default 0x77) and persistence
 			final var lc12b = (CouplerBehavior) lc12.behavior();
-			final var toDimmer = new CEMILData(CEMILData.MC_LDATA_IND, new IndividualAddress(1, 1, 250), new IndividualAddress(1, 2, 20),
+			final var toDimmer = new CEMILData(CEMILData.MC_LDATA_IND, new IndividualAddress(1, 1, 241), new IndividualAddress(1, 2, 20),
 					new byte[] { 0x00 }, Priority.LOW, false, 6);
-			final var toOwnLine = new CEMILData(CEMILData.MC_LDATA_IND, new IndividualAddress(1, 1, 250), new IndividualAddress(1, 1, 99),
+			final var toOwnLine = new CEMILData(CEMILData.MC_LDATA_IND, new IndividualAddress(1, 1, 241), new IndividualAddress(1, 1, 99),
 					new byte[] { 0x00 }, Priority.LOW, false, 6);
 			check("physical filter: main to sub passes for an address behind the coupler, not for another line",
 					lc12b.route(toDimmer, true).pass() && !lc12b.route(toOwnLine, true).pass());

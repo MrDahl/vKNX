@@ -3,6 +3,10 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [0.6.1] - 2026-10-30
+- **Fix:** with 0.6.0 devices behind a coupler stayed in programming mode and couplers could not be downloaded, because ETS' own telegrams (addressing, reading the address back, download) were stopped by couplers that had no download yet. ETS' management traffic (broadcasts and individually addressed telegrams from or to the tunnel addresses .241-.244) now passes couplers; group telegrams and telegrams between devices are still routed through the couplers' filter tables and hop count.
+- Tested with `TopologyTest` and `CouplerTest`; not tried in ETS.
+
 ## [0.6.0] - 2026-10-30
 **One coupler, real line routing and a real filter table.** Before this version telegrams crossed between lines whether or not a coupler existed or had been downloaded. Now they only do if the couplers are there and let them pass, so a missing coupler download causes the same kind of problem as on a real installation. **Not tried in ETS yet:** the coupler is built like a TP/TP coupler (mask 0912) from the KNX Virtual application and the MV-0912 procedure; only our own tests have run (see "What is checked").
 
