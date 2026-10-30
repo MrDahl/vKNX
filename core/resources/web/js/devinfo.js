@@ -31,7 +31,7 @@ export function pointsOf(d) {
   const add = (k, type, extra) => P.push({ id: n + '|' + k, dev: n, k, type, label: n, ...extra });
   switch (d.product) {
     case 'push-button': add('btn', 'button', { name: 'Button' }); break;
-    case 'push-rocker': add('k1', 'key', { keyNo: 1, sym: 'up', label: n + ' (upper)', name: 'Upper key' }); add('k2', 'key', { keyNo: 2, sym: 'down', label: n + ' (lower)', name: 'Lower key' }); break;
+    case 'push-rocker': case 'push-blind-rocker': add('k1', 'key', { keyNo: 1, sym: 'up', label: n + ' (upper)', name: 'Upper key' }); add('k2', 'key', { keyNo: 2, sym: 'down', label: n + ' (lower)', name: 'Lower key' }); break;
     case 'push-slider': add('btn', 'button', { name: 'Button' }); add('sl', 'slider', { label: n + ' (slider)', name: 'Slider', val: v.level ?? 0 }); break;
     case 'switch-actuator': add('l1', 'lamp', { name: 'Output 1', on: !!v.lamp }); break;
     case 'switch-actuator-4': case 'switch-actuator-8': [...(v.lamps || '')].forEach((c, i) => add('l' + (i + 1), 'lamp', { on: c === '1', label: n + ' ' + (i + 1), name: 'Output ' + (i + 1) })); break;

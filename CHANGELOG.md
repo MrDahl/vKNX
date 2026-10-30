@@ -3,6 +3,18 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [0.4.1] - 2026-10-30
+Fixes the status objects that did not send, and adds a blind rocker. Found from a real ETS group-monitor log. **Not yet tried in real ETS:** the new blind rocker product (it must be imported as a new `.knxprod`); the parameter fix is checked against the bytes ETS actually wrote, but only by our own tests.
+
+### Fixed: ETS settings were read with the wrong bit order
+- ETS stores several settings in one byte and counts the bits **from the top** (the first setting sits in the highest bits). vKNX counted from the bottom, so every setting that shares a byte was read as the wrong value. In the dimmer this meant **"Send status" was read as No** and "Level when switched on" as 100 %, whatever was chosen in ETS. That is why the dimmer never sent its status telegrams, and why a slider push button or rocker that follows the status never updated.
+- Other products with more than one setting in a byte (rocker, push button, slider, switch actuators, blind actuator, multisensor, couplers) were affected in the same way and now read correctly. No ETS product data changed, so existing `.knxprod` files and ETS projects keep working. Devices that were already downloaded do not need a new download: the stored bytes are simply read correctly now.
+- New automatic checks use the exact bytes from the ETS log (dimmer `0x44`, rocker `0x20 0x20`).
+
+### New: blind rocker
+- New product **Blind rocker (two keys)**: a short press sends step/stop (1 bit, DPT 1.007), a long press sends move up/down (1 bit, DPT 1.008). Link its objects to the blind actuator's *up/down* and *stop* objects. ETS settings: which key is up, and the long-press time.
+- The rocker for dimming (relative dimming, 4 bit) is unchanged and is not meant for blinds. The new product must be imported into ETS as a new `.knxprod` (`products/vknx-push-blind-rocker.xml`).
+
 ## [0.4.0] - 2026-10-30
 New control panel with an e-ink look, and line/area coupler products. **Not yet tried in real ETS:** the new panel together with ETS, the coupler products, rocker, blinds and the 4-/8-channel switch actuators. Known problem being investigated: status objects and blind movement are reported not to work in ETS (log requested).
 

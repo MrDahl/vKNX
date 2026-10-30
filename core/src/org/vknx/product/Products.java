@@ -61,6 +61,18 @@ public final class Products {
 				new ObjDef(2, "Dimming", "Relative dimming", "Output", 4, "DPST-3-7", false, false, true, false),
 				new ObjDef(3, "Status", "Status", "Input", 1, "DPST-1-1", false, true, false, true)));
 
+	/** Blind rocker: short press = step/stop, long press = move up/down (1 bit each, DPT 1.007 / 1.008). */
+	public static final ProductDef PUSH_BLIND_ROCKER = new ProductDef(
+			"push-blind-rocker", 0x0A0C, V, "vKNX Blind Rocker (double push) 1-fold", "VKNXBR1", 0x0A0C, 1,
+			List.of(
+				new ParamDef(1, "Orientation", "Upper key sends", 0, 0, 1, 0, List.of(
+					new Choice(0, "Up (lower key: down)"), new Choice(1, "Down (lower key: up)"))),
+				new ParamDef(2, "LongPressTime", "Long-press time", 0, 1, 2, 1, List.of(
+					new Choice(0, "0.4 s"), new Choice(1, "0.6 s"), new Choice(2, "1.0 s")))),
+			List.of(
+				new ObjDef(1, "Move", "Move up/down", "Output", 1, "DPST-1-8", false, false, true, false),
+				new ObjDef(2, "StepStop", "Step / stop", "Output", 1, "DPST-1-7", false, false, true, false)));
+
 	/** Push button with a slider: switch + 1-byte brightness value. */
 	public static final ProductDef PUSH_SLIDER = new ProductDef(
 			"push-slider", 0x0A04, V, "vKNX Slider push 1-fold", "VKNXSL1", 0x0A04, 1,
@@ -206,7 +218,7 @@ public final class Products {
 	public static final Map<String, ProductDef> ALL;
 	static {
 		final var m = new java.util.LinkedHashMap<String, ProductDef>();
-		for (final var p : List.of(PUSH_BUTTON, PUSH_ROCKER, PUSH_SLIDER, SWITCH_ACTUATOR, SWITCH_ACTUATOR_4, SWITCH_ACTUATOR_8,
+		for (final var p : List.of(PUSH_BUTTON, PUSH_ROCKER, PUSH_BLIND_ROCKER, PUSH_SLIDER, SWITCH_ACTUATOR, SWITCH_ACTUATOR_4, SWITCH_ACTUATOR_8,
 				DIMMER, BLIND_2, MULTISENSOR, COUPLER_LINE, COUPLER_AREA))
 			m.put(p.key(), p);
 		ALL = java.util.Collections.unmodifiableMap(m);

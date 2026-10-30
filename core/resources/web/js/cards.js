@@ -81,6 +81,12 @@ export function createCard(d, handlers) {
       face = v => setText(L.v, onOff(v.state));
       break;
     }
+    case 'push-blind-rocker': {
+      L.v = h('div.value'); state.append(L.v, h('div.hint', 'last command sent'));
+      controls.append(h('div.keys', holdButton(d.name, 1, 'Upper key', 'up'), holdButton(d.name, 2, 'Lower key', 'down')), h('div.hint', 'Short press = step/stop. Hold a key = move up/down.'));
+      face = v => setText(L.v, v.last || '–');
+      break;
+    }
     case 'push-slider': {
       L.v = h('div.value'); L.s = levelSlider(d.name); L.sv = h('span.mono');
       L.s.addEventListener('live', e => setText(L.v, e.detail + ' %'));

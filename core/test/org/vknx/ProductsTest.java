@@ -58,6 +58,17 @@ public final class ProductsTest {
 		final var ets = new SelfTest.EtsLikeClient(etsLink);
 		int serial = 10;
 		try {
+			// Bytes copied from a real ETS 6 download log (defaults of our products): ETS counts bits from the top.
+			final byte[] etsDimmer = { 0x44 };
+			check("real ETS dimmer parameter byte 0x44: DimTime 5 s, last level, startup off, send status YES",
+					Products.DIMMER.param("DimTime").read(etsDimmer) == 1 && Products.DIMMER.param("OnLevel").read(etsDimmer) == 0
+							&& Products.DIMMER.param("StartupState").read(etsDimmer) == 0
+							&& Products.DIMMER.param("SendStatus").read(etsDimmer) == 1);
+			final byte[] etsRocker = { 0x20, 0x20 };
+			check("real ETS rocker bytes 0x20 0x20: upper key on, long press 0.6 s, dimming step 100 %",
+					Products.PUSH_ROCKER.param("Orientation").read(etsRocker) == 0
+							&& Products.PUSH_ROCKER.param("LongPressTime").read(etsRocker) == 1
+							&& Products.PUSH_ROCKER.param("DimStep").read(etsRocker) == 1);
 			// DPT 9 helper
 			check("DPT9 21.0 -> 0x0C1A", Dpt9.encode(21.0) == 0x0C1A);
 			check("DPT9 round trip -5 / 21 / 101325", Dpt9.decode(Dpt9.encode(-5)) == -5.0
@@ -77,8 +88,10 @@ public final class ProductsTest {
 					dir.resolve("s4.state"), net, listener);
 			final var ms = VirtualDevice.create("ms", Products.MULTISENSOR, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
 					dir.resolve("ms.state"), net, listener);
+			final var brk = VirtualDevice.create("br", Products.PUSH_BLIND_ROCKER, new byte[] { 0, (byte) 0xFA, 0, 0, 0, (byte) serial++ },
+					dir.resolve("br.state"), net, listener);
 			int host = 1;
-			for (final var d : List.of(rocker, slider, dimmer, blind, sa4, ms)) {
+			for (final var d : List.of(rocker, slider, dimmer, blind, sa4, ms, brk)) {
 				d.toggleProgrammingMode();
 				final var addr = new IndividualAddress(1, 1, host++);
 				check(d.name() + " address assignment", ets.assignAddress(addr) && await(3000, () -> d.address().equals(addr)));
@@ -91,7 +104,7 @@ public final class ProductsTest {
 			final int[] gas = { gSw, gDim, gVal, gSwSt, gValSt };
 			// rocker: Orientation 0, LongPressTime 0 (0.4 s), DimStep 1 ; objects: 1 switch(send) 2 dim(send) 3 status
 			ets.downloadAll(rocker.address(), new int[] { gSw, gDim, gSwSt }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } },
-					new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0b000, 0x01 });
+					new int[] { SEND, SEND, STATUS_IN }, new byte[] { 0x00, 0x20 /* DimStep=1 in bits 7-5 */ });
 			// dimmer: DimTime 0 (2 s), OnLevel 1 (100 %), Startup 0, SendStatus 1
 			ets.downloadAll(dimmer.address(), gas, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 } },
 					new int[] { W, W, W, STATUS_OUT, STATUS_OUT }, new byte[] { 0b0010_0100 });
@@ -140,7 +153,7 @@ public final class ProductsTest {
 			// ---------------- blinds
 			final int gMove = ga(2, 0, 1), gStop = ga(2, 0, 2), gPos = ga(2, 0, 3);
 			ets.downloadAll(blind.address(), new int[] { gMove, gStop, gPos }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } },
-					new int[] { W, W, STATUS_OUT, W, W, STATUS_OUT }, new byte[] { 0b0001_0000 /* both 10 s, SendPosition */ });
+					new int[] { W, W, STATUS_OUT, W, W, STATUS_OUT }, new byte[] { 0b0000_1000 /* both 10 s, SendPosition (ETS counts bits from the top) */ });
 			check("blind application loaded", await(3000, blind::applicationLoaded));
 			final var bl = (BlindBehavior) blind.behavior();
 			etsLink.sendRequestWait(new GroupAddress(gMove), Priority.LOW, w1(1)); // down
@@ -155,10 +168,29 @@ public final class ProductsTest {
 				check("blind sent position status", trace.stream().anyMatch(s -> s.contains("BUS device") && s.contains("1.1.4") && s.contains("2/0/3")));
 			}
 
+			// ---------------- blind rocker -> blind actuator: long press = move, short press = step/stop
+			ets.downloadAll(brk.address(), new int[] { gMove, gStop }, new int[][] { { 1, 1 }, { 2, 2 } }, new int[] { SEND, SEND },
+					new byte[] { 0b0010_0000 /* upper key = up, long press 0.6 s */ });
+			check("blind rocker application loaded", await(3000, brk::applicationLoaded));
+			final int before = (Integer) bl.view().get("pos1");
+			brk.behavior().act("down", 2); // lower key held
+			Thread.sleep(1200);
+			brk.behavior().act("up", 2);
+			check("blind rocker lower key held: move DOWN sent, the blind actuator moves", await(3000, () -> (Integer) bl.view().get("pos1") > before));
+			check("blind rocker shows the last command", "Move down".equals(brk.behavior().view().get("last")));
+			brk.behavior().act("down", 2);
+			brk.behavior().act("up", 2); // short press = step/stop
+			final int stopped = (Integer) bl.view().get("pos1");
+			Thread.sleep(500);
+			check("blind rocker short press sends step/stop: the blind stops", "Step/stop down".equals(brk.behavior().view().get("last"))
+					&& (Integer) bl.view().get("pos1") - stopped <= 1);
+			check("blind rocker objects are 1.008 and 1.007 (1 bit)", Products.PUSH_BLIND_ROCKER.object(1).get().dpt().equals("DPST-1-8")
+					&& Products.PUSH_BLIND_ROCKER.object(2).get().dpt().equals("DPST-1-7"));
+
 			// ---------------- 4-channel switch actuator, channel 2 inverted
 			final int gC3 = ga(3, 0, 3), gC2 = ga(3, 0, 2);
 			ets.downloadAll(sa4.address(), new int[] { gC3, gC2 }, new int[][] { { 1, 3 }, { 2, 2 } },
-					new int[] { 0, W, W, 0, 0, 0, 0, 0 }, new byte[] { 0b0000_0010, 0b0000_0100 });
+					new int[] { 0, W, W, 0, 0, 0, 0, 0 }, new byte[] { 0b0100_0000 /* Ch2 inverted */, 0b0010_0000 /* SendStatus */ });
 			check("4-fold actuator application loaded", await(3000, sa4::applicationLoaded));
 			etsLink.sendRequestWait(new GroupAddress(gC3), Priority.LOW, w1(1));
 			etsLink.sendRequestWait(new GroupAddress(gC2), Priority.LOW, w1(1));
@@ -168,7 +200,7 @@ public final class ProductsTest {
 			// ---------------- multisensor: temperature fixed 21.5 degC every 1 s, CO2 random 400..500 every 1 s
 			final int gTemp = ga(4, 0, 4), gCo2 = ga(4, 0, 7);
 			final byte[] msParams = new byte[60];
-			msParams[0] = 1; // CO2 mode = random
+			msParams[0] = 0b0100_0000; // CO2 mode = random (value 1 in the top two bits)
 			msParams[2] = 0; msParams[3] = 1; // CO2 interval 1 s
 			msParams[6] = 0x01; msParams[7] = (byte) 0x90; // CO2 min 400
 			msParams[8] = 0x01; msParams[9] = (byte) 0xF4; // CO2 max 500
@@ -210,7 +242,7 @@ public final class ProductsTest {
 			final var acAddr = new IndividualAddress(2, 0, 0);
 			check("area coupler accepts address 2.0.0", ets.assignAddress(acAddr) && await(3000, () -> ac.address().equals(acAddr)));
 			// GroupDown=filter(2) GroupUp=route(1) PhysDown=block(0) PhysUp=filter(2) | Repeat=no Confirm=yes
-			final byte[] cpl = { (byte) 0b10_00_01_10, 0b10 };
+			final byte[] cpl = { (byte) 0b10_01_00_10, 0b0100_0000 };
 			ets.downloadAll(lc.address(), new int[0], new int[0][], new int[0], cpl);
 			ets.downloadAll(ac.address(), new int[0], new int[0][], new int[0], cpl);
 			check("couplers load an application without group objects", await(3000, () -> lc.applicationLoaded() && ac.applicationLoaded()));
@@ -228,10 +260,10 @@ public final class ProductsTest {
 							&& !org.vknx.tools.ProductXmlGenerator.generate(Products.COUPLER_AREA).contains("<ComObjectTable>"));
 
 			// ---------------- partial download keeps parameters that did not change
-			ets.partialWrite(rocker.address(), 4, 2, 1, new byte[] { 4 }); // ETS changes only DimStep -> 12.5 %
+			ets.partialWrite(rocker.address(), 4, 2, 1, new byte[] { (byte) (4 << 5) }); // ETS changes only DimStep -> 12.5 % (top three bits)
 			check("partial download writes the changed parameter (DimStep 12.5 % = 4)", await(2000, () -> rocker.param("DimStep") == 4));
 			final int pLong = rocker.param("LongPressTime");
-			ets.partialWrite(rocker.address(), 4, 2, 0, new byte[] { (byte) (rocker.parameterAreaForTest()[0] | 1) }); // then only Orientation
+			ets.partialWrite(rocker.address(), 4, 2, 0, new byte[] { (byte) (rocker.parameterAreaForTest()[0] | 0x80) }); // then only Orientation (top bit)
 			check("a second partial download keeps the parameters that did not change (DimStep stays 4)",
 					await(2000, () -> rocker.param("Orientation") == 1) && rocker.param("DimStep") == 4
 							&& rocker.param("LongPressTime") == pLong);

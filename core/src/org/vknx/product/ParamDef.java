@@ -62,8 +62,10 @@ public record ParamDef(int id, String name, String text, int byteOffset, int bit
 			final int u = ((area[byteOffset] & 0xff) << 8) | (area[byteOffset + 1] & 0xff);
 			return min < 0 ? (short) u : u;
 		}
+		// ETS counts BitOffset from the most significant bit: offset 0 = bit 7. Proven by a real ETS download log
+		// (dimmer default 0x44 = DimTime 01 at bits 7-6, SendStatus 1 at bit 2); counting from bit 0 read every flag wrong.
 		final int mask = (1 << bits) - 1;
-		final int v = ((area[byteOffset] & 0xff) >>> bitOffset) & mask;
+		final int v = ((area[byteOffset] & 0xff) >>> (8 - bitOffset - bits)) & mask;
 		if (!choices.isEmpty() && choices.stream().noneMatch(c -> c.value() == v))
 			return defaultValue;
 		return v;
