@@ -30,6 +30,11 @@ public final class WebUi {
 	private org.vknx.app.Settings settings;
 	private boolean supervised;
 	private String iface = "";
+	private org.vknx.sim.Subnet net;
+	private final long started = System.currentTimeMillis();
+
+	/** Lets the UI report what the KNXnet/IP server can verify (server state, tunnels, last IP frame). */
+	public void setNet(final org.vknx.sim.Subnet n) { net = n; }
 
 	public WebUi(final int port, final DeviceRegistry registry, final EventLog log) throws IOException {
 		this.registry = registry;
@@ -37,6 +42,7 @@ public final class WebUi {
 		this.log = log;
 		server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
 		server.createContext("/", this::page);
+		server.createContext("/web/", this::staticFile);
 		server.createContext("/api/state", this::state);
 		server.createContext("/api/log", this::logs);
 		server.createContext("/api/prog", ex -> action(ex, d -> d.toggleProgrammingMode()));
@@ -47,6 +53,7 @@ public final class WebUi {
 		});
 		server.createContext("/api/press", ex -> action(ex, d -> d.behavior().act("press", 0)));
 		server.createContext("/api/products", this::products);
+		server.createContext("/api/catalog", this::catalog);
 		server.createContext("/api/plan", this::plan);
 		server.createContext("/api/settings", this::settingsEndpoint);
 		server.createContext("/api/restart", this::restartEndpoint);
@@ -65,6 +72,14 @@ public final class WebUi {
 		server.createContext("/api/add", this::add);
 		server.createContext("/api/remove", ex -> {
 			final String n = param(ex.getRequestURI(), "dev", "");
+			if (!"POST".equals(ex.getRequestMethod())) {
+				send(ex, 405, "text/plain", "POST only".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
+			if (devices.stream().noneMatch(d -> d.name().equals(n))) {
+				send(ex, 404, "text/plain", ("there is no device called " + n).getBytes(StandardCharsets.UTF_8));
+				return;
+			}
 			try {
 				registry.remove(n);
 				send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
@@ -239,7 +254,30 @@ public final class WebUi {
 
 	public void stop() { server.stop(0); }
 
+	private static final Map<String, String> MIME = Map.of("html", "text/html; charset=utf-8", "css", "text/css; charset=utf-8",
+			"js", "text/javascript; charset=utf-8", "svg", "image/svg+xml", "png", "image/png", "json", "application/json; charset=utf-8");
+
+	/** Serves the bundled UI files (css, js, images) from the jar / classpath under /web/. Nothing outside it is reachable. */
+	private void staticFile(final HttpExchange ex) throws IOException {
+		final String path = ex.getRequestURI().getPath().substring("/web/".length());
+		if (!path.matches("[A-Za-z0-9_\\-]+(/[A-Za-z0-9_\\-]+)*\\.[a-z]{2,4}") || !MIME.containsKey(path.substring(path.lastIndexOf('.') + 1))) {
+			send(ex, 404, "text/plain", "not found".getBytes(StandardCharsets.UTF_8));
+			return;
+		}
+		try (InputStream in = WebUi.class.getResourceAsStream("/web/" + path)) {
+			if (in == null) {
+				send(ex, 404, "text/plain", "not found".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
+			send(ex, 200, MIME.get(path.substring(path.lastIndexOf('.') + 1)), in.readAllBytes());
+		}
+	}
+
 	private void page(final HttpExchange ex) throws IOException {
+		if (!ex.getRequestURI().getPath().equals("/") && !ex.getRequestURI().getPath().equals("/index.html")) {
+			send(ex, 404, "text/plain", "not found".getBytes(StandardCharsets.UTF_8));
+			return;
+		}
 		try (InputStream in = WebUi.class.getResourceAsStream("/web/index.html")) {
 			final byte[] b = in == null ? "missing index.html".getBytes(StandardCharsets.UTF_8) : in.readAllBytes();
 			send(ex, 200, "text/html; charset=utf-8", b);
@@ -248,7 +286,8 @@ public final class WebUi {
 
 	private void state(final HttpExchange ex) throws IOException {
 		final var sb = new StringBuilder("{\"version\":" + q(org.vknx.app.Version.current()) + ",\"line\":" + q(settings == null ? "1.1" : settings.line())
-				+ ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"devices\":[");
+				+ ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"started\":" + started
+				+ ",\"now\":" + System.currentTimeMillis() + ",\"link\":" + linkJson() + ",\"devices\":[");
 		boolean first = true;
 		for (final VirtualDevice d : devices) {
 			if (!first)
@@ -259,6 +298,7 @@ public final class WebUi {
 					.append(",\"unassigned\":").append(d.address().getRawAddress() == 0xFFFF)
 					.append(",\"programming\":").append(d.programmingMode()).append(",\"loaded\":")
 					.append(d.applicationLoaded()).append(",\"downloads\":").append(d.downloadCount())
+					.append(",\"downloadState\":").append(q(d.downloadState()))
 					.append(",\"params\":[");
 			boolean fp = true;
 			for (final ParamDef p : d.product().params()) {
@@ -281,7 +321,10 @@ public final class WebUi {
 				fa = false;
 				final var o = d.product().object(a[1]);
 				sb.append("{\"ga\":").append(q(new io.calimero.GroupAddress(a[0]).toString())).append(",\"obj\":").append(a[1])
-						.append(",\"text\":").append(q(o.map(x -> x.text()).orElse("?"))).append(",\"size\":").append(o.map(x -> x.sizeBits()).orElse(1))
+						.append(",\"text\":").append(q(o.map(x -> x.text()).orElse("?")))
+						.append(",\"function\":").append(q(o.map(x -> x.functionText()).orElse("")))
+						.append(",\"dpt\":").append(q(o.map(x -> x.dpt() == null ? "" : TelegramDecoder.pretty(x.dpt())).orElse("")))
+						.append(",\"size\":").append(o.map(x -> x.sizeBits()).orElse(1))
 						.append(",\"flags\":").append(a[2]).append('}');
 			}
 			sb.append("],\"view\":{");
@@ -293,12 +336,61 @@ public final class WebUi {
 		send(ex, 200, "application/json; charset=utf-8", sb.toString().getBytes(StandardCharsets.UTF_8));
 	}
 
+	/** Distinct DPTs per group address as declared by the products of the devices that have the address associated. */
+	private Map<String, java.util.Set<String>> dptsByGroup() {
+		final var m = new java.util.HashMap<String, java.util.Set<String>>();
+		for (final VirtualDevice d : devices)
+			for (final int[] a : d.associationView()) {
+				final var set = m.computeIfAbsent(new io.calimero.GroupAddress(a[0]).toString(), k -> new java.util.TreeSet<>());
+				d.product().object(a[1]).map(o -> o.dpt()).filter(x -> x != null && !x.isEmpty()).ifPresent(set::add);
+			}
+		return m;
+	}
+
 	private void logs(final HttpExchange ex) throws IOException {
 		final long since = Long.parseLong(param(ex.getRequestURI(), "since", "0"));
 		final var entries = log.since(since);
-		final String json = entries.stream().map(e -> "{\"seq\":" + e.seq() + ",\"t\":" + q(e.time()) + ",\"cat\":"
-				+ q(e.category()) + ",\"dev\":" + q(e.device()) + ",\"text\":" + q(e.text()) + "}")
-				.collect(Collectors.joining(",", "{\"entries\":[", "]}"));
+		final var dpts = dptsByGroup();
+		final String json = entries.stream().map(e -> {
+			final var sb = new StringBuilder("{\"seq\":" + e.seq() + ",\"ts\":" + e.ts() + ",\"t\":" + q(e.time()) + ",\"cat\":"
+					+ q(e.category()) + ",\"dev\":" + q(e.device()) + ",\"text\":" + q(e.text()));
+			final var tg = e.telegram();
+			if (tg != null) {
+				final var r = tg.group() ? TelegramDecoder.decode(tg.tpdu(), tg.service(), dpts.getOrDefault(tg.destination(), java.util.Set.of()))
+						: new TelegramDecoder.Result(null, null);
+				sb.append(",\"tg\":{\"origin\":").append(q(tg.origin())).append(",\"src\":").append(q(tg.source()))
+						.append(",\"dst\":").append(q(tg.destination())).append(",\"group\":").append(tg.group())
+						.append(",\"svc\":").append(q(tg.service())).append(",\"tpdu\":").append(q(tg.tpdu()))
+						.append(",\"prio\":").append(q(tg.priority())).append(",\"hops\":").append(tg.hops())
+						.append(",\"dpt\":").append(r.dpt() == null ? "null" : q(r.dpt()))
+						.append(",\"value\":").append(r.value() == null ? "null" : q(r.value())).append('}');
+			}
+			return sb.append('}').toString();
+		}).collect(Collectors.joining(",", "{\"entries\":[", "]}"));
+		send(ex, 200, "application/json; charset=utf-8", json.getBytes(StandardCharsets.UTF_8));
+	}
+
+	/** What can honestly be said about the connection: the API answers (by construction), the server state, tunnels, last IP frame. */
+	private String linkJson() {
+		if (net == null)
+			return "{\"server\":\"none\",\"port\":0,\"tunnels\":[],\"lastIpFrame\":0}";
+		final var s = net.linkStatus();
+		return "{\"server\":" + q(s.serverState()) + ",\"port\":" + s.port() + ",\"lastIpFrame\":" + s.lastIpFrameMillis()
+				+ ",\"tunnels\":" + s.tunnels().stream().map(t -> "{\"address\":" + q(t.address()) + ",\"since\":" + t.sinceMillis()
+						+ ",\"type\":" + q(t.type()) + "}").collect(Collectors.joining(",", "[", "]")) + "}";
+	}
+
+	/** Product catalogue for the "add device" dialog and the device details (static; fetched once by the UI). */
+	private void catalog(final HttpExchange ex) throws IOException {
+		final String json = Products.ALL.values().stream().map(p -> {
+			final var i = org.vknx.product.ProductInfo.of(p);
+			return "{\"key\":" + q(p.key()) + ",\"name\":" + q(p.name()) + ",\"title\":" + q(i.title()) + ",\"category\":" + q(i.category())
+					+ ",\"icon\":" + q(i.icon()) + ",\"description\":" + q(i.description()) + ",\"order\":" + q(p.orderNumber())
+					+ ",\"objects\":" + p.objects().stream().map(o -> "{\"number\":" + o.number() + ",\"text\":" + q(o.text()) + ",\"function\":"
+							+ q(o.functionText()) + ",\"size\":" + q(o.etsObjectSize()) + ",\"dpt\":" + q(o.dpt() == null || o.dpt().isEmpty() ? "" : TelegramDecoder.pretty(o.dpt()))
+							+ ",\"flags\":" + q((o.read() ? "R" : "") + (o.write() ? "W" : "") + (o.transmit() ? "T" : "") + (o.update() ? "U" : "")) + "}")
+					.collect(Collectors.joining(",", "[", "]")) + "}";
+		}).collect(Collectors.joining(",", "[", "]"));
 		send(ex, 200, "application/json; charset=utf-8", json.getBytes(StandardCharsets.UTF_8));
 	}
 

@@ -506,6 +506,31 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	public int downloadCount() { return downloadCount; }
 
+	/**
+	 * What the device itself can document about its configuration, from the load states of its four tables:
+	 * "empty" (nothing loaded), "loading" (a download is in progress), "partial" (some tables missing),
+	 * "error" (a load failed) or "complete" (address, association and group object table and application are loaded).
+	 */
+	public String downloadState() {
+		try {
+			final int[] st = { loadState(OBJ_ADDRESS_TABLE), loadState(OBJ_ASSOC_TABLE), loadState(OBJ_GROUP_OBJECT_TABLE),
+				loadState(OBJ_APPLICATION) };
+			int loaded = 0;
+			for (final int x : st) {
+				if (x == LS_LOADING)
+					return "loading";
+				if (x == LS_ERROR)
+					return "error";
+				if (x == LS_LOADED)
+					loaded++;
+			}
+			return loaded == 0 ? "empty" : loaded == st.length ? "complete" : "partial";
+		}
+		catch (final RuntimeException e) {
+			return "unknown";
+		}
+	}
+
 	/** Raw parameter area as downloaded; empty when the application is not loaded. */
 	byte[] parameterArea() {
 		if (!applicationLoaded())

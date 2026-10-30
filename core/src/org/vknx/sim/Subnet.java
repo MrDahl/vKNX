@@ -63,7 +63,9 @@ public final class Subnet implements AutoCloseable {
 		final var line = SharedVirtualLink.awaitInstance(15_000);
 		if (line == null)
 			throw new IOException("KNXnet/IP server did not create the virtual line within 15 s");
-		return new Subnet(line, launcher, t);
+		final var net = new Subnet(line, launcher, t);
+		net.port = port;
+		return net;
 	}
 
 	public static String serverConfig(final String friendlyName, final int port, final int area, final int line) {
@@ -95,17 +97,56 @@ public final class Subnet implements AutoCloseable {
 	 * from ETS.
 	 */
 	public void monitor(final Consumer<String> sink) {
-		line.addInboundTap(f -> sink.accept("ETS/IP -> bus  " + FrameFormatter.format(f)));
+		tap((origin, f) -> sink.accept((origin.equals(ORIGIN_IP) ? "ETS/IP -> bus  " : "device -> bus   ") + FrameFormatter.format(f)));
+	}
+
+	/** Origin of a frame that entered the line through the KNXnet/IP server (ETS or another IP client). */
+	public static final String ORIGIN_IP = "ip";
+	/** Origin of a frame sent by a virtual device. */
+	public static final String ORIGIN_DEVICE = "device";
+
+	/** Structured variant of {@link #monitor}: the origin is {@link #ORIGIN_IP} or {@link #ORIGIN_DEVICE}. */
+	public void tap(final java.util.function.BiConsumer<String, CEMILData> sink) {
+		line.addInboundTap(f -> {
+			lastIpFrame = System.currentTimeMillis();
+			sink.accept(ORIGIN_IP, f);
+		});
 		line.addLinkListener(new NetworkLinkListener() {
 			@Override
 			public void indication(final FrameEvent e) {
 				if (e.getFrame() instanceof final CEMILData d)
-					sink.accept("device -> bus   " + FrameFormatter.format(d));
+					sink.accept(ORIGIN_DEVICE, d);
 			}
 
 			@Override
 			public void linkClosed(final io.calimero.CloseEvent e) {}
 		});
+	}
+
+	private volatile long lastIpFrame;
+	private int port;
+
+	/** One KNXnet/IP data connection as reported by the server. */
+	public record Tunnel(String address, long sinceMillis, String type) {}
+
+	/** What the server can honestly tell about its state; {@code serverState} is "none" without a server. */
+	public record LinkStatus(String serverState, int port, java.util.List<Tunnel> tunnels, long lastIpFrameMillis) {}
+
+	public LinkStatus linkStatus() {
+		if (server == null)
+			return new LinkStatus("none", 0, java.util.List.of(), lastIpFrame);
+		final var tunnels = new java.util.ArrayList<Tunnel>();
+		String state = "unknown";
+		try {
+			final var srv = server.getGateway().getServer();
+			state = srv.state().name();
+			for (final var sc : srv.getServiceContainers())
+				for (final var c : srv.dataConnections(sc).values())
+					tunnels.add(new Tunnel(String.valueOf(c.deviceAddress()),
+							c.connectedSince() == null ? 0 : c.connectedSince().toEpochMilli(), c.type().name()));
+		}
+		catch (final RuntimeException e) { /* server shutting down: report what we have */ }
+		return new LinkStatus(state, port, tunnels, lastIpFrame);
 	}
 
 	public URI serverConfigHint() { return null; }

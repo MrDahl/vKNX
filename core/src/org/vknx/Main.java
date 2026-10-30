@@ -60,7 +60,20 @@ public final class Main {
 		final var log = new EventLog(1000);
 		log.tee(dir.resolve("vknx.log"));
 		final var net = Subnet.withServer(dir, friendly, port, settings.area(), settings.lineNo());
-		net.monitor(s -> log.add("bus", "", s));
+		net.tap((origin, f) -> {
+			String svc;
+			try {
+				svc = io.calimero.DataUnitBuilder.decodeAPCI(io.calimero.DataUnitBuilder.getAPDUService(f.getPayload()));
+			}
+			catch (final RuntimeException e) {
+				svc = "?";
+			}
+			final var tg = new EventLog.Telegram(origin, f.getSource().toString(), f.getDestination().toString(),
+					f.getDestination() instanceof io.calimero.GroupAddress, svc, java.util.HexFormat.of().formatHex(f.getPayload()),
+					f.getPriority().name(), f.getHopCount());
+			log.add("bus", "", (origin.equals(Subnet.ORIGIN_IP) ? "ETS/IP -> bus  " : "device -> bus   ")
+					+ org.vknx.sim.FrameFormatter.format(f), tg);
+		});
 
 		final var registry = new DeviceRegistry(dir, net, log);
 		for (final String spec : specs)
@@ -73,6 +86,7 @@ public final class Main {
 
 		final var ui = new WebUi(web, registry, log);
 		ui.configure(settings, supervised, settings.line() + ".241");
+		ui.setNet(net);
 		ui.start();
 		System.out.println();
 		System.out.println("vKNX is running.");
