@@ -77,8 +77,10 @@ public final class CouplerBehavior extends DeviceBehavior implements Topology.Co
 	private Topology.Decision routeGroup(final int raw, final boolean fromMain) {
 		final String side = fromMain ? "main -> sub" : "sub -> main";
 		if (raw == 0) { // broadcast
-			final int sel = dev.routerByte(fromMain ? PID_PHYS_MAIN : PID_PHYS_SUB) >> 2 & 3;
-			return sel == 2 ? Topology.Decision.block("broadcast blocked (" + side + ")") : Topology.Decision.PASS;
+			// PID 52/53 (LCCONFIG): bits 1-0 physical routing, bit 2 repeat, bit 3 BROADCAST LOCK, bit 4 broadcast repeat,
+			// bits 7-5 acknowledge. Only bit 3 blocks broadcasts (reading bits 3-2 as one field let "lock + repeat" pass).
+			final boolean locked = (dev.routerByte(fromMain ? PID_PHYS_MAIN : PID_PHYS_SUB) & 0x08) != 0;
+			return locked ? Topology.Decision.block("broadcast blocked (" + side + ")") : Topology.Decision.PASS;
 		}
 		final int cfg = dev.routerByte(fromMain ? PID_GROUP_MAIN : PID_GROUP_SUB);
 		final boolean high = raw >= 0x7000; // main groups 14-31 have their own setting

@@ -233,6 +233,24 @@ public final class CouplerTest {
 			check("physical filter: sub to main passes for addresses outside, blocks addresses behind it",
 					lc12b.route(toOwnLine, false).pass() && !lc12b.route(toDimmer, false).pass());
 
+			// broadcast lock is bit 3 of PID 52/53 (LCCONFIG); bit 2 is "repeat" and must not matter
+			final var bcast = new CEMILData(CEMILData.MC_LDATA_IND, new IndividualAddress(1, 1, 241), new GroupAddress(0),
+					new byte[] { 0x00 }, Priority.LOW, false, 6);
+			final Destination dd = ets.mc.createDestination(lc12.address(), true);
+			try {
+				final int ri = routerIndex(ets, dd);
+				ets.mc.rawPropertyWrite(dd, ri, 52, new byte[] { 0x77 });
+				check("broadcast passes with ETS' default LCCONFIG 0x77", lc12b.route(bcast, true).pass());
+				ets.mc.rawPropertyWrite(dd, ri, 52, new byte[] { 0x7F }); // broadcast lock + physical repeat
+				check("broadcast lock (bit 3) blocks, also together with the repeat bit (0x7F)", !lc12b.route(bcast, true).pass());
+				ets.mc.rawPropertyWrite(dd, ri, 52, new byte[] { 0x73 }); // neither bit 3 nor bit 2
+				check("without bit 3 the broadcast passes again (0x73)", lc12b.route(bcast, true).pass());
+				ets.mc.rawPropertyWrite(dd, ri, 52, new byte[] { 0x77 });
+			}
+			finally {
+				dd.destroy();
+			}
+
 			lc12.close();
 			final var again = VirtualDevice.create("lc12", Products.COUPLER, new byte[] { 0, (byte) 0xFA, 0, 0, 0, 41 },
 					dir.resolve("lc12.state"), net, listener);
