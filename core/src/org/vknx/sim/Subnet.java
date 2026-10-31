@@ -66,6 +66,7 @@ public final class Subnet implements AutoCloseable {
 		final var net = new Subnet(line, launcher, t);
 		net.port = port;
 		line.topology().setUplinkLine(area, lineNo);
+		line.topology().setTunnelSource(net::tunnelAddresses);
 		return net;
 	}
 
@@ -135,6 +136,21 @@ public final class Subnet implements AutoCloseable {
 
 	/** What the server can honestly tell about its state; {@code serverState} is "none" without a server. */
 	public record LinkStatus(String serverState, int port, java.util.List<Tunnel> tunnels, long lastIpFrameMillis) {}
+
+	/** The individual addresses the KNXnet/IP interface's data connections use right now (ETS may change them). */
+	java.util.List<IndividualAddress> tunnelAddresses() {
+		final var out = new java.util.ArrayList<IndividualAddress>();
+		if (server == null)
+			return out;
+		try {
+			final var srv = server.getGateway().getServer();
+			for (final var sc : srv.getServiceContainers())
+				for (final var c : srv.dataConnections(sc).values())
+					out.add(c.deviceAddress());
+		}
+		catch (final RuntimeException ignore) { /* shutting down */ }
+		return out;
+	}
 
 	public LinkStatus linkStatus() {
 		if (server == null)

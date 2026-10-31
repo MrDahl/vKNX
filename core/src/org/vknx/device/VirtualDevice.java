@@ -20,6 +20,7 @@ import org.vknx.product.Products;
 import io.calimero.DeviceDescriptor.DD0;
 import io.calimero.GroupAddress;
 import io.calimero.IndividualAddress;
+import io.calimero.KNXAddress;
 import io.calimero.KNXException;
 import io.calimero.Priority;
 import io.calimero.SerialNumber;
@@ -30,6 +31,7 @@ import io.calimero.device.ServiceResult;
 import io.calimero.dptxlator.DPTXlator;
 import io.calimero.link.KNXNetworkLink;
 import io.calimero.mgmt.Destination;
+import io.calimero.mgmt.TransportLayer;
 import io.calimero.process.ProcessEvent;
 
 /**
@@ -299,6 +301,67 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		log("download", String.format("memory write 0x%06X, %d bytes -> %s", startAddress, data.length,
 				r.getResult() == null ? "ok" : "ok"));
 		return r;
+	}
+
+	// ---------------------------------------------------------------- coupler filter table, legacy services
+
+	private static final int A_OPEN_ROUTING_TABLE = 0x3C0, A_READ_ROUTING_TABLE = 0x3C1, A_READ_ROUTING_TABLE_RES = 0x3C2,
+			A_WRITE_ROUTING_TABLE = 0x3C3;
+
+	/**
+	 * ETS writes the group filter table of a 0912 coupler with A_Write_Routing_Table (0x3C3) after A_Open_Routing_Table
+	 * (0x3C0), and verifies it with A_Read_Routing_Table_Res (0x3C2): the mask has VerifyMode on, so every write is
+	 * answered with the data now in memory. Without this answer ETS waits, repeats the write and fails the download
+	 * ("Device does not respond"), leaving the coupler in "download in progress".
+	 */
+	@Override
+	public ServiceResult<byte[]> management(final int svcType, final byte[] asdu, final KNXAddress dst,
+			final Destination respondTo, final TransportLayer tl) {
+		if (!product.coupler() || svcType < A_OPEN_ROUTING_TABLE || svcType > A_WRITE_ROUTING_TABLE)
+			return super.management(svcType, asdu, dst, respondTo, tl);
+		if (svcType == A_OPEN_ROUTING_TABLE) {
+			log("download", "A_Open_Routing_Table (filter table access)");
+			return null; // no response defined
+		}
+		if (asdu.length < 3) {
+			log("download", "routing table request too short, ignored");
+			return null;
+		}
+		final int count = asdu[0] & 0xff;
+		final int address = (asdu[1] & 0xff) << 8 | asdu[2] & 0xff;
+		final byte[] data;
+		if (svcType == A_WRITE_ROUTING_TABLE) {
+			final int n = Math.min(count, asdu.length - 3);
+			final byte[] w = java.util.Arrays.copyOfRange(asdu, 3, 3 + n);
+			final var r = writeMemory(address, w);
+			log("download", String.format("filter table write 0x%04X, %d byte(s)", address, n));
+			data = readMemory(address, n).getResult();
+			if (data == null || r == null)
+				return null;
+		}
+		else {
+			data = readMemory(address, count).getResult();
+			if (data == null)
+				return null;
+		}
+		final byte[] apdu = new byte[5 + data.length];
+		apdu[0] = (byte) (A_READ_ROUTING_TABLE_RES >> 8 & 3);
+		apdu[1] = (byte) A_READ_ROUTING_TABLE_RES;
+		apdu[2] = (byte) count;
+		apdu[3] = (byte) (address >> 8);
+		apdu[4] = (byte) address;
+		System.arraycopy(data, 0, apdu, 5, data.length);
+		return new ServiceResult<byte[]>() {
+			@Override
+			public void run() {
+				try {
+					tl.sendData(respondTo, Priority.LOW, apdu);
+				}
+				catch (final KNXException e) {
+					log("download", "routing table response failed: " + e.getMessage());
+				}
+			}
+		};
 	}
 
 	// ---------------------------------------------------------------- load state machine

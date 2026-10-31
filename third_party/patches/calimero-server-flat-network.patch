@@ -13,3 +13,16 @@ index 0b567f8..c5e3974 100755
  		if (subnetMask.getArea() == addr.getArea()) {
  			// if we represent an area coupler, line is 0
  			return subnetMask.getLine() == 0 || subnetMask.getLine() == addr.getLine();
+diff --git a/src/io/calimero/server/knxnetip/ControlEndpointService.java b/src/io/calimero/server/knxnetip/ControlEndpointService.java
+index 569b3e8..340667c 100644
+--- a/src/io/calimero/server/knxnetip/ControlEndpointService.java
++++ b/src/io/calimero/server/knxnetip/ControlEndpointService.java
+@@ -1180,6 +1180,8 @@ final class ControlEndpointService extends UdpServiceLooper
+ 
+ 	private boolean matchesSubnet(final IndividualAddress addr, final IndividualAddress subnetMask)
+ 	{
++		if (Boolean.getBoolean("vknx.flatNetwork"))
++			return true; // vKNX patch: ETS may give the interface any address, as with a real interface
+ 		if (subnetMask.getArea() == addr.getArea()) {
+ 			// if we represent an area coupler, line is 0
+ 			if (subnetMask.getLine() == 0 || subnetMask.getLine() == addr.getLine()) {

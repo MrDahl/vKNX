@@ -3,6 +3,11 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+- **Fix: partial download to a coupler failed** ("Device does not respond", the coupler stayed in *Download in progress*). ETS writes the group filter table of a 0912 coupler with the older services A_Open_Routing_Table (0x3C0) and A_Write_Routing_Table (0x3C3) and expects A_Read_Routing_Table_Res (0x3C2) as verification. vKNX did not answer them, so a download only worked while the filter table was empty (no group address to route). Found in the ETS telegram log of a failed download. vKNX now writes the table, answers the verification and also answers A_Read_Routing_Table. Download the couplers again (*Download all* clears a coupler stuck in *Download in progress*).
+- **Fix: the interface address can be changed in ETS** (Local Interface Settings, for example 7.0.24 on an interface in area 1). It failed with "Failed to write Feature IndividualAddress7018: E_DATA_VOID" because the Calimero server only accepted addresses in its own line. Any address that is free (not another tunnel of the interface) is accepted now, as on a real interface. The line ETS sits on follows the new address, and ETS' management traffic from the new address is still not stopped by couplers.
+- Tested with `CouplerTest` (the mini-ETS now writes the filter table with 0x3C0/0x3C3 and checks the verification) and `TunnelTest` (feature set of the interface address through the real KNXnet/IP server; refused address). **Not tried in ETS yet.** Open point: whether ETS needs more than the verification response for the routing-table write; the log showed no other step.
+
 ## [0.6.1] - 2026-10-30
 - **Fix:** with 0.6.0 devices behind a coupler stayed in programming mode and couplers could not be downloaded, because ETS' own telegrams (addressing, reading the address back, download) were stopped by couplers that had no download yet. ETS' management traffic (broadcasts and individually addressed telegrams from or to the tunnel addresses .241-.244) now passes couplers; group telegrams and telegrams between devices are still routed through the couplers' filter tables and hop count.
 - Tested with `TopologyTest` and `CouplerTest`; not tried in ETS.

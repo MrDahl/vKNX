@@ -58,6 +58,7 @@ public final class CouplerTest {
 			ets.mc.rawPropertyWrite(d, idx, 55, new byte[] { (byte) cfg(subMain) });
 			ets.mc.callFunctionProperty(d, idx, 56, (byte) 0, (byte) 1); // ClearLCFilterTable
 			final byte[] table = new byte[8192];
+			boolean opened = false;
 			for (final int ga : routedGroups)
 				table[ga >> 3] |= (byte) (1 << (ga & 7));
 			for (int off = 0; off < table.length; off += 10) {
@@ -65,8 +66,16 @@ public final class CouplerTest {
 				boolean any = false;
 				for (int i = 0; i < n; i++)
 					any |= table[off + i] != 0;
-				if (fullWrite || any)
-					ets.mc.writeMemory(d, 0x200 + off, java.util.Arrays.copyOfRange(table, off, off + n));
+				if (fullWrite || any) {
+					// as ETS does (recorded): A_Open_Routing_Table, then A_Write_Routing_Table verified by A_Read_Routing_Table_Res
+					if (off == 0 || !opened)
+						ets.mc.openRoutingTable(d);
+					opened = true;
+					final byte[] piece = java.util.Arrays.copyOfRange(table, off, off + n);
+					final byte[] back = ets.mc.writeRoutingTable(d, 0x200 + off, piece);
+					if (!java.util.Arrays.equals(back, piece))
+						throw new IllegalStateException("filter table write not verified at " + off + ": sent " + java.util.HexFormat.of().formatHex(piece) + " got " + java.util.HexFormat.of().formatHex(back));
+				}
 			}
 			final int st = ets.loadEvent(d, idx, (byte) 2);
 			if (st != 1)

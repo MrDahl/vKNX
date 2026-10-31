@@ -22,6 +22,46 @@ import io.calimero.link.medium.TPSettings;
  * Shows that server + virtual line + devices are wired correctly. Still NOT an ETS test.
  */
 public final class TunnelTest {
+	/**
+	 * ETS changes the interface address with the tunneling feature "IndividualAddress" (Local Interface Settings). A real
+	 * interface accepts any free address; the recorded ETS error was "Failed to write Feature IndividualAddress7018:
+	 * E_DATA_VOID" for 7.0.24 on an interface sitting in 1.0.
+	 */
+	static void interfaceAddressChange(final Subnet net, final InetAddress host, final int port) throws Exception {
+		final var answers = new java.util.concurrent.LinkedBlockingQueue<io.calimero.knxnetip.servicetype.TunnelingFeature>();
+		try (var t = new io.calimero.knxnetip.KNXnetIPTunnel(io.calimero.knxnetip.KNXnetIPTunnel.TunnelingLayer.LinkLayer,
+				new InetSocketAddress(host, 0), new InetSocketAddress(host, port), false)) {
+			t.addConnectionListener(new io.calimero.knxnetip.TunnelingListener() {
+				@Override public void frameReceived(final io.calimero.FrameEvent e) {}
+				@Override public void featureResponse(final io.calimero.knxnetip.servicetype.TunnelingFeature f) { answers.add(f); }
+				@Override public void featureInfo(final io.calimero.knxnetip.servicetype.TunnelingFeature f) {}
+			});
+			final var feature = io.calimero.knxnetip.servicetype.TunnelingFeature.InterfaceFeature.IndividualAddress;
+			t.send(feature, new IndividualAddress(7, 0, 24).toByteArray());
+			final var res = answers.poll(3, java.util.concurrent.TimeUnit.SECONDS);
+			SelfTest.check("interface address 7.0.24 (outside the interface's own line) is accepted: "
+					+ (res == null ? "no answer" : res.status()), res != null && res.status() == io.calimero.ReturnCode.Success);
+			SelfTest.check("the server now reports the tunnel as 7.0.24", net.linkStatus().tunnels().stream()
+					.anyMatch(x -> x.address().equals("7.0.24")));
+			net.topology().setEnabled(true);
+			final var f = new io.calimero.cemi.CEMILData(io.calimero.cemi.CEMILData.MC_LDATA_IND, new IndividualAddress(7, 0, 24),
+					new IndividualAddress(2, 1, 1), new byte[] { 0x03, (byte) 0xD5, 0, 0x38, 0x10, 1 }, io.calimero.Priority.LOW);
+			SelfTest.check("ETS management traffic from the new interface address still reaches devices on other lines",
+					net.topology().deliver(f, new IndividualAddress(2, 1, 1)) != null);
+			SelfTest.check("the line ETS sits on follows the new address", net.topology().uplinkLine().equals(
+					new org.vknx.sim.Topology.Line(7, 0)));
+			t.send(feature, new IndividualAddress(1, 1, 242).toByteArray());
+			final var res2 = answers.poll(3, java.util.concurrent.TimeUnit.SECONDS);
+			SelfTest.check("an address the interface offers for another tunnel is refused", res2 != null
+					&& res2.status() != io.calimero.ReturnCode.Success);
+			net.topology().setEnabled(false);
+		}
+		catch (final Throwable e) {
+			e.printStackTrace(System.out);
+			SelfTest.failed++;
+		}
+	}
+
 	public static void main(final String[] args) throws Exception {
 		final var dir = Files.createTempDirectory("vknx-tunnel");
 		final List<String> trace = new ArrayList<>();
@@ -67,6 +107,7 @@ public final class TunnelTest {
 			t.printStackTrace(System.out);
 			SelfTest.failed++;
 		}
+		interfaceAddressChange(net, host, port);
 		if (SelfTest.failed > 0)
 			synchronized (trace) { trace.forEach(System.out::println); }
 		System.out.println(SelfTest.failed == 0 ? "TUNNEL TEST PASSED" : "TUNNEL TEST FAILED");

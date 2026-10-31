@@ -70,6 +70,33 @@ public final class SelfTest {
 			final byte[] apdu = io.calimero.DataUnitBuilder.createAPDU(0x3D7, asdu);
 			return sendWait(d, Priority.LOW, apdu, 0x3D6, 4, 254, Duration.ofSeconds(3));
 		}
+
+		/** A_Open_Routing_Table_Req (0x3C0): ETS sends it before it touches the coupler's filter table; no response. */
+		void openRoutingTable(final Destination d) throws Exception {
+			send(d, Priority.LOW, io.calimero.DataUnitBuilder.createAPDU(0x3C0));
+		}
+
+		/**
+		 * A_Write_Routing_Table_Req (0x3C3) as ETS writes the filter table of a 0912 coupler, and the verifying
+		 * A_Read_Routing_Table_Res (0x3C2) that a device with verify mode answers. Returns the data the device reports.
+		 */
+		byte[] writeRoutingTable(final Destination d, final int address, final byte[] data) throws Exception {
+			final byte[] asdu = new byte[3 + data.length];
+			asdu[0] = (byte) data.length;
+			asdu[1] = (byte) (address >> 8);
+			asdu[2] = (byte) address;
+			System.arraycopy(data, 0, asdu, 3, data.length);
+			final byte[] res = sendWait(d, Priority.LOW, io.calimero.DataUnitBuilder.createAPDU(0x3C3, asdu), 0x3C2, 3, 254,
+					Duration.ofSeconds(3));
+			return java.util.Arrays.copyOfRange(res, 5, res.length); // sendWait returns the whole APDU here: 03 C2 count addr(2) data
+		}
+
+		/** A_Read_Routing_Table_Req (0x3C1) -> A_Read_Routing_Table_Res (0x3C2). */
+		byte[] readRoutingTable(final Destination d, final int address, final int count) throws Exception {
+			final byte[] res = sendWait(d, Priority.LOW, io.calimero.DataUnitBuilder.createAPDU(0x3C1, (byte) count,
+					(byte) (address >> 8), (byte) address), 0x3C2, 3, 254, Duration.ofSeconds(3));
+			return java.util.Arrays.copyOfRange(res, 5, res.length); // sendWait returns the whole APDU here: 03 C2 count addr(2) data
+		}
 	}
 
 	static final class EtsLikeClient {

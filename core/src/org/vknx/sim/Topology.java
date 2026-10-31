@@ -64,8 +64,24 @@ public final class Topology {
 		last = null;
 	}
 
-	/** The line the KNXnet/IP interface (ETS) sits on. */
-	public Line uplinkLine() { return uplink; }
+	private volatile java.util.function.Supplier<java.util.List<IndividualAddress>> tunnels = java.util.List::of;
+
+	/**
+	 * Where to find the addresses the KNXnet/IP interface currently uses. ETS may change the interface address at any
+	 * time (as on a real interface), so the line ETS sits on and the telegrams that count as ETS traffic follow it.
+	 */
+	public void setTunnelSource(final java.util.function.Supplier<java.util.List<IndividualAddress>> s) { tunnels = s; }
+
+	/** The line the KNXnet/IP interface (ETS) sits on: that of its current address, or the configured one. */
+	public Line uplinkLine() {
+		try {
+			for (final var a : tunnels.get())
+				if (a != null && a.getRawAddress() != 0 && a.getRawAddress() != 0xFFFF)
+					return new Line(a.getArea(), a.getLine());
+		}
+		catch (final RuntimeException ignore) { /* server going down: use the configured line */ }
+		return uplink;
+	}
 
 	public void setUplinkLine(final int area, final int line) {
 		uplink = new Line(area, line);
@@ -84,7 +100,7 @@ public final class Topology {
 
 	/** Line of an individual address; devices without an address are assumed to sit on the interface line. */
 	public Line lineOf(final IndividualAddress a) {
-		return a.getRawAddress() == 0xFFFF ? uplink : new Line(a.getArea(), a.getLine());
+		return a.getRawAddress() == 0xFFFF ? uplinkLine() : new Line(a.getArea(), a.getLine());
 	}
 
 	static boolean isCoupler(final IndividualAddress a) {
@@ -168,7 +184,7 @@ public final class Topology {
 	public CEMILData deliverToUplink(final CEMILData f) {
 		if (!enabled || management(f))
 			return f;
-		return deliverToLines(f, new Line[] { uplink });
+		return deliverToLines(f, new Line[] { uplinkLine() });
 	}
 
 	/**
@@ -177,14 +193,23 @@ public final class Topology {
 	 * line as soon as it has an address, before ETS could read the address back; ETS could then never finish. Group
 	 * telegrams and telegrams between devices are routed for real.
 	 */
-	private static boolean management(final CEMILData f) {
+	private boolean management(final CEMILData f) {
 		final KNXAddress dst = f.getDestination();
 		if (dst instanceof final io.calimero.GroupAddress g)
 			return g.getRawAddress() == 0;
 		return isTunnel(f.getSource()) || isTunnel((IndividualAddress) dst);
 	}
 
-	private static boolean isTunnel(final IndividualAddress a) { return a.getDevice() >= 241 && a.getDevice() <= 244; }
+	private boolean isTunnel(final IndividualAddress a) {
+		if (a.getDevice() >= 241 && a.getDevice() <= 244)
+			return true;
+		try {
+			return tunnels.get().contains(a);
+		}
+		catch (final RuntimeException e) {
+			return false;
+		}
+	}
 
 	private CEMILData deliverToLines(final CEMILData f, final Line[] lines) {
 		final var reach = reach(f);
