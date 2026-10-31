@@ -837,6 +837,12 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				state = LS_UNLOADED;
 				log("download", "load event UNLOAD for the router application");
 				behavior.onStop();
+				// an unloaded coupler is no longer the factory-new "route all" device: it has lost its application, so it
+				// falls back to filtering with an empty table (group telegrams blocked, individually addressed ones filtered)
+				final var m = base.deviceMemory();
+				m.set(CFG + 1, (byte) 0x77, (byte) 0x77, (byte) 0x17, (byte) 0x17);
+				m.set(FILTER_TABLE, new byte[FILTER_SIZE]);
+				log("coupler", "unloaded: group telegrams now blocked (empty filter table), physical routing = filter");
 			}
 			default -> log("download", "router load event " + event + " (ignored)");
 		}

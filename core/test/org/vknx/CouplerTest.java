@@ -213,6 +213,21 @@ public final class CouplerTest {
 			Thread.sleep(400);
 			check("unloaded coupler (ETS leaves filter + empty table) blocks group telegrams: dimmer stays ON", dim.levelPct() == 100);
 
+			// ---- plain unload (only the UNLOAD load event, as ETS' "Unload application" may do): must not keep routing
+			couplerDownload(ets, lc11.address(), ROUTE, ROUTE, Set.of(), false);
+			press(pb, 1);
+			check("route all again: ON passes", until(2000, () -> dim.levelPct() == 0 || dim.levelPct() == 100));
+			{
+				final Destination d = ets.mc.createDestination(lc11.address(), true);
+				try { ets.loadEvent(d, routerIndex(ets, d), (byte) 4); } finally { d.destroy(); }
+			}
+			check("plain unload resets the coupler to filter + empty table", !lc11.applicationLoaded()
+					&& "filter".equals(lc11.behavior().view().get("groupSubMain")) && ((List<?>) lc11.behavior().view().get("filter")).isEmpty());
+			final int before = dim.levelPct();
+			press(pb, 2);
+			Thread.sleep(400);
+			check("after a plain unload group telegrams no longer cross the coupler", dim.levelPct() == before);
+
 			// ---- block mode and route-all mode
 			couplerDownload(ets, lc11.address(), BLOCK, BLOCK, Set.of(gSw), false);
 			press(pb, 2);
