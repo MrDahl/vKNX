@@ -97,6 +97,12 @@ public final class Subnet implements AutoCloseable {
 		return line.createDeviceLink(address);
 	}
 
+	/** Same, for a device that is wired to a fixed line (see {@link Topology}). */
+	public KNXNetworkLink createDeviceLink(final IndividualAddress address,
+			final java.util.function.Supplier<Topology.Line[]> where) {
+		return line.createDeviceLink(address, where);
+	}
+
 	/**
 	 * Telegram monitor: reports every frame on the line, whether it came from a virtual device or via KNXnet/IP
 	 * from ETS.

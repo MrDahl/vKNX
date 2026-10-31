@@ -14,7 +14,11 @@ import io.calimero.cemi.CEMILData;
  * The line structure of the simulated installation. Lines form a tree: the backbone line 0.0 is the root, the main
  * line of area a is (a,0) and a line is (a,l). The coupler between a line and its parent has the address a.l.0
  * (area coupler a.0.0 between main line a.0 and the backbone, line coupler a.l.0 between line a.l and main line a.0).
- * A telegram only reaches another line if every coupler on the way exists in the installation and lets it pass.
+ *
+ * <p>Every device sits on a <em>physical</em> line, as in a real building: it is wired there, whatever address ETS
+ * gives it. A telegram starts on the line of the sender and only reaches another line if every coupler on the way is
+ * wired in and lets it pass. There is no shortcut for ETS: the KNXnet/IP interface sits on a line as well. A device
+ * without a placement (older code paths and tests) is placed by its address, as before.
  * When routing is switched off, every device reaches every other device (one flat line).
  */
 public final class Topology {
@@ -45,11 +49,16 @@ public final class Topology {
 	public interface CouplerPort {
 		IndividualAddress address();
 
+		/** The line on the sub side of the coupler (where it is wired), or null if it is not part of the line structure. */
+		Line subLine();
+
 		/** @param fromMain true when the telegram comes from the main side (the parent line) and wants to go to the sub side */
 		Decision route(CEMILData frame, boolean fromMain);
 	}
 
 	private final CopyOnWriteArrayList<CouplerPort> couplers = new CopyOnWriteArrayList<>();
+	private final java.util.concurrent.ConcurrentHashMap<Object, java.util.function.Supplier<Line[]>> senders =
+			new java.util.concurrent.ConcurrentHashMap<>();
 	private volatile boolean enabled;
 	private volatile Line uplink = new Line(1, 1);
 
@@ -68,7 +77,7 @@ public final class Topology {
 
 	/**
 	 * Where to find the addresses the KNXnet/IP interface currently uses. ETS may change the interface address at any
-	 * time (as on a real interface), so the line ETS sits on and the telegrams that count as ETS traffic follow it.
+	 * time (as on a real interface); the line the interface sits on follows the area and line of that address.
 	 */
 	public void setTunnelSource(final java.util.function.Supplier<java.util.List<IndividualAddress>> s) { tunnels = s; }
 
@@ -98,6 +107,28 @@ public final class Topology {
 		last = null;
 	}
 
+	/** Tells the topology on which line(s) the device behind {@code link} sits (asked again for every telegram). */
+	public void attach(final Object link, final java.util.function.Supplier<Line[]> where) {
+		senders.put(link, where);
+		last = null;
+	}
+
+	public void detach(final Object link) {
+		senders.remove(link);
+		last = null;
+	}
+
+	/** Forget cached paths after a device was moved or a coupler changed. */
+	public void changed() { last = null; }
+
+	/** Where a telegram that came from {@code link} starts: the sender's line, or the interface line for ETS. */
+	Line[] originOf(final Object link) {
+		final var s = link == null ? null : senders.get(link);
+		if (s != null)
+			return s.get();
+		return new Line[] { uplinkLine() };
+	}
+
 	/** Line of an individual address; devices without an address are assumed to sit on the interface line. */
 	public Line lineOf(final IndividualAddress a) {
 		return a.getRawAddress() == 0xFFFF ? uplinkLine() : new Line(a.getArea(), a.getLine());
@@ -118,12 +149,14 @@ public final class Topology {
 	}
 
 	/**
-	 * The lines a telegram reaches and the hop count it has there. Group telegrams spread to every line behind couplers
-	 * that let them pass, individually addressed telegrams only follow couplers that route them.
+	 * The lines a telegram reaches and the hop count it has there, starting on the lines {@code origin}. Group telegrams
+	 * spread to every line behind couplers that let them pass, individually addressed telegrams only follow couplers
+	 * that route them.
 	 */
-	public Map<Line, Integer> reach(final CEMILData f) {
+	public Map<Line, Integer> reach(final CEMILData f, final Line[] origin) {
 		final KNXAddress dst = f.getDestination();
-		final String key = f.getSource() + ">" + dst + ":" + Arrays.hashCode(f.getPayload()) + ":" + f.getHopCount();
+		final String key = Arrays.toString(origin) + f.getSource() + ">" + dst + ":" + Arrays.hashCode(f.getPayload()) + ":"
+				+ f.getHopCount();
 		final long now = System.nanoTime();
 		final Cached c = last;
 		if (c != null && c.key.equals(key) && now - c.time < 30_000_000L)
@@ -131,7 +164,7 @@ public final class Topology {
 		final var hop = new HashMap<Line, Integer>();
 		final var queue = new ArrayDeque<Line>();
 		final int h0 = f.getHopCount();
-		for (final Line o : linesOf(f.getSource())) {
+		for (final Line o : origin) {
 			hop.put(o, h0);
 			queue.add(o);
 		}
@@ -139,10 +172,9 @@ public final class Topology {
 			final Line x = queue.poll();
 			final int h = hop.get(x);
 			for (final CouplerPort p : couplers) {
-				final IndividualAddress pa = p.address();
-				if (!isCoupler(pa))
-					continue; // not placed on x.y.0 yet: not part of the topology
-				final Line child = new Line(pa.getArea(), pa.getLine());
+				final Line child = p.subLine();
+				if (child == null)
+					continue; // not wired into the line structure
 				final Line parent = child.parent();
 				if (parent == null)
 					continue;
@@ -171,48 +203,25 @@ public final class Topology {
 	}
 
 	/**
-	 * The telegram as seen by a receiver with the given address, or null if it never gets there (no coupler, blocked,
-	 * filtered, hop count used up). The hop count is lowered by every coupler crossed, as on a real installation.
+	 * The telegram as seen by a receiver on the given lines, or null if it never gets there (no coupler, blocked,
+	 * filtered, hop count used up). {@code from} is the link the telegram was sent on. The hop count is lowered by every
+	 * coupler crossed, as on a real installation.
 	 */
-	public CEMILData deliver(final CEMILData f, final IndividualAddress receiver) {
-		if (!enabled || management(f))
+	public CEMILData deliver(final CEMILData f, final Object from, final Line[] receiverLines) {
+		if (!enabled)
 			return f;
-		return deliverToLines(f, linesOf(receiver));
+		return deliverToLines(f, originOf(from), receiverLines);
 	}
 
-	/** Same for the KNXnet/IP interface (ETS). */
-	public CEMILData deliverToUplink(final CEMILData f) {
-		if (!enabled || management(f))
+	/** Same for the KNXnet/IP interface (ETS), which sits on {@link #uplinkLine()}. */
+	public CEMILData deliverToUplink(final CEMILData f, final Object from) {
+		if (!enabled)
 			return f;
-		return deliverToLines(f, new Line[] { uplinkLine() });
+		return deliverToLines(f, originOf(from), new Line[] { uplinkLine() });
 	}
 
-	/**
-	 * ETS' own management traffic (addressing, programming mode, downloads: broadcasts and individually addressed
-	 * telegrams from or to a tunnel address) is not stopped by couplers. Reason: in a simulator a device "moves" to its
-	 * line as soon as it has an address, before ETS could read the address back; ETS could then never finish. Group
-	 * telegrams and telegrams between devices are routed for real.
-	 */
-	private boolean management(final CEMILData f) {
-		final KNXAddress dst = f.getDestination();
-		if (dst instanceof final io.calimero.GroupAddress g)
-			return g.getRawAddress() == 0;
-		return isTunnel(f.getSource()) || isTunnel((IndividualAddress) dst);
-	}
-
-	private boolean isTunnel(final IndividualAddress a) {
-		if (a.getDevice() >= 241 && a.getDevice() <= 244)
-			return true;
-		try {
-			return tunnels.get().contains(a);
-		}
-		catch (final RuntimeException e) {
-			return false;
-		}
-	}
-
-	private CEMILData deliverToLines(final CEMILData f, final Line[] lines) {
-		final var reach = reach(f);
+	private CEMILData deliverToLines(final CEMILData f, final Line[] origin, final Line[] lines) {
+		final var reach = reach(f, origin);
 		Integer best = null;
 		for (final Line l : lines) {
 			final Integer h = reach.get(l);

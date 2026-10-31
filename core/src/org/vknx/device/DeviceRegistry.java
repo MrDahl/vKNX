@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import org.vknx.product.Products;
 import org.vknx.sim.Subnet;
+import org.vknx.sim.Topology.Line;
 import org.vknx.ui.EventLog;
 
 /** The set of virtual devices of this simulator instance; added/removed from the control panel and remembered in devices.txt. */
@@ -47,7 +48,17 @@ public final class DeviceRegistry {
 				log.add("device", p.length > 1 ? p[1] : p[0], "skipped: product " + p[0] + " no longer exists in this vKNX version (add the new product instead)");
 				continue;
 			}
-			add(p[0], p.length > 1 ? p[1] : p[0]);
+			// "name@a.l": the line the device is wired to; older files have only the name
+			final String rest = p.length > 1 ? p[1] : p[0];
+			final int at = rest.indexOf('@');
+			final String name = at < 0 ? rest : rest.substring(0, at);
+			final Line where = at < 0 ? null : parseLine(rest.substring(at + 1));
+			final var d = add(p[0], name, where);
+			if (where == null) {
+				// stored by an older version: keep the device where its address put it so far
+				final var a = d.address();
+				d.setLocation(a.getRawAddress() == 0xFFFF ? net.topology().uplinkLine() : new Line(a.getArea(), a.getLine()));
+			}
 		}
 		save();
 	}
@@ -72,6 +83,11 @@ public final class DeviceRegistry {
 	}
 
 	public synchronized VirtualDevice add(final String productKey, final String name) throws Exception {
+		return add(productKey, name, null);
+	}
+
+	/** @param where the line the device is wired to; null = the line of the KNXnet/IP interface */
+	public synchronized VirtualDevice add(final String productKey, final String name, final Line where) throws Exception {
 		final var product = Products.ALL.get(productKey);
 		if (product == null)
 			throw new IllegalArgumentException("unknown product " + productKey);
@@ -79,8 +95,9 @@ public final class DeviceRegistry {
 			throw new IllegalArgumentException("name must be 1-20 letters, digits, - or _");
 		if (devices.stream().anyMatch(d -> d.name().equalsIgnoreCase(name)))
 			throw new IllegalArgumentException("a device called " + name + " already exists");
+		final boolean stored = Files.exists(dir.resolve(name + ".state"));
 		final var d = VirtualDevice.create(name, product, serialFor(name), dir.resolve(name + ".state"), net,
-				(src, cat, text) -> log.add(cat, src.name(), text));
+				(src, cat, text) -> log.add(cat, src.name(), text), where != null ? where : stored ? null : net.topology().uplinkLine());
 		devices.add(d);
 		save();
 		return d;
@@ -101,11 +118,32 @@ public final class DeviceRegistry {
 			}
 	}
 
+	/** Wires a device to another line, as when moving it to another distribution board. */
+	public synchronized void setLocation(final String name, final Line line) throws IOException {
+		for (final var d : devices)
+			if (d.name().equals(name)) {
+				d.setLocation(line);
+				save();
+				return;
+			}
+		throw new IllegalArgumentException("no such device");
+	}
+
+	public static Line parseLine(final String text) {
+		final var m = LINE.matcher(text.trim());
+		if (!m.matches())
+			return null;
+		final int a = Integer.parseInt(m.group(1)), l = Integer.parseInt(m.group(2));
+		return a <= 15 && l <= 15 ? new Line(a, l) : null;
+	}
+
+	private static final Pattern LINE = Pattern.compile("(\\d{1,2})\\.(\\d{1,2})");
+
 	public void closeAll() { devices.forEach(VirtualDevice::close); }
 
 	private void save() throws IOException {
 		Files.write(dir.resolve("devices.txt"),
-				devices.stream().map(d -> d.product().key() + ":" + d.name()).toList());
+				devices.stream().map(d -> d.product().key() + ":" + d.name() + (d.location() == null ? "" : "@" + d.location())).toList());
 	}
 
 	static byte[] serialFor(final String name) {

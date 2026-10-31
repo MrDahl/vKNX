@@ -44,10 +44,6 @@ public final class TunnelTest {
 			SelfTest.check("the server now reports the tunnel as 7.0.24", net.linkStatus().tunnels().stream()
 					.anyMatch(x -> x.address().equals("7.0.24")));
 			net.topology().setEnabled(true);
-			final var f = new io.calimero.cemi.CEMILData(io.calimero.cemi.CEMILData.MC_LDATA_IND, new IndividualAddress(7, 0, 24),
-					new IndividualAddress(2, 1, 1), new byte[] { 0x03, (byte) 0xD5, 0, 0x38, 0x10, 1 }, io.calimero.Priority.LOW);
-			SelfTest.check("ETS management traffic from the new interface address still reaches devices on other lines",
-					net.topology().deliver(f, new IndividualAddress(2, 1, 1)) != null);
 			SelfTest.check("the line ETS sits on follows the new address", net.topology().uplinkLine().equals(
 					new org.vknx.sim.Topology.Line(7, 0)));
 			t.send(feature, new IndividualAddress(1, 1, 242).toByteArray());

@@ -146,7 +146,7 @@ export function createCard(d, handlers) {
       controls.append(h('div.hint', 'Everything shown here comes from the ETS download. Group telegrams in “filter” mode only pass if the group address is in the filter table.'));
       face = v => {
         const hi = (a, b) => (a === b ? a : a + ' / ' + b + ' (14-31)');
-        const roleText = v.role === 'area' ? 'Area coupler: main line ↔ backbone' : v.role === 'line' ? 'Line coupler: sub line ↔ main line' : 'Not placed: needs an address like 1.2.0 (line) or 1.0.0 (area) to join the lines';
+        const roleText = (v.role === 'area' ? `Area coupler: main line ${v.placement} ↔ backbone` : v.role === 'line' ? `Line coupler: line ${v.placement} ↔ main line ${v.mainLine}` : 'Not wired to a line') + (v.addressState === 'mismatch' ? ' · ADDRESS DOES NOT MATCH its line (should be ' + v.placement + '.0)' : '');
         setText(L.role, roleText + (v.loaded ? '' : ' · no download yet'));
         for (const r of L.rows) {
           const val = r.k === 'groupMainSub' ? hi(v.groupMainSub, v.groupMainSubHigh) : r.k === 'groupSubMain' ? hi(v.groupSubMain, v.groupSubMainHigh) : v[r.k];

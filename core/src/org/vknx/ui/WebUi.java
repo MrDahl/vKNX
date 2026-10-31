@@ -70,6 +70,7 @@ public final class WebUi {
 		server.createContext("/api/update/status", this::updateStatus);
 		server.createContext("/api/layout", this::layout);
 		server.createContext("/api/add", this::add);
+		server.createContext("/api/location", this::location);
 		server.createContext("/api/remove", ex -> {
 			final String n = param(ex.getRequestURI(), "dev", "");
 			if (!"POST".equals(ex.getRequestMethod())) {
@@ -255,7 +256,29 @@ public final class WebUi {
 			return;
 		}
 		try {
-			registry.add(param(ex.getRequestURI(), "product", ""), param(ex.getRequestURI(), "name", ""));
+			final String line = param(ex.getRequestURI(), "line", "");
+			final var where = line.isEmpty() ? null : org.vknx.device.DeviceRegistry.parseLine(line);
+			if (!line.isEmpty() && where == null)
+				throw new IllegalArgumentException("line must look like 1.1 (area 0-15, line 0-15)");
+			registry.add(param(ex.getRequestURI(), "product", ""), param(ex.getRequestURI(), "name", ""), where);
+			send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
+		}
+		catch (final Exception e) {
+			send(ex, 400, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+		}
+	}
+
+	/** Wires a device to another line: POST ?dev=Name&line=1.2. */
+	private void location(final HttpExchange ex) throws IOException {
+		if (!"POST".equals(ex.getRequestMethod())) {
+			send(ex, 405, "text/plain", "POST only".getBytes(StandardCharsets.UTF_8));
+			return;
+		}
+		try {
+			final var where = org.vknx.device.DeviceRegistry.parseLine(param(ex.getRequestURI(), "line", ""));
+			if (where == null)
+				throw new IllegalArgumentException("line must look like 1.1 (area 0-15, line 0-15)");
+			registry.setLocation(param(ex.getRequestURI(), "dev", ""), where);
 			send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
 		}
 		catch (final Exception e) {
@@ -299,7 +322,8 @@ public final class WebUi {
 
 	private void state(final HttpExchange ex) throws IOException {
 		final var sb = new StringBuilder("{\"version\":" + q(org.vknx.app.Version.current()) + ",\"line\":" + q(settings == null ? "1.1" : settings.line())
-				+ ",\"routing\":" + (settings == null || settings.lineRouting()) + ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"started\":" + started
+				+ ",\"routing\":" + (settings == null || settings.lineRouting())
+				+ ",\"uplink\":" + q(net == null ? "" : net.topology().uplinkLine().toString()) + ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"started\":" + started
 				+ ",\"plan\":" + hasPlan() + ",\"now\":" + System.currentTimeMillis() + ",\"link\":" + linkJson() + ",\"devices\":[");
 		boolean first = true;
 		for (final VirtualDevice d : devices) {
@@ -309,6 +333,7 @@ public final class WebUi {
 			sb.append("{\"name\":").append(q(d.name())).append(",\"product\":").append(q(d.product().key()))
 					.append(",\"productName\":").append(q(d.product().name())).append(",\"address\":").append(q(d.address().toString()))
 					.append(",\"unassigned\":").append(d.address().getRawAddress() == 0xFFFF)
+					.append(",\"location\":").append(q(d.location() == null ? "" : d.location().toString()))
 					.append(",\"programming\":").append(d.programmingMode()).append(",\"loaded\":")
 					.append(d.applicationLoaded()).append(",\"downloads\":").append(d.downloadCount())
 					.append(",\"downloadState\":").append(q(d.downloadState()))

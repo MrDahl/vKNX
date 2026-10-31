@@ -18,6 +18,12 @@
                   <Enumeration Text="Filter (use filter table)" Value="3" Id="M-00FA_A-0A0C-01-0000_PT-Routing_EN-3" />
                 </TypeRestriction>
               </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0C-01-0000_PT-Broadcast" Name="Broadcast">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Route" Value="0" Id="M-00FA_A-0A0C-01-0000_PT-Broadcast_EN-0" />
+                  <Enumeration Text="Lock" Value="1" Id="M-00FA_A-0A0C-01-0000_PT-Broadcast_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
             </ParameterTypes>
             <Parameters>
               <Parameter Id="M-00FA_A-0A0C-01-0000_P-1" Name="MainSubHigh" ParameterType="M-00FA_A-0A0C-01-0000_PT-Routing" Text="Main groups 14-31, main to sub" Value="3">
@@ -32,12 +38,28 @@
               <Parameter Id="M-00FA_A-0A0C-01-0000_P-4" Name="SubMain" ParameterType="M-00FA_A-0A0C-01-0000_PT-Routing" Text="Sub to main" Value="3">
                 <Property ObjectType="6" PropertyId="55" Offset="0" BitOffset="6" />
               </Parameter>
+              <Parameter Id="M-00FA_A-0A0C-01-0000_P-5" Name="PhysMainSub" ParameterType="M-00FA_A-0A0C-01-0000_PT-Routing" Text="Individually addressed, main to sub" Value="3">
+                <Property ObjectType="6" PropertyId="52" Offset="0" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0C-01-0000_P-6" Name="PhysSubMain" ParameterType="M-00FA_A-0A0C-01-0000_PT-Routing" Text="Individually addressed, sub to main" Value="3">
+                <Property ObjectType="6" PropertyId="53" Offset="0" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0C-01-0000_P-7" Name="BcastMainSub" ParameterType="M-00FA_A-0A0C-01-0000_PT-Broadcast" Text="Broadcast, main to sub" Value="0">
+                <Property ObjectType="6" PropertyId="52" Offset="0" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0C-01-0000_P-8" Name="BcastSubMain" ParameterType="M-00FA_A-0A0C-01-0000_PT-Broadcast" Text="Broadcast, sub to main" Value="0">
+                <Property ObjectType="6" PropertyId="53" Offset="0" BitOffset="4" />
+              </Parameter>
             </Parameters>
             <ParameterRefs>
               <ParameterRef Id="M-00FA_A-0A0C-01-0000_P-1_R-1" RefId="M-00FA_A-0A0C-01-0000_P-1" />
               <ParameterRef Id="M-00FA_A-0A0C-01-0000_P-2_R-2" RefId="M-00FA_A-0A0C-01-0000_P-2" Text="Main line to sub line: " />
               <ParameterRef Id="M-00FA_A-0A0C-01-0000_P-3_R-3" RefId="M-00FA_A-0A0C-01-0000_P-3" />
               <ParameterRef Id="M-00FA_A-0A0C-01-0000_P-4_R-4" RefId="M-00FA_A-0A0C-01-0000_P-4" Text="Sub line to main line: " />
+              <ParameterRef Id="M-00FA_A-0A0C-01-0000_P-5_R-5" RefId="M-00FA_A-0A0C-01-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A0C-01-0000_P-6_R-6" RefId="M-00FA_A-0A0C-01-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A0C-01-0000_P-7_R-7" RefId="M-00FA_A-0A0C-01-0000_P-7" />
+              <ParameterRef Id="M-00FA_A-0A0C-01-0000_P-8_R-8" RefId="M-00FA_A-0A0C-01-0000_P-8" />
             </ParameterRefs>
             <Options LineCoupler0912NewProgrammingStyle="true" MaxRoutingApduLength="66" Comparable="true" Reconstructable="true" />
           </Static>
@@ -68,6 +90,14 @@
                     <Assign TargetParamRefRef="M-00FA_A-0A0C-01-0000_P-3_R-3" Value="3" />
                   </when>
                 </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A0C-01-0000_PB-2" Name="PhysicalRouting" Text="Individually addressed telegrams">
+                <ParameterRefRef RefId="M-00FA_A-0A0C-01-0000_P-5_R-5" />
+                <ParameterRefRef RefId="M-00FA_A-0A0C-01-0000_P-6_R-6" />
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A0C-01-0000_PB-3" Name="BroadcastRouting" Text="Broadcast telegrams">
+                <ParameterRefRef RefId="M-00FA_A-0A0C-01-0000_P-7_R-7" />
+                <ParameterRefRef RefId="M-00FA_A-0A0C-01-0000_P-8_R-8" />
               </ParameterBlock>
             </ChannelIndependentBlock>
           </Dynamic>

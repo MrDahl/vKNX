@@ -103,8 +103,20 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public static VirtualDevice create(final String name, final ProductDef product, final byte[] serial,
 			final Path stateFile, final org.vknx.sim.Subnet uplink, final Listener listener)
 			throws KNXException, IOException {
+		return create(name, product, serial, stateFile, uplink, listener, null);
+	}
+
+	/**
+	 * @param location the line the device is wired to (for a coupler: the line it serves, its main line is the parent);
+	 *        null = placed by its address (older behaviour, used by tests)
+	 */
+	public static VirtualDevice create(final String name, final ProductDef product, final byte[] serial,
+			final Path stateFile, final org.vknx.sim.Subnet uplink, final Listener listener,
+			final org.vknx.sim.Topology.Line location) throws KNXException, IOException {
 		final boolean restored = Files.exists(stateFile);
 		final var logic = new VirtualDevice(name, product, stateFile);
+		logic.subnet = uplink;
+		logic.location = location;
 		if (listener != null)
 			logic.listeners.add(listener);
 		logic.behavior = DeviceBehavior.forProduct(product, logic);
@@ -121,7 +133,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		final IndividualAddress startAddress = restored
 				? io.calimero.device.ios.DeviceObject.lookup(device.getInterfaceObjectServer()).deviceAddress()
 				: new IndividualAddress(0xFFFF);
-		final KNXNetworkLink link = uplink.createDeviceLink(startAddress);
+		final KNXNetworkLink link = uplink.createDeviceLink(startAddress, logic::physicalLines);
 		device.setDeviceLink(link);
 		logic.log("device", "created " + product.name() + (restored ? " (state restored)" : " (factory state)")
 				+ ", address " + device.getAddress());
@@ -129,7 +141,6 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		logic.startApplication();
 		if (logic.behavior instanceof final CouplerBehavior cb)
 			uplink.topology().register(cb);
-		logic.subnet = uplink;
 		return logic;
 	}
 
@@ -157,6 +168,43 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public ProductDef product() { return product; }
 
 	public IndividualAddress address() { return base.getAddress(); }
+
+	// ---------------------------------------------------------------- physical placement
+
+	private volatile org.vknx.sim.Topology.Line location;
+
+	/** The line this device is wired to, or null if it is placed by its address. */
+	public org.vknx.sim.Topology.Line location() { return location; }
+
+	/** Wires the device to another line (a move in the building, not an address change). */
+	public void setLocation(final org.vknx.sim.Topology.Line line) {
+		location = line;
+		if (subnet != null)
+			subnet.topology().changed();
+		log("device", "wired to line " + (line == null ? "(by address)" : line));
+		changed();
+	}
+
+	/** The line(s) the device hears and sends on: one, or two for a coupler (its sub line and the main line). */
+	org.vknx.sim.Topology.Line[] physicalLines() {
+		final var l = location;
+		if (l == null)
+			return subnet.topology().linesOf(address());
+		if (product.coupler()) {
+			final var parent = l.parent();
+			return parent == null ? new org.vknx.sim.Topology.Line[] { l } : new org.vknx.sim.Topology.Line[] { l, parent };
+		}
+		return new org.vknx.sim.Topology.Line[] { l };
+	}
+
+	/** The sub line of a coupler: where it is wired, or (without placement) the line of its x.y.0 address; null if none. */
+	org.vknx.sim.Topology.Line couplerSubLine() {
+		final var l = location;
+		if (l != null)
+			return l;
+		final var a = address();
+		return a.getDevice() == 0 && a.getRawAddress() != 0 ? new org.vknx.sim.Topology.Line(a.getArea(), a.getLine()) : null;
+	}
 
 	public SerialNumber serialNumber() {
 		return io.calimero.device.ios.DeviceObject.lookup(base.getInterfaceObjectServer()).serialNumber();

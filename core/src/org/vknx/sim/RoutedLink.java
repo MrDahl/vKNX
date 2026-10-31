@@ -2,6 +2,7 @@ package org.vknx.sim;
 
 import java.util.function.Supplier;
 
+
 import io.calimero.CloseEvent;
 import io.calimero.FrameEvent;
 import io.calimero.IndividualAddress;
@@ -21,12 +22,14 @@ import io.calimero.link.medium.KNXMediumSettings;
 final class RoutedLink implements KNXNetworkLink {
 	private final KNXNetworkLink inner;
 	private final Topology topology;
-	private final Supplier<IndividualAddress> address;
+	private final Supplier<Topology.Line[]> where;
 
-	RoutedLink(final KNXNetworkLink inner, final Topology topology) {
+	/** @param where the line(s) this device sits on; null = placed by its current address (legacy, mini-ETS in tests) */
+	RoutedLink(final KNXNetworkLink inner, final Topology topology, final Supplier<Topology.Line[]> where) {
 		this.inner = inner;
 		this.topology = topology;
-		this.address = () -> inner.getKNXMedium().getDeviceAddress();
+		this.where = where != null ? where : () -> topology.linesOf(inner.getKNXMedium().getDeviceAddress());
+		topology.attach(inner, this.where);
 	}
 
 	@Override public KNXMediumSettings getKNXMedium() { return inner.getKNXMedium(); }
@@ -37,7 +40,7 @@ final class RoutedLink implements KNXNetworkLink {
 			@Override
 			public void indication(final FrameEvent e) {
 				if (e.getFrame() instanceof final CEMILData f) {
-					final CEMILData seen = topology.deliver(f, address.get());
+					final CEMILData seen = topology.deliver(f, e.getSource(), where.get());
 					if (seen == null)
 						return;
 					l.indication(seen == f ? e : new FrameEvent(e.getSource(), seen));
@@ -79,5 +82,5 @@ final class RoutedLink implements KNXNetworkLink {
 
 	@Override public boolean isOpen() { return inner.isOpen(); }
 
-	@Override public void close() { inner.close(); }
+	@Override public void close() { topology.detach(inner); inner.close(); }
 }

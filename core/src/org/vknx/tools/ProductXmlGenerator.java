@@ -216,7 +216,12 @@ public final class ProductXmlGenerator {
 			{ "1", "MainSubHigh", "Main groups 14-31, main to sub", "54", "4" },
 			{ "2", "MainSub", "Main to sub", "54", "6" },
 			{ "3", "SubMainHigh", "Main groups 14-31, sub to main", "55", "4" },
-			{ "4", "SubMain", "Sub to main", "55", "6" } };
+			{ "4", "SubMain", "Sub to main", "55", "6" },
+			{ "5", "PhysMainSub", "Individually addressed, main to sub", "52", "6" },
+			{ "6", "PhysSubMain", "Individually addressed, sub to main", "53", "6" },
+			{ "7", "BcastMainSub", "Broadcast, main to sub", "52", "4" },
+			{ "8", "BcastSubMain", "Broadcast, sub to main", "53", "4" } };
+		final String ptb = aid + "_PT-Broadcast";
 
 		final var x = new StringBuilder();
 		x.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
@@ -240,12 +245,16 @@ public final class ProductXmlGenerator {
 		for (int v = 1; v <= 3; v++)
 			x.append("                  <Enumeration Text=\"").append(en[v]).append("\" Value=\"").append(v).append("\" Id=\"")
 					.append(pt).append("_EN-").append(v).append("\" />\n");
+		x.append("                </TypeRestriction>\n              </ParameterType>\n");
+		x.append("              <ParameterType Id=\"").append(ptb).append("\" Name=\"Broadcast\">\n                <TypeRestriction Base=\"Value\" SizeInBit=\"1\">\n");
+		x.append("                  <Enumeration Text=\"Route\" Value=\"0\" Id=\"").append(ptb).append("_EN-0\" />\n");
+		x.append("                  <Enumeration Text=\"Lock\" Value=\"1\" Id=\"").append(ptb).append("_EN-1\" />\n");
 		x.append("                </TypeRestriction>\n              </ParameterType>\n            </ParameterTypes>\n");
 		x.append("            <Parameters>\n");
 		for (final String[] r : prm)
 			x.append("              <Parameter Id=\"").append(aid).append("_P-").append(r[0]).append("\" Name=\"")
-					.append(r[1]).append("\" ParameterType=\"").append(pt).append("\" Text=\"").append(r[2])
-					.append("\" Value=\"3\">\n                <Property ObjectType=\"6\" PropertyId=\"").append(r[3])
+					.append(r[1]).append("\" ParameterType=\"").append(Integer.parseInt(r[0]) >= 7 ? ptb : pt).append("\" Text=\"").append(r[2])
+					.append("\" Value=\"").append(Integer.parseInt(r[0]) >= 7 ? "0" : "3").append("\">\n                <Property ObjectType=\"6\" PropertyId=\"").append(r[3])
 					.append("\" Offset=\"0\" BitOffset=\"").append(r[4]).append("\" />\n              </Parameter>\n");
 		x.append("            </Parameters>\n            <ParameterRefs>\n");
 		for (final String[] r : prm)
@@ -267,6 +276,14 @@ public final class ProductXmlGenerator {
 						.append(pair[1]).append("\" Value=\"").append(v).append("\" />\n                  </when>\n");
 			x.append("                </choose>\n");
 		}
+		x.append("              </ParameterBlock>\n");
+		x.append("              <ParameterBlock Id=\"").append(aid).append("_PB-2\" Name=\"PhysicalRouting\" Text=\"Individually addressed telegrams\">\n");
+		for (final String n : new String[] { "5", "6" })
+			x.append("                <ParameterRefRef RefId=\"").append(aid).append("_P-").append(n).append("_R-").append(n).append("\" />\n");
+		x.append("              </ParameterBlock>\n");
+		x.append("              <ParameterBlock Id=\"").append(aid).append("_PB-3\" Name=\"BroadcastRouting\" Text=\"Broadcast telegrams\">\n");
+		for (final String n : new String[] { "7", "8" })
+			x.append("                <ParameterRefRef RefId=\"").append(aid).append("_P-").append(n).append("_R-").append(n).append("\" />\n");
 		x.append("              </ParameterBlock>\n            </ChannelIndependentBlock>\n          </Dynamic>\n");
 		x.append("        </ApplicationProgram>\n      </ApplicationPrograms>\n");
 

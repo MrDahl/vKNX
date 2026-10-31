@@ -40,7 +40,7 @@ public final class SharedVirtualLink extends VirtualLink {
 			@Override
 			public void indication(final FrameEvent e) {
 				if (e.getFrame() instanceof final CEMILData f) {
-					final CEMILData seen = topology.deliverToUplink(f);
+					final CEMILData seen = topology.deliverToUplink(f, e.getSource());
 					if (seen == null)
 						return;
 					l.indication(seen == f ? e : new FrameEvent(e.getSource(), seen));
@@ -61,7 +61,13 @@ public final class SharedVirtualLink extends VirtualLink {
 	/** The link of a device, hearing only what the topology lets through. */
 	@Override
 	public KNXNetworkLink createDeviceLink(final IndividualAddress address) {
-		return new RoutedLink(super.createDeviceLink(address), topology);
+		return createDeviceLink(address, null);
+	}
+
+	/** @param where the line(s) the device is wired to; null = placed by its address */
+	public KNXNetworkLink createDeviceLink(final IndividualAddress address,
+			final java.util.function.Supplier<Topology.Line[]> where) {
+		return new RoutedLink(super.createDeviceLink(address), topology, where);
 	}
 
 	/** Used by the KNXnet/IP server (reflection, signature fixed by Calimero) and by tests. */

@@ -31,12 +31,32 @@ public final class CouplerBehavior extends DeviceBehavior implements Topology.Co
 	@Override
 	public IndividualAddress address() { return dev.address(); }
 
-	/** "area", "line" or "none" (address not x.y.0 yet, so the coupler is not part of the line structure). */
-	public String role() {
+	@Override
+	public Topology.Line subLine() { return dev.couplerSubLine(); }
+
+	/** The line this coupler is for in its filter decisions: from its own address when ETS gave it x.y.0, else where it is wired. */
+	private Topology.Line ownLine() {
 		final var a = dev.address();
-		if (a.getDevice() != 0 || a.getRawAddress() == 0)
+		if (a.getDevice() == 0 && a.getRawAddress() != 0)
+			return new Topology.Line(a.getArea(), a.getLine());
+		return dev.couplerSubLine();
+	}
+
+	/** "area", "line" or "none" (not wired to a line / without address in older code paths). */
+	public String role() {
+		final var sub = dev.couplerSubLine();
+		if (sub == null || sub.parent() == null)
 			return "none";
-		return a.getLine() == 0 ? "area" : "line";
+		return sub.line() == 0 ? "area" : "line";
+	}
+
+	/** "unassigned", "ok" (address is x.y.0 of the line it is wired to) or "mismatch". */
+	String addressState() {
+		final var a = dev.address();
+		if (a.getRawAddress() == 0xFFFF)
+			return "unassigned";
+		final var sub = dev.couplerSubLine();
+		return sub != null && a.getDevice() == 0 && a.getArea() == sub.area() && a.getLine() == sub.line() ? "ok" : "mismatch";
 	}
 
 	static String mode(final int v) {
@@ -104,8 +124,8 @@ public final class CouplerBehavior extends DeviceBehavior implements Topology.Co
 			case 2:
 				return Topology.Decision.block("individually addressed telegrams blocked (" + side + ")");
 			case 3: {
-				final var me = dev.address();
-				final boolean inSub = dst.getArea() == me.getArea() && (me.getLine() == 0 || dst.getLine() == me.getLine());
+				final var me = ownLine();
+				final boolean inSub = me != null && dst.getArea() == me.area() && (me.line() == 0 || dst.getLine() == me.line());
 				return (fromMain == inSub) ? Topology.Decision.PASS
 						: Topology.Decision.block("destination " + dst + " is " + (fromMain ? "not behind" : "behind")
 								+ " this coupler (" + side + ", individually addressed set to filter)");
@@ -139,6 +159,10 @@ public final class CouplerBehavior extends DeviceBehavior implements Topology.Co
 	public Map<String, Object> view() {
 		final var m = newView();
 		m.put("role", role());
+		final var sub = dev.couplerSubLine();
+		m.put("placement", sub == null ? "" : sub.toString());
+		m.put("mainLine", sub == null || sub.parent() == null ? "" : sub.parent().toString());
+		m.put("addressState", addressState());
 		m.put("loaded", dev.applicationLoaded());
 		m.put("routing", dev.address().getRawAddress() != 0xFFFF);
 		m.put("physMainSub", mode(dev.routerByte(PID_PHYS_MAIN)));

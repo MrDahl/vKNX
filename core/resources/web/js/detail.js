@@ -56,13 +56,16 @@ export function createDetail({ onBack, onClose } = {}) {
     els.progBtn = h('button.prog-btn', { 'aria-pressed': 'false', onclick: () => operate('Programming button', () => api.prog(name)) }, h('span.led'), h('span.t', 'Programming button'));
     els.progTxt = h('div.hint');
     els.progBox = h('div.prog-box', els.progBtn, els.progTxt);
-    els.addr = h('span'); els.app = h('span'); els.dl = h('span'); els.dlN = h('span');
+    els.addr = h('span'); els.loc = h('span'); els.app = h('span'); els.dl = h('span'); els.dlN = h('span');
     const check = (label, valueEl) => h('li', h('span.label', label), valueEl);
-    els.checks = h('ul.checks', check('Physical address', els.addr), check('Application', els.app), check('Download', els.dl), check('Downloads received', els.dlN));
+    els.checks = h('ul.checks', check('Physical address', els.addr), check('Wired to line', els.loc), check('Application', els.app), check('Download', els.dl), check('Downloads received', els.dlN));
     els.params = h('div'); els.objs = h('div.tbl-wrap');
     els.sigParams = ''; els.sigObjs = '';
     body.replaceChildren(
       section('Programming and status', h('div', els.progBox, els.checks)),
+      section('Physical line', h('div', h('p.hint', { style: 'margin-top:0' }, 'The line this device is wired to. Telegrams only cross to other lines through couplers, as in a real installation. Moving it changes the wiring, not the address.'),
+        els.locIn = h('input.input', { type: 'text', maxlength: 5, 'aria-label': 'Physical line', style: 'width:6rem' }),
+        h('button.btn', { style: 'margin-left:.5rem', onclick: () => operate('Moving device', () => api.setLocation(name, els.locIn.value.trim())) }, 'Move'))),
       section('ETS parameters', els.params),
       section('Communication objects and group addresses', els.objs),
       section('Telegrams', h('div', h('p.hint', { style: 'margin-top:0' }, 'Telegrams sent by this device or addressed to one of its group addresses.'),
@@ -80,6 +83,8 @@ export function createDetail({ onBack, onClose } = {}) {
     setCls(els.progBox, 'active', d.programming);
     setCls(els.progBtn.firstChild, 'on', d.programming);
     setText(els.progTxt, d.programming ? 'Programming mode is ON (red indicator lit). ETS can now assign the physical address. Press the button again to switch it off.' : 'Programming mode is off. Press the button, then assign the physical address from ETS.');
+    setText(els.loc, d.location || '–');
+    if (document.activeElement !== els.locIn) els.locIn.value = d.location || '';
     setText(els.addr, d.unassigned ? 'Missing (15.15.255 = not assigned)' : d.address);
     setText(els.app, d.loaded ? 'Loaded' : 'Missing – download the application from ETS');
     setText(els.dl, DOWNLOAD_TEXT[d.downloadState] || d.downloadState);

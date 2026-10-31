@@ -22,6 +22,7 @@ public final class TopologyTest {
 		volatile int hops;
 		Port(final String a) throws Exception { addr = new IndividualAddress(a); }
 		@Override public IndividualAddress address() { return addr; }
+		@Override public Topology.Line subLine() { return new Topology.Line(addr.getArea(), addr.getLine()); }
 		@Override public Topology.Decision route(final CEMILData f, final boolean fromMain) {
 			hops++;
 			return pass ? Topology.Decision.PASS : Topology.Decision.block("test");
@@ -93,19 +94,31 @@ public final class TopologyTest {
 		b.got.clear(); c.got.clear();
 		send(a, "1/1/1", 7);
 		SelfTest.check("hop count 7 = unlimited, stays 7", c.got.size() == 1 && c.got.get(0).getHopCount() == 7);
-		// ETS management traffic (tunnel address 241-244) and broadcasts are not stopped by couplers
+		// no bypass: ETS' own traffic and broadcasts also need couplers to leave their line
 		final var ets = node(line, "1.1.241");
 		b.got.clear(); c.got.clear(); d.got.clear();
 		topo.unregister(lc12); topo.unregister(lc11);
 		ets.link.send(new CEMILData(CEMILData.MC_LDATA_REQ, new IndividualAddress("1.1.241"), new IndividualAddress("1.2.5"),
 				new byte[] { 0x00 }, Priority.LOW, false, 6), false);
 		Thread.sleep(50);
-		SelfTest.check("tunnel address reaches another line without couplers (individually addressed)", b.got.size() == 1);
+		SelfTest.check("tunnel address does NOT reach another line without couplers (no bypass)", b.got.isEmpty());
 		send(a, "0/0/0", 6);
-		SelfTest.check("broadcast reaches other lines without couplers", c.got.size() == 1);
+		SelfTest.check("broadcast does NOT reach other lines without couplers", c.got.isEmpty());
 		b.got.clear(); c.got.clear(); d.got.clear();
 		send(a, "1/1/1", 6);
 		SelfTest.check("group telegrams between devices are still stopped without couplers", d.got.size() == 1 && c.got.isEmpty() && b.got.isEmpty());
+		// physical placement is independent of the address: 1.2.5 wired to line 1.1 hears line 1.1, not line 1.2
+		final var wired = line.createDeviceLink(new IndividualAddress("1.2.9"), () -> new Topology.Line[] { new Topology.Line(1, 1) });
+		final List<CEMILData> wgot = new CopyOnWriteArrayList<>();
+		wired.addLinkListener(new NetworkLinkListener() {
+			@Override public void indication(final io.calimero.FrameEvent e) { wgot.add((CEMILData) e.getFrame()); }
+			@Override public void linkClosed(final io.calimero.CloseEvent e) {}
+		});
+		topo.register(lc11);
+		d.got.clear(); b.got.clear(); wgot.clear();
+		send(d, "1/1/2", 6);
+		SelfTest.check("device wired to line 1.1 with a 1.2.x address hears line 1.1 traffic", wgot.size() == 1);
+		SelfTest.check("... and line 1.2 devices do not hear it without couplers in between", b.got.isEmpty());
 		System.out.println("topology tests done");
 	}
 }

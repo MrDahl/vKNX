@@ -288,7 +288,7 @@ public final class ProductsTest {
 			boolean bad = false;
 			try { reg.add("dimmer", "bad name!"); } catch (final IllegalArgumentException e) { bad = true; }
 			check("registry rejects duplicate and invalid names", dup && bad);
-			check("registry remembers devices", Files.readAllLines(regDir.resolve("devices.txt")).equals(List.of("dimmer:Dimmer1")));
+			check("registry remembers devices", Files.readAllLines(regDir.resolve("devices.txt")).equals(List.of("dimmer:Dimmer1@" + reg.devices().get(0).location())));
 			reg.remove("Dimmer1");
 			check("registry remove deletes state", reg.devices().isEmpty()
 					&& Files.list(regDir).noneMatch(f -> f.getFileName().toString().startsWith("Dimmer1.state")));
