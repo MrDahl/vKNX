@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.6.3] - 2026-11-01
 - **Fix: an unloaded coupler kept routing.** Unloading a coupler's application in ETS only sent the UNLOAD event, and vKNX left the old routing settings and filter table in place, so the light kept working through an unloaded coupler. An unloaded coupler now falls back to *filter* with an empty table (group telegrams blocked). Tested with `CouplerTest`; **not tried in ETS.** A coupler without address still sits on the line it is wired to; its routing then follows the same settings.
 
 ## [0.6.2] - 2026-11-01
