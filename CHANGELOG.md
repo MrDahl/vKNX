@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.6.2] - 2026-11-01
 - **Realistic physical lines and couplers (replaces the 0.6.1 workaround).** Every device is now *wired* to a physical line, independent of its address (Add device: "Physical line", default = the line of the ETS interface; change later under *Physical line* in the device details). Couplers are wired to the sub line they serve; the main line is its parent. Telegrams only leave a line through couplers, **including ETS' own traffic and broadcasts**; the v0.6.1 bypass for ETS management traffic is removed. The workflow is therefore as in a real installation: **download the couplers first** (a factory-new coupler routes everything, so addressing and download work), then the devices behind them.
 - **New coupler ETS settings:** *Individually addressed telegrams* (route all / block / filter, per direction) and *Broadcast telegrams* (route / lock, per direction). Filter for individually addressed telegrams only passes telegrams towards the addresses behind the coupler. Group routing is unchanged.
 - **Coupler card** shows the lines it joins and warns if its address does not match its line (a coupler should be x.y.0 for line x.y, x.0.0 for area x). Devices from older versions are placed on the line of their address.
