@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.7.6] - 2026-11-01
 
 ### Fixed
 - Deactivating "Secure Commissioning" in ETS (second attempt): after ETS' reset with erase code 7, Calimero itself deleted the tool key and key tables, but ETS goes on with the tool key (to switch security mode off) and got no answer to its sync request ("Device does not respond"). The devices now keep their tool key, key tables and security mode through that reset, so ETS can switch security mode off and then download in plain. The previous fix (0.7.5) only covered vKNX's own handling and was not enough. Found by checking the MAC of ETS' messages in the supplied logs.
