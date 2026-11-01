@@ -1250,6 +1250,12 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		behavior.onStop();
 		scheduler.shutdownNow();
 		base.close();
+		// Calimero's device close() saves the state but leaves the device on the line: a removed device would go on
+		// answering ETS with its old address ("address already in use", every answer twice).
+		try {
+			base.getDeviceLink().close();
+		}
+		catch (final RuntimeException e) { /* already closed */ }
 	}
 
 	@Override

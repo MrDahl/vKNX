@@ -169,6 +169,20 @@ public final class SecureTest {
 			finally {
 				d2.destroy();
 			}
+			// a removed device must leave the bus: no more answers from its old address
+			final var addr = pb.address();
+			pb.close();
+			tool2.detach();
+			final var tool3 = new ManagementClientImpl(net.createDeviceLink(new IndividualAddress(1, 1, 243)));
+			final Destination d3 = tool3.createDestination(addr, true);
+			boolean answered;
+			try {
+				answered = tool3.readDeviceDesc(d3, 0) != null;
+			}
+			catch (final Exception e) {
+				answered = false;
+			}
+			check("a closed (removed) device no longer answers on the bus", !answered);
 			System.out.println("secure tests done");
 		}
 		catch (final Throwable t) {
