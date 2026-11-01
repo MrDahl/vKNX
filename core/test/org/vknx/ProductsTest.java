@@ -300,6 +300,18 @@ public final class ProductsTest {
 			reg.setLocation("Dimmer1", null);
 			check("empty line = automatic again", Files.readAllLines(regDir.resolve("devices.txt")).equals(List.of("dimmer:Dimmer1")));
 			reg.closeAll();
+			// first start gets the two default devices; once the user has emptied the installation it stays empty
+			final var firstDir = Files.createTempDirectory("vknx-first");
+			final var first = new DeviceRegistry(firstDir, Subnet.inProcess(), log);
+			first.restoreOrDefault(List.of());
+			check("first start creates the default devices", first.devices().size() == 2);
+			for (final String n : List.of("Tryk1", "Lampe1"))
+				first.remove(n);
+			first.closeAll();
+			final var again = new DeviceRegistry(firstDir, Subnet.inProcess(), log);
+			again.restoreOrDefault(List.of());
+			check("devices the user removed do not come back after a restart", again.devices().isEmpty());
+			again.closeAll();
 		}
 		catch (final Throwable t) {
 			t.printStackTrace(System.out);

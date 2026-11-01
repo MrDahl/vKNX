@@ -39,7 +39,8 @@ public final class DeviceRegistry {
 		final var list = new ArrayList<String>(specs);
 		if (list.isEmpty() && Files.exists(file))
 			list.addAll(Files.readAllLines(file).stream().map(String::trim).filter(l -> !l.isEmpty()).toList());
-		if (list.isEmpty())
+		// the defaults only on the very first start: an installation the user emptied on purpose stays empty
+		if (list.isEmpty() && !Files.exists(file))
 			list.addAll(List.of("push-button:Tryk1", "switch-actuator:Lampe1"));
 		resetOldSchema();
 		for (final String spec : list) {
