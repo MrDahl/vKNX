@@ -185,6 +185,22 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		return io.calimero.device.ios.SecurityObject.lookup(base.getInterfaceObjectServer());
 	}
 
+	/**
+	 * Master reset of a secure device (ETS does this when "Secure commissioning" is switched off or on): the tool key,
+	 * group keys, group object security flags and security mode are deleted, so the factory key (FDSK) is in use again.
+	 * The FDSK and serial number themselves never change.
+	 */
+	private void resetSecurity() {
+		final var sec = securityObject();
+		sec.set(io.calimero.device.ios.SecurityObject.Pid.SecurityMode, 1, 1, (byte) 0);
+		sec.set(io.calimero.device.ios.SecurityObject.Pid.ToolKey, new byte[16]);
+		sec.clear(io.calimero.device.ios.SecurityObject.Pid.GroupKeyTable);
+		sec.clear(io.calimero.device.ios.SecurityObject.Pid.P2PKeyTable);
+		sec.clear(io.calimero.device.ios.SecurityObject.Pid.SecurityIndividualAddressTable);
+		sec.clear(io.calimero.device.ios.SecurityObject.Pid.GoSecurityFlags);
+		log("mgmt", "security reset: keys deleted, factory key (FDSK) in use again");
+	}
+
 	/** The factory default setup key as 32 hex digits, or "" for a device that is not a secure product. */
 	public String fdskHex() {
 		return product.secure() ? HexFormat.of().withUpperCase().formatHex(securityObject().get(io.calimero.device.ios.SecurityObject.Pid.Fdsk)) : "";
@@ -192,6 +208,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	/** The 6-byte KNX serial number as 12 hex digits (ETS shows and asks for it together with the FDSK). */
 	public String serialHex() { return HexFormat.of().withUpperCase().formatHex(serialNumber().array()); }
+
+	/** The serial number the way ETS shows it: 2 bytes, colon, 4 bytes (e.g. 00FA:00000033). */
+	public String serialEts() { final String s = serialHex(); return s.substring(0, 4) + ":" + s.substring(4); }
 
 	/** True once ETS has switched on security mode (the secure download completed far enough). */
 	public boolean securityModeOn() {
@@ -315,6 +334,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			final io.calimero.mgmt.ManagementClient.EraseCode eraseCode, final int channel) {
 		log("mgmt", "A_Restart (" + (masterReset ? "master reset " + eraseCode : "basic restart") + ")");
 		final var r = super.restart(masterReset, eraseCode, channel);
+		if (masterReset && product.secure())
+			resetSecurity();
 		afterTablesChanged();
 		startApplication();
 		changed();

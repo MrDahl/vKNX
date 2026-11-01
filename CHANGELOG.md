@@ -4,6 +4,10 @@ All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
 ## [Unreleased]
+
+### Secure products: course-material review
+- The serial number is now shown the way ETS shows it in "Add Device Certificate" (`00FA:00000033`, 2 bytes + colon + 4 bytes).
+- A master reset (what ETS sends when Secure commissioning is switched off/on) now deletes the tool key, group keys, group object security flags and security mode on secure devices, so the factory key (FDSK) is in use again. FDSK and serial number never change. Covered by our own test (Calimero client), not yet tried in ETS.
 - **New: KNX Data Secure products** *Secure push button* and *Secure switch actuator* (same parameters and group objects as the plain products, ETS application flagged `IsSecureEnabled`). Each device gets a random **FDSK** and shows its **serial number and FDSK** in the device details (Copy buttons), which ETS needs for secure commissioning. After ETS has commissioned a device, group telegrams from secure group objects are sent authenticated and encrypted, and plain telegrams to them are ignored. Import the two new files `products/vknx-secure-push-button.xml` and `products/vknx-secure-switch-actuator.xml` (build the `.knxprod` as for the other products).
 - Local Calimero patch `calimero-core-secure-plain-drop.patch` (a plain group telegram to a secured group object is dropped; Calimero let it through).
 - Tested with the new `SecureTest` (Calimero's own secure client plays ETS: FDSK commissioning, tool key, group key, security mode, secure and plain group telegrams). **Not tried in ETS:** import, entering serial number/FDSK, the real ETS secure download. See `docs/limitations.md`.
