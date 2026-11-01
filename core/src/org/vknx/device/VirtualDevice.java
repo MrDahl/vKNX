@@ -684,7 +684,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			case LE_UNLOAD -> {
 				state = LS_UNLOADED;
 				log("download", "load event UNLOAD for " + what);
-				clearRegion(obj);
+				// The content stays: a partial download (ETS unloads, then writes only what changed) relies on the rest
+				// still being there. A full download initialises the region again when it allocates.
+				allocatedSize[obj] = 0;
 			}
 			default -> {
 				log("download", "ERROR: undefined load event " + event);
@@ -724,11 +726,6 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		log("download", String.format("relative allocation obj %d: %d bytes at 0x%04X (%s)", obj, size, SLOT_ADDRESS[obj],
 				fill ? "initialised" : "existing content kept, partial download"));
 		return true;
-	}
-
-	private void clearRegion(final int obj) {
-		base.deviceMemory().set(SLOT_ADDRESS[obj], new byte[SLOT_CAPACITY[obj]]);
-		allocatedSize[obj] = 0;
 	}
 
 	/** Memory control block entry: segment size(4), CRC control(1)=0 "always valid", access(1)=0xFF, CRC-16(2). */

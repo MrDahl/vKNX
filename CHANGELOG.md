@@ -3,6 +3,10 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Fixed
+- Partial downloads from ETS lost the parameters and group objects that had not changed. ETS unloads the application and the tables, then writes only what differs; vKNX cleared the memory on the unload, so e.g. a button or output that stayed enabled came back disabled, and the group object table was empty (no buttons or outputs on the operating card after the download). The memory is now kept on unload.
 ## [0.7.6] - 2026-11-01
 
 ### Fixed

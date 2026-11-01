@@ -166,6 +166,7 @@ public final class SelfTest {
 				final byte[] data) throws Exception {
 			final Destination d = mc.createDestination(dev, true);
 			try {
+				loadEvent(d, obj, (byte) 4); // ETS unloads first, then loads again without clearing (partial download)
 				loadEvent(d, obj, (byte) 1);
 				loadEvent(d, obj, ByteBuffer.allocate(8).put((byte) 3).put((byte) 0x0B).putInt(size).put((byte) 0).put((byte) 0).array());
 				final int addr = ByteBuffer.wrap(mc.readProperty(d, obj, PID.TABLE_REFERENCE, 1, 1)).getInt();
