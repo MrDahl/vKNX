@@ -1,0 +1,45 @@
+diff --git a/src/io/calimero/secure/SecureApplicationLayer.java b/src/io/calimero/secure/SecureApplicationLayer.java
+index dc75fe3..6fbc2df 100644
+--- a/src/io/calimero/secure/SecureApplicationLayer.java
++++ b/src/io/calimero/secure/SecureApplicationLayer.java
+@@ -518,6 +518,23 @@ public class SecureApplicationLayer implements AutoCloseable {
+ 		return decrypt(src, dst, tpci, secureAsdu);
+ 	}
+ 
++	private boolean isPlainFrameForSecuredGroupObject(final CEMILData ldata) {
++		if (!(ldata.getDestination() instanceof final GroupAddress ga) || ga.equals(GroupAddress.Broadcast))
++			return false;
++		final byte[] payload = ldata.getPayload();
++		if (payload.length < 2)
++			return false;
++		final int service = DataUnitBuilder.getAPDUService(payload);
++		if (service != 0x000 && service != 0x040 && service != 0x080) // group read, response, write
++			return false;
++		try {
++			return groupObjectSecurity(ga) != 0;
++		}
++		catch (final RuntimeException ex) {
++			return false;
++		}
++	}
++
+ 	protected Optional<FrameEvent> extract(final FrameEvent e) {
+ 		final var cemi = e.getFrame();
+ 		if (cemi instanceof final CEMILData ldata) {
+@@ -525,8 +542,15 @@ public class SecureApplicationLayer implements AutoCloseable {
+ 				final var salData = extract(ldata);
+ 				if (salData.apdu().length == 0)
+ 					return Optional.empty();
+-				if (salData.security() == SecurityControl.Plain)
++				if (salData.security() == SecurityControl.Plain) {
++					// vKNX: a plain group telegram to a group object that requires security is discarded (KNX Data Secure)
++					if (isPlainFrameForSecuredGroupObject(ldata)) {
++						logger.log(INFO, "{0}->{1}: plain group telegram for a secured group object, ignore",
++								ldata.getSource(), ldata.getDestination());
++						return Optional.empty();
++					}
+ 					return Optional.of(e);
++				}
+ 
+ 				final var plain = CEMIFactory.create(cemi.getMessageCode(), salData.apdu(), cemi);
+ 				final var extracted = new FrameEvent(e.getSource(), plain, e.systemBroadcast(),

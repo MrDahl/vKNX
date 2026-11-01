@@ -12,7 +12,7 @@ public abstract class DeviceBehavior {
 	protected DeviceBehavior(final VirtualDevice dev) { this.dev = dev; }
 
 	static DeviceBehavior forProduct(final ProductDef p, final VirtualDevice dev) {
-		return switch (p.key()) {
+		return switch (p.baseKey()) {
 			case "push-button" -> new PushButtonBehavior(dev);
 			case "switch-actuator" -> new SwitchActuatorBehavior(dev);
 			case "push-slider" -> new SliderPushBehavior(dev);

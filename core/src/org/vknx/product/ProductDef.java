@@ -9,7 +9,15 @@ import java.util.Optional;
  * from exactly the same data, so ETS and simulator cannot drift apart.
  */
 public record ProductDef(String key, int appNumber, int appVersion, String name, String orderNumber,
-		int hardwareSerial, int paramAreaSize, List<ParamDef> params, List<ObjDef> objects, boolean coupler) {
+		int hardwareSerial, int paramAreaSize, List<ParamDef> params, List<ObjDef> objects, boolean coupler,
+		boolean secure) {
+
+	/** Coupler flag given, not secure. */
+	public ProductDef(final String key, final int appNumber, final int appVersion, final String name,
+			final String orderNumber, final int hardwareSerial, final int paramAreaSize, final List<ParamDef> params,
+			final List<ObjDef> objects, final boolean coupler) {
+		this(key, appNumber, appVersion, name, orderNumber, hardwareSerial, paramAreaSize, params, objects, coupler, false);
+	}
 
 	/** A normal (non-coupler) product. */
 	public ProductDef(final String key, final int appNumber, final int appVersion, final String name,
@@ -21,6 +29,14 @@ public record ProductDef(String key, int appNumber, int appVersion, String name,
 	public ProductDef {
 		params = List.copyOf(params);
 		objects = List.copyOf(objects);
+	}
+
+	/** The key of the non-secure product this one is built on (behaviour and parameters are the same). */
+	public String baseKey() { return key.startsWith("secure-") ? key.substring(7) : key; }
+
+	/** A KNX Data Secure variant of this product: same parameters and objects, own application, ETS flags it as secure. */
+	public ProductDef secured(final String newKey, final int newApp, final String newName, final String newOrder) {
+		return new ProductDef(newKey, newApp, appVersion, newName, newOrder, newApp, paramAreaSize, params, objects, false, true);
 	}
 
 	public Optional<ObjDef> object(final int number) {

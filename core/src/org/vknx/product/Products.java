@@ -117,6 +117,13 @@ public final class Products {
 
 	public static final ProductDef SWITCH_ACTUATOR = switchActuator();
 
+	// ------------------------------------------------------------------ KNX Data Secure variants
+
+	public static final ProductDef SECURE_PUSH_BUTTON = PUSH_BUTTON.secured("secure-push-button", 0x0A10,
+			"vKNX Secure Push Button 4-fold", "VKNXSPB4");
+	public static final ProductDef SECURE_SWITCH_ACTUATOR = SWITCH_ACTUATOR.secured("secure-switch-actuator", 0x0A11,
+			"vKNX Secure Switch Actuator 8-fold", "VKNXSSA8");
+
 	/** Push button with a slider: switch + 1-byte brightness value. */
 	public static final ProductDef PUSH_SLIDER = new ProductDef(
 			"push-slider", 0x0A04, V, "vKNX Slider push 1-fold", "VKNXSL1", 0x0A04, 1,
@@ -261,7 +268,7 @@ public final class Products {
 	public static final Map<String, ProductDef> ALL;
 	static {
 		final var m = new java.util.LinkedHashMap<String, ProductDef>();
-		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, COUPLER))
+		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, SECURE_PUSH_BUTTON, SECURE_SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, COUPLER))
 			m.put(p.key(), p);
 		ALL = java.util.Collections.unmodifiableMap(m);
 	}

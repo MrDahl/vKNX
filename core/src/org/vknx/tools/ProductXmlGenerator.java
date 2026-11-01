@@ -71,8 +71,10 @@ public final class ProductXmlGenerator {
 				.append("\" ApplicationVersion=\"").append(p.appVersion())
 				.append("\" ProgramType=\"ApplicationProgram\" MaskVersion=\"MV-07B0\" Name=\"").append(esc(p.name()))
 				.append("\" LoadProcedureStyle=\"MergedProcedure\" PeiType=\"0\" DefaultLanguage=\"en-US\" ")
-				.append("DynamicTableManagement=\"false\" Linkable=\"true\" MinEtsVersion=\"5.0\" ReplacesVersions=\"")
-				.append(replaces(p.appVersion())).append("\">\n");
+				.append("DynamicTableManagement=\"false\" Linkable=\"true\" ")
+				.append(p.secure() ? "IsSecureEnabled=\"true\" MinEtsVersion=\"6.0\" MaxSecurityIndividualAddressEntries=\"5\" MaxSecurityGroupKeyTableEntries=\"80\" "
+						: "MinEtsVersion=\"5.0\" ")
+				.append("ReplacesVersions=\"").append(replaces(p.appVersion())).append("\">\n");
 		x.append("          <Static>\n");
 		x.append("            <Code>\n              <RelativeSegment Id=\"").append(seg)
 				.append("\" Name=\"Parameters\" Offset=\"0\" Size=\"").append(p.paramAreaSize())

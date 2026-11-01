@@ -3,7 +3,7 @@ import { api } from './api.js';
 import { S, emit, selectDevice, hooks } from './bus.js';
 import { modal, toast } from './dialogs.js';
 
-const PREFIX = { 'push-button': 'Button', 'push-slider': 'Slider', 'switch-actuator': 'Switch', dimmer: 'Dimmer', 'blind-actuator': 'Blind',
+const PREFIX = { 'push-button': 'Button', 'secure-push-button': 'SecButton', 'secure-switch-actuator': 'SecSwitch', 'push-slider': 'Slider', 'switch-actuator': 'Switch', dimmer: 'Dimmer', 'blind-actuator': 'Blind',
   multisensor: 'Sensor', coupler: 'Coupler' };
 const NAME_RE = /^[A-Za-z0-9_-]{1,20}$/;
 

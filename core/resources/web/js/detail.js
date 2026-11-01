@@ -60,9 +60,10 @@ export function createDetail({ onBack, onClose } = {}) {
     const check = (label, valueEl) => h('li', h('span.label', label), valueEl);
     els.checks = h('ul.checks', check('Physical address', els.addr), check('Wired to line', els.loc), check('Application', els.app), check('Download', els.dl), check('Downloads received', els.dlN));
     els.params = h('div'); els.objs = h('div.tbl-wrap');
-    els.sigParams = ''; els.sigObjs = '';
+    els.sigParams = ''; els.sigObjs = ''; els.sigSec = '';
     body.replaceChildren(
       section('Programming and status', h('div', els.progBox, els.checks)),
+      ...(d.secure ? [section('KNX Data Secure', els.sec = h('div'))] : []),
       section('Physical line', h('div', h('p.hint', { style: 'margin-top:0' }, 'Automatic (empty): the device sits on the line of its address, so it moves when ETS gives it a new address. Enter a line such as 1.2 to wire it by hand instead. Telegrams only cross to other lines through couplers.'),
         els.locIn = h('input.input', { type: 'text', maxlength: 5, placeholder: 'auto', 'aria-label': 'Physical line', style: 'width:6rem' }),
         h('button.btn', { style: 'margin-left:.5rem', onclick: () => operate('Moving device', () => api.setLocation(name, els.locIn.value.trim())) }, 'Set'))),
@@ -83,6 +84,7 @@ export function createDetail({ onBack, onClose } = {}) {
     setCls(els.progBox, 'active', d.programming);
     setCls(els.progBtn.firstChild, 'on', d.programming);
     setText(els.progTxt, d.programming ? 'Programming mode is ON (red indicator lit). ETS can now assign the physical address. Press the button again to switch it off.' : 'Programming mode is off. Press the button, then assign the physical address from ETS.');
+    if (d.secure) renderSecure(d);
     setText(els.loc, d.unassigned ? 'not placed (no address yet)' : d.line + (d.location ? ' (set by hand)' : ' (follows the address)'));
     if (document.activeElement !== els.locIn) els.locIn.value = d.location || '';
     setText(els.addr, d.unassigned ? 'Missing (15.15.255 = not assigned)' : d.address);
@@ -94,6 +96,21 @@ export function createDetail({ onBack, onClose } = {}) {
     if (sigP !== els.sigParams) { els.sigParams = sigP; renderParams(d); }
     const sigO = JSON.stringify([d.loaded, d.assoc, S.cat[d.product]?.key]);
     if (sigO !== els.sigObjs) { els.sigObjs = sigO; renderObjects(d); }
+  }
+
+  function renderSecure(d) {
+    const sig = [d.serial, d.fdsk, d.secMode, d.toolKey].join('|');
+    if (els.sigSec === sig) return;
+    els.sigSec = sig;
+    const copy = (label, text) => h('div', { style: 'display:flex;gap:.5rem;align-items:center;margin:.25rem 0;flex-wrap:wrap' },
+      h('span.mute', { style: 'min-width:6.5rem' }, label), h('code', { style: 'user-select:all;word-break:break-all' }, text),
+      h('button.btn', { onclick: async () => { try { await navigator.clipboard.writeText(text); toast(label + ' copied.', 'ok'); } catch (e) { toast('Could not copy; select the text instead.', 'warn'); } } }, 'Copy'));
+    const groups = d.fdsk.match(/.{4}/g).join(' ');
+    els.sec.replaceChildren(
+      h('p.hint', { style: 'margin-top:0' }, 'ETS needs these two values to commission this device securely: add them in your ETS project as a device certificate (Security tab), then download with Secure commissioning on. The FDSK is only used for the first secure download; ETS then replaces it with its own key.'),
+      copy('Serial number', d.serial), copy('FDSK', d.fdsk), h('div.hint', { style: 'margin:.1rem 0 .5rem' }, 'FDSK grouped for reading: ' + groups),
+      h('ul.checks', h('li', h('span.label', 'Security mode'), h('span', d.secMode ? 'On (ETS has commissioned the device)' : 'Off (not commissioned yet)')),
+        h('li', h('span.label', 'Key in use'), h('span', d.toolKey ? 'ETS tool key (FDSK replaced)' : 'Factory key (FDSK)'))));
   }
 
   function renderParams(d) {

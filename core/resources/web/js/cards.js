@@ -70,7 +70,7 @@ export function createCard(d, handlers) {
 
   let face;
   const L = {}; // value elements
-  switch (d.product) {
+  switch (d.product.replace(/^secure-/, '')) {
     case 'push-button': {
       L.k = [1, 2, 3, 4].map(i => ({ row: h('div.key-row'), btn: holdButton(d.name, i, 'Key ' + i, 'button'), d: h('div.hint'), l: h('span.mono') }));
       state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';

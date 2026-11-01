@@ -11,6 +11,10 @@ public final class ProductInfo {
 	private static final Map<String, Info> INFO = Map.ofEntries(
 			Map.entry("push-button", new Info("Push button, 4 keys", "Input", "button",
 					"Four keys. Each key can be disabled, named and given a function in ETS: switch, relative dimming or blinds.")),
+			Map.entry("secure-push-button", new Info("Secure push button, 4 keys", "Input", "button",
+					"Like the push button, but a KNX Data Secure device: ETS needs its serial number and FDSK (shown in the device details) to commission it, and group telegrams are then authenticated and encrypted.")),
+			Map.entry("secure-switch-actuator", new Info("Secure switch actuator, 8 outputs", "Actuator", "lamp",
+					"Like the switch actuator, but a KNX Data Secure device: ETS needs its serial number and FDSK (shown in the device details) to commission it. It only accepts group telegrams that are authenticated and encrypted as ETS configured.")),
 			Map.entry("push-slider", new Info("Slider push button", "Input", "slider",
 					"A button plus a slider that sends a brightness value (1 byte).")),
 			Map.entry("switch-actuator", new Info("Switch actuator, 8 outputs", "Actuator", "lamp",

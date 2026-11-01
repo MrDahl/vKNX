@@ -135,6 +135,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				: new IndividualAddress(0xFFFF);
 		final KNXNetworkLink link = uplink.createDeviceLink(startAddress, logic::physicalLines);
 		device.setDeviceLink(link);
+		if (product.secure()) // secure management telegrams (key tables) are longer than the 15 bytes of a standard frame
+			io.calimero.device.ios.DeviceObject.lookup(device.getInterfaceObjectServer()).set(PID.MAX_APDULENGTH, (byte) 0, (byte) 254);
 		logic.log("device", "created " + product.name() + (restored ? " (state restored)" : " (factory state)")
 				+ ", address " + device.getAddress());
 		logic.afterTablesChanged();
@@ -161,6 +163,49 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			ios.setProperty(obj, PID.TABLE_REFERENCE, 1, 1, intBytes(SLOT_ADDRESS[obj]));
 		}
 		ios.setProperty(OBJ_APPLICATION, PID.PROGRAM_VERSION, 1, 1, new byte[5]);
+		if (product.secure()) {
+			// KNX Data Secure: the factory default setup key (FDSK) ETS needs for the first, secure download
+			final byte[] fdsk = new byte[16];
+			new java.security.SecureRandom().nextBytes(fdsk);
+			final var sec = io.calimero.device.ios.SecurityObject.lookup(ios);
+			sec.set(io.calimero.device.ios.SecurityObject.Pid.Fdsk, fdsk);
+			// start the sending sequence number above 1: a device that starts at 1 first asks another device for a
+			// sync (S-A_Sync.req) before it can send a group telegram, and no such partner is known yet
+			final long seq = 2 + new java.security.SecureRandom().nextInt(1_000_000);
+			final byte[] seqBytes = java.nio.ByteBuffer.allocate(8).putLong(seq).array();
+			final byte[] six = java.util.Arrays.copyOfRange(seqBytes, 2, 8);
+			sec.set(io.calimero.device.ios.SecurityObject.Pid.SequenceNumberSending, six);
+			sec.set(io.calimero.device.ios.SecurityObject.Pid.InitialSequenceNumberSending, six);
+		}
+	}
+
+	// ---------------------------------------------------------------- KNX Data Secure
+
+	private io.calimero.device.ios.SecurityObject securityObject() {
+		return io.calimero.device.ios.SecurityObject.lookup(base.getInterfaceObjectServer());
+	}
+
+	/** The factory default setup key as 32 hex digits, or "" for a device that is not a secure product. */
+	public String fdskHex() {
+		return product.secure() ? HexFormat.of().withUpperCase().formatHex(securityObject().get(io.calimero.device.ios.SecurityObject.Pid.Fdsk)) : "";
+	}
+
+	/** The 6-byte KNX serial number as 12 hex digits (ETS shows and asks for it together with the FDSK). */
+	public String serialHex() { return HexFormat.of().withUpperCase().formatHex(serialNumber().array()); }
+
+	/** True once ETS has switched on security mode (the secure download completed far enough). */
+	public boolean securityModeOn() {
+		return product.secure() && (securityObject().get(io.calimero.device.ios.SecurityObject.Pid.SecurityMode, 1, 1)[0] & 0xff) == 1;
+	}
+
+	/** True once ETS replaced the factory key with its own tool key: the FDSK is no longer used. */
+	public boolean toolKeyActive() {
+		if (!product.secure())
+			return false;
+		for (final byte b : securityObject().get(io.calimero.device.ios.SecurityObject.Pid.ToolKey))
+			if (b != 0)
+				return true;
+		return false;
 	}
 
 	public String name() { return name; }
@@ -1033,13 +1078,19 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			System.arraycopy(data, 0, apdu, 2, data.length);
 		}
 		try {
-			base.getDeviceLink().sendRequest(ga, Priority.LOW, apdu);
+			// a group object ETS marked as secure is sent authenticated (and encrypted); otherwise the plain APDU goes out
+			final var secured = base.secureApplicationLayer().secureGroupObject(address(), ga, apdu);
+			base.getDeviceLink().sendRequest(ga, Priority.LOW, secured.orElse(apdu));
 			log("tx", "GroupValueWrite " + address() + " -> " + ga + " value " + value + " (object " + go + " " + oname
-					+ ")");
+					+ (secured.isPresent() ? ", KNX Data Secure" : "") + ")");
 			return true;
 		}
 		catch (final KNXException ex) {
 			log("tx", "send failed: " + ex);
+			return false;
+		}
+		catch (final InterruptedException ex) {
+			Thread.currentThread().interrupt();
 			return false;
 		}
 	}

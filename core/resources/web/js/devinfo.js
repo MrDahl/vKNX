@@ -30,7 +30,7 @@ export function pointsOf(d) {
   const v = d.view || {}, n = d.name, P = [];
   const add = (k, type, extra) => P.push({ id: n + '|' + k, dev: n, k, type, label: n, ...extra });
   const on = i => v['e' + i] !== false;
-  switch (d.product) {
+  switch (d.product.replace(/^secure-/, '')) {
     case 'push-button': for (let i = 1; i <= 4; i++) if (on(i)) add('k' + i, 'key', { keyNo: i, sym: 'button', label: n + ' ' + (v['n' + i] || 'Key ' + i), name: v['n' + i] || 'Key ' + i }); break;
     case 'push-slider': add('btn', 'button', { name: 'Button' }); add('sl', 'slider', { label: n + ' (slider)', name: 'Slider', val: v.level ?? 0 }); break;
     case 'switch-actuator': for (let i = 1; i <= 8; i++) if (on(i)) add('l' + i, 'lamp', { on: (v.lamps || '')[i - 1] === '1', label: n + ' ' + (v['n' + i] || 'Output ' + i), name: v['n' + i] || 'Output ' + i }); break;
@@ -45,7 +45,7 @@ export function pointsOf(d) {
 export function objectsOfPoint(d, p) {
   const all = (S.cat[d.product]?.objects || []).map(o => o.number);
   const n = +(p.k.match(/\d+$/)?.[0] || 0);
-  switch (d.product) {
+  switch (d.product.replace(/^secure-/, '')) {
     case 'push-button': case 'dimmer': return [1, 2, 3, 4, 5].map(i => 5 * (n - 1) + i);
     case 'switch-actuator': return [n, 8 + n];
     case 'blind-actuator': return [3 * (n - 1) + 1, 3 * (n - 1) + 2, 3 * (n - 1) + 3];
