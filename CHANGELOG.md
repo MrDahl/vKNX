@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.6.4] - 2026-11-01
 - **Fix: the structure was flat, so couplers had no effect.** 0.6.2/0.6.3 put every new device on the line of the ETS interface (for example 1.0), so couplers and devices all sat on the same line and telegrams never needed to cross a coupler. Now devices are placed **automatically by their physical address** as soon as ETS assigns it (1.1.4 on line 1.1, a line coupler 1.1.0 between 1.1 and 1.0, an area coupler 1.0.0 between 1.0 and the backbone) and move when ETS gives them a new address. A device that loses its address (15.15.255, or 15.15.0 as ETS leaves a coupler after an unload) stays where it was. Devices stored by 0.6.2/0.6.3 are placed by their address again.
 - **New: Topology view** in the Installation tab (button *Topology*): areas, lines and the devices on them, like ETS' topology window; devices without an address are listed as *Not addressed yet*.
 - The physical line can still be set by hand (Add device, device details; empty = automatic), for example to test a wrong address. Stored as `@a.l!` in `devices.txt`.
