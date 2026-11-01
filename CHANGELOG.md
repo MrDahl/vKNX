@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.7.3] - 2026-11-01
 
 ### Fixed
 - **The device certificate could not be typed into ETS.** ETS's "Add Device Certificate" field does not take the 32 hex digits we showed (it has no 0 or 1). It wants a 36-character Base32 code in six blocks of six (letters A-Z, digits 2-7) built from the serial number, the FDSK and a 4-bit CRC. vKNX now shows this **Device certificate** code in the device details, with a Copy button; the serial number and FDSK stay below it for reference. Our test reproduces the example code from the KNX Secure course exactly, but the CRC details are only checked against that one example, so ETS may still reject a code: it shows a check mark when the code is valid.
