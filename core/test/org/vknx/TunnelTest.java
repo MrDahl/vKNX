@@ -103,6 +103,37 @@ public final class TunnelTest {
 			pb.behavior().act("press", 1);
 			SelfTest.check("tunnel: button press lights lamp", SelfTest.await(((SwitchActuatorBehavior) sa.behavior())::lampLit));
 			Thread.sleep(300);
+			{
+				// a second tunnel (ETS' monitor tab) must not get the answers that belong to the first tunnel's address:
+				// ETS would see them twice, acknowledge twice and the device would drop the transport connection
+				final var me = new IndividualAddress(1, 1, 241); // the first tunnel's address
+				final java.util.concurrent.atomic.AtomicInteger own = new java.util.concurrent.atomic.AtomicInteger();
+				final java.util.concurrent.atomic.AtomicInteger foreign = new java.util.concurrent.atomic.AtomicInteger();
+				final io.calimero.link.NetworkLinkListener count = new io.calimero.link.NetworkLinkListener() {
+					@Override public void indication(final io.calimero.FrameEvent e) {
+						if (e.getFrame() instanceof final io.calimero.cemi.CEMILData d && me.equals(d.getDestination())
+								&& d.getSource().equals(sa.address()))
+							foreign.incrementAndGet();
+					}
+					@Override public void linkClosed(final io.calimero.CloseEvent e) {}
+				};
+				try (var tunnel2 = KNXNetworkLinkIP.newTunnelingLink(new InetSocketAddress(host, 0),
+						new InetSocketAddress(host, port), false, new TPSettings(new IndividualAddress(0)))) {
+					tunnel2.addLinkListener(count);
+					tunnel.addLinkListener(new io.calimero.link.NetworkLinkListener() {
+						@Override public void indication(final io.calimero.FrameEvent e) {
+							if (e.getFrame() instanceof final io.calimero.cemi.CEMILData d && me.equals(d.getDestination())
+									&& d.getSource().equals(sa.address()))
+								own.incrementAndGet();
+						}
+						@Override public void linkClosed(final io.calimero.CloseEvent e) {}
+					});
+					tunnel.sendRequestWait(sa.address(), io.calimero.Priority.LOW, new byte[] { 0x03, 0x00 });
+					Thread.sleep(500);
+					SelfTest.check("tunnel: the answer reaches the tunnel it is addressed to (" + own + ")", own.get() >= 1);
+					SelfTest.check("tunnel: a second tunnel does not get it (" + foreign + ")", foreign.get() == 0);
+				}
+			}
 			synchronized (trace) {
 				SelfTest.check("tunnel: ETS side saw the button telegram and the status telegram",
 						trace.stream().anyMatch(s -> s.startsWith("BUS device") && s.contains("1/0/1"))
