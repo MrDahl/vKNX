@@ -95,11 +95,13 @@ public final class SecureTest {
 			final var tool = new ManagementClientImpl(secureLink, security);
 			final byte[] groupKey = new byte[16];
 			new SecureRandom().nextBytes(groupKey);
+			final var toolKeys = new java.util.HashMap<IndividualAddress, byte[]>();
 			for (final var dev : List.of(pb, sw)) {
 				final Destination d = tool.createDestination(dev.address(), true);
 				try {
 					final byte[] toolKey = new byte[16];
 					new SecureRandom().nextBytes(toolKey);
+					toolKeys.put(dev.address(), toolKey);
 					tool.writeProperty(d, OBJ_TYPE_SECURITY, 1, PID_TOOL_KEY, 1, 1, toolKey);
 					tool.writeProperty(d, OBJ_TYPE_SECURITY, 1, PID_GROUP_KEY_TABLE, 1, 1,
 							ByteBuffer.allocate(18).putShort((short) 1).put(groupKey).array()); // entry for address-table index 1
@@ -148,12 +150,30 @@ public final class SecureTest {
 			Thread.sleep(900);
 			check("factory reset without address (ETS deactivating secure commissioning) keeps the tool key",
 					pb.securityModeOn() && pb.toolKeyActive());
+			{
+				// ETS then talks to the device with a fresh connection and a fresh sync, using the tool key it wrote
+				final var security3 = Security.newSecurity();
+				security3.deviceToolKeys().put(pb.address(), toolKeys.get(pb.address()));
+				final var fresh = new ManagementClientImpl(net.createDeviceLink(new IndividualAddress(1, 1, 245)), security3);
+				try {
+					final Destination dd = fresh.createDestination(pb.address(), true);
+					final byte[] sn = fresh.readProperty(dd, 0, 1, io.calimero.mgmt.PropertyAccess.PID.SERIAL_NUMBER, 1, 1);
+					check("after that reset a fresh secure management connection with the tool key works", sn != null && sn.length > 0);
+				}
+				catch (final Exception e) {
+					check("after that reset a fresh secure management connection with the tool key works: " + e, false);
+				}
+				finally {
+					fresh.detach();
+				}
+			}
 			pb.restart(true, io.calimero.mgmt.ManagementClient.EraseCode.FactoryReset, 0);
 			check("factory reset deletes security mode and tool key (after the answer has gone out)",
 					until(3000, () -> !pb.securityModeOn() && !pb.toolKeyActive()));
 			check("factory reset keeps FDSK and serial", pb.fdskHex().equals(fdskBefore) && pb.serialHex().equals("00FA00000033"));
 			// after the reset ETS talks to the device with the factory key again (secure management with the FDSK)
 			tool.detach();
+			Thread.sleep(1200); // the device ignores a sync.req within 1 s of its last sync.res
 			final var security2 = Security.newSecurity();
 			security2.deviceToolKeys().put(pb.address(), HexFormat.of().parseHex(pb.fdskHex()));
 			final var tool2 = new ManagementClientImpl(net.createDeviceLink(new IndividualAddress(1, 1, 244)), security2);
