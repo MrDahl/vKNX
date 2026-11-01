@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.7.7] - 2026-11-02
 
 ### Added
 - **Warnings and diagnostics (Installation tab).** A status strip shows how many ETS connections are open and the line the interface sits on, and warns about what typically ends in "Device does not respond" or "address already in use": a device on a line the interface cannot reach through the existing couplers ("Tryk1 (5.7.3) cannot reach the interface line 1.1 ... set the interface to 5.7 ..."), two devices with the same address, a device with the address of an ETS tunnel, and several open connections. From the recent traffic it also explains what ETS just tried: an address assignment while the programming button was off, a request to an address no device has, a device that did not answer (with the likely cause: unreachable line, secure commissioning on, no application), a failed download step or a refusal in the secure layer. The button "ETS messages explained" lists the common ETS messages with their usual causes with vKNX. These hints are derived from what vKNX can see on its own side; they are not read from ETS.
