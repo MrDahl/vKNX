@@ -144,6 +144,10 @@ public final class SecureTest {
 			Thread.sleep(800);
 			check("a confirmed restart (what ETS sends to activate the keys) keeps security mode and tool key",
 					pb.securityModeOn() && pb.toolKeyActive());
+			pb.restart(true, io.calimero.mgmt.ManagementClient.EraseCode.FactoryResetWithoutIndividualAddress, 0);
+			Thread.sleep(900);
+			check("factory reset without address (ETS deactivating secure commissioning) keeps the tool key",
+					pb.securityModeOn() && pb.toolKeyActive());
 			pb.restart(true, io.calimero.mgmt.ManagementClient.EraseCode.FactoryReset, 0);
 			check("factory reset deletes security mode and tool key (after the answer has gone out)",
 					until(3000, () -> !pb.securityModeOn() && !pb.toolKeyActive()));

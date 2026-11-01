@@ -5,6 +5,9 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Fixed
+- Deactivating "Secure Commissioning" in ETS: ETS sends a factory reset without address (code 7) and then keeps talking with the tool key to switch security mode off. vKNX deleted the keys on that reset, so ETS got no answer ("Device does not respond"). Now only a full factory reset deletes the keys.
+
 ### Added
 - **Secure devices now write what their KNX Data Secure layer does into their own log** (Monitor tab, category "secure"): received secured telegrams, sync requests and answers, MAC and sequence number errors. This is for finding out why ETS and a secure device do not agree after a reset ("Device does not respond" when Secure Commissioning is switched off and the device is downloaded in plain). Together with the "A_Restart (master reset ...)" line the log shows which erase code ETS sent.
 
