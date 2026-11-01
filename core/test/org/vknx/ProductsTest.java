@@ -288,12 +288,17 @@ public final class ProductsTest {
 			boolean bad = false;
 			try { reg.add("dimmer", "bad name!"); } catch (final IllegalArgumentException e) { bad = true; }
 			check("registry rejects duplicate and invalid names", dup && bad);
-			check("registry remembers devices", Files.readAllLines(regDir.resolve("devices.txt")).equals(List.of("dimmer:Dimmer1@" + reg.devices().get(0).location())));
+			check("registry remembers devices", Files.readAllLines(regDir.resolve("devices.txt")).equals(List.of("dimmer:Dimmer1")) && reg.devices().get(0).location() == null);
 			reg.remove("Dimmer1");
 			check("registry remove deletes state", reg.devices().isEmpty()
 					&& Files.list(regDir).noneMatch(f -> f.getFileName().toString().startsWith("Dimmer1.state")));
 			reg.add("dimmer", "Dimmer1");
 			check("same name can be added again after removal", reg.devices().size() == 1);
+			reg.setLocation("Dimmer1", new org.vknx.sim.Topology.Line(1, 2));
+			check("a line chosen by hand is stored with '!' and placement follows it", Files.readAllLines(regDir.resolve("devices.txt")).equals(List.of("dimmer:Dimmer1@1.2!"))
+					&& reg.devices().get(0).placement().equals(new org.vknx.sim.Topology.Line(1, 2)));
+			reg.setLocation("Dimmer1", null);
+			check("empty line = automatic again", Files.readAllLines(regDir.resolve("devices.txt")).equals(List.of("dimmer:Dimmer1")));
 			reg.closeAll();
 		}
 		catch (final Throwable t) {

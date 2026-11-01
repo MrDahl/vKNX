@@ -172,6 +172,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	// ---------------------------------------------------------------- physical placement
 
 	private volatile org.vknx.sim.Topology.Line location;
+	private volatile org.vknx.sim.Topology.Line[] autoLines;
 
 	/** The line this device is wired to, or null if it is placed by its address. */
 	public org.vknx.sim.Topology.Line location() { return location; }
@@ -185,11 +186,21 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		changed();
 	}
 
+	/** The line the device sits on right now (for a coupler: its sub line). */
+	public org.vknx.sim.Topology.Line placement() { return physicalLines()[0]; }
+
 	/** The line(s) the device hears and sends on: one, or two for a coupler (its sub line and the main line). */
 	org.vknx.sim.Topology.Line[] physicalLines() {
 		final var l = location;
-		if (l == null)
-			return subnet.topology().linesOf(address());
+		if (l == null) {
+			// placed by address; a device that loses its address stays where it was (it is not unplugged)
+			final var a = address();
+			if (a.getRawAddress() != 0xFFFF)
+				autoLines = subnet.topology().linesOf(a);
+			else if (autoLines != null)
+				return autoLines;
+			return subnet.topology().linesOf(a);
+		}
 		if (product.coupler()) {
 			final var parent = l.parent();
 			return parent == null ? new org.vknx.sim.Topology.Line[] { l } : new org.vknx.sim.Topology.Line[] { l, parent };
@@ -203,6 +214,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		if (l != null)
 			return l;
 		final var a = address();
+		if (a.getRawAddress() == 0xFFFF && autoLines != null && autoLines.length > 0)
+			return autoLines[0];
 		return a.getDevice() == 0 && a.getRawAddress() != 0 ? new org.vknx.sim.Topology.Line(a.getArea(), a.getLine()) : null;
 	}
 

@@ -18,7 +18,7 @@ function suggest(key) {
 export function openAddDevice() {
   let chosen = null, nameTouched = false;
   const name = h('input.input#new-name', { type: 'text', maxlength: 20, autocomplete: 'off', spellcheck: false, 'aria-describedby': 'name-help' });
-  const lineIn = h('input.input#new-line', { type: 'text', maxlength: 5, autocomplete: 'off', spellcheck: false, value: S.state?.uplink || '1.1', 'aria-describedby': 'line-help' });
+  const lineIn = h('input.input#new-line', { type: 'text', maxlength: 5, autocomplete: 'off', spellcheck: false, placeholder: 'automatic', 'aria-describedby': 'line-help' });
   name.addEventListener('input', () => { nameTouched = true; err.textContent = ''; });
   const err = h('div.error-text', { role: 'alert' });
   const addBtn = h('button.btn.primary', { disabled: true }, icon('plus'), 'Add device');
@@ -48,7 +48,7 @@ export function openAddDevice() {
     if (!NAME_RE.test(n)) { err.textContent = 'The name must be 1–20 characters: letters, digits, "-" or "_" (no spaces).'; name.focus(); return; }
     if ((S.state?.devices || []).some(d => d.name.toLowerCase() === n.toLowerCase())) { err.textContent = `A device called "${n}" already exists. Choose another name.`; name.focus(); return; }
     const ln = lineIn.value.trim();
-    if (!/^\d{1,2}\.\d{1,2}$/.test(ln)) { err.textContent = 'The physical line must look like 1.1 (area.line).'; lineIn.focus(); return; }
+    if (ln && !/^\d{1,2}\.\d{1,2}$/.test(ln)) { err.textContent = 'The physical line must look like 1.1 (area.line), or be empty for automatic placement.'; lineIn.focus(); return; }
     addBtn.disabled = true;
     try {
       await api.add(chosen.key, n, ln);
@@ -68,8 +68,8 @@ export function openAddDevice() {
       grid,
       h('div.field', { style: 'margin-top:1.1rem' }, h('label', { for: 'new-name' }, 'Device name'), name,
         h('div.hint#name-help', 'Letters, digits, "-" and "_", up to 20 characters. Shown in the lists and on the floor plan.'), err),
-      h('div.field', { style: 'margin-top:1.1rem' }, h('label', { for: 'new-line' }, 'Physical line (where it is wired)'), lineIn,
-        h('div.hint#line-help', 'Like a real installation, the device sits on one line, independent of its address. Default: the line of the ETS interface. Couplers: the sub line they serve.'))],
+      h('div.field', { style: 'margin-top:1.1rem' }, h('label', { for: 'new-line' }, 'Physical line (optional)'), lineIn,
+        h('div.hint#line-help', 'Leave empty: the device is placed on the line of its physical address as soon as ETS assigns one (see the topology view). Enter a line such as 1.1 only to wire it by hand, for example to test a wrong address.'))],
     buttons: close => { addBtn.onclick = () => submit(close); return [h('button.btn', { onclick: close }, 'Cancel'), addBtn]; },
   });
   name.addEventListener('keydown', e => { if (e.key === 'Enter') addBtn.click(); });

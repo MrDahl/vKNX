@@ -3,6 +3,12 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+- **Fix: the structure was flat, so couplers had no effect.** 0.6.2/0.6.3 put every new device on the line of the ETS interface (for example 1.0), so couplers and devices all sat on the same line and telegrams never needed to cross a coupler. Now devices are placed **automatically by their physical address** as soon as ETS assigns it (1.1.4 on line 1.1, a line coupler 1.1.0 between 1.1 and 1.0, an area coupler 1.0.0 between 1.0 and the backbone) and move when ETS gives them a new address. A device that loses its address stays where it was. Devices stored by 0.6.2/0.6.3 are placed by their address again.
+- **New: Topology view** in the Installation tab (button *Topology*): areas, lines and the devices on them, like ETS' topology window; devices without an address are listed as *Not addressed yet*.
+- The physical line can still be set by hand (Add device, device details; empty = automatic), for example to test a wrong address. Stored as `@a.l!` in `devices.txt`.
+- Tested with `TopologyTest`, `CouplerTest` (an unaddressed coupler stays on its line) and `ProductsTest` (registry); topology view checked headless. **Not tried in ETS.**
+
 ## [0.6.3] - 2026-11-01
 - **Fix: an unloaded coupler kept routing.** Unloading a coupler's application in ETS only sent the UNLOAD event, and vKNX left the old routing settings and filter table in place, so the light kept working through an unloaded coupler. An unloaded coupler now falls back to *filter* with an empty table (group telegrams blocked). Tested with `CouplerTest`; **not tried in ETS.** A coupler without address still sits on the line it is wired to; its routing then follows the same settings.
 

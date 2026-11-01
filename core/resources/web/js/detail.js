@@ -63,9 +63,9 @@ export function createDetail({ onBack, onClose } = {}) {
     els.sigParams = ''; els.sigObjs = '';
     body.replaceChildren(
       section('Programming and status', h('div', els.progBox, els.checks)),
-      section('Physical line', h('div', h('p.hint', { style: 'margin-top:0' }, 'The line this device is wired to. Telegrams only cross to other lines through couplers, as in a real installation. Moving it changes the wiring, not the address.'),
-        els.locIn = h('input.input', { type: 'text', maxlength: 5, 'aria-label': 'Physical line', style: 'width:6rem' }),
-        h('button.btn', { style: 'margin-left:.5rem', onclick: () => operate('Moving device', () => api.setLocation(name, els.locIn.value.trim())) }, 'Move'))),
+      section('Physical line', h('div', h('p.hint', { style: 'margin-top:0' }, 'Automatic (empty): the device sits on the line of its address, so it moves when ETS gives it a new address. Enter a line such as 1.2 to wire it by hand instead. Telegrams only cross to other lines through couplers.'),
+        els.locIn = h('input.input', { type: 'text', maxlength: 5, placeholder: 'auto', 'aria-label': 'Physical line', style: 'width:6rem' }),
+        h('button.btn', { style: 'margin-left:.5rem', onclick: () => operate('Moving device', () => api.setLocation(name, els.locIn.value.trim())) }, 'Set'))),
       section('ETS parameters', els.params),
       section('Communication objects and group addresses', els.objs),
       section('Telegrams', h('div', h('p.hint', { style: 'margin-top:0' }, 'Telegrams sent by this device or addressed to one of its group addresses.'),
@@ -83,7 +83,7 @@ export function createDetail({ onBack, onClose } = {}) {
     setCls(els.progBox, 'active', d.programming);
     setCls(els.progBtn.firstChild, 'on', d.programming);
     setText(els.progTxt, d.programming ? 'Programming mode is ON (red indicator lit). ETS can now assign the physical address. Press the button again to switch it off.' : 'Programming mode is off. Press the button, then assign the physical address from ETS.');
-    setText(els.loc, d.location || '–');
+    setText(els.loc, d.unassigned ? 'not placed (no address yet)' : d.line + (d.location ? ' (set by hand)' : ' (follows the address)'));
     if (document.activeElement !== els.locIn) els.locIn.value = d.location || '';
     setText(els.addr, d.unassigned ? 'Missing (15.15.255 = not assigned)' : d.address);
     setText(els.app, d.loaded ? 'Loaded' : 'Missing – download the application from ETS');

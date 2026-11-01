@@ -268,15 +268,16 @@ public final class WebUi {
 		}
 	}
 
-	/** Wires a device to another line: POST ?dev=Name&line=1.2. */
+	/** Wires a device to another line: POST ?dev=Name&line=1.2 (empty line = placed by its address again). */
 	private void location(final HttpExchange ex) throws IOException {
 		if (!"POST".equals(ex.getRequestMethod())) {
 			send(ex, 405, "text/plain", "POST only".getBytes(StandardCharsets.UTF_8));
 			return;
 		}
 		try {
-			final var where = org.vknx.device.DeviceRegistry.parseLine(param(ex.getRequestURI(), "line", ""));
-			if (where == null)
+			final String text = param(ex.getRequestURI(), "line", "");
+			final var where = org.vknx.device.DeviceRegistry.parseLine(text);
+			if (where == null && !text.isEmpty())
 				throw new IllegalArgumentException("line must look like 1.1 (area 0-15, line 0-15)");
 			registry.setLocation(param(ex.getRequestURI(), "dev", ""), where);
 			send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
@@ -333,7 +334,7 @@ public final class WebUi {
 			sb.append("{\"name\":").append(q(d.name())).append(",\"product\":").append(q(d.product().key()))
 					.append(",\"productName\":").append(q(d.product().name())).append(",\"address\":").append(q(d.address().toString()))
 					.append(",\"unassigned\":").append(d.address().getRawAddress() == 0xFFFF)
-					.append(",\"location\":").append(q(d.location() == null ? "" : d.location().toString()))
+					.append(",\"line\":").append(q(d.placement().toString())).append(",\"location\":").append(q(d.location() == null ? "" : d.location().toString()))
 					.append(",\"programming\":").append(d.programmingMode()).append(",\"loaded\":")
 					.append(d.applicationLoaded()).append(",\"downloads\":").append(d.downloadCount())
 					.append(",\"downloadState\":").append(q(d.downloadState()))

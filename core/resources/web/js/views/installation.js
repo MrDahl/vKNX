@@ -8,11 +8,14 @@ export function createInstallation() {
   const root = h('div.split');
   const search = h('input.input', { type: 'search', placeholder: 'Search devices', 'aria-label': 'Search devices' });
   const list = h('div.list', { role: 'list' });
+  const tree = h('div.list.topo', { hidden: true });
+  let mode = 'list';
+  const modeBtn = h('button.btn', { 'aria-pressed': 'false', title: 'Show the devices as a topology tree (areas, lines)', onclick: () => { mode = mode === 'list' ? 'topology' : 'list'; update(); } }, 'Topology');
   const count = h('span.hint');
   const empty = h('div.empty', icon('devices'), h('div', 'No devices yet.'), h('div.hint', 'Use "Add device" to create one from the catalogue.'));
   root.append(
     h('section.panel.list-panel', h('div.list-tools', h('label.search', icon('search'), search),
-      h('button.btn.primary', { onclick: openAddDevice }, icon('plus'), 'Add device')), list, h('div', { style: 'padding:.5rem .85rem;border-top:1px solid var(--border)' }, count)));
+      h('button.btn.primary', { onclick: openAddDevice }, icon('plus'), 'Add device'), modeBtn), list, tree, h('div', { style: 'padding:.5rem .85rem;border-top:1px solid var(--border)' }, count)));
   const detail = createDetail({ onBack: () => selectDevice(null) });
   const detailPanel = h('section.panel.detail-panel', detail.el);
   root.append(detailPanel);
@@ -42,10 +45,35 @@ export function createInstallation() {
     setCls(el, 'hl', !!S.gaSel && (d.assoc || []).some(a => a.ga === S.gaSel));
   }
 
+  function renderTree(ds) {
+    const byLine = new Map(), unplaced = [];
+    for (const d of ds) { if (d.unassigned) { unplaced.push(d); continue; } if (!byLine.has(d.line)) byLine.set(d.line, []); byLine.get(d.line).push(d); }
+    const lines = [...byLine.keys()].sort((a, b) => { const [x, y] = a.split('.').map(Number), [p, q] = b.split('.').map(Number); return x - p || y - q; });
+    const areas = new Map();
+    for (const l of lines) { const a = l.split('.')[0]; if (!areas.has(a)) areas.set(a, []); areas.get(a).push(l); }
+    const dev = d => h('button.row', { type: 'button', onclick: () => selectDevice(d.name), 'aria-current': S.selected === d.name ? 'true' : null },
+      h('div.ico', icon(productOf(d).icon)), h('div.grow', h('div.name.ellipsis', d.name), h('div.sub.ellipsis', productOf(d).title + (d.location ? ' · wired by hand' : ''))),
+      h('div.mono', d.address));
+    const kids = [h('p.hint', { style: 'margin:.2rem .85rem' }, 'Devices are placed by their physical address as soon as ETS assigns it (a line coupler x.y.0 sits on line x.y, an area coupler x.0.0 on main line x.0). Telegrams only cross between lines through couplers.')];
+    for (const [a, ls] of areas) {
+      kids.push(h('h4', { style: 'margin:.8rem .85rem .2rem' }, a === '0' ? 'Backbone (area 0)' : `Area ${a}`));
+      for (const l of ls) {
+        const [, n] = l.split('.');
+        kids.push(h('div.mute', { style: 'margin:.3rem .85rem 0' }, n === '0' ? `Main line ${l}` : `Line ${l}`));
+        kids.push(...byLine.get(l).sort((x, y) => x.address.localeCompare(y.address, undefined, { numeric: true })).map(dev));
+      }
+    }
+    if (unplaced.length) { kids.push(h('h4', { style: 'margin:.8rem .85rem .2rem' }, 'Not addressed yet'), ...unplaced.map(dev)); }
+    if (!ds.length) kids.push(h('div.empty', 'No devices yet.'));
+    tree.replaceChildren(...kids);
+  }
+
   function update() {
     const ds = S.state?.devices || [];
     const q = search.value.trim().toLowerCase();
     const shown = ds.filter(d => matches(d, q));
+    tree.hidden = mode !== 'topology'; list.hidden = mode === 'topology'; setAttr(modeBtn, 'aria-pressed', String(mode === 'topology'));
+    if (mode === 'topology') renderTree(shown);
     syncKeyed(list, shown, d => d.name, create, updRow);
     if (!shown.length) { if (!empty.isConnected) list.append(empty); } else empty.remove();
     setText(count, q ? `${shown.length} of ${ds.length} devices` : `${ds.length} device${ds.length === 1 ? '' : 's'}`);

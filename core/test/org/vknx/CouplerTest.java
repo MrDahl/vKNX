@@ -228,6 +228,15 @@ public final class CouplerTest {
 			Thread.sleep(400);
 			check("after a plain unload group telegrams no longer cross the coupler", dim.levelPct() == before);
 
+			// ---- a coupler that loses its address stays where it is wired (placement is remembered)
+			lc11.toggleProgrammingMode();
+			check("address removed from the coupler (back to 15.15.255)", ets.assignAddress(new IndividualAddress(0xFFFF))
+					&& until(3000, () -> lc11.address().getRawAddress() == 0xFFFF));
+			check("an unaddressed coupler still sits on its line 1.1", new org.vknx.sim.Topology.Line(1, 1).equals(lc11.placement()));
+			lc11.toggleProgrammingMode();
+			check("coupler gets 1.1.0 again", ets.assignAddress(new IndividualAddress(1, 1, 0))
+					&& until(3000, () -> lc11.address().equals(new IndividualAddress(1, 1, 0))));
+
 			// ---- block mode and route-all mode
 			couplerDownload(ets, lc11.address(), BLOCK, BLOCK, Set.of(gSw), false);
 			press(pb, 2);
