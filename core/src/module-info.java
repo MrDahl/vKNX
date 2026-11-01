@@ -5,6 +5,7 @@ module org.vknx {
 	requires jdk.httpserver;
 	requires java.desktop;
 	requires java.net.http;
+	requires java.logging;
 
 	exports org.vknx.app;
 	exports org.vknx.ui;

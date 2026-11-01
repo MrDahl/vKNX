@@ -115,6 +115,10 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			final org.vknx.sim.Topology.Line location) throws KNXException, IOException {
 		final boolean restored = Files.exists(stateFile);
 		final var logic = new VirtualDevice(name, product, stateFile);
+		if (product.secure()) {
+			SECURE_DEVICES.put(name, logic);
+			installSecureLogBridge();
+		}
 		logic.subnet = uplink;
 		logic.location = location;
 		if (listener != null)
@@ -253,6 +257,45 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public String certificate() {
 		return product.secure() ? deviceCertificate(serialNumber().array(),
 				securityObject().get(io.calimero.device.ios.SecurityObject.Pid.Fdsk)) : "";
+	}
+
+	// ---- what the secure layer does, in the device's own log (for finding out why ETS and a device do not agree)
+
+	private static final java.util.Map<String, VirtualDevice> SECURE_DEVICES = new java.util.concurrent.ConcurrentHashMap<>();
+	private static volatile boolean secureLogInstalled;
+
+	private static synchronized void installSecureLogBridge() {
+		if (secureLogInstalled)
+			return;
+		secureLogInstalled = true;
+		final var handler = new java.util.logging.Handler() {
+			@Override
+			public void publish(final java.util.logging.LogRecord r) {
+				final String logger = r.getLoggerName();
+				if (logger == null)
+					return;
+				for (final var e : SECURE_DEVICES.entrySet())
+					if (logger.endsWith(" " + e.getKey())) {
+						String msg = r.getMessage();
+						try {
+							if (r.getParameters() != null && r.getParameters().length > 0)
+								msg = java.text.MessageFormat.format(msg, r.getParameters());
+						}
+						catch (final RuntimeException ignore) { /* use the raw text */ }
+						if (r.getThrown() != null)
+							msg += " (" + r.getThrown().getMessage() + ")";
+						e.getValue().log("secure", msg);
+					}
+			}
+			@Override public void flush() {}
+			@Override public void close() {}
+		};
+		handler.setLevel(java.util.logging.Level.ALL);
+		for (final String n : new String[] { "io.calimero.device", "io.calimero.secure" }) {
+			final var l = java.util.logging.Logger.getLogger(n);
+			l.setLevel(java.util.logging.Level.FINE);
+			l.addHandler(handler);
+		}
 	}
 
 	/** The serial number the way ETS shows it: 2 bytes, colon, 4 bytes (e.g. 00FA:00000033). */

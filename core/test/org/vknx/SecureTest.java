@@ -122,6 +122,11 @@ public final class SecureTest {
 				sentSecure = trace.stream().anyMatch(s -> s.contains("spb [tx]") && s.contains("KNX Data Secure"));
 			}
 			check("the push button's log says the telegram went out as KNX Data Secure", sentSecure);
+			final boolean secLog;
+			synchronized (trace) {
+				secLog = trace.stream().anyMatch(s -> s.contains("[secure]"));
+			}
+			check("the secure layer's own messages (decrypt, MAC, sync) show up in the device log", secLog);
 
 			// a plain write to a secure group object must be ignored
 			final var plainLink = net.createDeviceLink(new IndividualAddress(1, 1, 243));
@@ -143,6 +148,23 @@ public final class SecureTest {
 			check("factory reset deletes security mode and tool key (after the answer has gone out)",
 					until(3000, () -> !pb.securityModeOn() && !pb.toolKeyActive()));
 			check("factory reset keeps FDSK and serial", pb.fdskHex().equals(fdskBefore) && pb.serialHex().equals("00FA00000033"));
+			// after the reset ETS talks to the device with the factory key again (secure management with the FDSK)
+			tool.detach();
+			final var security2 = Security.newSecurity();
+			security2.deviceToolKeys().put(pb.address(), HexFormat.of().parseHex(pb.fdskHex()));
+			final var tool2 = new ManagementClientImpl(net.createDeviceLink(new IndividualAddress(1, 1, 244)), security2);
+			final Destination d2 = tool2.createDestination(pb.address(), true);
+			try {
+				final byte[] mode = tool2.readProperty(d2, 0, 1, io.calimero.mgmt.PropertyAccess.PID.SERIAL_NUMBER, 1, 1);
+				check("after a factory reset the device answers secure management with the factory key again",
+						mode != null && mode.length > 0);
+			}
+			catch (final Exception e) {
+				check("after a factory reset the device answers secure management with the factory key again: " + e, false);
+			}
+			finally {
+				d2.destroy();
+			}
 			System.out.println("secure tests done");
 		}
 		catch (final Throwable t) {

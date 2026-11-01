@@ -3,6 +3,11 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Added
+- **Secure devices now write what their KNX Data Secure layer does into their own log** (Monitor tab, category "secure"): received secured telegrams, sync requests and answers, MAC and sequence number errors. This is for finding out why ETS and a secure device do not agree after a reset ("Device does not respond" when Secure Commissioning is switched off and the device is downloaded in plain). Together with the "A_Restart (master reset ...)" line the log shows which erase code ETS sent.
+
 ## [0.7.4] - 2026-11-01
 
 ### Fixed
