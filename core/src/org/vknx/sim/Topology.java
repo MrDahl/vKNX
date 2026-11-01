@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import io.calimero.IndividualAddress;
 import io.calimero.KNXAddress;
 import io.calimero.cemi.CEMILData;
+import io.calimero.cemi.CEMILDataEx;
 
 /**
  * The line structure of the simulated installation. Lines form a tree: the backbone line 0.0 is the root, the main
@@ -237,6 +238,10 @@ public final class Topology {
 			return null;
 		if (best == f.getHopCount())
 			return f;
+		// a long (extended) frame, e.g. an ETS memory write to a secure device, must stay an extended frame
+		if (f instanceof CEMILDataEx || f.getPayload().length > 16)
+			return new CEMILDataEx(f.getMessageCode(), f.getSource(), f.getDestination(), f.getPayload(), f.getPriority(),
+					f.isRepetition(), best);
 		return new CEMILData(f.getMessageCode(), f.getSource(), f.getDestination(), f.getPayload(), f.getPriority(),
 				f.isRepetition(), best);
 	}

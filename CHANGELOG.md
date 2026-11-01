@@ -3,6 +3,11 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Fixed
+- **Long (extended) frames were lost when they crossed a coupler.** ETS now sends the memory writes of a secure application as long frames (up to 254 bytes of APDU). The coupler model rebuilt every routed frame as a short frame, which fails for anything over 16 bytes, so the frame never reached the device and ETS reported "Communication quality with 1.x.y is too bad for a stable connection". Routed long frames now stay long frames. Covered by our own tests (a 40-byte frame through two line couplers, and a long memory write through the KNXnet/IP server); not yet tried in ETS.
+
 ## [0.7.1] - 2026-11-01
 
 ### Fixed

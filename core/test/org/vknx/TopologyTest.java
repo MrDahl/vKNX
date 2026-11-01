@@ -79,6 +79,16 @@ public final class TopologyTest {
 		SelfTest.check("1.1 -> 2.1 through area coupler, hop 6 -> 2", c.got.size() == 1 && c.got.get(0).getHopCount() == 2);
 		b.got.clear(); c.got.clear(); d.got.clear();
 
+		// long (extended) frame, e.g. an ETS memory write to a secure device: must survive the hop count change
+		final var longPayload = new byte[40];
+		longPayload[0] = 0x42;
+		a.link.send(new io.calimero.cemi.CEMILDataEx(CEMILData.MC_LDATA_REQ, a.link.getKNXMedium().getDeviceAddress(),
+				new IndividualAddress("1.2.5"), longPayload, Priority.SYSTEM, false, 6), false);
+		Thread.sleep(100);
+		SelfTest.check("a long (extended) frame crosses two line couplers intact",
+				b.got.size() == 1 && b.got.get(0).getPayload().length == 40 && b.got.get(0).getHopCount() == 4);
+		b.got.clear(); c.got.clear(); d.got.clear();
+
 		lc12.pass = false;
 		send(a, "1/1/1", 6);
 		SelfTest.check("blocked at 1.2.0: 1.2 deaf, 2.1 still hears", b.got.isEmpty() && c.got.size() == 1);
