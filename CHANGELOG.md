@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.7.5] - 2026-11-01
 
 ### Fixed
 - Deactivating "Secure Commissioning" in ETS: ETS sends a factory reset without address (code 7) and then keeps talking with the tool key to switch security mode off. vKNX deleted the keys on that reset, so ETS got no answer ("Device does not respond"). Now only a full factory reset deletes the keys.
