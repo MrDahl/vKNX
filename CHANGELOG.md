@@ -7,6 +7,7 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ### Fixed
 - A device removed in vKNX stayed on the simulated bus and kept answering with its old address. ETS then reported "The individual address is already in use by another device" for a new device with that address, and received every answer twice (the old and the new device both answered), which made ETS acknowledge twice, the device drop the connection and downloads fail with "Communication quality ... too bad" or run slowly. Removing a device now takes it off the bus.
+
 ## [0.7.5] - 2026-11-01
 
 ### Fixed
