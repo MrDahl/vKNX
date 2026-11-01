@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.7.0] - 2026-11-01
 
 ### Secure products: course-material review
 - The serial number is now shown the way ETS shows it in "Add Device Certificate" (`00FA:00000033`, 2 bytes + colon + 4 bytes).
