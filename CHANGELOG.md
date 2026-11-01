@@ -5,8 +5,20 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Added
+- **Warnings and diagnostics (Installation tab).** A status strip shows how many ETS connections are open and the line the interface sits on, and warns about what typically ends in "Device does not respond" or "address already in use": a device on a line the interface cannot reach through the existing couplers ("Tryk1 (5.7.3) cannot reach the interface line 1.1 ... set the interface to 5.7 ..."), two devices with the same address, a device with the address of an ETS tunnel, and several open connections. From the recent traffic it also explains what ETS just tried: an address assignment while the programming button was off, a request to an address no device has, a device that did not answer (with the likely cause: unreachable line, secure commissioning on, no application), a failed download step or a refusal in the secure layer. The button "ETS messages explained" lists the common ETS messages with their usual causes with vKNX. These hints are derived from what vKNX can see on its own side; they are not read from ETS.
+- **Setup checklist per device** (ETS connected, interface can reach the device, programming button pressed, address assigned, application downloaded, secure commissioning for secure products), ticked from the live state. When no device is selected, the Installation tab shows the next step for the first device that is not ready.
+- **Device details: status badges** (address, application, download, lock for secure devices) and a one-line **last ETS action** per device ("Partial download: 3 of 4 parts written, 5 memory writes", "Physical address 1.1.5 assigned", "Master reset ...", "Address refused: the programming button was not pressed"). Secure devices show a clear lock box that explains what secure commissioning means, and that group telegrams are only encrypted for group addresses marked secure in ETS.
+- **Topology diagram** (Installation tab, empty selection and the topology view): backbone, main lines, lines and couplers, the ETS interface marked, lines that cannot be reached from the interface outlined in red, lines that carried a telegram a moment ago glowing.
+- **Telegram monitor:** device and object names next to addresses (group addresses show "Device: object"; the ETS interface is labelled), **encrypted (Data Secure) telegrams are recognised** (lock symbol, key type, sequence number; when a vKNX device accepted the telegram it is shown, which proves the key and sequence number were right), a filter for encrypted telegrams only, and **"Explain this telegram"** in plain words for group telegrams, ETS management services and secure telegrams. The content of an encrypted telegram is only shown if a vKNX device accepted it.
+- **Operating cards:** push buttons show real key caps with a status LED, dimmers show the brightness as slider, blinds move smoothly and are marked while moving, every card lists its group addresses (and the channels show theirs); a lock marks commissioned secure devices. The simulation opens on the floor plan when a plan with placed devices exists (unless you chose a view before).
+
+### Changed
+- **New default look:** a bright, high-contrast light theme that works on projectors, larger buttons and rows, more space. The previous e-ink look is still available as "Paper (e-ink)" in Settings, and a "Large (projector)" size makes text and controls bigger. Animation is on, except in the Paper theme.
+
 ### Fixed
 - Partial downloads from ETS lost the parameters and group objects that had not changed. ETS unloads the application and the tables, then writes only what differs; vKNX cleared the memory on the unload, so e.g. a button or output that stayed enabled came back disabled, and the group object table was empty (no buttons or outputs on the operating card after the download). The memory is now kept on unload.
+
 ## [0.7.6] - 2026-11-01
 
 ### Fixed

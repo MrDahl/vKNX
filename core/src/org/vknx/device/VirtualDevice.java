@@ -449,18 +449,24 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public void writeAddress(final IndividualAddress newAddress) {
 		if (inProgrammingMode()) {
 			log("mgmt", "A_IndividualAddress_Write " + newAddress + " accepted (programming mode on)");
+			etsAction("Physical address " + newAddress + " assigned");
 			super.writeAddress(newAddress);
 			// real devices leave programming mode after an address assignment sequence ends (ETS restarts them)
 			changed();
 		}
 		else
 			log("mgmt", "A_IndividualAddress_Write " + newAddress + " ignored: not in programming mode");
+			etsAction("Address " + newAddress + " refused: the programming button was not pressed");
 	}
 
 	@Override
 	public ServiceResult<java.time.Duration> restart(final boolean masterReset,
 			final io.calimero.mgmt.ManagementClient.EraseCode eraseCode, final int channel) {
 		log("mgmt", "A_Restart (" + (masterReset ? "master reset " + eraseCode : "basic restart") + ")");
+		if (!masterReset && (lastEts.startsWith("Download") || lastEts.startsWith("Partial download")) && !lastEts.endsWith("device restarted"))
+			etsAction(lastEts + ", device restarted"); // ETS ends a download with a restart: keep what was downloaded in view
+		else
+			etsAction(masterReset ? "Master reset (" + eraseCode + ")" : "Restart");
 		// ETS sends "factory reset without address" (code 7) when it deactivates secure commissioning, and goes on talking
 		// with the tool key afterwards. Calimero deletes tool key and tables on that code (after the answer has gone out),
 		// so the device would no longer answer ETS. Keep what is there: snapshot now, put it back once Calimero is done.
@@ -584,6 +590,12 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			changed();
 		log("download", String.format("memory write 0x%06X, %d bytes -> %s", startAddress, data.length,
 				r.getResult() == null ? "ok" : "ok"));
+		synchronized (this) {
+			sessionTick();
+			sessWrites++;
+			if (!sessStarted.isEmpty())
+				downloadSummary();
+		}
 		return r;
 	}
 
@@ -694,6 +706,21 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			}
 		}
 		ios.setProperty(obj, PID.LOAD_STATE_CONTROL, 1, 1, (byte) state);
+		synchronized (this) {
+			if (event == LE_START_LOADING || event == LE_LOAD_COMPLETED || event == LE_UNLOAD || state == LS_ERROR) {
+				sessionTick();
+				if (event == LE_START_LOADING)
+					sessStarted.add(obj);
+				else if (event == LE_LOAD_COMPLETED)
+					sessDone.add(obj);
+				if (state == LS_ERROR)
+					sessErrors = true;
+				if (event == LE_UNLOAD)
+					etsAction("Unloaded " + what + " (ETS is about to download it again)");
+				else
+					downloadSummary();
+			}
+		}
 		if (event == LE_LOAD_COMPLETED) {
 			if (obj == OBJ_APPLICATION)
 				downloadCount++;
@@ -717,6 +744,11 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		final var mem = base.deviceMemory();
 		// Mode 1 = (re)initialise with the fill byte (full download). Mode 0 = partial download: keep what is already in
 		// memory, because ETS then writes only the parameters that changed. Zeroing here wiped every unchanged parameter.
+		synchronized (this) {
+			sessionTick();
+			if (!fill)
+				sessPartial = true;
+		}
 		if (fill && size > 0) {
 			final byte[] region = new byte[size];
 			java.util.Arrays.fill(region, fillByte);
@@ -906,6 +938,50 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	public int downloadCount() { return downloadCount; }
 
+	// ---- the last thing ETS did to this device, in one line (for the device card)
+
+	private volatile String lastEts = "";
+	private volatile long lastEtsAt;
+	private final java.util.Set<Integer> sessStarted = new java.util.TreeSet<>(), sessDone = new java.util.TreeSet<>();
+	private int sessWrites;
+	private boolean sessPartial, sessErrors;
+	private long sessAt;
+
+	/** One line about the most recent ETS action ("Partial download: 3 of 4 parts written"), or "" if ETS has done nothing yet. */
+	public String lastEtsAction() { return lastEts; }
+
+	public long lastEtsAt() { return lastEtsAt; }
+
+	private synchronized void etsAction(final String text) {
+		lastEts = text;
+		lastEtsAt = System.currentTimeMillis();
+	}
+
+	/** A new download session starts when the previous activity is more than 20 s ago. */
+	private void sessionTick() {
+		final long now = System.currentTimeMillis();
+		if (now - sessAt > 20_000) {
+			sessStarted.clear();
+			sessDone.clear();
+			sessWrites = 0;
+			sessPartial = false;
+			sessErrors = false;
+		}
+		sessAt = now;
+	}
+
+	private synchronized void downloadSummary() {
+		final int parts = 4;
+		final String kind = sessPartial ? "Partial download" : "Download";
+		if (sessErrors)
+			etsAction(kind + " failed (see the device log)");
+		else if (sessStarted.size() > sessDone.size())
+			etsAction(kind + " in progress: " + sessDone.size() + " of " + parts + " parts finished");
+		else
+			etsAction(kind + ": " + sessDone.size() + " of " + parts + " parts written, " + sessWrites + " memory write"
+					+ (sessWrites == 1 ? "" : "s"));
+	}
+
 	/**
 	 * What the device itself can document about its configuration, from the load states of its four tables:
 	 * "empty" (nothing loaded), "loading" (a download is in progress), "partial" (some tables missing),
@@ -1065,6 +1141,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			case LE_LOAD_COMPLETED -> {
 				state = LS_LOADED;
 				log("download", "load event LOAD_COMPLETED for the router application -> Loaded");
+				etsAction("Coupler configuration downloaded");
 			}
 			case LE_UNLOAD -> {
 				state = LS_UNLOADED;

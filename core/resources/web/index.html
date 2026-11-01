@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>vKNX</title>
 <script>
-// Theme before first paint. Light is the default; an explicit choice saved earlier is respected.
-try { var th = localStorage.getItem('vknx-theme'); document.documentElement.dataset.theme = th === 'dark' ? 'dark' : 'light'; } catch (e) {}
+// Theme and size before first paint. Light (bright, high contrast, good on projectors) is the default; an explicit choice is respected.
+try { var th = localStorage.getItem('vknx-theme'); document.documentElement.dataset.theme = th === 'dark' || th === 'paper' ? th : 'light'; if (localStorage.getItem('vknx-size') === 'large') document.documentElement.dataset.size = 'large'; } catch (e) {}
 </script>
 <link rel="stylesheet" href="/web/css/app.css">
 </head>

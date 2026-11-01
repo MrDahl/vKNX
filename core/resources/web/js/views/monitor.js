@@ -2,9 +2,10 @@ import { h, icon, setText, setCls, syncKeyed, clock, naturalCmp, flagLetters } f
 import { S, on, emit, setFilter, resetFilter, selectGa, device } from '../bus.js';
 import { gaIndex } from '../devinfo.js';
 import { toast } from '../dialogs.js';
+import { nameOfAddr, nameOfGa, secureInfo, secureLabel, acceptedBy, explain } from '../telegram.js';
 
 const MAX_ROWS = 400;
-const SERVICES = [['', 'All services'], ['write', 'Group write'], ['read', 'Group read'], ['response', 'Group response'], ['other', 'Other services']];
+const SERVICES = [['', 'All services'], ['write', 'Group write'], ['read', 'Group read'], ['response', 'Group response'], ['other', 'Other services'], ['secure', 'Encrypted (Data Secure) only']];
 
 export const svcKind = s => /GroupValue.*Write/i.test(s) ? 'write' : /GroupValue.*Read/i.test(s) ? 'read' : /GroupValue.*Response/i.test(s) ? 'response' : 'other';
 const svcLabel = s => { if (/^T_/.test(s)) return s; const t = s.replace(/^A_/, '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_.]/g, ' ').trim().toLowerCase(); return t.charAt(0).toUpperCase() + t.slice(1); };
@@ -17,7 +18,6 @@ export function rawData(tg) {
   return '0x' + b.slice(2).join(' ');
 }
 
-function nameOfAddr(addr) { return S.state?.devices.find(d => !d.unassigned && d.address === addr)?.name || ''; }
 
 /** Is the entry related to the device: sent by it, addressed to it, or addressed to a group address configured on it? */
 function relatedToDevice(e, name) {
@@ -35,7 +35,7 @@ export function filtered() {
     if (e.seq <= cut) return false;
     const tg = e.tg;
     if (f.origin && tg.origin !== f.origin) return false;
-    if (f.service && svcKind(tg.svc) !== f.service) return false;
+    if (f.service === 'secure' ? !secureInfo(tg) : f.service && svcKind(tg.svc) !== f.service) return false;
     if (f.ga && !(tg.group && tg.dst === f.ga)) return false;
     if (f.device && !relatedToDevice(e, f.device)) return false;
     if (q && !`${tg.src} ${nameOfAddr(tg.src)} ${tg.dst} ${tg.svc} ${tg.value || ''} ${tg.tpdu}`.toLowerCase().includes(q)) return false;
@@ -46,7 +46,7 @@ const activeFilters = () => Object.entries(S.filter).filter(([, v]) => v);
 
 /** Telegram monitor (compact in the simulation dock, full in the Monitor workspace). */
 export function createMonitor({ compact }) {
-  const st = { paused: false, pausedAt: 0, follow: true, tab: 'telegrams', sel: null, sig: '' };
+  const st = { paused: false, pausedAt: 0, follow: true, tab: 'telegrams', sel: null, sig: '', explain: false };
   const root = h('div.mon');
 
   const tabs = h('div.segmented', { role: 'group', 'aria-label': 'Monitor content' });
@@ -111,15 +111,17 @@ export function createMonitor({ compact }) {
   }
 
   function rowFor(e) {
-    const tg = e.tg;
+    const tg = e.tg, sec = secureInfo(tg);
     const tr = h('tr', { 'aria-selected': 'false', tabindex: 0, onclick: () => select(e.seq), onkeydown: ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(e.seq); } } });
-    const sn = nameOfAddr(tg.src);
+    const sn = nameOfAddr(tg.src), dn = tg.group ? nameOfGa(tg.dst) : nameOfAddr(tg.dst);
     let value;
-    if (tg.value) value = `${tg.value}`;
+    if (sec) { const acc = sec.service === 'data' ? acceptedBy(e) : null; value = sec.service === 'data' ? 'Encrypted' + (acc ? ` · ${acc.devs.join(', ')} accepted${acc.data ? ' (0x' + acc.data + ')' : ''}` : '') : `Sequence ${sec.seq}`; }
+    else if (tg.value) value = `${tg.value}`;
     else if (tg.group && /Write|Response/.test(tg.svc)) value = `Unknown DPT · ${rawData(tg)}`;
     else value = '–';
     tr.append(h('td', e.t), h('td', h('span.tag' + (tg.origin === 'ip' ? '.ip' : ''), { title: tg.origin === 'ip' ? 'Entered through the KNXnet/IP interface (ETS or another IP client)' : 'Sent by a virtual device' }, tg.origin === 'ip' ? 'IP' : 'DEV'), ' ', tg.src, sn ? h('span.mute', ' ' + sn) : null),
-      h('td', tg.dst), h('td', svcLabel(tg.svc)), h('td.value-col', { title: value }, value));
+      h('td', tg.dst, dn ? h('span.mute', ' ' + dn) : null),
+      h('td', sec ? h('span.sec-tag', { title: 'Encrypted with KNX Data Secure / secure management' }, icon('lock'), secureLabel(sec)) : svcLabel(tg.svc)), h('td.value-col', { title: value }, value));
     return tr;
   }
   function select(seq) { st.sel = st.sel === seq ? null : seq; syncSel(); }
@@ -132,6 +134,9 @@ export function createMonitor({ compact }) {
     const members = tg.group ? (gaIndex().get(tg.dst) || []) : [];
     const dpts = [...new Set(members.map(m => m.dpt).filter(Boolean))];
     detail.replaceChildren(
+      h('div', { style: 'margin-bottom:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center' },
+        h('button.btn.sm' + (st.explain ? '' : '.primary'), { onclick: () => { st.explain = !st.explain; syncSel(); } }, icon('info'), st.explain ? 'Hide the explanation' : 'Explain this telegram')),
+      st.explain ? h('div.explain', { style: 'margin-bottom:.7rem' }, explain(e).map(t => h('p', t))) : null,
       h('dl.kv',
         h('dt', 'Time'), h('dd', e.t),
         h('dt', 'Origin'), h('dd', tg.origin === 'ip' ? 'Entered through the KNXnet/IP interface (ETS or another IP client)' : 'Sent by a virtual device'),
@@ -139,6 +144,7 @@ export function createMonitor({ compact }) {
         h('dt', 'Destination'), h('dd', tg.dst + (tg.group ? ' (group address)' : ' (device)')),
         h('dt', 'Service'), h('dd', tg.svc),
         h('dt', 'Priority / hops'), h('dd', `${tg.prio} / ${tg.hops}`),
+        ...(secureInfo(tg) ? [h('dt', 'Security'), h('dd', `${secureLabel(secureInfo(tg))} · sequence number ${secureInfo(tg).seq}. The content is encrypted and cannot be shown here.`)] : []),
         h('dt', 'Data type'), h('dd', tg.dpt ? `DPT ${tg.dpt} (from the product definition of the devices using this address)` : tg.group ? (dpts.length > 1 ? `Unknown DPT – the devices disagree (${dpts.join(', ')})` : 'Unknown DPT – no device has this address configured with a type') : 'Not a group value telegram'),
         h('dt', 'Decoded value'), h('dd', tg.value || '–'),
         h('dt', 'Raw data'), h('dd.mono', tg.group ? rawData(tg) || '–' : '–'),

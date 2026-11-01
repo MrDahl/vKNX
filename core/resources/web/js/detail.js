@@ -1,7 +1,8 @@
-import { h, icon, setText, setCls, setAttr, naturalCmp } from './util.js';
+import { h, icon, setText, setCls, setAttr, naturalCmp, ago } from './util.js';
 import { api } from './api.js';
 import { S, emit, device, showTelegrams, showGroupAddress, selectDevice, hooks } from './bus.js';
-import { statusOf, productOf, DOWNLOAD_TEXT } from './devinfo.js';
+import { statusOf, productOf, badgesOf, DOWNLOAD_TEXT } from './devinfo.js';
+import { renderGuide } from './guide.js';
 import { confirmDialog, menuButton, toast } from './dialogs.js';
 import { operate } from './cards.js';
 
@@ -34,11 +35,12 @@ export function deviceMenu(name) {
 }
 
 /** Device details: product, address, programming, status, ETS parameters, objects and group addresses. */
-export function createDetail({ onBack, onClose } = {}) {
+export function createDetail({ onBack, onClose, empty } = {}) {
   const root = h('div.detail');
   const head = h('div.detail-head');
   const body = h('div');
-  root.append(head, body);
+  const badgeRow = h('div.badge-row'); const lastEts = h('div.last-ets');
+  root.append(head, badgeRow, lastEts, body);
   let current = null;
   const els = {};
 
@@ -61,7 +63,9 @@ export function createDetail({ onBack, onClose } = {}) {
     els.checks = h('ul.checks', check('Physical address', els.addr), check('Wired to line', els.loc), check('Application', els.app), check('Download', els.dl), check('Downloads received', els.dlN));
     els.params = h('div'); els.objs = h('div.tbl-wrap');
     els.sigParams = ''; els.sigObjs = ''; els.sigSec = '';
+    els.guideBox = h('div'); els.guideSig = '';
     body.replaceChildren(
+      section('Setup checklist', els.guideBox),
       section('Programming and status', h('div', els.progBox, els.checks)),
       ...(d.secure ? [section('KNX Data Secure', els.sec = h('div'))] : []),
       section('Physical line', h('div', h('p.hint', { style: 'margin-top:0' }, 'Automatic (empty): the device sits on the line of its address, so it moves when ETS gives it a new address. Enter a line such as 1.2 to wire it by hand instead. Telegrams only cross to other lines through couplers.'),
@@ -76,9 +80,19 @@ export function createDetail({ onBack, onClose } = {}) {
 
   function update() {
     const d = device(S.selected);
-    if (!d) { current = null; head.replaceChildren(); body.replaceChildren(h('div.empty', icon('devices'), 'Select a device to see its details.')); return; }
+    if (!d) {
+      if (current !== null || !body.firstChild) {
+        current = null; head.replaceChildren(); badgeRow.replaceChildren(); badgeRow.dataset.sig = ''; lastEts.replaceChildren();
+        body.replaceChildren(empty ? empty.el : h('div.empty', icon('devices'), 'Select a device to see its details.'));
+      }
+      if (empty) empty.update();
+      return;
+    }
     if (current !== d.name) buildFor(d.name);
     const st = statusOf(d);
+    updateBadges(d);
+    const g = renderGuide(d);
+    if (g.sig !== els.guideSig) { els.guideSig = g.sig; els.guideBox.replaceChildren(g.el); }
     setText(els.chip, st.label); els.chip.className = 'chip ' + st.cls;
     setAttr(els.progBtn, 'aria-pressed', d.programming ? 'true' : 'false');
     setCls(els.progBox, 'active', d.programming);
@@ -98,6 +112,16 @@ export function createDetail({ onBack, onClose } = {}) {
     if (sigO !== els.sigObjs) { els.sigObjs = sigO; renderObjects(d); }
   }
 
+  function updateBadges(d) {
+    const B = badgesOf(d), sig = JSON.stringify(B);
+    if (badgeRow.dataset.sig !== sig) {
+      badgeRow.dataset.sig = sig;
+      badgeRow.replaceChildren(...B.map(b => h('span.chip.' + (b.cls || 'plain'), { title: b.title }, icon(b.icon), b.text)));
+    }
+    lastEts.hidden = false;
+    lastEts.replaceChildren(icon('list'), h('span', h('b', 'Last ETS action: '), d.lastEts ? [d.lastEts, h('span.mute', ' · ' + ago(d.lastEtsAt))] : h('span.mute', 'none yet – ETS has not changed this device')));
+  }
+
   function renderSecure(d) {
     const sig = [d.serial, d.fdsk, d.cert, d.secMode, d.toolKey].join('|');
     if (els.sigSec === sig) return;
@@ -107,6 +131,10 @@ export function createDetail({ onBack, onClose } = {}) {
       h('button.btn', { onclick: async () => { try { await navigator.clipboard.writeText(text); toast(label + ' copied.', 'ok'); } catch (e) { toast('Could not copy; select the text instead.', 'warn'); } } }, 'Copy'));
     const groups = d.fdsk.match(/.{4}/g).join(' ');
     els.sec.replaceChildren(
+      h('div.lock-box' + (d.secMode && d.toolKey ? '.on' : ''), icon(d.secMode ? 'lock' : 'lockOpen'), h('div',
+        h('b', d.secMode && d.toolKey ? 'Secure commissioned' : d.secMode ? 'Security mode on, factory key still in use' : 'Not commissioned securely'),
+        h('div.hint', d.secMode ? 'Only ETS with the project key may configure this device now (download, restart, change address). Normal unsecured configuration is ignored, which ETS shows as "Device does not respond".' : 'The device accepts configuration from any ETS project, like a normal device.'),
+        h('div.hint', 'Group telegrams: secure commissioning does not encrypt them by itself. A group address is only encrypted (Data Secure) if you mark it secure in ETS and download the group keys. The telegram monitor shows a lock on telegrams that really were encrypted.'))),
       h('p.hint', { style: 'margin-top:0' }, 'ETS needs the device certificate to commission this device securely: in ETS choose Add Device Certificate for this device and type (or paste) the code below. It already contains the serial number and the FDSK. The FDSK is only used for the first secure download; ETS then replaces it with its own key.'),
       copy('Device certificate', d.cert), h('div.hint', { style: 'margin:.1rem 0 .5rem' }, 'ETS entry field: 36 characters in six blocks of six (letters A-Z and digits 2-7; ETS has no 0 or 1). Typing the dashes is not needed.'),
       copy('Serial number', d.serial), copy('FDSK (hex)', d.fdsk), h('div.hint', { style: 'margin:.1rem 0 .5rem' }, 'Serial number and FDSK are shown for reference (ETS shows them after the certificate is accepted): ' + groups),

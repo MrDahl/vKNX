@@ -99,9 +99,22 @@ async function tick() {
     if (!S.catalog.length) await loadCatalog(); // before the first render, so icons and titles are right from the start
     ingest(st);
     if (!shown) { shown = true; showView(); }
+    pickDefaultMode();
     ingestLog(await api.log(S.since));
   } catch (e) { header(); }
   finally { busy = false; done(); }
+}
+/** With a floor plan that has devices placed on it, the simulation opens on the plan - unless the user chose a view before. */
+let modeChecked = false;
+async function pickDefaultMode() {
+  if (modeChecked || !S.state) return;
+  modeChecked = true;
+  try { if (localStorage.getItem('vknx-simMode') !== null) return; } catch (e) { return; }
+  if (!S.state.plan) return;
+  try {
+    const l = await api.layout();
+    if ((l.items || []).length) { S.simMode = 'plan'; emit('state'); }
+  } catch (e) { /* stays on the cards */ }
 }
 hooks.refresh = tick;
 (function loop() { tick().finally(() => setTimeout(loop, document.hidden ? 2500 : 600)); })();

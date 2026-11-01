@@ -8,6 +8,11 @@ export function applyTheme(t, persist) {
   if (persist) { try { localStorage.setItem('vknx-theme', t); } catch (e) { /* ignore */ } }
 }
 export const currentTheme = () => document.documentElement.dataset.theme || 'light';
+export function applySize(v, persist) {
+  if (v === 'large') document.documentElement.dataset.size = 'large'; else delete document.documentElement.dataset.size;
+  if (persist) { try { localStorage.setItem('vknx-size', v); } catch (e) { /* ignore */ } }
+}
+export const currentSize = () => document.documentElement.dataset.size === 'large' ? 'large' : 'normal';
 
 /** What can be said about the connection, and how sure we are. Used by the header indicator and the details dialog. */
 export function linkSummary() {
@@ -47,7 +52,12 @@ export function openSettings() {
   const line = h('input.input', { type: 'text', size: 6, value: S.state?.line || '1.1', 'aria-label': 'Line', style: 'width:6rem' });
   const themeSeg = h('div.segmented', { role: 'group', 'aria-label': 'Theme' });
   const mk = (t, label, ic) => { const b = h('button', { type: 'button', 'aria-pressed': String(currentTheme() === t), onclick: () => { applyTheme(t, true); for (const x of themeSeg.children) x.setAttribute('aria-pressed', String(x === b)); } }, icon(ic), label); return b; };
-  themeSeg.append(mk('light', 'E-ink (paper)', 'sun'), mk('dark', 'E-ink (dark)', 'moon'));
+  themeSeg.append(mk('light', 'Light', 'sun'), mk('dark', 'Dark', 'moon'), mk('paper', 'Paper (e-ink)', 'edit'));
+  const sizeSeg = h('div.segmented', { role: 'group', 'aria-label': 'Size' });
+  for (const [v, label] of [['normal', 'Normal'], ['large', 'Large (projector)']]) {
+    const b = h('button', { type: 'button', 'aria-pressed': String(currentSize() === v), onclick: () => { applySize(v, true); for (const x of sizeSeg.children) x.setAttribute('aria-pressed', String(x === b)); } }, label);
+    sizeSeg.append(b);
+  }
   const check = h('button.btn.primary', { onclick: checkUpdates }, icon('update'), 'Check for updates');
 
   async function checkUpdates() {
@@ -88,7 +98,7 @@ export function openSettings() {
   modal({
     title: 'Settings', wide: true,
     body: [
-      sec('Appearance', themeSeg),
+      sec('Appearance', themeSeg, h('div', { style: 'margin-top:.6rem' }, sizeSeg), h('p.hint', 'Light is bright and high contrast for projectors. Large makes text and buttons bigger. Paper is a flat, animation-free look for e-ink screens.')),
       sec('About', h('div', 'Version ', h('b', S.state?.version || '?')), h('p.hint', { style: 'margin:.3rem 0 .6rem' }, 'vKNX is an open-source teaching simulator. The generated product files are not made or endorsed by the KNX Association.'), check, upd),
       sec('Lines and couplers', h('label', { style: 'display:flex;gap:.5rem;align-items:center' },
         h('input', { type: 'checkbox', checked: S.state?.routing !== false, onchange: async e => { try { await api.saveRouting(e.target.checked); toast(e.target.checked ? 'Telegrams now cross lines only through couplers.' : 'All devices hear everything again (one flat line).'); } catch (err) { e.target.checked = !e.target.checked; toast('Could not change the setting: ' + err.message); } } }),

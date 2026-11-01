@@ -66,3 +66,18 @@ export function gaIndex() {
   }
   return m;
 }
+
+/** Small status badges for a device: address, application, download and (for secure products) the lock. */
+export function badgesOf(d) {
+  const B = [];
+  B.push(d.unassigned ? { icon: 'alert', text: 'No address', cls: 'warn', title: 'The device has no physical address yet (15.15.255). Assign one from ETS.' }
+    : { icon: 'check', text: d.address, cls: 'ok', title: 'Physical address assigned by ETS' });
+  B.push(d.loaded ? { icon: 'check', text: 'Application', cls: 'ok', title: 'An application program is loaded' }
+    : { icon: 'alert', text: 'No application', cls: 'warn', title: 'Download the application from ETS' });
+  const dl = { complete: ['check', 'Download complete', 'ok'], partial: ['alert', 'Partial download', 'warn'], loading: ['update', 'Downloading…', 'info'], error: ['alert', 'Download error', 'danger'] }[d.downloadState];
+  B.push(dl ? { icon: dl[0], text: dl[1], cls: dl[2], title: DOWNLOAD_TEXT[d.downloadState] } : { icon: 'circle', text: 'Not downloaded', cls: '', title: DOWNLOAD_TEXT.empty });
+  if (d.secure) B.push(d.secMode && d.toolKey ? { icon: 'lock', text: 'Secure', cls: 'ok', title: 'Secure commissioning is done: the device only accepts configuration from ETS with the project key' }
+    : d.secMode ? { icon: 'lock', text: 'Secure (factory key)', cls: 'warn', title: 'Security mode is on, but the factory key (FDSK) is still in use' }
+    : { icon: 'lockOpen', text: 'Not secure yet', cls: '', title: 'Secure commissioning has not been done' });
+  return B;
+}

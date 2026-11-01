@@ -340,6 +340,7 @@ public final class WebUi {
 					.append(",\"downloadState\":").append(q(d.downloadState()))
 					.append(",\"secure\":").append(d.product().secure())
 					.append(",\"serial\":").append(q(d.serialEts())).append(",\"fdsk\":").append(q(d.fdskHex())).append(",\"cert\":").append(q(d.certificate()))
+					.append(",\"lastEts\":").append(q(d.lastEtsAction())).append(",\"lastEtsAt\":").append(d.lastEtsAt())
 					.append(",\"secMode\":").append(d.securityModeOn()).append(",\"toolKey\":").append(d.toolKeyActive())
 					.append(",\"params\":[");
 			boolean fp = true;

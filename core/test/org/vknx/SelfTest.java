@@ -286,6 +286,9 @@ public final class SelfTest {
 					new int[] { FLAGS_SEND, FLAGS_STATUS_IN }, Products.PUSH_BUTTON.defaultParams() /* Key 1: switch, alternating, follow status */);
 			check("actuator application loaded", await(saF::applicationLoaded));
 			check("push button application loaded", await(pbF::applicationLoaded));
+			check("device reports the last ETS action as a finished full download",
+					await(() -> saF.lastEtsAction().startsWith("Download: 4 of 4 parts written") && saF.lastEtsAt() > 0));
+			check("address assignment was recorded as an ETS action before (and the download replaced it)", !pbF.lastEtsAction().isEmpty());
 
 			// --- 6/8/9: pressing the button sends from the button's address; the actuator reacts
 			btn.act("press", 1);
