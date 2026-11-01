@@ -37,7 +37,7 @@ public final class CouplerBehavior extends DeviceBehavior implements Topology.Co
 	/** The line this coupler is for in its filter decisions: from its own address when ETS gave it x.y.0, else where it is wired. */
 	private Topology.Line ownLine() {
 		final var a = dev.address();
-		if (a.getDevice() == 0 && a.getRawAddress() != 0)
+		if (a.getDevice() == 0 && a.getRawAddress() != 0 && !Topology.unaddressed(a))
 			return new Topology.Line(a.getArea(), a.getLine());
 		return dev.couplerSubLine();
 	}
@@ -53,7 +53,7 @@ public final class CouplerBehavior extends DeviceBehavior implements Topology.Co
 	/** "unassigned", "ok" (address is x.y.0 of the line it is wired to) or "mismatch". */
 	String addressState() {
 		final var a = dev.address();
-		if (a.getRawAddress() == 0xFFFF)
+		if (Topology.unaddressed(a))
 			return "unassigned";
 		final var sub = dev.couplerSubLine();
 		return sub != null && a.getDevice() == 0 && a.getArea() == sub.area() && a.getLine() == sub.line() ? "ok" : "mismatch";

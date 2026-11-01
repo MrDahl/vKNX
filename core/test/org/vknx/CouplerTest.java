@@ -234,6 +234,9 @@ public final class CouplerTest {
 					&& until(3000, () -> lc11.address().getRawAddress() == 0xFFFF));
 			check("an unaddressed coupler still sits on its line 1.1", new org.vknx.sim.Topology.Line(1, 1).equals(lc11.placement()));
 			lc11.toggleProgrammingMode();
+			check("address 15.15.0 (as after an ETS unload) is also not a place: coupler stays on 1.1", ets.assignAddress(new IndividualAddress(15, 15, 0))
+					&& until(3000, () -> lc11.address().equals(new IndividualAddress(15, 15, 0))) && new org.vknx.sim.Topology.Line(1, 1).equals(lc11.placement()));
+			lc11.toggleProgrammingMode();
 			check("coupler gets 1.1.0 again", ets.assignAddress(new IndividualAddress(1, 1, 0))
 					&& until(3000, () -> lc11.address().equals(new IndividualAddress(1, 1, 0))));
 

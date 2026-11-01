@@ -195,7 +195,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		if (l == null) {
 			// placed by address; a device that loses its address stays where it was (it is not unplugged)
 			final var a = address();
-			if (a.getRawAddress() != 0xFFFF)
+			if (!org.vknx.sim.Topology.unaddressed(a))
 				autoLines = subnet.topology().linesOf(a);
 			else if (autoLines != null)
 				return autoLines;
@@ -214,9 +214,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		if (l != null)
 			return l;
 		final var a = address();
-		if (a.getRawAddress() == 0xFFFF && autoLines != null && autoLines.length > 0)
+		if (org.vknx.sim.Topology.unaddressed(a) && autoLines != null && autoLines.length > 0)
 			return autoLines[0];
-		return a.getDevice() == 0 && a.getRawAddress() != 0 ? new org.vknx.sim.Topology.Line(a.getArea(), a.getLine()) : null;
+		return a.getDevice() == 0 && a.getRawAddress() != 0 && !org.vknx.sim.Topology.unaddressed(a) ? new org.vknx.sim.Topology.Line(a.getArea(), a.getLine()) : null;
 	}
 
 	public SerialNumber serialNumber() {

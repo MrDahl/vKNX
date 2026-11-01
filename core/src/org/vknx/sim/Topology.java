@@ -131,11 +131,16 @@ public final class Topology {
 
 	/** Line of an individual address; devices without an address are assumed to sit on the interface line. */
 	public Line lineOf(final IndividualAddress a) {
-		return a.getRawAddress() == 0xFFFF ? uplinkLine() : new Line(a.getArea(), a.getLine());
+		return unaddressed(a) ? uplinkLine() : new Line(a.getArea(), a.getLine());
+	}
+
+	/** 15.15.x is the factory range (15.15.255; ETS may also leave 15.15.0 after an unload): not a place in the topology. */
+	public static boolean unaddressed(final IndividualAddress a) {
+		return a.getArea() == 15 && a.getLine() == 15;
 	}
 
 	static boolean isCoupler(final IndividualAddress a) {
-		return a.getDevice() == 0 && a.getRawAddress() != 0;
+		return a.getDevice() == 0 && a.getRawAddress() != 0 && !unaddressed(a);
 	}
 
 	/** The lines a device with this address is connected to (a coupler is connected to two lines). */
