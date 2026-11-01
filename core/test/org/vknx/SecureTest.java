@@ -146,8 +146,20 @@ public final class SecureTest {
 			Thread.sleep(800);
 			check("a confirmed restart (what ETS sends to activate the keys) keeps security mode and tool key",
 					pb.securityModeOn() && pb.toolKeyActive());
-			pb.restart(true, io.calimero.mgmt.ManagementClient.EraseCode.FactoryResetWithoutIndividualAddress, 0);
-			Thread.sleep(900);
+			{
+				// as ETS does it: over the bus, sealed with the tool key (Calimero resets the device after the answer)
+				final Destination dr = tool.createDestination(pb.address(), true);
+				try {
+					tool.restart(dr, io.calimero.mgmt.ManagementClient.EraseCode.FactoryResetWithoutIndividualAddress, 0);
+				}
+				catch (final Exception e) {
+					check("restart over the bus: " + e, false);
+				}
+				finally {
+					dr.destroy();
+				}
+			}
+			Thread.sleep(1500);
 			check("factory reset without address (ETS deactivating secure commissioning) keeps the tool key",
 					pb.securityModeOn() && pb.toolKeyActive());
 			{
@@ -159,6 +171,18 @@ public final class SecureTest {
 					final Destination dd = fresh.createDestination(pb.address(), true);
 					final byte[] sn = fresh.readProperty(dd, 0, 1, io.calimero.mgmt.PropertyAccess.PID.SERIAL_NUMBER, 1, 1);
 					check("after that reset a fresh secure management connection with the tool key works", sn != null && sn.length > 0);
+					// ETS now switches security mode off (function property command), then downloads in plain
+					fresh.callFunctionProperty(dd, OBJ_TYPE_SECURITY, 1, PID_SECURITY_MODE, 0, (byte) 0);
+					check("security mode can then be switched off with the tool key", until(1500, () -> !pb.securityModeOn()));
+					final var plainClient = new ManagementClientImpl(net.createDeviceLink(new IndividualAddress(1, 1, 246)));
+					try {
+						final Destination dp = plainClient.createDestination(pb.address(), true);
+						final byte[] sn2 = plainClient.readProperty(dp, 0, 1, io.calimero.mgmt.PropertyAccess.PID.SERIAL_NUMBER, 1, 1);
+						check("a plain (unsecured) management connection works with security mode off", sn2 != null && sn2.length > 0);
+					}
+					finally {
+						plainClient.detach();
+					}
 				}
 				catch (final Exception e) {
 					check("after that reset a fresh secure management connection with the tool key works: " + e, false);

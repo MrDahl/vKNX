@@ -205,6 +205,45 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		log("mgmt", "security reset: keys deleted, factory key (FDSK) in use again");
 	}
 
+	private static final int[] KEPT_SECURITY_PIDS = {
+			io.calimero.device.ios.SecurityObject.Pid.GroupKeyTable, io.calimero.device.ios.SecurityObject.Pid.ZoneKeyTable,
+			io.calimero.device.ios.SecurityObject.Pid.GoSecurityFlags, io.calimero.device.ios.SecurityObject.Pid.P2PKeyTable,
+			io.calimero.device.ios.SecurityObject.Pid.SecurityIndividualAddressTable };
+
+	/** Tool key, security mode and the key/flag tables: {pid, element count, data}. */
+	private java.util.List<Object[]> snapshotSecurity() {
+		final var sec = securityObject();
+		final var out = new java.util.ArrayList<Object[]>();
+		out.add(new Object[] { io.calimero.device.ios.SecurityObject.Pid.ToolKey, 1, sec.get(io.calimero.device.ios.SecurityObject.Pid.ToolKey) });
+		out.add(new Object[] { io.calimero.device.ios.SecurityObject.Pid.SecurityMode, 1, sec.get(io.calimero.device.ios.SecurityObject.Pid.SecurityMode) });
+		for (final int pid : KEPT_SECURITY_PIDS) {
+			try {
+				final byte[] n = sec.get(pid, 0, 1);
+				final int count = ((n[0] & 0xff) << 8) | (n[1] & 0xff);
+				out.add(new Object[] { pid, count, count == 0 ? new byte[0] : sec.get(pid) });
+			}
+			catch (final RuntimeException e) { /* property not there: nothing to keep */ }
+		}
+		return out;
+	}
+
+	private void restoreSecurity(final java.util.List<Object[]> kept) {
+		final var sec = securityObject();
+		for (final var k : kept) {
+			final int pid = (Integer) k[0];
+			final int count = (Integer) k[1];
+			final byte[] data = (byte[]) k[2];
+			try {
+				if (count == 0)
+					continue;
+				if (java.util.Arrays.equals(sec.get(pid), data))
+					continue;
+				sec.set(pid, 1, count, data);
+			}
+			catch (final RuntimeException e) { log("mgmt", "could not keep security property " + pid + ": " + e); }
+		}
+	}
+
 	/** The factory default setup key as 32 hex digits, or "" for a device that is not a secure product. */
 	public String fdskHex() {
 		return product.secure() ? HexFormat.of().withUpperCase().formatHex(securityObject().get(io.calimero.device.ios.SecurityObject.Pid.Fdsk)) : "";
@@ -422,7 +461,25 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public ServiceResult<java.time.Duration> restart(final boolean masterReset,
 			final io.calimero.mgmt.ManagementClient.EraseCode eraseCode, final int channel) {
 		log("mgmt", "A_Restart (" + (masterReset ? "master reset " + eraseCode : "basic restart") + ")");
+		// ETS sends "factory reset without address" (code 7) when it deactivates secure commissioning, and goes on talking
+		// with the tool key afterwards. Calimero deletes tool key and tables on that code (after the answer has gone out),
+		// so the device would no longer answer ETS. Keep what is there: snapshot now, put it back once Calimero is done.
+		final boolean keepSecurity = masterReset && product.secure()
+				&& eraseCode == io.calimero.mgmt.ManagementClient.EraseCode.FactoryResetWithoutIndividualAddress;
+		final var kept = keepSecurity ? snapshotSecurity() : null;
 		final var r = super.restart(masterReset, eraseCode, channel);
+		if (kept != null) {
+			restoreSecurity(kept);
+			final var t = new Thread(() -> {
+				for (int i = 0; i < 4; i++) {
+					try { Thread.sleep(400); } catch (final InterruptedException e) { return; }
+					restoreSecurity(kept);
+				}
+				changed();
+			}, "vknx-secure-keep-" + name);
+			t.setDaemon(true);
+			t.start();
+		}
 		// ETS ends a secure download with a master reset of type "confirmed restart": that only restarts and keeps the
 		// keys. Factory reset without address (code 7) is what ETS sends when it deactivates secure commissioning; it
 		// goes on talking with the tool key afterwards (to switch security mode off), so it keeps the keys too.

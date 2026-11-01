@@ -6,6 +6,7 @@ The text under each version is also shown as the release notes on GitHub and in 
 ## [Unreleased]
 
 ### Fixed
+- Deactivating "Secure Commissioning" in ETS (second attempt): after ETS' reset with erase code 7, Calimero itself deleted the tool key and key tables, but ETS goes on with the tool key (to switch security mode off) and got no answer to its sync request ("Device does not respond"). The devices now keep their tool key, key tables and security mode through that reset, so ETS can switch security mode off and then download in plain. The previous fix (0.7.5) only covered vKNX's own handling and was not enough. Found by checking the MAC of ETS' messages in the supplied logs.
 - A device removed in vKNX stayed on the simulated bus and kept answering with its old address. ETS then reported "The individual address is already in use by another device" for a new device with that address, and received every answer twice (the old and the new device both answered), which made ETS acknowledge twice, the device drop the connection and downloads fail with "Communication quality ... too bad" or run slowly. Removing a device now takes it off the bus.
 - The two default devices (Tryk1, Lampe1) came back at every start after you had removed them. They are now only created on the very first start; an installation you emptied stays empty.
 
