@@ -131,6 +131,18 @@ public final class SecureTest {
 
 			CouplerTest.press(pb, 2);
 			check("secure switch off works too (sequence numbers advance)", until(3000, () -> !lamp.lampLit(1)));
+			check("serial is shown in ETS format", pb.serialEts().equals("00FA:00000033"));
+
+			// ---- restarts: ETS ends a secure download with a "confirmed restart", which must keep the keys
+			final String fdskBefore = pb.fdskHex();
+			pb.restart(true, io.calimero.mgmt.ManagementClient.EraseCode.ConfirmedRestart, 0);
+			Thread.sleep(800);
+			check("a confirmed restart (what ETS sends to activate the keys) keeps security mode and tool key",
+					pb.securityModeOn() && pb.toolKeyActive());
+			pb.restart(true, io.calimero.mgmt.ManagementClient.EraseCode.FactoryReset, 0);
+			check("factory reset deletes security mode and tool key (after the answer has gone out)",
+					until(3000, () -> !pb.securityModeOn() && !pb.toolKeyActive()));
+			check("factory reset keeps FDSK and serial", pb.fdskHex().equals(fdskBefore) && pb.serialHex().equals("00FA00000033"));
 			System.out.println("secure tests done");
 		}
 		catch (final Throwable t) {

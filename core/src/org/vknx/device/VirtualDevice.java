@@ -380,8 +380,18 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			final io.calimero.mgmt.ManagementClient.EraseCode eraseCode, final int channel) {
 		log("mgmt", "A_Restart (" + (masterReset ? "master reset " + eraseCode : "basic restart") + ")");
 		final var r = super.restart(masterReset, eraseCode, channel);
-		if (masterReset && product.secure())
-			resetSecurity();
+		// ETS ends a secure download with a master reset of type "confirmed restart": that only restarts and keeps the
+		// keys. Only a factory reset deletes them, and only after the answer (still sealed with the old key) has gone out.
+		if (masterReset && product.secure() && (eraseCode == io.calimero.mgmt.ManagementClient.EraseCode.FactoryReset
+				|| eraseCode == io.calimero.mgmt.ManagementClient.EraseCode.FactoryResetWithoutIndividualAddress)) {
+			final var t = new Thread(() -> {
+				try { Thread.sleep(500); } catch (final InterruptedException e) { return; }
+				resetSecurity();
+				changed();
+			}, "vknx-secure-reset-" + name);
+			t.setDaemon(true);
+			t.start();
+		}
 		afterTablesChanged();
 		startApplication();
 		changed();

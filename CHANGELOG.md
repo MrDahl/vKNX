@@ -3,6 +3,11 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Fixed
+- **ETS aborted the secure download with "No key available to decrypt the message".** ETS writes the new tool key and then sends a "confirmed restart" (a master reset of the restart-only kind) to activate it. The master-reset handling added in 0.7.0 deleted the keys on every master reset, so the device answered with the old factory key and ETS could not read the answer. Now only a factory reset (with or without the individual address) deletes the keys, and only after the answer has been sent. Found by decrypting the communication log from ETS with the device's FDSK; covered by our own test, not yet tried in ETS.
+
 ## [0.7.3] - 2026-11-01
 
 ### Fixed
