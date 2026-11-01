@@ -73,6 +73,16 @@ public final class TunnelTest {
 		final var sa = VirtualDevice.create("sa", Products.SWITCH_ACTUATOR, new byte[] { 0, (byte) 0xFA, 0, 0, 0, 2 },
 				dir.resolve("sa.state"), net, l);
 		Thread.sleep(2000);
+		{
+			// ETS refuses to download KNX Data Secure applications when the interface reports an APDU of only 15 bytes
+			final var res = new io.calimero.knxnetip.Discoverer(0, false)
+					.search(new InetSocketAddress(host, port), io.calimero.knxnetip.util.Srp.withDeviceDescription(io.calimero.knxnetip.util.DIB.TunnelingInfo))
+					.get(5, java.util.concurrent.TimeUnit.SECONDS).response();
+			final var tdib = res.description().stream().filter(d -> d instanceof io.calimero.knxnetip.util.TunnelingDib)
+					.map(d -> (io.calimero.knxnetip.util.TunnelingDib) d).findFirst();
+			SelfTest.check("interface reports a long max APDU (254) to ETS in the tunnelling DIB: "
+					+ tdib.map(d -> d.maxApduLength()).orElse(-1), tdib.isPresent() && tdib.get().maxApduLength() == 254);
+		}
 		try (var tunnel = KNXNetworkLinkIP.newTunnelingLink(new InetSocketAddress(host, 0),
 				new InetSocketAddress(host, port), false,
 				new TPSettings(new IndividualAddress(0)))) {

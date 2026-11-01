@@ -3,6 +3,11 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Fixed
+- **Secure products could not be downloaded from ETS** ("Insufficient APDU Length (restricted to 15 by capabilities of the bus interface, required: 34)"). The KNXnet/IP interface reported a maximum APDU of 15 bytes, which is Calimero's default for TP1, and ETS refused before sending anything to the device. The interface now reports 254 (tunnelling DIB, cEMI server object and device object). Our test checks the value the server announces; whether ETS then accepts the secure download must be tried in ETS.
+
 ## [0.7.0] - 2026-11-01
 
 ### Secure products: course-material review

@@ -65,9 +65,37 @@ public final class Subnet implements AutoCloseable {
 			throw new IOException("KNXnet/IP server did not create the virtual line within 15 s");
 		final var net = new Subnet(line, launcher, t);
 		net.port = port;
+		net.allowLongFrames();
 		line.topology().setUplinkLine(area, lineNo);
 		line.topology().setTunnelSource(net::tunnelAddresses);
 		return net;
+	}
+
+	/**
+	 * Tells ETS that this interface handles long (extended) frames. Calimero's default for a TP1 interface is an APDU of
+	 * 15 bytes, and ETS then refuses to download anything that needs more (KNX Data Secure: "Insufficient APDU Length,
+	 * restricted to 15 by capabilities of the bus interface, required: 34"). ETS reads it from the tunnelling DIB, which
+	 * comes from the cEMI server object (pid 68), and from the device object (pid 56).
+	 */
+	private void allowLongFrames() {
+		final long end = System.currentTimeMillis() + 15_000;
+		while (System.currentTimeMillis() < end) {
+			try {
+				final var gw = server.getGateway();
+				if (gw != null) {
+					final var srv = gw.getServer();
+					final byte[] v = { 0, (byte) 254 };
+					for (final var sc : srv.getServiceContainers())
+						sc.getMediumSettings().setMaxApduLength(254);
+					final var ios = srv.getInterfaceObjectServer();
+					ios.setProperty(io.calimero.device.ios.InterfaceObject.CEMI_SERVER_OBJECT, 1, 68, 1, 1, v);
+					ios.setProperty(io.calimero.device.ios.InterfaceObject.DEVICE_OBJECT, 1, 56, 1, 1, v);
+					return;
+				}
+			}
+			catch (final RuntimeException ignore) { /* server not ready yet */ }
+			try { Thread.sleep(50); } catch (final InterruptedException e) { Thread.currentThread().interrupt(); return; }
+		}
 	}
 
 	public static String serverConfig(final String friendlyName, final int port, final int area, final int line) {
