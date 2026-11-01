@@ -61,6 +61,11 @@ public final class SecureTest {
 			check("FDSK is 32 hex digits, differs per device, serial is 12 hex digits",
 					pb.fdskHex().matches("[0-9A-F]{32}") && !pb.fdskHex().equals(sw.fdskHex()) && pb.serialHex().equals("00FA00000033")
 							&& plain.fdskHex().isEmpty());
+			check("device certificate: example from the KNX Secure course (serial 0007:EE952A16) gives the code ETS shows",
+					VirtualDevice.deviceCertificate(HexFormat.of().parseHex("0007EE952A16"), HexFormat.of().parseHex("3C5F1D5D9CDFCE716F7D461FDBC2B820"))
+							.startsWith("AAD65F - JKCY6F - 6HK5TT - P444LP - PVDB7W - 6CXAQE"));
+			check("device certificate has six blocks of six and no 0/1 characters", pb.certificate().matches("([A-Z2-7]{6} - ){5}[A-Z2-7]{6}")
+					&& plain.certificate().isEmpty());
 			check("not commissioned yet: security mode off, factory key in use", !pb.securityModeOn() && !pb.toolKeyActive());
 
 			// ---- plain programming first (security mode is off): addresses and the application download

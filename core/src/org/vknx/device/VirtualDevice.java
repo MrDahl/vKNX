@@ -209,6 +209,52 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	/** The 6-byte KNX serial number as 12 hex digits (ETS shows and asks for it together with the FDSK). */
 	public String serialHex() { return HexFormat.of().withUpperCase().formatHex(serialNumber().array()); }
 
+	/**
+	 * The device certificate ETS asks for ("Add Device Certificate"): serial number (6 bytes) + FDSK (16 bytes) as
+	 * Base32 (A-Z, 2-7) plus a 4-bit CRC, 36 characters in six blocks of six. ETS does not accept 0 or 1, so the hex FDSK cannot be typed.
+	 * Verified against the example in the KNX Secure course (serial 0007:EE952A16 = AAD65F-JKCY6F-...).
+	 */
+	public static String deviceCertificate(final byte[] serial, final byte[] fdsk) {
+		final byte[] all = new byte[serial.length + fdsk.length];
+		System.arraycopy(serial, 0, all, 0, serial.length);
+		System.arraycopy(fdsk, 0, all, serial.length, fdsk.length);
+		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+		final var sb = new StringBuilder();
+		int buffer = 0, bits = 0;
+		// 4-bit CRC (x^4 + x + 1, start value 0, no reflection) over serial + FDSK, appended as the last 4 bits
+		int crc = 0;
+		for (final byte b : all)
+			for (int i = 7; i >= 0; i--) {
+				final boolean feedback = (crc >> 3 & 1 ^ b >> i & 1) != 0;
+				crc = crc << 1 & 0xF;
+				if (feedback)
+					crc ^= 0x3;
+			}
+		final byte[] withCrc = java.util.Arrays.copyOf(all, all.length + 1);
+		withCrc[all.length] = (byte) (crc << 4);
+		for (final byte b : withCrc) {
+			buffer = buffer << 8 | b & 0xff;
+			bits += 8;
+			while (bits >= 5) {
+				sb.append(alphabet.charAt(buffer >> bits - 5 & 31));
+				bits -= 5;
+			}
+		}
+		final var out = new StringBuilder();
+		for (int i = 0; i < sb.length(); i += 6) {
+			if (i > 0)
+				out.append(" - ");
+			out.append(sb, i, Math.min(sb.length(), i + 6));
+		}
+		return out.toString();
+	}
+
+	/** This device's certificate code (see {@link #deviceCertificate}), or "" for a plain product. */
+	public String certificate() {
+		return product.secure() ? deviceCertificate(serialNumber().array(),
+				securityObject().get(io.calimero.device.ios.SecurityObject.Pid.Fdsk)) : "";
+	}
+
 	/** The serial number the way ETS shows it: 2 bytes, colon, 4 bytes (e.g. 00FA:00000033). */
 	public String serialEts() { final String s = serialHex(); return s.substring(0, 4) + ":" + s.substring(4); }
 

@@ -99,7 +99,7 @@ export function createDetail({ onBack, onClose } = {}) {
   }
 
   function renderSecure(d) {
-    const sig = [d.serial, d.fdsk, d.secMode, d.toolKey].join('|');
+    const sig = [d.serial, d.fdsk, d.cert, d.secMode, d.toolKey].join('|');
     if (els.sigSec === sig) return;
     els.sigSec = sig;
     const copy = (label, text) => h('div', { style: 'display:flex;gap:.5rem;align-items:center;margin:.25rem 0;flex-wrap:wrap' },
@@ -107,8 +107,9 @@ export function createDetail({ onBack, onClose } = {}) {
       h('button.btn', { onclick: async () => { try { await navigator.clipboard.writeText(text); toast(label + ' copied.', 'ok'); } catch (e) { toast('Could not copy; select the text instead.', 'warn'); } } }, 'Copy'));
     const groups = d.fdsk.match(/.{4}/g).join(' ');
     els.sec.replaceChildren(
-      h('p.hint', { style: 'margin-top:0' }, 'ETS needs these two values to commission this device securely: add them in your ETS project as a device certificate (Security tab), then download with Secure commissioning on. The FDSK is only used for the first secure download; ETS then replaces it with its own key.'),
-      copy('Serial number', d.serial), copy('FDSK', d.fdsk), h('div.hint', { style: 'margin:.1rem 0 .5rem' }, 'FDSK grouped for reading: ' + groups),
+      h('p.hint', { style: 'margin-top:0' }, 'ETS needs the device certificate to commission this device securely: in ETS choose Add Device Certificate for this device and type (or paste) the code below. It already contains the serial number and the FDSK. The FDSK is only used for the first secure download; ETS then replaces it with its own key.'),
+      copy('Device certificate', d.cert), h('div.hint', { style: 'margin:.1rem 0 .5rem' }, 'ETS entry field: 36 characters in six blocks of six (letters A-Z and digits 2-7; ETS has no 0 or 1). Typing the dashes is not needed.'),
+      copy('Serial number', d.serial), copy('FDSK (hex)', d.fdsk), h('div.hint', { style: 'margin:.1rem 0 .5rem' }, 'Serial number and FDSK are shown for reference (ETS shows them after the certificate is accepted): ' + groups),
       h('ul.checks', h('li', h('span.label', 'Security mode'), h('span', d.secMode ? 'On (ETS has commissioned the device)' : 'Off (not commissioned yet)')),
         h('li', h('span.label', 'Key in use'), h('span', d.toolKey ? 'ETS tool key (FDSK replaced)' : 'Factory key (FDSK)'))));
   }
