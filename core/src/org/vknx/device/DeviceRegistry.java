@@ -109,10 +109,27 @@ public final class DeviceRegistry {
 					for (final Path f : s.filter(f -> f.getFileName().toString().startsWith(name + ".state")).toList())
 						Files.deleteIfExists(f);
 				}
+				org.vknx.app.DataFiles.deleteBackupsOf(dir, name);
 				log.add("device", name, "removed (state files deleted)");
 				save();
 				return;
 			}
+	}
+
+	/**
+	 * Starts a new installation: every device is removed and created again in factory state (no address, no download,
+	 * no keys; secure devices get a new factory key). The devices, their names and the line they are wired to stay.
+	 */
+	public synchronized void resetAll() throws Exception {
+		final var keep = new ArrayList<Object[]>();
+		for (final var d : devices)
+			keep.add(new Object[] { d.product().key(), d.name(), d.location() });
+		for (final var k : keep)
+			remove((String) k[1]);
+		for (final var k : keep)
+			add((String) k[0], (String) k[1], (Line) k[2]);
+		org.vknx.app.DataFiles.deleteBackups(dir, 0);
+		log.add("device", "-", "new installation: " + keep.size() + " device(s) reset to factory state");
 	}
 
 	/** Wires a device to another line, as when moving it to another distribution board. */

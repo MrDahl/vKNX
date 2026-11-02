@@ -30,7 +30,7 @@ export function confirmDialog({ title, message, confirmLabel, danger }) {
   return new Promise(resolve => {
     let result = false;
     const dlg = modal({
-      title, body: h('p', { style: 'margin:0' }, message),
+      title, body: h('div', { style: 'margin:0' }, message),
       buttons: close => [
         h('button.btn', { onclick: close }, 'Cancel'),
         h(`button.btn.${danger ? 'danger' : 'primary'}`, { onclick: () => { result = true; close(); } }, confirmLabel)],

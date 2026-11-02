@@ -474,6 +474,10 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				&& eraseCode == io.calimero.mgmt.ManagementClient.EraseCode.FactoryResetWithoutIndividualAddress;
 		final var kept = keepSecurity ? snapshotSecurity() : null;
 		final var r = super.restart(masterReset, eraseCode, channel);
+		if (masterReset) { // Calimero keeps the old state file at every reset: only the newest copy is worth keeping
+			try { org.vknx.app.DataFiles.deleteBackups(stateFile.toAbsolutePath().getParent(), 1); }
+			catch (final java.io.IOException e) { /* only a left-over file */ }
+		}
 		if (kept != null) {
 			restoreSecurity(kept);
 			final var t = new Thread(() -> {

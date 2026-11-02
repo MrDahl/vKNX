@@ -1,7 +1,7 @@
 import { h, icon, setText, ago, clock } from './util.js';
 import { api, conn } from './api.js';
 import { S, on } from './bus.js';
-import { modal, toast } from './dialogs.js';
+import { modal, toast, confirmDialog } from './dialogs.js';
 
 export function applyTheme(t, persist) {
   document.documentElement.dataset.theme = t;
@@ -45,6 +45,49 @@ export function openConnection() {
   const off = on('state', draw);
   const dlg = modal({ title: 'Connection status', body: box, buttons: close => [h('button.btn.primary', { onclick: close }, 'Close')] });
   dlg.addEventListener('close', off);
+}
+
+const fmtBytes = b => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(0)} KB` : b < 1073741824 ? `${(b / 1048576).toFixed(1)} MB` : `${(b / 1073741824).toFixed(2)} GB`;
+
+/** "Data and cleanup": what vKNX keeps on disk, with buttons to remove the parts that are not needed. */
+function dataSection() {
+  const box = h('div');
+  const info = {
+    logs: ['Logs', 'vknx.log and console.log. Only useful when something went wrong. Each is limited to 10 MB (plus one older copy), so they cannot grow without end.', 'Delete logs'],
+    backups: ['Old device backups', 'vKNX keeps the old state of a device each time ETS resets it (factory reset, "deactivate secure commissioning"). Nothing in vKNX uses them. Only the newest one per device is kept automatically.', 'Delete backups'],
+    plan: ['Floor plan', 'The plan image and where the devices are placed on it.', 'Remove floor plan'],
+    state: ['Devices (addresses, downloads, keys)', 'What ETS has programmed into the devices. This is the installation itself.', null],
+  };
+  async function load() {
+    let items;
+    try { items = (await api.dataInfo()).items; } catch (e) { box.replaceChildren(h('span.error-text', 'Could not read the data folder: ' + e.message)); return; }
+    const row = it => {
+      const [title, text, label] = info[it.id];
+      const done = async () => { try { const r = await api.dataClear(it.id); toast(`Freed ${fmtBytes(r.freed)}.`); if (it.id === 'plan') location.reload(); else load(); } catch (e) { toast('Could not clear: ' + e.message); } };
+      return h('tr', h('td', { style: 'width:30%' }, h('b', title), h('div.hint', `${it.files} file${it.files === 1 ? '' : 's'} · ${fmtBytes(it.bytes)}`)),
+        h('td.hint', text),
+        h('td', { style: 'white-space:nowrap' }, label ? h('button.btn', { disabled: it.files === 0, onclick: async () => {
+          if (it.id === 'plan' && !await confirmDialog({ title: 'Remove the floor plan?', message: 'The plan image and the placement of the devices on it are deleted. The devices themselves are not changed.', confirmLabel: 'Remove floor plan', danger: true })) return;
+          done();
+        } }, label) : null));
+    };
+    box.replaceChildren(h('table.tbl', h('tbody', items.map(row))),
+      h('div', { style: 'margin-top:.8rem' }, h('button.btn.danger', { onclick: newInstallation }, icon('restart'), 'Start a new installation…')),
+      h('p.hint', 'Resets every device to factory state and clears the logs and backups. The devices stay, with their names and lines. Use it when you start a new ETS project.'));
+  }
+  async function newInstallation() {
+    const plan = h('input', { type: 'checkbox', id: 'ni-plan' });
+    const msg = h('div', h('p', 'This resets every virtual device to factory state:'),
+      h('ul', h('li', 'addresses and downloaded applications are gone (download them again from ETS),'),
+        h('li', 'secure devices get a new factory key (FDSK) and a new certificate, so they must be added again in ETS,'),
+        h('li', 'logs and device backups are deleted.')),
+      h('label', { style: 'display:flex;gap:.5rem;align-items:center' }, plan, 'Also remove the floor plan'));
+    if (!await confirmDialog({ title: 'Start a new installation?', message: msg, confirmLabel: 'Reset all devices', danger: true })) return;
+    try { await api.dataClear('installation', plan.checked ? { plan: '1' } : {}); toast('New installation ready. All devices are in factory state.'); setTimeout(() => location.reload(), 600); }
+    catch (e) { toast('Could not start a new installation: ' + e.message); }
+  }
+  load();
+  return h('section.section', { style: 'border:0;margin-bottom:1.1rem' }, h('h3', { style: 'margin-bottom:.5rem' }, 'Data and cleanup'), box);
 }
 
 export function openSettings() {
@@ -104,6 +147,7 @@ export function openSettings() {
         h('input', { type: 'checkbox', checked: S.state?.routing !== false, onchange: async e => { try { await api.saveRouting(e.target.checked); toast(e.target.checked ? 'Telegrams now cross lines only through couplers.' : 'All devices hear everything again (one flat line).'); } catch (err) { e.target.checked = !e.target.checked; toast('Could not change the setting: ' + err.message); } } }),
         'Route telegrams between lines through couplers'),
         h('p.hint', 'On: a device on another line only hears a telegram if a coupler with the right address exists, is downloaded, and lets it pass (filter table, hop count). Off: every device hears everything, couplers have no effect.')),
+      dataSection(),
       sec('KNXnet/IP interface', h('div', 'Interface address: ', h('b.mono', S.state?.iface || '')), h('p.hint', 'ETS connects to the interface "vKNX". The line decides the physical addresses of its tunnels (line.241–244). Changing it restarts vKNX.'),
         h('div', { style: 'display:flex;gap:.5rem;align-items:center' }, line, h('button.btn', { onclick: saveLine }, icon('restart'), 'Save and restart')), lineMsg),
     ],

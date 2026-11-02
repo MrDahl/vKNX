@@ -69,6 +69,7 @@ public final class WebUi {
 		server.createContext("/api/update/install", this::updateInstall);
 		server.createContext("/api/update/status", this::updateStatus);
 		server.createContext("/api/layout", this::layout);
+		server.createContext("/api/data", this::dataEndpoint);
 		server.createContext("/api/add", this::add);
 		server.createContext("/api/location", this::location);
 		server.createContext("/api/remove", ex -> {
@@ -152,6 +153,56 @@ public final class WebUi {
 		}
 		catch (final IOException e) {
 			send(ex, 500, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+		}
+	}
+
+	/**
+	 * GET /api/data: what vKNX keeps in its data directory (logs, state backups, floor plan, device state) with sizes.
+	 * POST /api/data/clear?what=logs|backups|plan|installation: removes that part. "installation" resets every device to
+	 * factory state (and with plan=1 also removes the floor plan); it also clears logs and backups.
+	 */
+	private void dataEndpoint(final HttpExchange ex) throws IOException {
+		final var dir = registry.dir();
+		try {
+			final String path = ex.getRequestURI().getPath();
+			if (path.equals("/api/data") && "GET".equals(ex.getRequestMethod())) {
+				final var sb = new StringBuilder("{\"items\":[");
+				boolean first = true;
+				for (final var i : org.vknx.app.DataFiles.inspect(dir)) {
+					sb.append(first ? "" : ",").append("{\"id\":").append(q(i.id())).append(",\"files\":").append(i.files())
+							.append(",\"bytes\":").append(i.bytes()).append('}');
+					first = false;
+				}
+				send(ex, 200, "application/json; charset=utf-8", utf8(sb.append("]}").toString()));
+				return;
+			}
+			if (!path.equals("/api/data/clear") || !"POST".equals(ex.getRequestMethod())) {
+				send(ex, 405, "text/plain", utf8("POST /api/data/clear?what=..."));
+				return;
+			}
+			final String what = param(ex.getRequestURI(), "what", "");
+			long freed = 0;
+			switch (what) {
+				case "logs" -> { freed = org.vknx.app.DataFiles.clearLogs(dir); log.clear(); }
+				case "backups" -> freed = org.vknx.app.DataFiles.deleteBackups(dir, 0);
+				case "plan" -> freed = org.vknx.app.DataFiles.clearPlan(dir);
+				case "installation" -> {
+					registry.resetAll();
+					freed += org.vknx.app.DataFiles.deleteBackups(dir, 0);
+					if ("1".equals(param(ex.getRequestURI(), "plan", "")))
+						freed += org.vknx.app.DataFiles.clearPlan(dir);
+					freed += org.vknx.app.DataFiles.clearLogs(dir);
+					log.clear();
+				}
+				default -> {
+					send(ex, 400, "text/plain", utf8("unknown part: " + what));
+					return;
+				}
+			}
+			send(ex, 200, "application/json; charset=utf-8", utf8("{\"freed\":" + freed + "}"));
+		}
+		catch (final Exception e) {
+			send(ex, 500, "text/plain", utf8(String.valueOf(e.getMessage())));
 		}
 	}
 

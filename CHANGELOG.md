@@ -3,6 +3,15 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Added
+- **Settings → Data and cleanup.** Shows what vKNX keeps in its data folder (logs, old device backups, floor plan, device state) with sizes, and has buttons to delete the logs, delete the old device backups and remove the floor plan. **Start a new installation…** resets every device to factory state (no address, no download, no keys; secure devices get a new factory key and certificate), keeps the devices with their names and lines, and clears logs and backups; a checkbox also removes the floor plan. It asks for confirmation first.
+
+### Changed
+- The log files can no longer grow without limit: `vknx.log` is moved to `vknx.log.1` when it passes 10 MB (an older `.1` is replaced), and so is `console.log` at each start. A log of 35 MB, as seen in testing, is rotated at the next start.
+- Calimero keeps the old state file of a device every time ETS resets it (`<name>_<date>-<time>_EC7.state`, 138 KB each, several per secure download). Nothing used them and they piled up. Only the newest one per device is kept now, and removing a device deletes its backups too.
+
 ## [0.7.8] - 2026-11-02
 
 ### Fixed

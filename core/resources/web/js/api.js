@@ -56,4 +56,6 @@ export const api = {
   saveLine: v => req('/api/settings?' + q({ line: v }), { method: 'POST' }),
   saveRouting: v => req('/api/settings?' + q({ routing: String(v) }), { method: 'POST' }),
   restart: () => req('/api/restart', { method: 'POST' }),
+  dataInfo: () => req('/api/data'),
+  dataClear: (what, extra = {}) => req('/api/data/clear?' + q({ what, ...extra }), { method: 'POST', timeout: 30000 }),
 };

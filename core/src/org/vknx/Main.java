@@ -48,6 +48,8 @@ public final class Main {
 		}
 
 		Files.createDirectories(dir);
+		org.vknx.app.DataFiles.rotate(dir.resolve("console.log"), org.vknx.ui.EventLog.MAX_FILE_BYTES);
+		org.vknx.app.DataFiles.deleteBackups(dir, 1);
 		if (consoleLog) {
 			final var ps = new java.io.PrintStream(new java.io.FileOutputStream(dir.resolve("console.log").toFile(), true), true,
 					java.nio.charset.StandardCharsets.UTF_8);
