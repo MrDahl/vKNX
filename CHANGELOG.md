@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.7.9] - 2026-11-02
 
 ### Added
 - **Settings → Data and cleanup.** Shows what vKNX keeps in its data folder (logs, old device backups, floor plan, device state) with sizes, and has buttons to delete the logs, delete the old device backups and remove the floor plan. **Start a new installation…** resets every device to factory state (no address, no download, no keys; secure devices get a new factory key and certificate), keeps the devices with their names and lines, and clears logs and backups; a checkbox also removes the floor plan. It asks for confirmation first.
