@@ -83,6 +83,20 @@ public final class SecureTest {
 			check("both secure devices loaded", until(3000, () -> pb.applicationLoaded() && sw.applicationLoaded()));
 			final var lamp = (SwitchActuatorBehavior) sw.behavior();
 
+			// the device's own maximum APDU length: set to 254 for secure products, and a management client cannot change it
+			{
+				final Destination dd = ets.mc.createDestination(sw.address(), true);
+				try {
+					final int before = ((ets.mc.readProperty(dd, 0, 56, 1, 1)[0] & 0xff) << 8) | (ets.mc.readProperty(dd, 0, 56, 1, 1)[1] & 0xff);
+					byte[] resp = null;
+					try { resp = ets.mc.rawPropertyWrite(dd, 0, 56, new byte[] { 0, 15 }); } catch (final Exception e) { resp = new byte[0]; }
+					final byte[] now = ets.mc.readProperty(dd, 0, 56, 1, 1);
+					check("a secure device has max APDU 254, and a management write of 15 does not change it",
+							before == 254 && (((now[0] & 0xff) << 8) | (now[1] & 0xff)) == 254);
+				}
+				finally { dd.destroy(); }
+			}
+
 			CouplerTest.press(pb, 1);
 			check("before commissioning the secure devices still talk plain group telegrams", until(2000, () -> lamp.lampLit(1)));
 			CouplerTest.press(pb, 2);
@@ -195,6 +209,15 @@ public final class SecureTest {
 			check("factory reset deletes security mode and tool key (after the answer has gone out)",
 					until(3000, () -> !pb.securityModeOn() && !pb.toolKeyActive()));
 			check("factory reset keeps FDSK and serial", pb.fdskHex().equals(fdskBefore) && pb.serialHex().equals("00FA00000033"));
+			{
+				final Destination dp = ets.mc.createDestination(pb.address(), true);
+				try {
+					final byte[] v = ets.mc.readProperty(dp, 0, 56, 1, 1);
+					check("... and the secure device still has max APDU 254 after the factory reset",
+							v != null && v.length == 2 && (((v[0] & 0xff) << 8) | (v[1] & 0xff)) == 254);
+				}
+				finally { dp.destroy(); }
+			}
 			// after the reset ETS talks to the device with the factory key again (secure management with the FDSK)
 			tool.detach();
 			Thread.sleep(1200); // the device ignores a sync.req within 1 s of its last sync.res
