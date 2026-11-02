@@ -3,6 +3,14 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Fixed
+- **The interface's maximum APDU length kept dropping from 254 to 15**, after which ETS refused every download that needs long frames (KNX Data Secure: "Insufficient APDU Length (restricted to 15 by capabilities of the bus interface, required: 34)") until vKNX was restarted. Cause: Calimero lets any device-management client write that property (cEMI server object pid 68, device object pid 56), and ETS keeps its own copy of the value and writes it back. The two properties are now read only (new patch `calimero-server-fixed-apdu.patch`); a write attempt is refused and logged, and the test suite checks that the value stays at 254. If ETS still shows 15 in "Local Interface Settings" from earlier, let ETS discover the interface again (or re-add the connection) so it reads 254 afresh.
+
+### Changed
+- The status strip on the Installation tab is smaller: every warning is one line that opens for the details, and the whole list can be hidden and shown again with the button "n messages" (the choice is remembered). Several "programming button was not pressed" hints are combined into one, and disappear when the device has an address or its button is on.
+
 ## [0.7.7] - 2026-11-02
 
 ### Added

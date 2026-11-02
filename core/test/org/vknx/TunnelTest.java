@@ -83,6 +83,21 @@ public final class TunnelTest {
 			SelfTest.check("interface reports a long max APDU (254) to ETS in the tunnelling DIB: "
 					+ tdib.map(d -> d.maxApduLength()).orElse(-1), tdib.isPresent() && tdib.get().maxApduLength() == 254);
 		}
+		{
+			// ETS keeps a copy of the interface's max APDU and wrote 15 back over device management; the property is read only now
+			boolean refused = true;
+			try (var ad = io.calimero.mgmt.LocalDeviceManagementIp.newAdapter(new InetSocketAddress(host, 0), new InetSocketAddress(host, port), false, false, e -> {})) {
+				for (final int[] t : new int[][] { { 0, 56 }, { 6, 68 } })
+					try { ad.setProperty(t[0], t[1], 1, 1, new byte[] { 0, 15 }); refused = false; }
+					catch (final io.calimero.KNXException e) { /* expected: read only */ }
+			}
+			final var res = new io.calimero.knxnetip.Discoverer(0, false)
+					.search(new InetSocketAddress(host, port), io.calimero.knxnetip.util.Srp.withDeviceDescription(io.calimero.knxnetip.util.DIB.TunnelingInfo))
+					.get(5, java.util.concurrent.TimeUnit.SECONDS).response();
+			final int after = res.description().stream().filter(d -> d instanceof io.calimero.knxnetip.util.TunnelingDib)
+					.map(d -> ((io.calimero.knxnetip.util.TunnelingDib) d).maxApduLength()).findFirst().orElse(-1);
+			SelfTest.check("a client cannot write the interface's max APDU (device management write refused, value still " + after + ")", refused && after == 254);
+		}
 		try (var tunnel = KNXNetworkLinkIP.newTunnelingLink(new InetSocketAddress(host, 0),
 				new InetSocketAddress(host, port), false,
 				new TPSettings(new IndividualAddress(0)))) {

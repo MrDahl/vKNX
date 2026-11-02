@@ -1,0 +1,20 @@
+--- a/src/io/calimero/server/gateway/KnxServerGateway.java
++++ b/src/io/calimero/server/gateway/KnxServerGateway.java
+@@ -1867,7 +1867,16 @@
+ 					// read property elements first so we know property exists
+ 					ios.getProperty(f.getObjectType(), f.getObjectInstance(), f.getPID(), 0, 1);
+ 
+-					if (checkPropertyAccess(f.getObjectType(), f.getObjectInstance(), f.getPID(),
++					// vKNX: the maximum APDU length of the interface is fixed. A client (ETS keeps a copy of it) must not be able
++					// to write 15 into it, which would make ETS refuse every download that needs long frames
++					if (!read && Boolean.getBoolean("vknx.flatNetwork")
++							&& (f.getObjectType() == InterfaceObject.CEMI_SERVER_OBJECT && f.getPID() == 68
++									|| f.getObjectType() == InterfaceObject.DEVICE_OBJECT && f.getPID() == PID.MAX_APDULENGTH)) {
++						logger.log(INFO, "refuse write of the fixed maximum APDU length ({0}|{1})", f.getObjectType(), f.getPID());
++						data = new byte[] { (byte) CEMIDevMgmt.ErrorCodes.READ_ONLY };
++						elems = 0;
++					}
++					else if (checkPropertyAccess(f.getObjectType(), f.getObjectInstance(), f.getPID(),
+ 							mc == CEMIDevMgmt.MC_PROPREAD_REQ, securityControl)) {
+ 						if (read)
+ 							data = ios.getProperty(f.getObjectType(), f.getObjectInstance(), f.getPID(),

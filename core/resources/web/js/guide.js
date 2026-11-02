@@ -1,4 +1,4 @@
-import { h, icon, setText } from './util.js';
+import { h, icon, setText, pref, setPref } from './util.js';
 import { S, on, selectDevice } from './bus.js';
 import { productOf } from './devinfo.js';
 import { modal } from './dialogs.js';
@@ -63,25 +63,31 @@ function rowFor(p) {
     p.dev ? h('button.btn.sm', { onclick: () => selectDevice(p.dev) }, 'Show device') : null);
 }
 
+function compactRow(p) {
+  return h('details.diag.compact.' + p.level, h('summary', icon(p.level === 'info' ? 'info' : 'alert'), h('span.grow.ellipsis', p.title),
+    p.dev ? h('button.btn.sm', { onclick: ev => { ev.preventDefault(); selectDevice(p.dev); } }, 'Show device') : null, h('span.more', icon('chevron'))),
+    h('div.hint', p.text));
+}
+
 export function createStatusStrip() {
   const root = h('section.status-strip', { 'aria-label': 'Status and warnings' });
   const head = h('div.strip-head'); const list = h('div.strip-list');
-  let all = false, sig = '';
+  let open = pref('stripOpen', true), sig = '';
   root.append(head, list);
   function update() {
     const tun = tunnels(), iface = interfaceLine();
     const items = [...problems(), ...hints()];
     const worst = items.some(i => i.level === 'danger') ? 'danger' : items.some(i => i.level === 'warn') ? 'warn' : 'ok';
-    const s = JSON.stringify([tun.map(t => t.address), iface, items.map(i => i.key + i.level), all]);
+    const s = JSON.stringify([tun.map(t => t.address), iface, items.map(i => i.key + i.level), open]);
     if (s === sig) return; sig = s;
     const etsChip = h('span.chip' + (tun.length ? '.ok' : ''), icon(tun.length ? 'check' : 'circle'), tun.length ? `ETS connected · ${tun.length} connection${tun.length === 1 ? '' : 's'}` : 'No ETS connected');
-    head.replaceChildren(etsChip,
-      h('span.chip', 'Interface line ' + (iface || '?')),
-      worst === 'ok' ? h('span.chip.ok', icon('check'), 'No problems found') : h('span.chip.' + (worst === 'danger' ? 'danger' : 'warn'), icon('alert'), `${items.filter(i => i.level !== 'info').length || items.length} to check`),
-      h('span.grow'), h('button.btn.sm', { onclick: openEtsMessages }, icon('info'), 'ETS messages explained'));
-    const shown = all ? items : items.slice(0, 3);
-    list.replaceChildren(...shown.map(rowFor), items.length > 3 ? h('button.btn.quiet.sm', { onclick: () => { all = !all; sig = ''; update(); } }, all ? 'Show fewer' : `Show ${items.length - 3} more`) : null);
-    root.classList.toggle('calm', !items.length);
+    const toggle = items.length ? h('button.btn.sm.' + (worst === 'danger' ? 'danger-outline' : 'quiet'), { 'aria-expanded': String(open), title: open ? 'Hide the warnings' : 'Show the warnings',
+      onclick: () => { open = !open; setPref('stripOpen', open); sig = ''; update(); } }, icon(worst === 'ok' ? 'info' : 'alert'), `${items.length} ${items.length === 1 ? 'message' : 'messages'}`, h('span' + (open ? '.chev.open' : '.chev'), icon('chevron'))) : null;
+    head.replaceChildren(etsChip, h('span.chip', 'Interface line ' + (iface || '?')),
+      items.length ? toggle : h('span.chip.ok', icon('check'), 'No problems found'),
+      h('span.grow'), h('button.btn.sm.quiet', { onclick: openEtsMessages }, icon('info'), 'ETS messages explained'));
+    list.hidden = !items.length || !open;
+    list.replaceChildren(...items.map(compactRow));
   }
   return { el: root, update };
 }

@@ -468,3 +468,16 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .strip-list { max-height: 34vh; overflow-y: auto; }
 .blind .v { font-size: .95rem; line-height: 1.2; }
 .blind .hint { font-size: .8rem; line-height: 1.2; }
+
+/* compact, collapsible status strip */
+.status-strip { padding: .45rem 1rem 0; gap: .35rem; }
+.strip-list { max-height: 26vh; gap: .3rem; }
+details.diag.compact { display: block; padding: 0; margin: 0; }
+details.diag.compact > summary { display: flex; align-items: center; gap: .6rem; padding: .3rem .7rem; cursor: pointer; list-style: none; font-weight: 600; min-height: 36px; }
+details.diag.compact > summary::-webkit-details-marker { display: none; }
+details.diag.compact > summary .more { display: inline-flex; transition: transform .15s; color: var(--muted); }
+details.diag.compact[open] > summary .more { transform: rotate(90deg); }
+details.diag.compact > .hint { padding: 0 .7rem .55rem 2.4rem; color: var(--text); }
+details.diag.compact > summary > .ic:first-child { flex: none; }
+.chev { display: inline-flex; transition: transform .15s; } .chev.open { transform: rotate(90deg); }
+.btn.danger-outline .ic, .btn.sm.quiet .ic { width: 1.1em; height: 1.1em; }

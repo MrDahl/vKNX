@@ -78,17 +78,23 @@ const SECURE_BAD = /ignor|discard|invalid|fail|wrong|mismatch|unknown key|not ma
 export function hints() {
   const out = [], now = Date.now(), W = 180000, devs = S.state?.devices || [];
   const recent = e => now - e.ts < W && e.seq > (S.monCutoff || 0);
-  const seen = new Set();
+  const seen = new Set(), noProg = new Set();
   const add = h => { if (!seen.has(h.key)) { seen.add(h.key); out.push(h); } };
   for (const e of S.devlog) {
     if (!recent(e)) continue;
-    if (e.cat === 'mgmt' && /A_IndividualAddress_Write .* ignored/.test(e.text))
-      add({ key: 'prog-' + e.dev, level: 'warn', dev: e.dev, title: `ETS tried to give ${e.dev} an address, but the programming button was not pressed`,
-        text: 'Press the programming button on the device (red indicator lit), then assign the address again in ETS.' });
+    if (e.cat === 'mgmt' && /A_IndividualAddress_Write .* ignored/.test(e.text)) {
+      const d = devs.find(x => x.name === e.dev);
+      if (d && d.unassigned && !d.programming) noProg.add(e.dev); // solved once the device has an address or its button is on
+    }
     if (e.cat === 'download' && /ERROR/.test(e.text))
       add({ key: 'dl-' + e.dev, level: 'danger', dev: e.dev, title: `A download step to ${e.dev} failed`, text: e.text.replace(/^ERROR:\s*/, '') + ' – see the device log for the steps before it. Try the download again; if it keeps failing, unload the application in ETS and download again.' });
     if (e.cat === 'secure' && SECURE_BAD.test(e.text) && !/ok|success/i.test(e.text))
       add({ key: 'sec-' + e.dev, level: 'warn', dev: e.dev, title: `The secure layer of ${e.dev} refused something`, text: `"${e.text}". Usual causes: ETS uses another tool key than the one in the device (the device was commissioned in a different ETS project or with another certificate), or a telegram was repeated. Remove the device in ETS and re-add it with its certificate, or reset the vKNX device to the factory state.` });
+  }
+  if (noProg.size) {
+    const names = [...noProg];
+    add({ key: 'prog-' + names.join(','), level: 'warn', dev: names[0], title: `ETS tried to give ${names.join(', ')} an address, but the programming button was not pressed`,
+      text: 'Press the programming button on the device (red indicator lit), then assign the address again in ETS.' });
   }
   if (S.devlog.some(e => recent(e) && e.cat === 'mgmt' && /A_IndividualAddress_Read -> silent/.test(e.text)) && !devs.some(d => d.programming))
     add({ key: 'noprog', level: 'info', title: 'ETS looked for devices in programming mode and none answered', text: 'Press the programming button of the virtual device you want to address, then try again in ETS.' });
