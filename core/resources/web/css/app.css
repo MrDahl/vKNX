@@ -450,9 +450,8 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .dim-grid { grid-template-columns: repeat(2, 1fr); gap: .8rem 1rem; }
 .dim-grid .lamp-cell { align-items: stretch; text-align: center; }
 .dim-grid .lamp-cell .bulb { align-self: center; }
-.dslider { position: relative; height: 10px; border-radius: 5px; background: var(--surface-3); margin: .45rem 0 .2rem; border: 1px solid var(--border); }
-.dslider .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--lamp); border-radius: 5px; transition: width .4s linear; }
-.dslider .thumb { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--surface); border: 3px solid var(--lamp); transition: left .4s linear; text-decoration: none; }
+.dslider { position: relative; height: 8px; border-radius: 2px; background: var(--surface-3); margin: .45rem 0 .2rem; border: 1px solid var(--border); overflow: hidden; }
+.dslider .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--lamp); transition: width .4s linear; }
 .blind.moving .window { border-color: var(--accent); }
 .blind.moving .hint { color: var(--accent); font-weight: 600; }
 .card-gas { border-top: 1px solid var(--border); padding: 0 1rem; font-size: .9rem; }
@@ -530,3 +529,25 @@ details.diag.compact > summary > .ic:first-child { flex: none; }
 details.fold { margin: .8rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .15rem .8rem; background: var(--surface); }
 details.fold > summary { cursor: pointer; font-weight: 600; padding: .5rem 0; }
 details.fold[open] > summary { margin-bottom: .3rem; }
+
+/* ---- redesign: cards */
+
+.lamp-cell b { padding: .05rem .5rem; border-radius: 99px; background: var(--surface-3); }
+.lamp-cell .bulb.on ~ b { background: var(--lamp-soft); }
+details.howto { font-size: .9rem; }
+details.howto > summary { cursor: pointer; color: var(--muted); font-weight: 500; padding: .1rem 0; }
+details.howto[open] > summary { margin-bottom: .25rem; }
+.dim-grid .lamp-cell b { align-self: center; }
+
+/* ---- redesign: add device catalogue */
+.add-layout { display: grid; grid-template-columns: minmax(0, 1fr) 17rem; gap: 1rem; align-items: start; }
+.catalog.compact { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); max-height: 46vh; overflow-y: auto; padding: 2px; }
+.catalog.compact .cat-item { align-items: center; padding: .5rem .6rem; }
+.catalog.compact .cat-item b { font-size: .95rem; }
+.cat-detail { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); padding: .8rem; display: grid; gap: .5rem; max-height: 46vh; overflow-y: auto; }
+.cat-detail p { margin: 0; }
+.cat-detail-head { display: flex; gap: .7rem; align-items: center; }
+.cat-detail-head .ico { width: 2.6rem; height: 2.6rem; border-radius: 8px; background: var(--surface-3); display: grid; place-items: center; color: var(--muted); flex: none; }
+.cat-detail h3 { font-size: 1.05rem; }
+.dlg-foot .grow { flex: 1; }
+@media (max-width: 720px) { .add-layout { grid-template-columns: 1fr; } .cat-detail { max-height: none; } }

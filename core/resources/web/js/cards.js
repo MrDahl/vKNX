@@ -21,6 +21,8 @@ function gaText(dev, objs) {
   const l = [...set].sort(naturalCmp);
   return l.length ? l.slice(0, 2).join(', ') + (l.length > 2 ? ` +${l.length - 2}` : '') : '';
 }
+/** Long usage hints live in a small fold-out so the card stays about the device, not about instructions. */
+const howTo = text => h('details.howto', h('summary', 'How to operate'), h('div.hint', text));
 const range = (from, n) => Array.from({ length: n }, (_, i) => from + i);
 
 const LAMP = { on: 'lamp', off: 'lampOff' };
@@ -101,7 +103,7 @@ export function createCard(d, handlers) {
       L.k = [1, 2, 3, 4].map(i => ({ row: h('div.keytile'), btn: holdButton(d.name, i, 'Key ' + i, 'button'), d: h('div.hint'), l: h('span.mono'), ga: h('div.cga') }));
       L.k.forEach(k => { k.row.append(k.btn, k.d, k.l, k.ga); pad.append(k.row); });
       state.append(pad);
-      controls.append(h('div.hint', 'Press and hold a key for a long press. The small light on a key is its status LED. Functions and names are set in ETS.'));
+      controls.append(howTo('Press and hold a key for a long press. The small light on a key is its status LED. Functions and names are set in ETS.'));
       face = (v, dev) => L.k.forEach((k, i) => {
         const n = i + 1, en = v['e' + n] !== false;
         k.row.hidden = !en; paintIcon(k.btn.ico, d.name + '|k' + n, 'button'); setText(k.btn.lbl, v['n' + n] || 'Key ' + n); setText(k.d, v['d' + n] || ''); setText(k.l, v['l' + n] || '');
@@ -136,15 +138,15 @@ export function createCard(d, handlers) {
       L.cells = [];
       const grid = h('div.lamp-grid.dim-grid');
       for (let i = 0; i < 4; i++) {
-        const b = bulb(); const nm = h('span'); const t = h('b'); const m = h('i.fill'); const th = h('u.thumb'); const ga = h('span.cga');
-        const trk = h('div.dslider', { role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': 100 }, m, th);
-        const cell = h('div.lamp-cell', b, nm, t, trk, ga); L.cells.push({ cell, b, nm, t, m, th, ga, trk }); grid.append(cell);
+        const b = bulb(); const nm = h('span'); const t = h('b'); const m = h('i.fill'); const ga = h('span.cga');
+        const trk = h('div.dslider', { role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-label': 'Brightness (display only)' }, m);
+        const cell = h('div.lamp-cell', b, nm, t, trk, ga); L.cells.push({ cell, b, nm, t, m, ga, trk }); grid.append(cell);
       }
       state.append(grid);
-      controls.append(h('div.hint', 'The sliders show the actual brightness. Dim with the push buttons (relative or absolute value from ETS).'));
+      controls.append(howTo('The bars show the actual brightness of each channel; they cannot be dragged. Dim with the push buttons or a slider device (relative or absolute value from ETS).'));
       face = (v, dev) => L.cells.forEach((c, i) => {
         const n = i + 1, lv = v['level' + n] ?? 0;
-        c.cell.hidden = v['e' + n] === false; setBulb(c.b, lv > 0, lv, d.name + '|d' + n); setText(c.t, lv + ' %'); setStyle(c.m, 'width', lv + '%'); setStyle(c.th, 'left', lv + '%');
+        c.cell.hidden = v['e' + n] === false; setBulb(c.b, lv > 0, lv, d.name + '|d' + n); setText(c.t, lv + ' %'); setStyle(c.m, 'width', lv + '%');
         setAttr(c.trk, 'aria-valuenow', lv); setText(c.ga, dev ? gaText(dev, range(5 * (n - 1) + 1, 5)) : '');
         setText(c.nm, v['n' + n] || 'Channel ' + n);
       });
@@ -164,7 +166,7 @@ export function createCard(d, handlers) {
       L.sib = SENSORS.map(s => h('span.sb', icon(s.icon)));
       L.cellEl = SENSORS.map((s, i) => { const c = h('div.sens', h('div.l', L.sib[i], s.name), L.n[i]); grid.append(c); return c; });
       state.append(grid);
-      controls.append(h('div.hint', 'Values are set in ETS. They cannot be changed here.'));
+      controls.append(howTo('The values are sent by the sensor according to its ETS parameters. They cannot be changed here.'));
       face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; paintIcon(L.sib[i], d.name + '|s' + i, s.icon); L.cellEl[i].hidden = v['e' + i] === false; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
       break;
     }
@@ -176,7 +178,7 @@ export function createCard(d, handlers) {
       L.rows.forEach(r => grid.append(h('div.cp-row', h('span', r.t), r.v)));
       state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
       state.append(L.role, grid, L.cnt, L.filter, L.block);
-      controls.append(h('div.hint', 'Everything shown here comes from the ETS download. Group telegrams in “filter” mode only pass if the group address is in the filter table.'));
+      controls.append(howTo('Everything shown here comes from the ETS download. Group telegrams in “filter” mode only pass if the group address is in the filter table.'));
       face = v => {
         const hi = (a, b) => (a === b ? a : a + ' / ' + b + ' (14-31)');
         const roleText = (v.role === 'area' ? `Area coupler: main line ${v.placement} ↔ backbone` : v.role === 'line' ? `Line coupler: line ${v.placement} ↔ main line ${v.mainLine}` : 'Not wired to a line') + (v.addressState === 'mismatch' ? ' · ADDRESS DOES NOT MATCH its line (should be ' + v.placement + '.0)' : '');
@@ -201,7 +203,7 @@ export function createCard(d, handlers) {
       const v = dev.view || {};
       const st = statusOf(dev);
       paintIcon(headIco, dev.name, info.icon);
-      setText(addr, dev.unassigned ? 'No address' : dev.address);
+      addr.hidden = dev.unassigned; setText(addr, dev.unassigned ? '' : dev.address);
       setText(chip, st.label); chip.className = 'chip ' + st.cls;
       prog.hidden = !dev.programming;
       setCls(root, 'selected', S.selected === dev.name && S.drawer);
