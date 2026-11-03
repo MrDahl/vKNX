@@ -551,3 +551,22 @@ details.howto[open] > summary { margin-bottom: .25rem; }
 .cat-detail h3 { font-size: 1.05rem; }
 .dlg-foot .grow { flex: 1; }
 @media (max-width: 720px) { .add-layout { grid-template-columns: 1fr; } .cat-detail { max-height: none; } }
+
+/* ---- redesign: floor plan */
+.props-head { display: flex; align-items: flex-start; gap: .5rem; padding: .7rem .85rem .2rem; }
+.props-head h3 { padding: 0; font-size: 1rem; }
+.plan-settings { display: inline-flex; }
+
+/* ---- redesign: monitor */
+.ga-body { display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: hidden; }
+.ga-body > .list { flex: 1; overflow-y: auto; }
+.mon-layout.ga-collapsed { grid-template-columns: minmax(200px, 240px) 1fr; }
+.mon-layout.ga-collapsed .ga-list-panel { align-self: start; }
+.ga-list-panel > header { gap: .3rem; }
+@media (max-width: 720px) {
+  .detail-head { flex-wrap: wrap; row-gap: .5rem; padding: .8rem 1rem; }
+  .detail-head .grow { flex: 1 1 9rem; min-width: 0; }
+  .detail-head .back-only { flex: 1 0 100%; justify-content: flex-start; }
+  .next-bar, .tabs, .badge-row { margin-left: 1rem; margin-right: 1rem; padding-left: 0; padding-right: 0; }
+  .tabs { padding: 0; }
+}

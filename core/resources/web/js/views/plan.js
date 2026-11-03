@@ -3,7 +3,7 @@ import { api } from '../api.js';
 import { S, on, emit, device, selectDevice, showGroupAddress } from '../bus.js';
 import { pointsOf, objectsOfPoint, SENSORS } from '../devinfo.js';
 import { operate } from '../cards.js';
-import { confirmDialog, toast } from '../dialogs.js';
+import { confirmDialog, toast, menuButton } from '../dialogs.js';
 import { paintIcon, setIcon, hasCustomIcon, pointDefault, pointKind } from '../iconStore.js';
 import { pickIcon } from '../iconPicker.js';
 
@@ -34,13 +34,15 @@ export function createPlan() {
   sRange.addEventListener('input', () => { layout.size = +sRange.value / 100; applySize(); save(); });
   const file = h('input', { type: 'file', accept: '.png,.jpg,.jpeg,.svg,.webp,.gif,image/*', hidden: true });
   file.addEventListener('change', upload);
-  const bUp = h('button.btn', { type: 'button', onclick: () => file.click() }, icon('upload'), h('span.btn-text.opt', 'Upload plan'));
-  const bRm = h('button.btn.danger-outline', { type: 'button', onclick: removePlanImage }, icon('trash'), h('span.btn-text.opt', 'Remove plan image'));
+  const symBox = h('span.zoom-box', h('span.hint', 'Symbol size'), sRange);
+  const planMenu = menuButton({ label: 'Plan settings', text: 'Plan settings', items: () => [
+    { label: hasImg ? 'Replace plan image…' : 'Upload plan image…', icon: 'upload', onclick: () => file.click() },
+    ...(hasImg ? [{ label: 'Remove plan image…', icon: 'trash', danger: true, onclick: removePlanImage }] : [])] });
+  const settingsBox = h('span.plan-settings', planMenu);
   const toolbar = h('div.toolbar', seg,
     h('button.btn', { onclick: fit, title: 'Fit the whole plan into the window' }, icon('fit'), h('span.btn-text.opt', 'Fit to window')),
     h('span.zoom-box', h('button.btn.icon', { 'aria-label': 'Zoom out', title: 'Zoom out', onclick: () => setZoom(layout.zoom - 15) }, icon('zoomOut')), zRange, h('button.btn.icon', { 'aria-label': 'Zoom in', title: 'Zoom in', onclick: () => setZoom(layout.zoom + 15) }, icon('zoomIn')), zVal),
-    h('span.zoom-box', h('span.hint', 'Symbols'), sRange),
-    h('span.grow'), bUp, bRm, file);
+    symBox, h('span.grow'), settingsBox, file);
 
   // ----- canvas -----
   const img = h('img', { alt: 'Floor plan', draggable: false });
@@ -58,7 +60,7 @@ export function createPlan() {
   const palSearch = h('input.input', { type: 'search', placeholder: 'Search channels', 'aria-label': 'Search channels', style: 'margin:.5rem .85rem;width:calc(100% - 1.7rem)' });
   palSearch.addEventListener('input', renderPalette);
   const palList = h('div');
-  const palette = h('aside.plan-side', { 'aria-label': 'Channels that can be placed' }, h('h3', 'Place on the plan'), h('div.hint', { style: 'padding:0 .85rem' }, 'Click a channel to place it in the middle of the view, or drag it onto the plan.'), palSearch, palList);
+  const palette = h('aside.plan-side', { 'aria-label': 'Channels that can be placed' }, h('h3', 'Place on the plan'), h('div.hint', { style: 'padding:0 .85rem' }, 'Click a channel to place it in the middle of the view, or drag it onto the plan. Select a symbol to change its label and icon; drag it (or use the arrow keys) to move it.'), palSearch, palList);
 
   // ----- properties (edit mode) -----
   const props = h('aside.plan-side.right', { 'aria-label': 'Symbol properties' });
@@ -89,7 +91,7 @@ export function createPlan() {
     viewport.scrollLeft = viewport.scrollTop = 0; save();
   }
   function setEdit(v) { S.planEdit = v; if (!v) sel = null; update(); }
-  function refreshTools() { bRm.hidden = !(S.planEdit && hasImg); bUp.querySelector('.btn-text')?.replaceChildren(document.createTextNode(hasImg ? 'Replace plan image' : 'Upload plan')); }
+  function refreshTools() { symBox.hidden = !S.planEdit; settingsBox.hidden = !S.planEdit; }
 
   async function upload() {
     const f = file.files[0]; if (!f) return;
@@ -251,8 +253,7 @@ export function createPlan() {
   function renderProps() {
     const it = sel && itemOf(sel), p = it && pointsMap().get(sel);
     if (!it || !p) {
-      props.replaceChildren(h('h3', 'Symbol properties'), h('p.hint', { style: 'padding:0 .85rem' }, 'Select a symbol on the plan to change its label or remove it from the plan. Drag a symbol to move it; the arrow keys also move it.'));
-      props.dataset.sel = ''; return;
+      props.replaceChildren(); props.dataset.sel = ''; return;
     }
     const d = device(p.dev);
     const key = sel + '|' + (it.label || '');
@@ -264,7 +265,7 @@ export function createPlan() {
     const gas = (d.assoc || []).filter(a => objs.has(a.obj));
     const catObjs = S.cat[d.product]?.objects || [];
     props.replaceChildren(
-      h('h3', 'Symbol properties'),
+      h('div.props-head', h('div.grow', h('h3', `${p.dev} · ${p.name}`), it.label ? h('div.mute', 'Shown on the plan as “' + it.label + '”') : null), h('button.btn.quiet.icon', { 'aria-label': 'Close properties', title: 'Close', onclick: () => { sel = null; update(); } }, icon('close'))),
       h('div', { style: 'padding:.4rem .85rem .85rem;display:grid;gap:.85rem' },
         h('div.field', { style: 'margin:0' }, h('label', { for: 'mk-label' }, 'Label on the plan'), label, h('div.hint#mk-label-help', 'Leave empty to use the default name.')),
         h('div.field', { style: 'margin:0' }, h('label', 'Icon'), (() => {
@@ -313,8 +314,7 @@ export function createPlan() {
     const hp = !!S.state?.plan;
     if (loaded && hp !== planKnown) { planKnown = hp; if (hp) loadImg(); else img.onerror(); }
     bOp.setAttribute('aria-pressed', String(!S.planEdit)); bEd.setAttribute('aria-pressed', String(S.planEdit));
-    palette.hidden = !S.planEdit; props.hidden = !S.planEdit;
-    for (const el of [bUp]) el.hidden = !S.planEdit;
+    palette.hidden = !S.planEdit; props.hidden = !(S.planEdit && sel);
     refreshTools();
     const pts = pointsMap();
     const items = layout.items.filter(i => pts.has(i.id));

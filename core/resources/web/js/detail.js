@@ -30,7 +30,7 @@ export function deviceMenu(name) {
     label: `More actions for ${name}`,
     items: () => [
       { label: 'Show details', icon: 'info', onclick: () => { selectDevice(name, { drawer: true }); } },
-      { label: 'Show telegrams for this device', icon: 'devices', onclick: () => showTelegrams(name) },
+      { label: 'Show related telegrams', icon: 'devices', onclick: () => showTelegrams(name) },
       { label: 'Change icons…', icon: 'edit', onclick: () => openIconEditor(name) },
       'hr',
       { label: 'Remove device…', icon: 'trash', danger: true, onclick: () => removeDevice(name) },

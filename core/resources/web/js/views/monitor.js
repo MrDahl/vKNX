@@ -1,4 +1,4 @@
-import { h, icon, setText, setCls, syncKeyed, clock, naturalCmp, flagLetters } from '../util.js';
+import { h, icon, setText, setCls, syncKeyed, clock, naturalCmp, flagLetters, pref, setPref } from '../util.js';
 import { S, on, emit, setFilter, resetFilter, selectGa, device } from '../bus.js';
 import { gaIndex } from '../devinfo.js';
 import { toast } from '../dialogs.js';
@@ -53,7 +53,7 @@ export function createMonitor({ compact }) {
   const bTg = h('button', { type: 'button', onclick: () => setTab('telegrams') }, 'Bus telegrams');
   const bLog = h('button', { type: 'button', onclick: () => setTab('devlog'), title: 'Explanations written by the virtual devices - not telegrams on the bus' }, 'Device log');
   tabs.append(bTg, bLog);
-  const bPause = h('button.btn', { type: 'button', onclick: togglePause }, icon('pause'), h('span', 'Pause'));
+  const bPause = h('button.btn', { type: 'button', title: 'Pause view: stops this list from changing. The simulation keeps running and new telegrams are collected.', onclick: togglePause }, icon('pause'), h('span', 'Pause view'));
   const newBadge = h('span.chip.info', { hidden: true });
   const bFollow = h('button.btn', { type: 'button', 'aria-pressed': 'true', title: 'Keep the newest telegram in view', onclick: () => { st.follow = !st.follow; if (st.follow) scrollEnd(); refreshTools(); } }, icon('down'), h('span', 'Follow live'));
   const search = h('input.input', { type: 'search', placeholder: 'Search', 'aria-label': 'Search telegrams', style: 'width:11rem' });
@@ -105,7 +105,7 @@ export function createMonitor({ compact }) {
     jump.hidden = st.follow || st.tab !== 'telegrams';
     if (bPause.dataset.p !== String(st.paused)) {
       bPause.dataset.p = String(st.paused);
-      bPause.replaceChildren(icon(st.paused ? 'play' : 'pause'), h('span', st.paused ? 'Resume live' : 'Pause'));
+      bPause.replaceChildren(icon(st.paused ? 'play' : 'pause'), h('span', st.paused ? 'Resume live view' : 'Pause view'));
     }
     setCls(bPause, 'primary', st.paused);
   }
@@ -171,7 +171,7 @@ export function createMonitor({ compact }) {
     chips.hidden = !af.length && !st.paused;
     chips.replaceChildren(...af.map(([k, v]) => h('span.chip.info', `${{ text: 'Text', device: 'Device', service: 'Type', origin: 'Origin', ga: 'Group address' }[k]}: ${v}`,
       h('button.btn.quiet.sm', { style: 'height:20px;padding:0 4px', 'aria-label': 'Remove this filter', onclick: () => { setFilter({ [k]: '' }); if (k === 'ga') selectGa(null); } }, icon('close')))),
-      st.paused ? h('span.chip.warn', icon('pause'), 'Paused – the simulation keeps running; new telegrams are collected') : null,
+      st.paused ? h('span.chip.warn', icon('pause'), 'View paused – the simulation keeps running; new telegrams are collected') : null,
       af.length ? bReset : null);
 
     if (isTg) {
@@ -217,10 +217,17 @@ export function createMonitorView() {
   gaSearch.addEventListener('input', renderList);
   const gaList = h('div.list');
   const gaInfo = h('div.ga-info', { hidden: true });
-  const gaPanel = h('section.panel.ga-list-panel', h('header', h('h2', 'Group addresses'), h('span.grow'), h('span.hint.cnt')),
-    h('div.list-tools', h('label.search', { style: 'flex:1' }, icon('search'), gaSearch)), gaList, gaInfo);
+  let gaOpen = pref('gaPanelOpen', true);
+  const gaToggle = h('button.btn.quiet.icon', { type: 'button', onclick: () => { gaOpen = !gaOpen; setPref('gaPanelOpen', gaOpen); applyGaOpen(); } });
+  const gaBody = h('div.ga-body', h('div.list-tools', h('label.search', { style: 'flex:1' }, icon('search'), gaSearch)), gaList, gaInfo);
+  const gaPanel = h('section.panel.ga-list-panel', h('header', gaToggle, h('h2', 'Group addresses'), h('span.grow'), h('span.hint.cnt')), gaBody);
+  function applyGaOpen() {
+    gaBody.hidden = !gaOpen; root.classList.toggle('ga-collapsed', !gaOpen);
+    gaToggle.replaceChildren(icon(gaOpen ? 'down' : 'chevron')); gaToggle.title = gaOpen ? 'Hide the group address list' : 'Show the group address list'; gaToggle.setAttribute('aria-label', gaToggle.title); gaToggle.setAttribute('aria-expanded', String(gaOpen));
+  }
   const mon = createMonitor({ compact: false });
   root.append(gaPanel, h('section.panel', { style: 'display:flex;flex-direction:column;min-height:0;overflow:hidden' }, mon.el));
+  applyGaOpen();
   let counts = new Map(), countSig = '';
 
   function observed() {

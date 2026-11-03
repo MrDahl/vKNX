@@ -41,9 +41,10 @@ export function confirmDialog({ title, message, confirmLabel, danger }) {
 }
 
 /** Small popup menu anchored to a button. items: [{label, icon, onclick, danger}] or 'hr'. */
-export function menuButton({ label, items }) {
+export function menuButton({ label, items, text }) {
   const wrap = h('div.menu-wrap');
-  const btn = h('button.btn.quiet.icon', { 'aria-label': label, title: label, 'aria-haspopup': 'menu', 'aria-expanded': 'false' }, icon('more'));
+  const btn = text ? h('button.btn', { title: label, 'aria-haspopup': 'menu', 'aria-expanded': 'false' }, icon('cog'), text)
+    : h('button.btn.quiet.icon', { 'aria-label': label, title: label, 'aria-haspopup': 'menu', 'aria-expanded': 'false' }, icon('more'));
   let menu = null;
   const close = () => { if (menu) { menu.remove(); menu = null; btn.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', outside, true); } };
   const outside = e => { if (menu && !wrap.contains(e.target)) close(); };

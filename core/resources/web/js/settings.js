@@ -138,19 +138,35 @@ export function openSettings() {
     const iv = setInterval(async () => { try { await fetch('/api/state', { cache: 'no-store' }); if (down || Date.now() - t0 > 9000) { clearInterval(iv); location.reload(); } } catch (e) { down = true; } }, 600);
   }
   const sec = (title, ...c) => h('section.section', { style: 'border:0;margin-bottom:1.1rem' }, h('h3', { style: 'margin-bottom:.5rem' }, title), ...c);
-  modal({
-    title: 'Settings', wide: true,
-    body: [
-      sec('Appearance', themeSeg, h('div', { style: 'margin-top:.6rem' }, sizeSeg), h('p.hint', 'Light is bright and high contrast for projectors. Large makes text and buttons bigger. Paper is a flat, animation-free look for e-ink screens.')),
-      sec('About', h('div', 'Version ', h('b', S.state?.version || '?')), h('p.hint', { style: 'margin:.3rem 0 .6rem' }, 'vKNX is an open-source teaching simulator. The generated product files are not made or endorsed by the KNX Association.'), check, upd),
-      sec('Lines and couplers', h('label', { style: 'display:flex;gap:.5rem;align-items:center' },
-        h('input', { type: 'checkbox', checked: S.state?.routing !== false, onchange: async e => { try { await api.saveRouting(e.target.checked); toast(e.target.checked ? 'Telegrams now cross lines only through couplers.' : 'All devices hear everything again (one flat line).'); } catch (err) { e.target.checked = !e.target.checked; toast('Could not change the setting: ' + err.message); } } }),
-        'Route telegrams between lines through couplers'),
-        h('p.hint', 'On: a device on another line only hears a telegram if a coupler with the right address exists, is downloaded, and lets it pass (filter table, hop count). Off: every device hears everything, couplers have no effect.')),
-      dataSection(),
+  const routing = h('div', h('label', { style: 'display:flex;gap:.5rem;align-items:center' },
+    h('input', { type: 'checkbox', checked: S.state?.routing !== false, onchange: async e => { try { await api.saveRouting(e.target.checked); toast(e.target.checked ? 'Telegrams now cross lines only through couplers.' : 'All devices hear everything again (one flat line).'); } catch (err) { e.target.checked = !e.target.checked; toast('Could not change the setting: ' + err.message); } } }),
+    'Route telegrams between lines through couplers'),
+    h('p.hint', 'On: a device on another line only hears a telegram if a coupler with the right address exists, is downloaded, and lets it pass (filter table, hop count). Off: every device hears everything, couplers have no effect.'));
+  const TABS = [
+    ['appearance', 'Appearance', () => [sec('Appearance', themeSeg, h('div', { style: 'margin-top:.6rem' }, sizeSeg), h('p.hint', 'Light is bright and high contrast for projectors. Large makes text and buttons bigger. Paper is a flat, animation-free look for e-ink screens.'))]],
+    ['connection', 'Connection', () => [
       sec('KNXnet/IP interface', h('div', 'Interface address: ', h('b.mono', S.state?.iface || '')), h('p.hint', 'ETS connects to the interface "vKNX". The line decides the physical addresses of its tunnels (line.241–244). Changing it restarts vKNX.'),
         h('div', { style: 'display:flex;gap:.5rem;align-items:center' }, line, h('button.btn', { onclick: saveLine }, icon('restart'), 'Save and restart')), lineMsg),
-    ],
+      sec('Status', h('p.hint', { style: 'margin-top:0' }, 'Whether ETS or another IP client is connected, and when the last frame arrived.'), h('button.btn', { onclick: openConnection }, icon('info'), 'Show connection status'))]],
+    ['simulation', 'Simulation', () => [sec('Lines and couplers', routing)]],
+    ['maintenance', 'Maintenance', () => [dataSection()]],
+    ['about', 'About', () => [sec('About', h('div', 'Version ', h('b', S.state?.version || '?')), h('p.hint', { style: 'margin:.3rem 0 .6rem' }, 'vKNX is an open-source teaching simulator. The generated product files are not made or endorsed by the KNX Association.'), check, upd)]],
+  ];
+  const bar = h('div.tabs', { role: 'tablist', 'aria-label': 'Settings sections', style: 'padding:0;margin:-.3rem 0 .9rem' });
+  const pane = h('div', { role: 'tabpanel' });
+  const btns = {};
+  const built = {};
+  const show = k => {
+    for (const [key, b] of Object.entries(btns)) { b.setAttribute('aria-selected', String(key === k)); b.tabIndex = key === k ? 0 : -1; }
+    pane.replaceChildren(...(built[k] ||= TABS.find(t => t[0] === k)[2]()));
+    try { sessionStorage.setItem('vknx-settings-tab', k); } catch (e) { /* ignore */ }
+  };
+  for (const [k, t] of TABS) bar.append(btns[k] = h('button.tab', { type: 'button', role: 'tab', onclick: () => show(k) }, t));
+  let first = 'appearance'; try { first = sessionStorage.getItem('vknx-settings-tab') || first; } catch (e) { /* ignore */ }
+  show(TABS.some(t => t[0] === first) ? first : 'appearance');
+  modal({
+    title: 'Settings', wide: true,
+    body: [bar, pane],
     buttons: close => [h('button.btn.primary', { onclick: close }, 'Close')],
   });
 }
