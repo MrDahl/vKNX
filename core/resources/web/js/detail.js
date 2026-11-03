@@ -2,7 +2,7 @@ import { h, icon, setText, setCls, setAttr, naturalCmp, ago } from './util.js';
 import { api } from './api.js';
 import { S, emit, device, showTelegrams, showGroupAddress, selectDevice, hooks } from './bus.js';
 import { statusOf, productOf, badgesOf, DOWNLOAD_TEXT } from './devinfo.js';
-import { renderGuide } from './guide.js';
+import { renderGuide, createNextBar } from './guide.js';
 import { confirmDialog, menuButton, toast } from './dialogs.js';
 import { operate } from './cards.js';
 import { paintIcon, forgetIconsOf } from './iconStore.js';
@@ -38,47 +38,66 @@ export function deviceMenu(name) {
   });
 }
 
-/** Device details: product, address, programming, status, ETS parameters, objects and group addresses. */
+const TABS = [['overview', 'Overview'], ['params', 'Parameters'], ['objects', 'Group objects'], ['diag', 'Diagnostics']];
+
+/**
+ * Device details. The header (name, status, programming button) and the "Next:" line are always visible; below them the
+ * tabs Overview (checklist, status, security), Parameters, Group objects and Diagnostics (last ETS action, line, telegrams).
+ */
 export function createDetail({ onBack, onClose, empty } = {}) {
   const root = h('div.detail');
   const head = h('div.detail-head');
   const body = h('div');
-  const badgeRow = h('div.badge-row'); const lastEts = h('div.last-ets');
-  root.append(head, badgeRow, lastEts, body);
-  let current = null;
+  const badgeRow = h('div.badge-row'); const next = createNextBar();
+  const tabBar = h('div.tabs', { role: 'tablist', 'aria-label': 'Device details' });
+  const panes = {};
+  root.append(head, badgeRow, next.el, tabBar, body);
+  let current = null, tab = 'overview';
   const els = {};
+
+  function showTab(t) {
+    tab = t;
+    for (const [k, b] of Object.entries(els.tabBtns || {})) { setAttr(b, 'aria-selected', String(k === t)); b.tabIndex = k === t ? 0 : -1; }
+    for (const [k, p] of Object.entries(panes)) p.hidden = k !== t;
+  }
 
   function buildFor(name) {
     current = name;
     const d = device(name); if (!d) return;
     const info = productOf(d);
+    els.progBtn = h('button.prog-btn.compact', { 'aria-pressed': 'false', title: 'Programming button: press it, then give the device its physical address from ETS', onclick: () => operate('Programming button', () => api.prog(name)) }, h('span.led'), h('span.t', 'Programming button'));
     head.replaceChildren(
       onBack ? h('button.btn.quiet.back-only', { 'aria-label': 'Back to the device list', onclick: onBack }, icon('back'), 'Devices') : null,
       els.ico = h('div.ico', icon(info.icon)),
       h('div.grow', h('h2.ellipsis', d.name), h('div.mute.ellipsis', `${info.title} · ${d.productName}`)),
-      els.chip = h('span.chip'),
+      els.chip = h('span.chip'), els.progBtn,
       deviceMenu(name),
       onClose ? h('button.btn.quiet.icon', { 'aria-label': 'Close details', title: 'Close details', onclick: onClose }, icon('close')) : null);
-    els.progBtn = h('button.prog-btn', { 'aria-pressed': 'false', onclick: () => operate('Programming button', () => api.prog(name)) }, h('span.led'), h('span.t', 'Programming button'));
     els.progTxt = h('div.hint');
-    els.progBox = h('div.prog-box', els.progBtn, els.progTxt);
     els.addr = h('span'); els.loc = h('span'); els.app = h('span'); els.dl = h('span'); els.dlN = h('span');
     const check = (label, valueEl) => h('li', h('span.label', label), valueEl);
-    els.checks = h('ul.checks', check('Physical address', els.addr), check('Wired to line', els.loc), check('Application', els.app), check('Download', els.dl), check('Downloads received', els.dlN));
+    els.checks = h('ul.checks', check('Physical address', els.addr), check('Wired to line', h('span', els.loc, ' ', h('button.btn.sm.quiet', { title: 'Show the devices as a topology tree', onclick: () => hooks.showTopology && hooks.showTopology() }, 'Show in topology'))), check('Application', els.app), check('Download', els.dl), check('Downloads received', els.dlN));
     els.params = h('div'); els.objs = h('div.tbl-wrap');
     els.sigParams = ''; els.sigObjs = ''; els.sigSec = '';
     els.guideBox = h('div'); els.guideSig = '';
-    body.replaceChildren(
-      section('Setup checklist', els.guideBox),
-      section('Programming and status', h('div', els.progBox, els.checks)),
-      ...(d.secure ? [section('KNX Data Secure', els.sec = h('div'))] : []),
+    els.lastEts = h('div.last-ets');
+    els.locIn = h('input.input', { type: 'text', maxlength: 5, placeholder: 'auto', 'aria-label': 'Physical line', style: 'width:6rem' });
+    panes.overview = h('div.pane', section('Setup checklist', els.guideBox), section('Status', els.checks), ...(d.secure ? [section('KNX Data Secure', els.sec = h('div'))] : []));
+    panes.params = h('div.pane', section('ETS parameters', els.params));
+    panes.objects = h('div.pane', section('Communication objects and group addresses', els.objs));
+    panes.diag = h('div.pane',
+      section('Last ETS action', els.lastEts),
+      section('Programming button', els.progTxt),
       section('Physical line', h('div', h('p.hint', { style: 'margin-top:0' }, 'Automatic (empty): the device sits on the line of its address, so it moves when ETS gives it a new address. Enter a line such as 1.2 to wire it by hand instead. Telegrams only cross to other lines through couplers.'),
-        els.locIn = h('input.input', { type: 'text', maxlength: 5, placeholder: 'auto', 'aria-label': 'Physical line', style: 'width:6rem' }),
-        h('button.btn', { style: 'margin-left:.5rem', onclick: () => operate('Moving device', () => api.setLocation(name, els.locIn.value.trim())) }, 'Set'))),
-      section('ETS parameters', els.params),
-      section('Communication objects and group addresses', els.objs),
+        els.locIn, h('button.btn', { style: 'margin-left:.5rem', onclick: () => operate('Moving device', () => api.setLocation(name, els.locIn.value.trim())) }, 'Set'))),
       section('Telegrams', h('div', h('p.hint', { style: 'margin-top:0' }, 'Telegrams sent by this device or addressed to one of its group addresses.'),
-        h('button.btn', { onclick: () => showTelegrams(name) }, icon('devices'), 'Show telegrams for this device'))));
+        h('button.btn', { onclick: () => showTelegrams(name) }, icon('devices'), 'Show related telegrams'))));
+    els.tabBtns = {};
+    tabBar.replaceChildren(...TABS.map(([k, t]) => els.tabBtns[k] = h('button.tab', { type: 'button', role: 'tab', id: 'tab-' + k, onclick: () => showTab(k),
+      onkeydown: ev => { const i = TABS.findIndex(x => x[0] === k), j = ev.key === 'ArrowRight' ? i + 1 : ev.key === 'ArrowLeft' ? i - 1 : -1; if (j >= 0 && j < TABS.length) { ev.preventDefault(); showTab(TABS[j][0]); els.tabBtns[TABS[j][0]].focus(); } } }, t)));
+    body.replaceChildren(...Object.values(panes));
+    for (const p of Object.values(panes)) p.setAttribute('role', 'tabpanel');
+    showTab(tab);
   }
   function section(title, content) { return h('section.section', h('header', h('h3', title)), h('div.body', content)); }
 
@@ -86,7 +105,7 @@ export function createDetail({ onBack, onClose, empty } = {}) {
     const d = device(S.selected);
     if (!d) {
       if (current !== null || !body.firstChild) {
-        current = null; head.replaceChildren(); badgeRow.replaceChildren(); badgeRow.dataset.sig = ''; lastEts.replaceChildren();
+        current = null; head.replaceChildren(); badgeRow.replaceChildren(); badgeRow.dataset.sig = ''; next.el.replaceChildren(); next.el.className = 'next-bar'; tabBar.replaceChildren();
         body.replaceChildren(empty ? empty.el : h('div.empty', icon('devices'), 'Select a device to see its details.'));
       }
       if (empty) empty.update();
@@ -97,10 +116,10 @@ export function createDetail({ onBack, onClose, empty } = {}) {
     const st = statusOf(d);
     updateBadges(d);
     const g = renderGuide(d);
+    next.update(d, g);
     if (g.sig !== els.guideSig) { els.guideSig = g.sig; els.guideBox.replaceChildren(g.el); }
     setText(els.chip, st.label); els.chip.className = 'chip ' + st.cls;
     setAttr(els.progBtn, 'aria-pressed', d.programming ? 'true' : 'false');
-    setCls(els.progBox, 'active', d.programming);
     setCls(els.progBtn.firstChild, 'on', d.programming);
     setText(els.progTxt, d.programming ? 'Programming mode is ON (red indicator lit). ETS can now assign the physical address. Press the button again to switch it off.' : 'Programming mode is off. Press the button, then assign the physical address from ETS.');
     if (d.secure) renderSecure(d);
@@ -123,8 +142,11 @@ export function createDetail({ onBack, onClose, empty } = {}) {
       badgeRow.dataset.sig = sig;
       badgeRow.replaceChildren(...B.map(b => h('span.chip.' + (b.cls || 'plain'), { title: b.title }, icon(b.icon), b.text)));
     }
-    lastEts.hidden = false;
-    lastEts.replaceChildren(icon('list'), h('span', h('b', 'Last ETS action: '), d.lastEts ? [d.lastEts, h('span.mute', ' · ' + ago(d.lastEtsAt))] : h('span.mute', 'none yet – ETS has not changed this device')));
+    const le = d.lastEts ? d.lastEts + ' · ' + ago(d.lastEtsAt) : '';
+    if (els.lastEts.dataset.sig !== le) {
+      els.lastEts.dataset.sig = le;
+      els.lastEts.replaceChildren(icon('list'), h('span', d.lastEts ? [d.lastEts, h('span.mute', ' · ' + ago(d.lastEtsAt))] : h('span.mute', 'none yet – ETS has not changed this device')));
+    }
   }
 
   function renderSecure(d) {

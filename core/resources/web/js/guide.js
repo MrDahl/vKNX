@@ -6,26 +6,29 @@ import { problems, hints, tunnels, interfaceLine, reachable, reachableFrom, line
 
 // ---------------------------------------------------------------- start guide (checklist)
 
-/** The steps from "nothing" to a working device, each ticked from facts the simulator reports. */
+/**
+ * The steps from "nothing" to a working device, each ticked from facts the simulator reports. A step that is still open
+ * is worded as a task ("Connect ETS"), a finished one as a fact ("ETS connected"); `short` is the one-line next action.
+ */
 export function guideSteps(d) {
   const tun = tunnels();
   const ok = reachable(d);
   const steps = [
-    { key: 'ets', label: 'ETS is connected', done: tun.length > 0,
+    { key: 'ets', label: 'Connect ETS', doneLabel: 'ETS connected', short: 'Connect ETS to continue', done: tun.length > 0,
       todo: 'In ETS choose the connection "vKNX" (Project, Connections). It lists the interface when vKNX runs on the same network.',
       did: tun.length ? `${tun.length} connection${tun.length === 1 ? '' : 's'} open (${tun.map(t => t.address).join(', ')})` : '' },
-    { key: 'iface', label: 'Interface can reach the device', done: ok, problem: !ok,
+    { key: 'iface', label: 'Check the interface line', doneLabel: 'Interface can reach the device', short: 'Fix the interface line', done: ok, problem: !ok,
       todo: `The interface sits on line ${interfaceLine()}; this device is on line ${d.line}. Set the interface to ${d.line} or give the device an address on line ${interfaceLine()}.`,
       did: d.unassigned ? 'A device without an address counts as being on the interface line' : `Interface line ${interfaceLine()} reaches line ${d.line}` },
-    { key: 'prog', label: 'Programming button pressed', done: d.programming || !d.unassigned,
-      todo: 'Press the programming button below (the red indicator lights).', did: d.programming ? 'Programming mode is on' : 'Done (the address has been assigned)' },
-    { key: 'addr', label: 'Physical address assigned', done: !d.unassigned,
+    { key: 'prog', label: 'Press the programming button', doneLabel: 'Programming button pressed', short: 'Press the programming button (top right)', done: d.programming || !d.unassigned,
+      todo: 'Press the programming button at the top of this page (the red indicator lights).', did: d.programming ? 'Programming mode is on' : 'Done (the address has been assigned)' },
+    { key: 'addr', label: 'Assign the physical address', doneLabel: 'Physical address assigned', short: 'Assign the physical address in ETS', done: !d.unassigned,
       todo: 'In ETS: right-click the device, Program, Physical address.', did: d.address },
-    { key: 'dl', label: 'Application downloaded', done: d.loaded && d.downloadState === 'complete',
+    { key: 'dl', label: 'Download the application', doneLabel: 'Application downloaded', short: 'Download the application from ETS', done: d.loaded && d.downloadState === 'complete',
       todo: d.downloadState === 'loading' ? 'A download is in progress…' : d.downloadState === 'partial' ? 'Some tables are missing: download the application again.' : 'In ETS: right-click the device, Program, Application program.',
       did: d.downloads ? `Download ${d.downloads} complete` : 'Complete' },
   ];
-  if (d.secure) steps.push({ key: 'sec', label: 'Secure commissioning done', done: d.secMode && d.toolKey,
+  if (d.secure) steps.push({ key: 'sec', label: 'Commission securely (optional)', doneLabel: 'Secure commissioning done', short: 'Optional: commission securely', done: d.secMode && d.toolKey,
     todo: d.secMode ? 'The device is in secure mode, but ETS has not replaced the factory key yet: download again.' : 'Optional. In ETS: Add Device Certificate for the device, enable Secure Commissioning, then download.',
     did: 'Security mode on, project tool key in use' });
   let now = -1;
@@ -34,6 +37,7 @@ export function guideSteps(d) {
   return steps;
 }
 
+/** The compact checklist: finished steps are one line, only the current step shows its explanation. */
 export function renderGuide(d) {
   const steps = guideSteps(d);
   const sig = JSON.stringify(steps.map(s => [s.key, s.state, s.did, s.todo]));
@@ -41,10 +45,28 @@ export function renderGuide(d) {
   el.dataset.sig = sig;
   for (const s of steps) {
     const mark = s.state === 'done' ? icon('check') : s.state === 'warn' ? icon('alert') : h('span.dot');
+    const open = s.state === 'now' || s.state === 'warn';
     el.append(h('li.step.' + s.state, h('span.mark', mark),
-      h('div.grow', h('div.label', s.label), s.state === 'done' ? (s.did ? h('div.hint', s.did) : null) : h('div.hint', s.todo))));
+      h('div.grow', h('div.label', s.state === 'done' ? s.doneLabel : s.label),
+        open ? h('div.hint', s.todo) : s.state === 'done' && s.did ? h('div.hint.faint-hint', s.did) : null)));
   }
-  return { el, sig, ready: steps.every(s => s.state === 'done' || s.key === 'sec') };
+  const cur = steps.find(s => s.state === 'warn') || steps.find(s => s.state === 'now');
+  const ready = steps.every(s => s.state === 'done' || s.key === 'sec');
+  return { el, sig, ready, next: ready ? null : cur };
+}
+
+/** "Next: ..." line for a device: the short text of the first open step, or a ready message. */
+export function createNextBar() {
+  const el = h('div.next-bar'); let sig = '';
+  function update(d, g) {
+    const cur = g.next, s = JSON.stringify([d.name, cur?.key, cur?.state, g.ready]);
+    if (s === sig) return; sig = s;
+    if (cur && !g.ready) el.className = 'next-bar ' + (cur.state === 'warn' ? 'warn' : 'now');
+    else el.className = 'next-bar ok';
+    el.replaceChildren(icon(cur && !g.ready ? (cur.state === 'warn' ? 'alert' : 'chevron') : 'check'),
+      h('span.grow', cur && !g.ready ? [h('b', 'Next: '), cur.short] : [h('b', 'Ready. '), 'Operate it in Simulation.']));
+  }
+  return { el, update };
 }
 
 // ---------------------------------------------------------------- status strip (ETS connection, warnings)

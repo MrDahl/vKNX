@@ -1,9 +1,9 @@
 import { h, icon, setText, setCls, setAttr, syncKeyed } from '../util.js';
-import { S, on, selectDevice } from '../bus.js';
+import { S, on, selectDevice, hooks } from '../bus.js';
 import { productOf, statusOf } from '../devinfo.js';
 import { createDetail } from '../detail.js';
 import { openAddDevice } from '../addDevice.js';
-import { renderGuide, createStatusStrip, createTopologyDiagram } from '../guide.js';
+import { renderGuide, createStatusStrip, createTopologyDiagram, openEtsMessages } from '../guide.js';
 import { paintIcon } from '../iconStore.js';
 
 export function createInstallation() {
@@ -13,12 +13,14 @@ export function createInstallation() {
   const list = h('div.list', { role: 'list' });
   const tree = h('div.list.topo', { hidden: true });
   let mode = 'list';
-  const modeBtn = h('button.btn', { 'aria-pressed': 'false', title: 'Show the devices as a topology tree (areas, lines)', onclick: () => { mode = mode === 'list' ? 'topology' : 'list'; update(); } }, 'Topology');
+  const modeBtns = { list: h('button', { type: 'button', onclick: () => { mode = 'list'; update(); } }, 'Devices'), topology: h('button', { type: 'button', title: 'Show the devices as a topology tree (areas, lines)', onclick: () => { mode = 'topology'; update(); } }, 'Topology') };
+  const modeSeg = h('div.segmented.full', { role: 'group', 'aria-label': 'Device view' }, modeBtns.list, modeBtns.topology);
+  hooks.showTopology = () => { mode = 'topology'; update(); };
   const count = h('span.hint');
   const empty = h('div.empty', icon('devices'), h('div', 'No devices yet.'), h('div.hint', 'Use "Add device" to create one from the catalogue.'));
   split.append(
     h('section.panel.list-panel', h('div.list-tools', h('label.search', icon('search'), search),
-      h('button.btn.primary', { onclick: openAddDevice }, icon('plus'), 'Add device'), modeBtn), list, tree, h('div', { style: 'padding:.5rem .85rem;border-top:1px solid var(--border)' }, count)));
+      h('button.btn.primary', { onclick: openAddDevice }, icon('plus'), 'Add device'), modeSeg), list, tree, h('div', { style: 'padding:.5rem .85rem;border-top:1px solid var(--border)' }, count)));
   const overviewDiagram = createTopologyDiagram();
   const ov = h('div.overview'); let ovSig = '';
   const overview = { el: ov, update() {
@@ -28,11 +30,12 @@ export function createInstallation() {
     const sig = next ? next.d.name + next.g.sig : 'none:' + ds.length;
     if (sig === ovSig && ov.firstChild) return; ovSig = sig;
     ov.replaceChildren(
-      h('h3', 'Topology'), overviewDiagram.el,
-      next ? h('div', h('h3', { style: 'margin:1rem 0 .4rem' }, 'Next step for ' + next.d.name), next.g.el,
+      next ? h('div.next-bar.now', icon('chevron'), h('span.grow', h('b', 'Next: '), next.g.next ? next.g.next.short : 'finish ' + next.d.name, h('span.mute', ' · ' + next.d.name)),
         h('button.btn.sm', { onclick: () => selectDevice(next.d.name) }, 'Open ' + next.d.name))
-        : ds.length ? h('div.diag.ok', icon('check'), h('div', h('b', 'All devices are ready.'), h('div.hint', 'Select a device in the list to see its details, or go to Simulation to operate them.')))
-        : h('div.empty', icon('devices'), 'Add a device to get started.'));
+        : ds.length ? h('div.next-bar.ok', icon('check'), h('span.grow', h('b', 'All devices are ready. '), 'Select a device for its details, or go to Simulation to operate them.'))
+        : h('div.empty', icon('devices'), 'Add a device to get started.'),
+      h('details.fold', { open: true }, h('summary', 'Topology'), overviewDiagram.el),
+      next && next.g.next && next.g.next.key === 'ets' ? h('details.fold', h('summary', 'Need help connecting ETS?'), h('p.hint', { style: 'margin-top:.4rem' }, next.g.next.todo), h('button.btn.sm', { onclick: openEtsMessages }, icon('info'), 'ETS messages explained')) : null);
     overviewDiagram.el.dataset.mounted = '1';
   } };
   const detail = createDetail({ onBack: () => selectDevice(null), empty: overview });
@@ -93,7 +96,7 @@ export function createInstallation() {
     const ds = S.state?.devices || [];
     const q = search.value.trim().toLowerCase();
     const shown = ds.filter(d => matches(d, q));
-    tree.hidden = mode !== 'topology'; list.hidden = mode === 'topology'; setAttr(modeBtn, 'aria-pressed', String(mode === 'topology'));
+    tree.hidden = mode !== 'topology'; list.hidden = mode === 'topology'; for (const [k, b] of Object.entries(modeBtns)) setAttr(b, 'aria-pressed', String(mode === k));
     if (mode === 'topology') renderTree(shown);
     syncKeyed(list, shown, d => d.name, create, updRow);
     if (!shown.length) { if (!empty.isConnected) list.append(empty); } else empty.remove();

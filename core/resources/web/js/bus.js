@@ -21,7 +21,7 @@ export const S = {
   icons: {},                             // chosen icons: id -> { n, p, o } (see iconStore.js)
 };
 /** Set by main.js: fetches the state right now (after add/remove/upload) instead of waiting for the next poll. */
-export const hooks = { refresh: async () => {} };
+export const hooks = { refresh: async () => {}, showTopology: null };
 export function device(name) { return S.state?.devices.find(d => d.name === name); }
 export function setFilter(patch) { Object.assign(S.filter, patch); emit('filter'); }
 export function resetFilter() { S.filter = { text: '', device: '', service: '', origin: '', ga: '' }; const had = S.gaSel; S.gaSel = null; emit('filter'); if (had) emit('ga'); }

@@ -500,3 +500,33 @@ details.diag.compact > summary > .ic:first-child { flex: none; }
 .kico .ic { width: 1.3rem; height: 1.3rem; }
 .sens .l .sb { display: inline-grid; place-items: center; }
 .pal-item .mk-ico .ic { width: 1.2rem; height: 1.2rem; }
+
+/* ---- redesign: installation detail (header actions, next bar, compact checklist, tabs) */
+.detail-head .chip { flex: none; }
+.prog-btn.compact { height: 36px; padding: 0 .8rem; border-width: 1px; font-size: .92rem; }
+.prog-btn[aria-pressed=true] { background: var(--danger-soft); }
+.next-bar { display: flex; align-items: center; gap: .6rem; margin: .7rem 1.25rem 0; padding: .55rem .85rem; border-radius: var(--radius-sm); font-size: 1rem; }
+.next-bar:empty { display: none; }
+.next-bar.now { background: var(--accent-soft); color: var(--text); }
+.next-bar.now > .ic { color: var(--accent); }
+.next-bar.warn { background: var(--warn-soft); }
+.next-bar.warn > .ic { color: var(--warn); }
+.next-bar.ok { background: var(--ok-soft); }
+.next-bar.ok > .ic { color: var(--ok); }
+.overview .next-bar { margin: 0 0 .9rem; }
+.tabs { display: flex; gap: .2rem; padding: 0 1.25rem; margin-top: .7rem; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tabs:empty { display: none; }
+.tab { border: 0; background: transparent; padding: .55rem .9rem; font: inherit; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tab:hover { color: var(--text); }
+.tab[aria-selected=true] { color: var(--accent); border-bottom-color: var(--accent); }
+.pane[hidden] { display: none; }
+.pane > .section > header { border-bottom: 0; padding-bottom: 0; }
+.pane > .section > .body { padding-top: .5rem; }
+.last-ets { padding: 0; border: 0; }
+.guide .faint-hint { color: var(--faint); font-size: .9rem; }
+.guide.compact .step { padding: .3rem .6rem; }
+.segmented.full { flex: 1 0 100%; }
+.segmented.full button { flex: 1; justify-content: center; }
+details.fold { margin: .8rem 0; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .15rem .8rem; background: var(--surface); }
+details.fold > summary { cursor: pointer; font-weight: 600; padding: .5rem 0; }
+details.fold[open] > summary { margin-bottom: .3rem; }
