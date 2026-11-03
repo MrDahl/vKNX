@@ -4,6 +4,7 @@ import { productOf, statusOf } from '../devinfo.js';
 import { createDetail } from '../detail.js';
 import { openAddDevice } from '../addDevice.js';
 import { renderGuide, createStatusStrip, createTopologyDiagram } from '../guide.js';
+import { paintIcon } from '../iconStore.js';
 
 export function createInstallation() {
   const root = h('div.view'); const split = h('div.split'); const strip = createStatusStrip(); const diagram = createTopologyDiagram();
@@ -55,6 +56,7 @@ export function createInstallation() {
   }
   function updRow(el, d) {
     const st = statusOf(d);
+    paintIcon(el.querySelector('.ico'), d.name, productOf(d).icon);
     setText(el.querySelector('.name'), d.name);
     setText(el.querySelector('.addr'), d.unassigned ? '–' : d.address);
     const chip = el.querySelector('.st');
@@ -70,7 +72,7 @@ export function createInstallation() {
     const areas = new Map();
     for (const l of lines) { const a = l.split('.')[0]; if (!areas.has(a)) areas.set(a, []); areas.get(a).push(l); }
     const dev = d => h('button.row', { type: 'button', onclick: () => selectDevice(d.name), 'aria-current': S.selected === d.name ? 'true' : null },
-      h('div.ico', icon(productOf(d).icon)), h('div.grow', h('div.name.ellipsis', d.name), h('div.sub.ellipsis', productOf(d).title + (d.location ? ' · wired by hand' : ''))),
+      (() => { const b = h('div.ico'); paintIcon(b, d.name, productOf(d).icon); return b; })(), h('div.grow', h('div.name.ellipsis', d.name), h('div.sub.ellipsis', productOf(d).title + (d.location ? ' · wired by hand' : ''))),
       h('div.mono', d.address));
     diagram.update();
     const kids = [h('div', { style: 'padding:.4rem .85rem' }, diagram.el), h('p.hint', { style: 'margin:.2rem .85rem' }, 'Devices are placed by their physical address as soon as ETS assigns it (a line coupler x.y.0 sits on line x.y, an area coupler x.0.0 on main line x.0). Telegrams only cross between lines through couplers.')];
@@ -102,6 +104,6 @@ export function createInstallation() {
     detail.update();
   }
   const live = () => { if (S.view === 'installation') update(); };
-  on('state', live); on('select', live); on('ga', live); on('devices', live); on('telegrams', live);
+  on('state', live); on('select', live); on('ga', live); on('devices', live); on('telegrams', live); on('icons', live);
   return { el: root, update };
 }

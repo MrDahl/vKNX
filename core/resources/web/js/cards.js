@@ -4,6 +4,7 @@ import { toast } from './dialogs.js';
 import { S, emit, showGroupAddress } from './bus.js';
 import { SENSORS, productOf, statusOf } from './devinfo.js';
 import { naturalCmp } from './util.js';
+import { paintIcon } from './iconStore.js';
 
 /** Reports a failed operation with the concrete reason; never claims success. */
 export async function operate(label, fn) {
@@ -22,21 +23,23 @@ function gaText(dev, objs) {
 }
 const range = (from, n) => Array.from({ length: n }, (_, i) => from + i);
 
-function bulb(on) { const el = h('div.bulb'); el.append(icon('lampOff', 'off'), icon('lamp', 'on')); return el; }
-function setBulb(el, on, pct) {
+const LAMP = { on: 'lamp', off: 'lampOff' };
+function bulb() { const el = h('div.bulb'); el.append(icon('lampOff')); return el; }
+/** id: the icon id of this output ("<device>|l3"): the user's own icon or the built-in lamp */
+function setBulb(el, on, pct, id) {
   setCls(el, 'on', on);
   const lv = pct == null ? (on ? 1 : 0) : pct / 100;
   setStyle(el, 'box-shadow', on ? `0 0 ${(6 + 14 * lv).toFixed(0)}px ${(1 + 3 * lv).toFixed(0)}px color-mix(in srgb, var(--lamp) ${Math.round(20 + 35 * lv)}%, transparent)` : 'none');
-  const [off, onI] = el.querySelectorAll('svg');
-  off.style.display = on ? 'none' : ''; onI.style.display = on ? '' : 'none';
+  paintIcon(el, id, LAMP, on);
 }
 
 /** A press-and-hold button: sends down on pointerdown and up on pointerup/cancel, even if the card is re-rendered meanwhile. */
 function holdButton(devName, keyNo, label, iconName) {
   const lbl = h('span', label);
   const led = h('span.keyled');
-  const b = h('button.btn.press.keycap', { type: 'button' }, led, lbl);
-  b.lbl = lbl; b.led = led;
+  const ico = h('span.kico', icon(iconName || 'button'));
+  const b = h('button.btn.press.keycap', { type: 'button' }, led, ico, lbl);
+  b.lbl = lbl; b.led = led; b.ico = ico;
   let held = false;
   const release = () => { if (!held) return; held = false; b.classList.remove('down'); operate(`Key "${lbl.textContent}"`, () => api.act(devName, 'up', keyNo)); };
   b.addEventListener('pointerdown', e => { if (held) return; held = true; b.setPointerCapture(e.pointerId); b.classList.add('down'); operate(`Key "${lbl.textContent}"`, () => api.act(devName, 'down', keyNo)); });
@@ -73,7 +76,8 @@ export function createCard(d, handlers) {
   const title = h('h3.ellipsis', d.name);
   const sub = h('div.sub.ellipsis', info.title);
   const menu = handlers.menu(d.name);
-  root.append(h('div.card-head', h('div.ico', icon(info.icon)), h('div.grow', title, sub), menu));
+  const headIco = h('div.ico', icon(info.icon));
+  root.append(h('div.card-head', headIco, h('div.grow', title, sub), menu));
   const state = h('div.card-state'); const controls = h('div.card-controls');
   const addr = h('span.mono'); const chip = h('span.chip'); const prog = h('span.chip.prog', h('span.led.on'), 'Programming mode');
   const lockI = h('span.lock-i', { hidden: true }, icon('lock'));
@@ -100,7 +104,7 @@ export function createCard(d, handlers) {
       controls.append(h('div.hint', 'Press and hold a key for a long press. The small light on a key is its status LED. Functions and names are set in ETS.'));
       face = (v, dev) => L.k.forEach((k, i) => {
         const n = i + 1, en = v['e' + n] !== false;
-        k.row.hidden = !en; setText(k.btn.lbl, v['n' + n] || 'Key ' + n); setText(k.d, v['d' + n] || ''); setText(k.l, v['l' + n] || '');
+        k.row.hidden = !en; paintIcon(k.btn.ico, d.name + '|k' + n, 'button'); setText(k.btn.lbl, v['n' + n] || 'Key ' + n); setText(k.d, v['d' + n] || ''); setText(k.l, v['l' + n] || '');
         setCls(k.row, 'on', !!v['s' + n]); setCls(k.btn.led, 'on', !!v['s' + n]);
         setText(k.ga, dev ? gaText(dev, range(5 * (n - 1) + 1, 5)) : '');
       });
@@ -123,7 +127,7 @@ export function createCard(d, handlers) {
       state.append(grid, L.sum);
       face = (v, dev) => {
         const l = v.lamps || ''; let on = 0, en = 0;
-        L.cells.forEach((c, i) => { setText(c.ga, dev ? gaText(dev, [i + 1, 9 + i]) : ''); const e = v['e' + (i + 1)] !== false; c.cell.hidden = !e; if (e) en++; const o = l[i] === '1'; if (o) on++; setBulb(c.b, o); setText(c.t, o ? 'On' : 'Off'); setText(c.nm, v['n' + (i + 1)] || 'Output ' + (i + 1)); });
+        L.cells.forEach((c, i) => { setText(c.ga, dev ? gaText(dev, [i + 1, 9 + i]) : ''); const e = v['e' + (i + 1)] !== false; c.cell.hidden = !e; if (e) en++; const o = l[i] === '1'; if (o) on++; setBulb(c.b, o, null, d.name + '|l' + (i + 1)); setText(c.t, o ? 'On' : 'Off'); setText(c.nm, v['n' + (i + 1)] || 'Output ' + (i + 1)); });
         setText(L.sum, `${on} of ${en} outputs on`);
       };
       break;
@@ -140,7 +144,7 @@ export function createCard(d, handlers) {
       controls.append(h('div.hint', 'The sliders show the actual brightness. Dim with the push buttons (relative or absolute value from ETS).'));
       face = (v, dev) => L.cells.forEach((c, i) => {
         const n = i + 1, lv = v['level' + n] ?? 0;
-        c.cell.hidden = v['e' + n] === false; setBulb(c.b, lv > 0, lv); setText(c.t, lv + ' %'); setStyle(c.m, 'width', lv + '%'); setStyle(c.th, 'left', lv + '%');
+        c.cell.hidden = v['e' + n] === false; setBulb(c.b, lv > 0, lv, d.name + '|d' + n); setText(c.t, lv + ' %'); setStyle(c.m, 'width', lv + '%'); setStyle(c.th, 'left', lv + '%');
         setAttr(c.trk, 'aria-valuenow', lv); setText(c.ga, dev ? gaText(dev, range(5 * (n - 1) + 1, 5)) : '');
         setText(c.nm, v['n' + n] || 'Channel ' + n);
       });
@@ -157,10 +161,11 @@ export function createCard(d, handlers) {
     case 'multisensor': {
       L.n = SENSORS.map(s => h('span.n'));
       const grid = h('div.sens-grid');
-      L.cellEl = SENSORS.map((s, i) => { const c = h('div.sens', h('div.l', icon(s.icon), s.name), L.n[i]); grid.append(c); return c; });
+      L.sib = SENSORS.map(s => h('span.sb', icon(s.icon)));
+      L.cellEl = SENSORS.map((s, i) => { const c = h('div.sens', h('div.l', L.sib[i], s.name), L.n[i]); grid.append(c); return c; });
       state.append(grid);
       controls.append(h('div.hint', 'Values are set in ETS. They cannot be changed here.'));
-      face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; L.cellEl[i].hidden = v['e' + i] === false; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
+      face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; paintIcon(L.sib[i], d.name + '|s' + i, s.icon); L.cellEl[i].hidden = v['e' + i] === false; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
       break;
     }
     case 'coupler': {
@@ -195,6 +200,7 @@ export function createCard(d, handlers) {
     update(dev) {
       const v = dev.view || {};
       const st = statusOf(dev);
+      paintIcon(headIco, dev.name, info.icon);
       setText(addr, dev.unassigned ? 'No address' : dev.address);
       setText(chip, st.label); chip.className = 'chip ' + st.cls;
       prog.hidden = !dev.programming;

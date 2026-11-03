@@ -18,6 +18,7 @@ export const S = {
   telegrams: [], devlog: [], since: 0,   // buffers filled from /api/log
   filter: { text: '', device: '', service: '', origin: '', ga: '' },
   planEdit: false,
+  icons: {},                             // chosen icons: id -> { n, p, o } (see iconStore.js)
 };
 /** Set by main.js: fetches the state right now (after add/remove/upload) instead of waiting for the next poll. */
 export const hooks = { refresh: async () => {} };

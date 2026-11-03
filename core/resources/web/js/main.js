@@ -6,6 +6,7 @@ import { applyTheme, currentTheme, linkSummary, openConnection, openSettings } f
 import { createInstallation } from './views/installation.js';
 import { createSimulation } from './views/simulation.js';
 import { createMonitorView } from './views/monitor.js';
+import { loadIcons } from './iconStore.js';
 
 const app = document.getElementById('app');
 
@@ -117,6 +118,7 @@ async function pickDefaultMode() {
   } catch (e) { /* stays on the cards */ }
 }
 hooks.refresh = tick;
+loadIcons();
 (function loop() { tick().finally(() => setTimeout(loop, document.hidden ? 2500 : 600)); })();
 
 showView(); header();

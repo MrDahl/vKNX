@@ -55,7 +55,7 @@ function dataSection() {
   const info = {
     logs: ['Logs', 'vknx.log and console.log. Only useful when something went wrong. Each is limited to 10 MB (plus one older copy), so they cannot grow without end.', 'Delete logs'],
     backups: ['Old device backups', 'vKNX keeps the old state of a device each time ETS resets it (factory reset, "deactivate secure commissioning"). Nothing in vKNX uses them. Only the newest one per device is kept automatically.', 'Delete backups'],
-    plan: ['Floor plan', 'The plan image and where the devices are placed on it.', 'Remove floor plan'],
+    plan: ['Floor plan and icons', 'The plan image, where the devices are placed on it and the icons you chose.', 'Remove floor plan and icons'],
     state: ['Devices (addresses, downloads, keys)', 'What ETS has programmed into the devices. This is the installation itself.', null],
   };
   async function load() {
@@ -67,7 +67,7 @@ function dataSection() {
       return h('tr', h('td', { style: 'width:30%' }, h('b', title), h('div.hint', `${it.files} file${it.files === 1 ? '' : 's'} · ${fmtBytes(it.bytes)}`)),
         h('td.hint', text),
         h('td', { style: 'white-space:nowrap' }, label ? h('button.btn', { disabled: it.files === 0, onclick: async () => {
-          if (it.id === 'plan' && !await confirmDialog({ title: 'Remove the floor plan?', message: 'The plan image and the placement of the devices on it are deleted. The devices themselves are not changed.', confirmLabel: 'Remove floor plan', danger: true })) return;
+          if (it.id === 'plan' && !await confirmDialog({ title: 'Remove the floor plan and icons?', message: 'The plan image, the placement of the devices on it and the icons you chose are deleted. The devices themselves are not changed.', confirmLabel: 'Remove', danger: true })) return;
           done();
         } }, label) : null));
     };
@@ -81,7 +81,7 @@ function dataSection() {
       h('ul', h('li', 'addresses and downloaded applications are gone (download them again from ETS),'),
         h('li', 'secure devices get a new factory key (FDSK) and a new certificate, so they must be added again in ETS,'),
         h('li', 'logs and device backups are deleted.')),
-      h('label', { style: 'display:flex;gap:.5rem;align-items:center' }, plan, 'Also remove the floor plan'));
+      h('label', { style: 'display:flex;gap:.5rem;align-items:center' }, plan, 'Also remove the floor plan and icons'));
     if (!await confirmDialog({ title: 'Start a new installation?', message: msg, confirmLabel: 'Reset all devices', danger: true })) return;
     try { await api.dataClear('installation', plan.checked ? { plan: '1' } : {}); toast('New installation ready. All devices are in factory state.'); setTimeout(() => location.reload(), 600); }
     catch (e) { toast('Could not start a new installation: ' + e.message); }

@@ -70,6 +70,7 @@ public final class WebUi {
 		server.createContext("/api/update/status", this::updateStatus);
 		server.createContext("/api/layout", this::layout);
 		server.createContext("/api/data", this::dataEndpoint);
+		server.createContext("/api/icons", this::icons);
 		server.createContext("/api/add", this::add);
 		server.createContext("/api/location", this::location);
 		server.createContext("/api/remove", ex -> {
@@ -204,6 +205,23 @@ public final class WebUi {
 		catch (final Exception e) {
 			send(ex, 500, "text/plain", utf8(String.valueOf(e.getMessage())));
 		}
+	}
+
+	/** The icons the user chose for devices and channels, stored as opaque JSON text in icons.json. */
+	private void icons(final HttpExchange ex) throws IOException {
+		final var f = registry.dir().resolve("icons.json");
+		if ("POST".equals(ex.getRequestMethod())) {
+			final byte[] body = ex.getRequestBody().readNBytes(2_000_001);
+			if (body.length > 2_000_000) {
+				send(ex, 400, "text/plain", utf8("too large"));
+				return;
+			}
+			java.nio.file.Files.write(f, body);
+			send(ex, 200, "text/plain", utf8("ok"));
+		}
+		else
+			send(ex, 200, "application/json; charset=utf-8",
+					java.nio.file.Files.exists(f) ? java.nio.file.Files.readAllBytes(f) : utf8("{\"icons\":{}}"));
 	}
 
 	/** Placement of inputs/outputs on the floor plan, stored as opaque JSON text in plan-layout.json. */

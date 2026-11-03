@@ -481,3 +481,22 @@ details.diag.compact > .hint { padding: 0 .7rem .55rem 2.4rem; color: var(--text
 details.diag.compact > summary > .ic:first-child { flex: none; }
 .chev { display: inline-flex; transition: transform .15s; } .chev.open { transform: rotate(90deg); }
 .btn.danger-outline .ic, .btn.sm.quiet .ic { width: 1.1em; height: 1.1em; }
+
+/* ---- icon picker and chosen icons ---- */
+.ipick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr)); gap: .3rem; max-height: 46vh; overflow: auto; padding: .3rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+.ipick { height: 3rem; display: grid; place-items: center; border: 1px solid transparent; background: var(--surface); border-radius: 8px; cursor: pointer; color: var(--text); }
+.ipick .ic { width: 1.7rem; height: 1.7rem; }
+.ipick:hover { border-color: var(--border-strong); }
+.ipick[aria-pressed=true] { border-color: var(--accent); outline: 2px solid var(--accent); background: var(--accent-soft, var(--surface)); }
+.ipick-side { margin-top: .7rem; display: grid; gap: .3rem; }
+.ipick-prev { width: 3.4rem; height: 3.4rem; border-radius: 12px; display: grid; place-items: center; background: var(--surface-3); border: 2px solid var(--border); color: var(--faint); }
+.ipick-prev.on { background: var(--lamp-soft); border-color: var(--lamp); color: var(--lamp); }
+.ipick-prev .ic { width: 2rem; height: 2rem; }
+.dim-off { opacity: .45; }
+.ico-box { display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 8px; background: var(--surface-3); color: var(--muted); margin-right: .3rem; }
+.ico-box .ic { width: 1.4rem; height: 1.4rem; }
+.mk-ico { display: inline-grid; place-items: center; }
+.kico { display: inline-grid; place-items: center; }
+.kico .ic { width: 1.3rem; height: 1.3rem; }
+.sens .l .sb { display: inline-grid; place-items: center; }
+.pal-item .mk-ico .ic { width: 1.2rem; height: 1.2rem; }

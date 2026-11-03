@@ -5,6 +5,8 @@ import { statusOf, productOf, badgesOf, DOWNLOAD_TEXT } from './devinfo.js';
 import { renderGuide } from './guide.js';
 import { confirmDialog, menuButton, toast } from './dialogs.js';
 import { operate } from './cards.js';
+import { paintIcon, forgetIconsOf } from './iconStore.js';
+import { openIconEditor } from './iconPicker.js';
 
 const openGroups = new Set();
 
@@ -15,6 +17,7 @@ export async function removeDevice(name) {
   });
   if (!ok) return;
   if (await operate(`Removing "${name}"`, () => api.remove(name))) {
+    forgetIconsOf(name);
     toast(`"${name}" was removed.`, 'ok');
     if (S.selected === name) selectDevice(null, { drawer: false });
     await hooks.refresh();
@@ -28,6 +31,7 @@ export function deviceMenu(name) {
     items: () => [
       { label: 'Show details', icon: 'info', onclick: () => { selectDevice(name, { drawer: true }); } },
       { label: 'Show telegrams for this device', icon: 'devices', onclick: () => showTelegrams(name) },
+      { label: 'Change icons…', icon: 'edit', onclick: () => openIconEditor(name) },
       'hr',
       { label: 'Remove device…', icon: 'trash', danger: true, onclick: () => removeDevice(name) },
     ],
@@ -50,7 +54,7 @@ export function createDetail({ onBack, onClose, empty } = {}) {
     const info = productOf(d);
     head.replaceChildren(
       onBack ? h('button.btn.quiet.back-only', { 'aria-label': 'Back to the device list', onclick: onBack }, icon('back'), 'Devices') : null,
-      h('div.ico', icon(info.icon)),
+      els.ico = h('div.ico', icon(info.icon)),
       h('div.grow', h('h2.ellipsis', d.name), h('div.mute.ellipsis', `${info.title} · ${d.productName}`)),
       els.chip = h('span.chip'),
       deviceMenu(name),
@@ -89,6 +93,7 @@ export function createDetail({ onBack, onClose, empty } = {}) {
       return;
     }
     if (current !== d.name) buildFor(d.name);
+    paintIcon(els.ico, d.name, productOf(d).icon);
     const st = statusOf(d);
     updateBadges(d);
     const g = renderGuide(d);

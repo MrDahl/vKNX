@@ -4,6 +4,8 @@ import { S, on, emit, device, selectDevice, showGroupAddress } from '../bus.js';
 import { pointsOf, objectsOfPoint, SENSORS } from '../devinfo.js';
 import { operate } from '../cards.js';
 import { confirmDialog, toast } from '../dialogs.js';
+import { paintIcon, setIcon, hasCustomIcon, pointDefault, pointKind } from '../iconStore.js';
+import { pickIcon } from '../iconPicker.js';
 
 const MIN_Z = 20, MAX_Z = 300;
 
@@ -112,23 +114,25 @@ export function createPlan() {
     let upd;
     switch (p.type) {
       case 'lamp': {
-        const i1 = icon('lampOff'), i2 = icon('lamp'); const t = h('span.t');
-        body.append(i1, i2, t);
-        upd = q => { setCls(el, 'on', q.on); i1.style.display = q.on ? 'none' : ''; i2.style.display = q.on ? '' : 'none'; setText(t, q.pct != null && q.on ? q.pct + ' %' : ''); return q.on + ':' + q.pct; };
+        const ib = h('span.mk-ico', icon('lampOff')); const t = h('span.t');
+        body.append(ib, t);
+        upd = q => { setCls(el, 'on', q.on); paintIcon(ib, p.id, pointDefault(p), q.on); setText(t, q.pct != null && q.on ? q.pct + ' %' : ''); return q.on + ':' + q.pct + ':' + (S.icons[p.id]?.n || ''); };
         body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
       case 'button': {
-        const b = h('button.mk-btn', { type: 'button', 'aria-label': 'Press ' + p.dev, title: 'Press', onclick: () => { if (!S.planEdit) operate('Button press', () => api.act(p.dev, 'press', 0)); } }, icon('button'));
-        body.append(b); upd = () => ''; break;
+        const ib = h('span.mk-ico', icon('button'));
+        const b = h('button.mk-btn', { type: 'button', 'aria-label': 'Press ' + p.dev, title: 'Press', onclick: () => { if (!S.planEdit) operate('Button press', () => api.act(p.dev, 'press', 0)); } }, ib);
+        body.append(b); upd = () => { paintIcon(ib, p.id, pointDefault(p)); return S.icons[p.id]?.n || ''; }; break;
       }
       case 'key': {
-        const b = h('button.mk-btn', { type: 'button', 'aria-label': p.name + ' of ' + p.dev, title: p.name + ' (hold for a long press)' }, icon(p.sym));
+        const ib = h('span.mk-ico', icon(p.sym));
+        const b = h('button.mk-btn', { type: 'button', 'aria-label': p.name + ' of ' + p.dev, title: p.name + ' (hold for a long press)' }, ib);
         let held = false;
         const up = () => { if (!held) return; held = false; b.classList.remove('down'); operate('Key', () => api.act(p.dev, 'up', p.keyNo)); };
         b.addEventListener('pointerdown', e => { if (S.planEdit || held) return; held = true; b.setPointerCapture(e.pointerId); b.classList.add('down'); operate('Key', () => api.act(p.dev, 'down', p.keyNo)); });
         b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
-        body.append(b); upd = () => ''; break;
+        body.append(b); upd = () => { paintIcon(ib, p.id, pointDefault(p)); return S.icons[p.id]?.n || ''; }; break;
       }
       case 'slider': {
         const r = h('input', { type: 'range', min: 0, max: 100, value: 0, 'aria-label': 'Slider of ' + p.dev }); const t = h('span.t', { style: 'min-width:2.6em;text-align:right' });
@@ -137,21 +141,23 @@ export function createPlan() {
         r.addEventListener('pointerup', end); r.addEventListener('pointercancel', end);
         r.addEventListener('input', () => { setText(t, r.value + ' %'); api.act(p.dev, 'sliderLive', r.value).catch(() => {}); });
         r.addEventListener('change', () => operate('Slider', () => api.act(p.dev, 'slider', r.value)));
-        body.append(r, t);
-        upd = q => { if (!active && Date.now() > until && document.activeElement !== r) { if (+r.value !== q.val) r.value = q.val; setText(t, q.val + ' %'); } return ''; };
+        const ib = h('span.mk-ico', icon('slider'));
+        body.append(ib, r, t);
+        upd = q => { ib.hidden = !hasCustomIcon(p.id); if (!ib.hidden) paintIcon(ib, p.id, pointDefault(p)); if (!active && Date.now() > until && document.activeElement !== r) { if (+r.value !== q.val) r.value = q.val; setText(t, q.val + ' %'); } return ''; };
         break;
       }
       case 'blind': {
-        const w = h('i'); const t = h('span.t');
-        body.append(h('div.mk-win', w), t);
-        upd = q => { setStyle(w, 'height', q.pos + '%'); setText(t, q.pos + ' %'); body.title = 'Blind position: ' + q.pos + ' % closed'; return q.pos; };
+        const w = h('i'); const t = h('span.t'); const win = h('div.mk-win', w); const ib = h('span.mk-ico', icon('blind'));
+        body.append(win, ib, t);
+        upd = q => { const own = hasCustomIcon(p.id); win.hidden = own; ib.hidden = !own; if (own) paintIcon(ib, p.id, pointDefault(p)); setStyle(w, 'height', q.pos + '%'); setText(t, q.pos + ' %'); body.title = 'Blind position: ' + q.pos + ' % closed'; return q.pos; };
         body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
       case 'sensor': {
         const t = h('span.t');
-        body.append(icon(SENSORS[p.sensor].icon), t);
-        upd = q => { setText(t, q.text); return q.text; };
+        const ib = h('span.mk-ico', icon(SENSORS[p.sensor].icon));
+        body.append(ib, t);
+        upd = q => { paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.text; };
         body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
@@ -223,12 +229,13 @@ export function createPlan() {
       const free = pointsOf(d).filter(p => !placed.has(p.id) && (!q || (d.name + ' ' + p.name).toLowerCase().includes(q)));
       if (!free.length) continue;
       blocks.push(h('div.pal-group', d.name), ...free.map(p => {
-        const b = h('button.pal-item', { type: 'button', draggable: true, title: 'Click to place, or drag onto the plan', onclick: () => placeAt(p.id, ...viewCenter(), true) }, icon(p.type === 'lamp' ? 'lampOff' : p.type === 'sensor' ? SENSORS[p.sensor].icon : p.type === 'key' ? p.sym : p.type), p.name);
+        const pib = h('span.mk-ico', icon('info')); paintIcon(pib, p.id, pointDefault(p));
+        const b = h('button.pal-item', { type: 'button', draggable: true, title: 'Click to place, or drag onto the plan', onclick: () => placeAt(p.id, ...viewCenter(), true) }, pib, p.name);
         b.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', p.id));
         return b;
       }));
     }
-    const sig = blocks.map(b => b.textContent).join('|');
+    const sig = blocks.map(b => b.textContent).join('|') + Object.values(S.icons).map(e => e.n).join();
     if (palList.dataset.sig === sig) return;
     palList.dataset.sig = sig;
     palList.replaceChildren(...(blocks.length ? blocks : [h('div.empty', 'All channels are placed on the plan.')]));
@@ -260,6 +267,16 @@ export function createPlan() {
       h('h3', 'Symbol properties'),
       h('div', { style: 'padding:.4rem .85rem .85rem;display:grid;gap:.85rem' },
         h('div.field', { style: 'margin:0' }, h('label', { for: 'mk-label' }, 'Label on the plan'), label, h('div.hint#mk-label-help', 'Leave empty to use the default name.')),
+        h('div.field', { style: 'margin:0' }, h('label', 'Icon'), (() => {
+          const ib = h('span.ico-box', icon('info')); paintIcon(ib, sel, pointDefault(p));
+          const id = sel;
+          return h('div', { style: 'display:flex;gap:.4rem;align-items:center;flex-wrap:wrap' }, ib,
+            h('button.btn.sm', { onclick: async () => {
+              const r = await pickIcon({ title: `Icon for ${p.label}`, kind: pointKind(p), currentName: S.icons[id]?.n, withOff: p.type === 'lamp' });
+              if (r === undefined) return; await setIcon(id, r); props.dataset.sel = ''; renderProps();
+            } }, 'Change…'),
+            hasCustomIcon(id) ? h('button.btn.sm.quiet', { onclick: async () => { await setIcon(id, null); props.dataset.sel = ''; renderProps(); } }, 'Reset') : null);
+        })()),
         h('dl.kv', h('dt', 'Device'), h('dd', h('button.btn.sm', { onclick: () => selectDevice(p.dev, { drawer: true }) }, p.dev)), h('dt', 'Channel'), h('dd', p.name),
           h('dt', 'Address'), h('dd.mono', d.unassigned ? 'not assigned' : d.address)),
         h('div', h('div.hint', 'Configured group addresses'), gas.length ? gas.map(a => h('div', h('button.ga-chip', { onclick: () => showGroupAddress(a.ga) }, a.ga), h('span.hint', ' ' + (catObjs.find(o => o.number === a.obj)?.text || a.text)))) : h('div.mute', d.loaded ? 'none for this channel' : 'none (not downloaded yet)')),
@@ -305,6 +322,7 @@ export function createPlan() {
     if (S.planEdit) { renderPalette(); renderProps(); }
   }
   on('state', () => { if (!root.hidden) update(); });
+  on('icons', () => { if (!root.hidden) update(); });
   on('devices', () => { if (!root.hidden) update(); });
   on('ga', () => { if (!root.hidden) update(); });
   return { el: root, update: () => { root.hidden = false; update(); } };

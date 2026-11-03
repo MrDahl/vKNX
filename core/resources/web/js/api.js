@@ -46,6 +46,8 @@ export const api = {
   setLocation: (dev, line) => req('/api/location?' + q({ dev, line }), { method: 'POST' }),
   remove: dev => req('/api/remove?' + q({ dev }), { method: 'POST' }),
   layout: () => req('/api/layout'),
+  icons: () => req('/api/icons'),
+  saveIcons: obj => req('/api/icons', { method: 'POST', body: JSON.stringify(obj) }),
   saveLayout: obj => req('/api/layout', { method: 'POST', body: JSON.stringify(obj) }),
   planHead: async () => { try { const r = await fetch('/api/plan?t=' + Date.now(), { method: 'GET', cache: 'no-store' }); return r.ok; } catch (e) { return false; } },
   planUpload: (ext, buf) => req('/api/plan?' + q({ ext }), { method: 'POST', body: buf, timeout: 30000 }),

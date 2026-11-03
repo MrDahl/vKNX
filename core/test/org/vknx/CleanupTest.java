@@ -26,6 +26,7 @@ public final class CleanupTest {
 		Files.write(dir.resolve("Tryk1.state"), new byte[500]);
 		Files.write(dir.resolve("plan.jpg"), new byte[1000]);
 		Files.write(dir.resolve("plan-layout.json"), new byte[20]);
+		Files.write(dir.resolve("icons.json"), new byte[30]);
 		Files.write(dir.resolve("vknx.log"), new byte[3000]);
 		Files.write(dir.resolve("vknx.log.1"), new byte[2000]);
 		Files.write(dir.resolve("console.log"), new byte[400]);
@@ -33,7 +34,7 @@ public final class CleanupTest {
 		final var items = DataFiles.inspect(dir).stream().collect(java.util.stream.Collectors.toMap(DataFiles.Item::id, i -> i));
 		check("logs counted: vknx.log, vknx.log.1, console.log", items.get("logs").files() == 3 && items.get("logs").bytes() == 5400);
 		check("backups counted, the live state file is not one", items.get("backups").files() == 4 && items.get("state").files() == 1);
-		check("plan image and layout counted together", items.get("plan").files() == 2 && items.get("plan").bytes() == 1020);
+		check("plan image, layout and icons counted together", items.get("plan").files() == 3 && items.get("plan").bytes() == 1050);
 
 		check("keep newest backup per device: 2 of 3 Tryk1 backups deleted", DataFiles.deleteBackups(dir, 1) == 200
 				&& Files.exists(dir.resolve("Tryk1_20261102-131001-818_EC7.state"))
@@ -44,7 +45,7 @@ public final class CleanupTest {
 				&& Files.exists(dir.resolve("Tryk1_20261102-131001-818_EC7.state")));
 		check("clearing logs empties the open logs and deletes the rotated copy", DataFiles.clearLogs(dir) == 5400
 				&& size(dir.resolve("vknx.log")) == 0 && size(dir.resolve("console.log")) == 0 && size(dir.resolve("vknx.log.1")) == -1);
-		check("clearing the plan deletes image and layout, nothing else", DataFiles.clearPlan(dir) == 1020
+		check("clearing the plan deletes image, layout and icons, nothing else", DataFiles.clearPlan(dir) == 1050
 				&& !Files.exists(dir.resolve("plan.jpg")) && Files.exists(dir.resolve("devices.txt")) && Files.exists(dir.resolve("Tryk1.state")));
 
 		// ---- log rotation

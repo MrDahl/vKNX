@@ -49,7 +49,7 @@ public final class DataFiles {
 	}
 
 	private static boolean isPlan(final String n) {
-		if (n.equals("plan-layout.json"))
+		if (n.equals("plan-layout.json") || n.equals("icons.json"))
 			return true;
 		return n.startsWith("plan.") && PLAN_TYPES.contains(n.substring(5));
 	}
@@ -117,7 +117,7 @@ public final class DataFiles {
 		}
 	}
 
-	/** Deletes the floor plan image and the placement of the devices on it. */
+	/** Deletes the floor plan image, the placement of the devices on it and the icons the user chose. */
 	public static long clearPlan(final Path dir) throws IOException {
 		long freed = 0;
 		for (final Path f : list(dir))
