@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.8.0] - 2026-11-03
 
 ### Added
 - **Your own icons.** Every device, output, key, slider, blind and sensor can get an icon of your choice from the Material Design Icons by Pictogrammers (the complete catalogue of more than 7,000 icons is built in and works offline). The picker opens with a short list that fits the thing you are changing (lights, buttons and scenes, sliders, blinds/windows/doors, sensors, devices) and a search over all icons. For lights the matching "off" or "outline" icon is used automatically for the off state; icons without an off variant are dimmed when off. Change an icon on the floor plan (select the symbol, **Icon → Change...**) or for a whole device (device menu **... → Change icons...**, one row per channel). The choice is shown on the operating cards, in the device list, in the detail view and on the floor plan, and is saved with the installation in `icons.json`.
