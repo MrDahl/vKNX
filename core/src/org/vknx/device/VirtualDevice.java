@@ -1032,6 +1032,19 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		return area.length == 0 ? p.defaultValue() : p.read(area);
 	}
 
+	/**
+	 * Overwrites one enumeration or 8 bit number parameter in the device memory. Used when a scene is stored by a learn
+	 * telegram: the new value replaces the one ETS downloaded (like in a real actuator) until the next download.
+	 */
+	void setParam(final String paramName, final int value) {
+		final ParamDef p = product.param(paramName);
+		final byte[] area = parameterArea();
+		if (area.length == 0 || p.isText() || p.sizeBytes() != 1 || p.byteOffset() >= area.length)
+			return;
+		p.write(area, value);
+		base.deviceMemory().set(SLOT_ADDRESS[OBJ_APPLICATION] + p.byteOffset(), area[p.byteOffset()]);
+	}
+
 	/** Current value of a text parameter (names of keys, outputs, channels): the downloaded text or the product default. */
 	public String paramText(final String paramName) {
 		final ParamDef p = product.param(paramName);

@@ -2,7 +2,11 @@ package org.vknx.device;
 
 import java.util.Map;
 
-/** Push button with a slider: the button switches, the slider sends a brightness value (1 byte, 0..100 % = 0..255). */
+/**
+ * Push button with a slider: the button switches, the slider sends a brightness value (1 byte, 0..100 % = 0..255).
+ * Objects: 1 switch, 2 brightness value, 3 brightness status (input), 4 switch status (input). A received switch status
+ * (parameter FollowStatus) sets the state the next press toggles from.
+ */
 public final class SliderPushBehavior extends DeviceBehavior {
 	private volatile boolean on;
 	private volatile int levelPct;
@@ -59,9 +63,17 @@ public final class SliderPushBehavior extends DeviceBehavior {
 			on = levelPct > 0;
 			dev.log("button", "brightness status received: " + levelPct + " %");
 		}
+		else if (go == 4) {
+			if (dev.param("FollowStatus") == 0) {
+				dev.log("button", "switch status received but parameter FollowStatus=No: ignored");
+				return;
+			}
+			on = (value & 1) != 0;
+			dev.log("button", "switch status received -> " + (on ? "on" : "off"));
+		}
 	}
 
-	@Override Integer valueOf(final int go) { return go == 1 ? (on ? 1 : 0) : go == 2 || go == 3 ? toByte(levelPct) : null; }
+	@Override Integer valueOf(final int go) { return go == 1 || go == 4 ? (on ? 1 : 0) : go == 2 || go == 3 ? toByte(levelPct) : null; }
 
 	@Override
 	public Map<String, Object> view() {

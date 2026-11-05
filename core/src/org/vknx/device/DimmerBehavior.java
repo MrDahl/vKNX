@@ -6,7 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Dimming actuator with 4 channels; every channel can be disabled and named in ETS. Objects of channel c (1..4):
- * 5(c-1)+1 switch, +2 relative dimming (4 bit), +3 brightness value (1 byte), +4 switch status, +5 brightness status.
+ * 5(c-1)+1 switch, +2 relative dimming (4 bit), +3 brightness value (1 byte), +4 switch status, +5 brightness status;
+ * object 21 is the scene object of the whole device (DPT 18.001: bit 7 = store, bits 0-5 = scene number - 1). Every channel
+ * has four scene slots (Ch1Scene1 = scene number, Ch1Scene1Value = brightness in percent).
  * Ramp speed, on level, startup state and status sending are ETS parameters per channel (Ch1DimTime ...).
  */
 public final class DimmerBehavior extends DeviceBehavior {
@@ -18,6 +20,7 @@ public final class DimmerBehavior extends DeviceBehavior {
 	private final double[] target = new double[N];
 	private final boolean[] ramping = new boolean[N];
 	private final ScheduledFuture<?>[] task = new ScheduledFuture<?>[N];
+	private volatile String lastScene = "";
 
 	DimmerBehavior(final VirtualDevice dev) { super(dev); }
 
@@ -60,6 +63,11 @@ public final class DimmerBehavior extends DeviceBehavior {
 
 	@Override
 	synchronized void onObjectReceived(final int go, final int value) {
+		if (go == 5 * N + 1) {
+			scene(value);
+			dev.changed();
+			return;
+		}
 		final int c = (go - 1) / 5, kind = (go - 1) % 5 + 1;
 		if (c >= N || kind > 3)
 			return; // status objects are outputs
@@ -95,6 +103,40 @@ public final class DimmerBehavior extends DeviceBehavior {
 			default -> relative(c, value & 0x0f);
 		}
 		dev.changed();
+	}
+
+	/** A scene telegram: call the scene (set every channel that has it in a slot) or store the current brightness in those slots. */
+	private void scene(final int value) {
+		final boolean store = (value & 0x80) != 0;
+		final int n = (value & 0x3f) + 1;
+		int hit = 0;
+		for (int c = 0; c < N; c++) {
+			if (!enabled(c))
+				continue;
+			for (int s = 1; s <= org.vknx.product.Products.SCENE_SLOTS; s++) {
+				final String pre = pre(c) + "Scene" + s;
+				if (dev.param(pre) != n)
+					continue;
+				hit++;
+				if (store) {
+					dev.setParam(pre + "Value", levelPct(c));
+					dev.log("dimmer", who(c) + ": scene " + n + " stored in slot " + s + ": " + levelPct(c) + " % (replaces the ETS value until the next download)");
+				}
+				else {
+					stopRamp(c);
+					if (level[c] > 0)
+						lastLevel[c] = level[c];
+					level[c] = Math.round(dev.param(pre + "Value") * 255.0 / 100.0);
+					if (level[c] > 0)
+						lastLevel[c] = level[c];
+					dev.log("dimmer", who(c) + ": scene " + n + " (slot " + s + ") -> brightness " + levelPct(c) + " %");
+					reportStatus(c);
+				}
+			}
+		}
+		lastScene = (store ? "Scene " + n + " stored" : "Scene " + n + " called") + (hit == 0 ? " (no channel uses it)" : "");
+		if (hit == 0)
+			dev.log("dimmer", "scene " + n + (store ? " store" : " call") + " received: no channel has this scene number in a scene slot (parameters Ch1Scene1 ...)");
 	}
 
 	private void relative(final int c, final int code) {
@@ -183,6 +225,7 @@ public final class DimmerBehavior extends DeviceBehavior {
 			m.put("level" + n, levelPct(c));
 			m.put("ramping" + n, ramping[c]);
 		}
+		m.put("scene", lastScene);
 		return m;
 	}
 }

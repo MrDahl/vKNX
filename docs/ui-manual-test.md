@@ -45,3 +45,16 @@ These steps need Windows, the installed program and ETS; they were **not** run b
 28. **Floor plan:** in Edit plan select a symbol: the properties panel opens and can be closed with the cross; **Plan settings** offers Replace and Remove plan image; Operate shows no side panels.
 29. **Monitor:** **Pause view** freezes the list while the status shows "View paused"; the group address list can be folded away and stays folded after a reload; **Show related telegrams** in the device menu filters the monitor and shows the filter chip, which removes the filter with one click.
 30. **Settings:** the five sections (Appearance, Connection, Simulation, Maintenance, About) each work; Save and restart in Connection still restarts vKNX.
+
+## Added after 0.8.0 (scenes, slider status) - ETS import and Windows not tried by the developer
+
+Developer tests (in-process mini-ETS, `SceneTest`) cover call, store and learn of scenes, the key function, the slider status and the short old parameter area. They do NOT prove that ETS accepts the new product file.
+
+31. **Import the new product file in ETS** (application version 4): the import must succeed without errors; in an existing project update the devices to the new version. Check that the push button key function list contains **Scene** and that the actuators show four scene slots per output/channel.
+32. **Scene call:** set key 1 of the push button to *Scene 1*, set an output of the switch actuator to scene number 1 / state On, link the key's scene object and the actuator's Scene object to the same group address, download both: pressing the key must switch the output on and the card shows "Scene 1 called".
+33. **Scene store:** set the key to *long press stores the scene*, switch the output manually, long-press the key: the card shows "Scene 1 stored". Change the output, short-press the key: the stored state returns. After a new ETS download the original ETS value applies again.
+34. **Dimming actuator:** the same with a channel and brightness in %; the bar must jump to the value, and the status objects must follow.
+35. **Secure variants:** the same with secure push button and secure switch actuator after commissioning with a FDSK (scene telegrams are then secure telegrams).
+36. **Slider push:** link the new switch status object to the group address of a switch actuator output: switching the output from another key must light the lamp on the Press button; *Follow switch status object = No* must ignore it.
+37. **Switch actuator card** with all 8 outputs enabled: nothing is cut off at the right edge, also in a narrow window.
+

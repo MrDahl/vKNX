@@ -3,12 +3,14 @@ package org.vknx.device;
 import java.util.Map;
 
 /**
- * Switch actuator with 8 outputs; every output can be disabled and named in ETS. Objects: 1..8 switch, 9..16 status.
- * ETS parameters: Out1Enable.., Out1Logic.. (relay logic), StartupState, SendStatus.
+ * Switch actuator with 8 outputs; every output can be disabled and named in ETS. Objects: 1..8 switch, 9..16 status,
+ * 17 scene (DPT 18.001: bit 7 = store, bits 0-5 = scene number - 1). ETS parameters: Out1Enable.., Out1Logic.. (relay
+ * logic), StartupState, SendStatus, and per output four scene slots (Out1Scene1 = scene number, Out1Scene1Value).
  */
 public final class SwitchActuatorBehavior extends DeviceBehavior {
 	static final int N = 8;
 	private final int[] obj = new int[N]; // logical value of each Switch object
+	private volatile String lastScene = "";
 
 	SwitchActuatorBehavior(final VirtualDevice dev) { super(dev); }
 
@@ -28,6 +30,11 @@ public final class SwitchActuatorBehavior extends DeviceBehavior {
 
 	@Override
 	void onObjectReceived(final int go, final int value) {
+		if (go == 2 * N + 1) {
+			scene(value);
+			dev.changed();
+			return;
+		}
 		if (go < 1 || go > N)
 			return;
 		final int c = go - 1;
@@ -42,6 +49,39 @@ public final class SwitchActuatorBehavior extends DeviceBehavior {
 				+ " -> relay " + (closed(c) ? "closed" : "open"));
 		if (before != closed(c))
 			status(c);
+	}
+
+	/** A scene telegram: call the scene (set every output that has it in a slot) or store the current state in those slots. */
+	private void scene(final int value) {
+		final boolean store = (value & 0x80) != 0;
+		final int n = (value & 0x3f) + 1;
+		int hit = 0;
+		for (int c = 0; c < N; c++) {
+			if (!enabled(c))
+				continue;
+			for (int s = 1; s <= org.vknx.product.Products.SCENE_SLOTS; s++) {
+				final String pre = "Out" + (c + 1) + "Scene" + s;
+				if (dev.param(pre) != n)
+					continue;
+				hit++;
+				if (store) {
+					dev.setParam(pre + "Value", obj[c]);
+					dev.log("relay", "output " + (c + 1) + " (" + dev.paramText("Out" + (c + 1) + "Name") + "): scene " + n + " stored in slot " + s
+							+ ": " + (obj[c] == 1 ? "ON" : "OFF") + " (replaces the ETS value until the next download)");
+				}
+				else {
+					final boolean before = closed(c);
+					obj[c] = dev.param(pre + "Value");
+					dev.log("relay", "output " + (c + 1) + " (" + dev.paramText("Out" + (c + 1) + "Name") + "): scene " + n + " (slot " + s + ") -> "
+							+ (obj[c] == 1 ? "ON" : "OFF") + ", relay " + (closed(c) ? "closed" : "open"));
+					if (before != closed(c))
+						status(c);
+				}
+			}
+		}
+		lastScene = (store ? "Scene " + n + " stored" : "Scene " + n + " called") + (hit == 0 ? " (no output uses it)" : "");
+		if (hit == 0)
+			dev.log("relay", "scene " + n + (store ? " store" : " call") + " received: no output has this scene number in a scene slot (parameters Out1Scene1 ...)");
 	}
 
 	private void status(final int c) {
@@ -67,6 +107,7 @@ public final class SwitchActuatorBehavior extends DeviceBehavior {
 			m.put("n" + (c + 1), dev.paramText("Out" + (c + 1) + "Name"));
 		}
 		m.put("lamps", lamps.toString());
+		m.put("scene", lastScene);
 		return m;
 	}
 }

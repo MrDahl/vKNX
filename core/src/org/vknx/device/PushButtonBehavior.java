@@ -12,8 +12,10 @@ import java.util.concurrent.TimeUnit;
  * command, release after a long press sends STOP;</li>
  * <li>Blinds: Up, Down or Up/Down (alternating): short press sends step/stop, long press sends move; Steps: the key
  * sends a step at once.</li>
+ * <li>Scene: sends a scene number (DPT 18.001) to call a scene; with the parameter "long press stores the scene" a
+ * short press (sent on release) calls it and a long press sends the store (learn) telegram instead.</li>
  * </ul>
- * Object numbers of key k (1..4): 5(k-1)+1 switch, +2 status, +3 dimming, +4 move, +5 step/stop.
+ * Object numbers of key k (1..4): 5(k-1)+1 switch, +2 status, +3 dimming, +4 move, +5 step/stop; 20+k scene.
  */
 public final class PushButtonBehavior extends DeviceBehavior {
 	private static final int KEYS = 4;
@@ -34,6 +36,19 @@ public final class PushButtonBehavior extends DeviceBehavior {
 	private static String pre(final int k) { return "Key" + k; }
 
 	private static int base(final int k) { return (k - 1) * 5; }
+
+	/** Scene function: the scene number (1..64) of the key and whether a long press stores the scene. */
+	private int scene(final int k) { return dev.param(pre(k) + "Scene"); }
+
+	private boolean sceneStore(final int k) { return dev.param(pre(k) + "SceneStore") == 1; }
+
+	private void sendScene(final int k, final boolean store, final String who) {
+		final int n = scene(k);
+		dev.log("button", who + (store ? ": long press -> sending STORE scene " : " -> sending CALL scene ") + n
+				+ " (DPT 18.001 value 0x" + Integer.toHexString((store ? 0x80 : 0) | (n - 1)) + ")");
+		last[k] = (store ? "Store scene " : "Scene ") + n;
+		dev.transmit(20 + k, (store ? 0x80 : 0) | (n - 1));
+	}
 
 	private boolean enabled(final int k) { return dev.param(pre(k) + "Enable") == 1; }
 
@@ -81,6 +96,15 @@ public final class PushButtonBehavior extends DeviceBehavior {
 				dev.log("button", who + " pressed, waiting " + ms + " ms (parameter LongPress) to tell short from long press");
 				pending[k] = dev.later(() -> longPress(k), ms, TimeUnit.MILLISECONDS);
 			}
+			case 3 -> {
+				if (sceneStore(k)) {
+					final int ms = LONG_MS[Math.min(2, dev.param(pre(k) + "LongPress"))];
+					dev.log("button", who + " pressed, waiting " + ms + " ms (parameter LongPress) to tell call from store");
+					pending[k] = dev.later(() -> longPress(k), ms, TimeUnit.MILLISECONDS);
+				}
+				else
+					sendScene(k, false, who);
+			}
 			default -> {
 				final int mode = dev.param(pre(k) + "BlindMode");
 				if (mode == 3) { // Steps: no long press
@@ -111,7 +135,9 @@ public final class PushButtonBehavior extends DeviceBehavior {
 		if (!held[k])
 			return;
 		longFired[k] = true;
-		if (dev.param(pre(k) + "Function") == 1) {
+		if (dev.param(pre(k) + "Function") == 3)
+			sendScene(k, true, "key " + k + " (" + name(k) + ")");
+		else if (dev.param(pre(k) + "Function") == 1) {
 			final boolean brighter = dev.param(pre(k) + "DimDir") == 0;
 			final int step = dev.param(pre(k) + "DimStep");
 			dev.log("button", "key " + k + ": long press -> sending dim " + (brighter ? "UP" : "DOWN") + " step code " + step
@@ -137,8 +163,13 @@ public final class PushButtonBehavior extends DeviceBehavior {
 		if (pending[k] != null)
 			pending[k].cancel(false);
 		final int fn = dev.param(pre(k) + "Function");
-		if (fn == 0 || (fn == 2 && dev.param(pre(k) + "BlindMode") == 3))
+		if (fn == 0 || (fn == 2 && dev.param(pre(k) + "BlindMode") == 3) || (fn == 3 && !sceneStore(k)))
 			return; // acted on press
+		if (fn == 3) {
+			if (!longFired[k])
+				sendScene(k, false, "key " + k + " (" + name(k) + ") released before the long-press time: short press");
+			return;
+		}
 		if (fn == 1) {
 			if (longFired[k]) {
 				dev.log("button", "key " + k + " released after long press -> sending dim STOP");
@@ -199,6 +230,7 @@ public final class PushButtonBehavior extends DeviceBehavior {
 		return switch (dev.param(pre(k) + "Function")) {
 			case 0 -> "Switch: " + switch (dev.param(pre(k) + "SwitchMode")) { case 0 -> "on"; case 1 -> "off"; default -> "alternating"; };
 			case 1 -> "Dimming: " + (dev.param(pre(k) + "DimDir") == 0 ? "brighter" : "darker");
+			case 3 -> "Scene " + scene(k) + (sceneStore(k) ? " (long press stores)" : "");
 			default -> "Blinds: " + switch (dev.param(pre(k) + "BlindMode")) {
 				case 0 -> "up"; case 1 -> "down"; case 2 -> "up / down";
 				default -> "step " + (dev.param(pre(k) + "BlindDir") == 0 ? "up" : "down"); };

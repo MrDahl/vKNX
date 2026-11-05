@@ -103,12 +103,12 @@ export function createCard(d, handlers) {
       L.k = [1, 2, 3, 4].map(i => ({ row: h('div.keytile'), btn: holdButton(d.name, i, 'Key ' + i, 'button'), d: h('div.hint'), l: h('span.mono'), ga: h('div.cga') }));
       L.k.forEach(k => { k.row.append(k.btn, k.d, k.l, k.ga); pad.append(k.row); });
       state.append(pad);
-      controls.append(howTo('Press and hold a key for a long press. The small light on a key is its status LED. Functions and names are set in ETS.'));
+      controls.append(howTo('Press and hold a key for a long press. The small light on a key is its status LED. A key set to Scene calls its scene when pressed; if ETS lets the long press store the scene, a short press calls it and a long press stores it. Functions and names are set in ETS.'));
       face = (v, dev) => L.k.forEach((k, i) => {
         const n = i + 1, en = v['e' + n] !== false;
-        k.row.hidden = !en; paintIcon(k.btn.ico, d.name + '|k' + n, 'button'); setText(k.btn.lbl, v['n' + n] || 'Key ' + n); setText(k.d, v['d' + n] || ''); setText(k.l, v['l' + n] || '');
+        k.row.hidden = !en; paintIcon(k.btn.ico, d.name + '|k' + n, /^Scene/.test(v['d' + n] || '') ? 'scene' : 'button'); setText(k.btn.lbl, v['n' + n] || 'Key ' + n); setText(k.d, v['d' + n] || ''); setText(k.l, v['l' + n] || '');
         setCls(k.row, 'on', !!v['s' + n]); setCls(k.btn.led, 'on', !!v['s' + n]);
-        setText(k.ga, dev ? gaText(dev, range(5 * (n - 1) + 1, 5)) : '');
+        setText(k.ga, dev ? gaText(dev, [...range(5 * (n - 1) + 1, 5), 20 + n]) : '');
       });
       break;
     }
@@ -116,8 +116,9 @@ export function createCard(d, handlers) {
       L.v = h('div.value'); L.s = levelSlider(d.name); L.sv = h('span.mono');
       L.s.addEventListener('live', e => setText(L.v, e.detail + ' %'));
       state.append(L.v, h('div.hint', 'brightness value'));
-      controls.append(h('button.btn.primary.press-btn', { type: 'button', onclick: () => operate('Button press', () => api.act(d.name, 'press', 0)) }, icon('button'), 'Press (on/off)'), L.s);
-      face = v => { if (!L.s.busy()) { setText(L.v, (v.level ?? 0) + ' %'); if (+L.s.value !== v.level) L.s.value = v.level ?? 0; } };
+      L.led = h('span.keyled');
+      controls.append(h('button.btn.primary.press-btn', { type: 'button', onclick: () => operate('Button press', () => api.act(d.name, 'press', 0)) }, L.led, icon('button'), 'Press (on/off)'), L.s);
+      face = v => { setCls(L.led, 'on', !!v.state); if (!L.s.busy()) { setText(L.v, (v.level ?? 0) + ' %'); if (+L.s.value !== v.level) L.s.value = v.level ?? 0; } };
       break;
     }
     case 'switch-actuator': {
@@ -130,7 +131,7 @@ export function createCard(d, handlers) {
       face = (v, dev) => {
         const l = v.lamps || ''; let on = 0, en = 0;
         L.cells.forEach((c, i) => { setText(c.ga, dev ? gaText(dev, [i + 1, 9 + i]) : ''); const e = v['e' + (i + 1)] !== false; c.cell.hidden = !e; if (e) en++; const o = l[i] === '1'; if (o) on++; setBulb(c.b, o, null, d.name + '|l' + (i + 1)); setText(c.t, o ? 'On' : 'Off'); setText(c.nm, v['n' + (i + 1)] || 'Output ' + (i + 1)); });
-        setText(L.sum, `${on} of ${en} outputs on`);
+        setText(L.sum, `${on} of ${en} outputs on` + (v.scene ? ' · ' + v.scene : ''));
       };
       break;
     }
@@ -142,14 +143,16 @@ export function createCard(d, handlers) {
         const trk = h('div.dslider', { role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-label': 'Brightness (display only)' }, m);
         const cell = h('div.lamp-cell', b, nm, t, trk, ga); L.cells.push({ cell, b, nm, t, m, ga, trk }); grid.append(cell);
       }
-      state.append(grid);
-      controls.append(howTo('The bars show the actual brightness of each channel; they cannot be dragged. Dim with the push buttons or a slider device (relative or absolute value from ETS).'));
-      face = (v, dev) => L.cells.forEach((c, i) => {
+      L.scene = h('div.hint');
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(grid, L.scene);
+      controls.append(howTo('The bars show the actual brightness of each channel; they cannot be dragged. Dim with the push buttons or a slider device (relative or absolute value from ETS). A scene telegram sets every channel that has the scene number in one of its scene slots; a store telegram saves the current brightness in those slots.'));
+      face = (v, dev) => { setText(L.scene, v.scene || ''); L.cells.forEach((c, i) => {
         const n = i + 1, lv = v['level' + n] ?? 0;
         c.cell.hidden = v['e' + n] === false; setBulb(c.b, lv > 0, lv, d.name + '|d' + n); setText(c.t, lv + ' %'); setStyle(c.m, 'width', lv + '%');
         setAttr(c.trk, 'aria-valuenow', lv); setText(c.ga, dev ? gaText(dev, range(5 * (n - 1) + 1, 5)) : '');
         setText(c.nm, v['n' + n] || 'Channel ' + n);
-      });
+      }); };
       break;
     }
     case 'blind-actuator': {

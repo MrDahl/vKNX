@@ -247,7 +247,9 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .bulb { width: 3rem; height: 3rem; border-radius: 50%; display: grid; place-items: center; background: var(--surface-3); color: var(--faint); border: 2px solid var(--border); flex: none; transition: background .2s, box-shadow .2s, color .2s; }
 .bulb .ic { width: 1.6rem; height: 1.6rem; }
 .bulb.on { background: var(--lamp-soft); color: var(--lamp); border-color: var(--lamp); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--lamp) 45%, transparent); }
-.lamp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .55rem; width: 100%; }
+.lamp-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem; width: 100%; }
+.lamp-cell { min-width: 0; }
+.lamp-cell .cga { text-align: center; }
 .lamp-cell { display: flex; flex-direction: column; align-items: center; gap: .15rem; font-size: .8rem; color: var(--muted); }
 .lamp-cell .bulb { width: 2.4rem; height: 2.4rem; }
 .lamp-cell .bulb .ic { width: 1.3rem; height: 1.3rem; }
@@ -570,3 +572,4 @@ details.howto[open] > summary { margin-bottom: .25rem; }
   .next-bar, .tabs, .badge-row { margin-left: 1rem; margin-right: 1rem; padding-left: 0; padding-right: 0; }
   .tabs { padding: 0; }
 }
+.card, .card-state { min-width: 0; }

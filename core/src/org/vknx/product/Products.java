@@ -16,7 +16,7 @@ public final class Products {
 	public static final int MANUFACTURER_ID = 0x00FA;
 
 	/** Application version of every product in this release (bumped when texts or the parameter layout change). */
-	static final int V = 3;
+	static final int V = 4;
 
 	private static final List<Choice> NO_YES = List.of(new Choice(0, "No"), new Choice(1, "Yes"));
 	private static final List<Choice> STARTUP = List.of(new Choice(0, "Off"), new Choice(1, "On"), new Choice(2, "Unchanged"));
@@ -27,6 +27,13 @@ public final class Products {
 	static final int STRIDE = 20;
 	/** Characters of a channel name text parameter. */
 	public static final int NAME_CHARS = 16;
+
+	/** Scene slots per output (switch actuator) or channel (dimming actuator). */
+	public static final int SCENE_SLOTS = 4;
+
+	private static ParamDef sceneNumber(final int id, final String name, final int slot, final int byteOffset, final String page) {
+		return ParamDef.number(id, name, "Scene " + slot + ": scene number (0 = not used, 1-64)", byteOffset, 8, 0, 0, 64).inGroup(page);
+	}
 
 	private static ParamDef enable(final int id, final String pre, final int b, final String label, final String page) {
 		return new ParamDef(id, pre + "Enable", label, b, 0, 1, 1, NO_YES).inGroup(page);
@@ -40,9 +47,10 @@ public final class Products {
 
 	/**
 	 * Push button with four keys. Every key can be disabled and named and has one function: Switch, Relative dimming or
-	 * Blinds. Per key (block of {@link #STRIDE} bytes): byte 0 = Enable, Function, SwitchMode, FollowStatus, DimDir;
-	 * byte 1 = BlindMode, BlindDir, LongPress, DimStep; bytes 2-17 = name. Objects per key: 5 (switch, status, dimming,
-	 * move, step/stop), shown by function.
+	 * Blinds or Scene. Per key (block of {@link #STRIDE} bytes): byte 0 = Enable, Function, SwitchMode, FollowStatus,
+	 * DimDir; byte 1 = BlindMode, BlindDir, LongPress, DimStep; bytes 2-17 = name; byte 18 = scene number; byte 19 = scene
+	 * store. Objects per key: 5 (switch, status, dimming, move, step/stop), shown by function; the scene objects 21..24
+	 * (one per key, DPT 18.001) come after them so the numbers of the older objects did not change.
 	 */
 	private static ProductDef pushButton() {
 		final var params = new ArrayList<ParamDef>();
@@ -54,7 +62,7 @@ public final class Products {
 			params.add(enable(id++, pre, b, "Enable key", page));
 			params.add(nameParam(id++, pre, b, "Key " + k, page));
 			params.add(new ParamDef(id++, fn, "Function", b, 1, 2, 0, List.of(new Choice(0, "Switch"),
-					new Choice(1, "Relative dimming"), new Choice(2, "Blinds"))).inGroup(page).showWhen(en, 1));
+					new Choice(1, "Relative dimming"), new Choice(2, "Blinds"), new Choice(3, "Scene"))).inGroup(page).showWhen(en, 1));
 			params.add(new ParamDef(id++, pre + "SwitchMode", "Key sends", b, 3, 2, 2, List.of(new Choice(0, "On"),
 					new Choice(1, "Off"), new Choice(2, "Alternating on / off"))).inGroup(page).showWhen(en, 1).showWhen(fn, 0));
 			params.add(new ParamDef(id++, pre + "FollowStatus", "Follow status object", b, 5, 1, 1, NO_YES)
@@ -71,7 +79,7 @@ public final class Products {
 			params.add(new ParamDef(id++, pre + "BlindDir", "Step direction", b + 1, 2, 1, 0, List.of(new Choice(0, "Up"),
 					new Choice(1, "Down"))).inGroup(page).showWhen(en, 1).showWhen(fn, 2).showWhen(pre + "BlindMode", 3));
 			params.add(new ParamDef(id++, pre + "LongPress", "Long-press time", b + 1, 3, 2, 1, List.of(
-					new Choice(0, "0.4 s"), new Choice(1, "0.6 s"), new Choice(2, "1.0 s"))).inGroup(page).showWhen(en, 1).showWhen(fn, 1, 2));
+					new Choice(0, "0.4 s"), new Choice(1, "0.6 s"), new Choice(2, "1.0 s"))).inGroup(page).showWhen(en, 1).showWhen(fn, 1, 2, 3));
 			final String t = page + ": ";
 			objs.add(new ObjDef(o + 1, pre + "Switch", t + "switch", "Output", 1, "DPST-1-1", false, false, true, false)
 					.inGroup(page).showWhen(en, 1).showWhen(fn, 0, 1));
@@ -83,6 +91,19 @@ public final class Products {
 					.inGroup(page).showWhen(en, 1).showWhen(fn, 2));
 			objs.add(new ObjDef(o + 5, pre + "StepStop", t + "blind step / stop", "Output", 1, "DPST-1-7", false, false, true, false)
 					.inGroup(page).showWhen(en, 1).showWhen(fn, 2));
+		}
+		// scene function (added in application version 4, so its parameters and objects come last)
+		for (int k = 1; k <= 4; k++) {
+			final String pre = "Key" + k, page = "Key " + k, en = pre + "Enable", fn = pre + "Function", t = page + ": ";
+			final int b = (k - 1) * STRIDE;
+			params.add(ParamDef.number(id++, pre + "Scene", "Scene number (1-64)", b + 18, 8, 1, 1, 64)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 3));
+			params.add(new ParamDef(id++, pre + "SceneStore", "Long press", b + 19, 0, 1, 1, List.of(
+					new Choice(0, "Does nothing (the scene is called at once when the key is pressed)"),
+					new Choice(1, "Stores the scene in the actuators (short press calls it)")))
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 3));
+			objs.add(new ObjDef(20 + k, pre + "Scene", t + "scene (call / store)", "Output", 8, "DPST-18-1", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 3));
 		}
 		return new ProductDef("push-button", 0x0A01, V, "vKNX Push Button 4-fold", "VKNXPB4", 0x0A01, 4 * STRIDE, params, objs);
 	}
@@ -112,7 +133,18 @@ public final class Products {
 		}
 		params.add(new ParamDef(id++, "StartupState", "State after download/restart", g, 0, 2, 0, STARTUP));
 		params.add(new ParamDef(id++, "SendStatus", "Send status on change", g, 2, 1, 1, NO_YES));
-		return new ProductDef("switch-actuator", 0x0A02, V, "vKNX Switch Actuator 8-fold", "VKNXSA8", 0x0A02, g + 1, params, objs);
+		// scenes (added in application version 4): one scene object for the whole device, four scene slots per output
+		for (int c = 1; c <= n; c++) {
+			final String pre = "Out" + c, page = "Output " + c;
+			for (int s = 1; s <= SCENE_SLOTS; s++) {
+				final int at = g + 1 + (c - 1) * SCENE_SLOTS * 2 + (s - 1) * 2;
+				params.add(sceneNumber(id++, pre + "Scene" + s, s, at, page).showWhen(pre + "Enable", 1));
+				params.add(new ParamDef(id++, pre + "Scene" + s + "Value", "Scene " + s + ": output is", at + 1, 0, 1, 1, List.of(
+						new Choice(0, "Off"), new Choice(1, "On"))).inGroup(page).showWhen(pre + "Enable", 1));
+			}
+		}
+		objs.add(new ObjDef(2 * n + 1, "Scene", "Scene (call / store)", "Input", 8, "DPST-18-1", false, true, false, false));
+		return new ProductDef("switch-actuator", 0x0A02, V, "vKNX Switch Actuator 8-fold", "VKNXSA8", 0x0A02, g + 1 + n * SCENE_SLOTS * 2, params, objs);
 	}
 
 	public static final ProductDef SWITCH_ACTUATOR = switchActuator();
@@ -124,17 +156,19 @@ public final class Products {
 	public static final ProductDef SECURE_SWITCH_ACTUATOR = SWITCH_ACTUATOR.secured("secure-switch-actuator", 0x0A11,
 			"vKNX Secure Switch Actuator 8-fold", "VKNXSSA8");
 
-	/** Push button with a slider: switch + 1-byte brightness value. */
+	/** Push button with a slider: switch + 1-byte brightness value, with a switch status and a brightness status input. */
 	public static final ProductDef PUSH_SLIDER = new ProductDef(
 			"push-slider", 0x0A04, V, "vKNX Slider push 1-fold", "VKNXSL1", 0x0A04, 1,
 			List.of(
 				new ParamDef(1, "ButtonFunction", "Button function", 0, 0, 2, 0, BUTTON_FUNCTION),
 				new ParamDef(2, "SliderSend", "Slider sends", 0, 2, 1, 0, List.of(
-					new Choice(0, "Only when released"), new Choice(1, "Continuously while sliding")))),
+					new Choice(0, "Only when released"), new Choice(1, "Continuously while sliding"))),
+				new ParamDef(3, "FollowStatus", "Follow switch status object", 0, 3, 1, 1, NO_YES)),
 			List.of(
 				new ObjDef(1, "Switch", "Switch", "Output", 1, "DPST-1-1", false, false, true, false),
 				new ObjDef(2, "Brightness", "Brightness (value)", "Output", 8, "DPST-5-1", false, false, true, false),
-				new ObjDef(3, "BrightnessStatus", "Brightness status", "Input", 8, "DPST-5-1", false, true, false, true)));
+				new ObjDef(3, "BrightnessStatus", "Brightness status", "Input", 8, "DPST-5-1", false, true, false, true),
+				new ObjDef(4, "SwitchStatus", "Switch status", "Input", 1, "DPST-1-1", false, true, false, true)));
 
 	// ------------------------------------------------------------------ dimming actuator (4 channels)
 
@@ -167,7 +201,19 @@ public final class Products {
 			objs.add(new ObjDef(o + 5, pre + "BrightnessStatus", page + ": brightness status", "Output", 8, "DPST-5-1", true, false, true, false)
 					.inGroup(page).showWhen(en, 1));
 		}
-		return new ProductDef("dimmer", 0x0A05, V, "vKNX Dimming Actuator 4-fold", "VKNXDM4", 0x0A05, 4 * STRIDE, params, objs);
+		// scenes (added in application version 4): one scene object for the whole device, four scene slots per channel
+		final int g = 4 * STRIDE;
+		for (int c = 1; c <= 4; c++) {
+			final String pre = "Ch" + c, page = "Channel " + c;
+			for (int s = 1; s <= SCENE_SLOTS; s++) {
+				final int at = g + (c - 1) * SCENE_SLOTS * 2 + (s - 1) * 2;
+				params.add(sceneNumber(id++, pre + "Scene" + s, s, at, page).showWhen(pre + "Enable", 1));
+				params.add(ParamDef.number(id++, pre + "Scene" + s + "Value", "Scene " + s + ": brightness (%)", at + 1, 8, 100, 0, 100)
+						.inGroup(page).showWhen(pre + "Enable", 1));
+			}
+		}
+		objs.add(new ObjDef(21, "Scene", "Scene (call / store)", "Input", 8, "DPST-18-1", false, true, false, false));
+		return new ProductDef("dimmer", 0x0A05, V, "vKNX Dimming Actuator 4-fold", "VKNXDM4", 0x0A05, g + 4 * SCENE_SLOTS * 2, params, objs);
 	}
 
 	public static final ProductDef DIMMER = dimmer();

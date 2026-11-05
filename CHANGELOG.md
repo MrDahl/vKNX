@@ -3,6 +3,20 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Added
+- **Scenes (DPT 18.001).** The 4-fold push button has a new key function **Scene**: the key sends a scene number (1-64). Optionally the long press **stores** the scene (a short press then calls it); without that option the scene is called at once when the key is pressed. Each key has its own scene object (objects 21-24).
+- **Switch actuator and dimming actuator react to scenes.** Each output (channel) has four scene slots in ETS: a scene number (0 = not used) and the state (On/Off, or brightness in %) that the output takes when that scene is called. A new "Scene" group object (object 17 on the switch actuator, object 21 on the dimming actuator) receives the scene telegram. A *store* telegram saves the current state of every output that uses that scene number, like a real actuator (**learned values last until the next ETS download**). The operating card shows the last scene that was called or stored.
+- **Slider push: switch status object.** New input object "Switch status" and the parameter *Follow switch status object* (default Yes): the on/off state of the button follows the status; with No the object is ignored. The Press button on the card shows the state with a small lamp.
+- The secure push button and the secure switch actuator get all of this automatically (same parameters and behaviour as the plain ones).
+
+### Fixed
+- The output grid of the switch actuator card no longer grows wider than the card ("Output 4 / 8" was cut off, the card looked broken).
+
+### Changed
+- **Application version 4.** The products have new parameters and objects (the existing ones keep their numbers). In ETS re-import the product file and update the devices in existing projects to the new version, then download again. Devices that still hold a version 3 download keep working and read the new parameters as their defaults (scenes off), until they are downloaded again.
+
 ## [0.8.0] - 2026-11-03
 
 ### Added
