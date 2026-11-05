@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.9.0] - 2026-11-05
 
 ### Added
 - **Scenes (DPT 18.001).** The 4-fold push button has a new key function **Scene**: the key sends a scene number (1-64). Optionally the long press **stores** the scene (a short press then calls it); without that option the scene is called at once when the key is pressed. Each key has its own scene object (objects 21-24).
