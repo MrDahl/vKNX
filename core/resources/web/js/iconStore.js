@@ -61,6 +61,7 @@ export function pointDefault(p) {
     case 'blind': return 'blind';
     case 'sensor': return SENSORS[p.sensor].icon;
     case 'display': return 'display';
+    case 'logic': return 'logic';
     default: return 'info';
   }
 }

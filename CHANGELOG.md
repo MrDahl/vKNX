@@ -3,6 +3,21 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Added
+- **New product: Logic module and time master** (one combined device). 
+  - **16 inputs and 16 outputs (1 bit).** Every input and output is hidden at first. In ETS you switch each one on (pages "Inputs 1-8", "Inputs 9-16", "Outputs 1-8", "Outputs 9-16") and can give it a name; only then its group object appears in the group object list. The ETS object texts are fixed ("Input 3", "Output 5"); the names you type are shown in the ETS parameters and in vKNX.
+  - **Logic editor.** After the download the device card has the button **Open logic editor**. It opens a full-screen window inside the control panel (it cannot be reached from anywhere else). There you place the enabled inputs and outputs and wire them with the gates AND, NAND, OR, NOR, XOR, XNOR (2-16 inputs), NOT, BUFFER, DELAY (switch-on/off follows the input after a time), STAIRWAY (stairway light timer, restarts on a new rising edge), IMPULSE (toggle on every rising edge) and CLOCK (square wave). A simplified version of Marc's GateCraft: no file download, no sharing, only logic. Save stores the circuit in the device; it survives a new ETS download and a restart of vKNX. The values of all inputs, gates and outputs are shown live in the editor, and the outputs are shown on the card and on the floor plan.
+  - **Bus behaviour.** A telegram to an input object runs through the circuit; an output sends its value on the bus when it changes (not while the circuit is loaded). With that, two devices in different group addresses can talk to each other through the logic module, as with a real logic controller.
+  - **Time master.** Sends time (DPT 10.001), date (DPT 11.001) or both in one object (DPT 19.001), chosen in ETS (page "Date and time"); optionally at start and cyclically (every n minutes). The clock is a simulated clock: the card can set the time and weekday, run it faster (up to 3600 times) or follow the PC clock, and **Send time now**. 
+  - **Eight weekday timers.** Each timer (ETS pages "Timer 1" ... "Timer 8") has a name, weekdays Monday-Sunday, a switch-on time and a switch-off time and its own 1 bit object. The timers follow the simulated clock, also when it runs faster.
+- Devices can send telegrams with more than 2 bytes of data and have a persistent user memory area (used for the circuit).
+
+### Not tried in ETS yet
+- The product file `vknx-logic.knxprod` (32 input/output parameter pages, 8 timer pages, 3 and 8 byte time objects, *Read on init* on the inputs) has only been checked by our own tests (ETS-like client in the test suite); ETS itself has not imported it yet. Behaviour of the circuit, the time telegrams (decoded with Calimero) and the timers are covered by tests, the editor by a browser check.
+- This is not an ETS plug-in (like the ABB logic controller has): the editor lives in the vKNX window.
+
 ## [0.9.1] - 2026-11-06
 
 ### Fixed

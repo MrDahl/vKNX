@@ -69,6 +69,7 @@ public final class WebUi {
 		server.createContext("/api/update/install", this::updateInstall);
 		server.createContext("/api/update/status", this::updateStatus);
 		server.createContext("/api/layout", this::layout);
+		server.createContext("/api/logic", this::logic);
 		server.createContext("/api/data", this::dataEndpoint);
 		server.createContext("/api/icons", this::icons);
 		server.createContext("/api/add", this::add);
@@ -225,6 +226,39 @@ public final class WebUi {
 	}
 
 	/** Placement of inputs/outputs on the floor plan, stored as opaque JSON text in plan-layout.json. */
+	/**
+	 * The circuit of a logic module. GET returns the circuit text and the live value of every element
+	 * ({@code live=1}: values only); POST stores a new circuit (400 with the reason if it is not accepted).
+	 */
+	private void logic(final HttpExchange ex) throws IOException {
+		final String name = param(ex.getRequestURI(), "dev", "");
+		final var dev = devices.stream().filter(d -> d.name().equals(name)).findFirst();
+		if (dev.isEmpty() || !(dev.get().behavior() instanceof final org.vknx.device.LogicBehavior lb)) {
+			send(ex, 404, "text/plain", utf8("no such logic module"));
+			return;
+		}
+		if ("POST".equals(ex.getRequestMethod())) {
+			final byte[] body = ex.getRequestBody().readNBytes(100_001);
+			if (body.length > 100_000) {
+				send(ex, 400, "text/plain", utf8("too large"));
+				return;
+			}
+			final String err = lb.setCircuit(new String(body, StandardCharsets.UTF_8));
+			if (err == null)
+				send(ex, 200, "text/plain", utf8("ok"));
+			else
+				send(ex, 400, "text/plain", utf8(err));
+			return;
+		}
+		final boolean liveOnly = "1".equals(param(ex.getRequestURI(), "live", "0"));
+		final var sb = new StringBuilder("{");
+		if (!liveOnly)
+			sb.append("\"circuit\":").append(q(lb.circuit())).append(',');
+		sb.append("\"live\":{").append(lb.live().entrySet().stream().map(e -> q(e.getKey()) + ":" + (e.getValue() ? 1 : 0))
+				.collect(Collectors.joining(","))).append("}}");
+		send(ex, 200, "application/json; charset=utf-8", utf8(sb.toString()));
+	}
+
 	private void layout(final HttpExchange ex) throws IOException {
 		final var f = registry.dir().resolve("plan-layout.json");
 		if ("POST".equals(ex.getRequestMethod())) {

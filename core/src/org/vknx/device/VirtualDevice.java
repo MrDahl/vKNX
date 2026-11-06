@@ -1350,6 +1350,26 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	/** @param quiet true for cyclic sending: stay silent in the log when nothing can be sent (avoids log flooding) */
 	boolean transmit(final int go, final int value, final boolean quiet) {
+		final int bits = product.object(go).map(ObjDef::sizeBits).orElse(1);
+		final byte[] data = encodeData(bits, value);
+		final byte[] apdu = bits <= 6 ? new byte[] { 0x00, (byte) (0x80 | (value & 0x3f)) }
+				: new byte[2 + data.length];
+		if (bits > 6) {
+			apdu[1] = (byte) 0x80;
+			System.arraycopy(data, 0, apdu, 2, data.length);
+		}
+		return send(go, apdu, String.valueOf(value), quiet);
+	}
+
+	/** Sends a value of more than two bytes (date, time, date and time) to the sending group address of object {@code go}. */
+	boolean transmitBytes(final int go, final byte[] data, final String shown, final boolean quiet) {
+		final byte[] apdu = new byte[2 + data.length];
+		apdu[1] = (byte) 0x80;
+		System.arraycopy(data, 0, apdu, 2, data.length);
+		return send(go, apdu, shown, quiet);
+	}
+
+	private boolean send(final int go, final byte[] apdu, final String shown, final boolean quiet) {
 		final String oname = product.object(go).map(ObjDef::name).orElse("?");
 		final var t = tables;
 		if (!applicationLoaded()) {
@@ -1370,19 +1390,11 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 						+ " flag off");
 			return false;
 		}
-		final int bits = product.object(go).map(ObjDef::sizeBits).orElse(1);
-		final byte[] data = encodeData(bits, value);
-		final byte[] apdu = bits <= 6 ? new byte[] { 0x00, (byte) (0x80 | (value & 0x3f)) }
-				: new byte[2 + data.length];
-		if (bits > 6) {
-			apdu[1] = (byte) 0x80;
-			System.arraycopy(data, 0, apdu, 2, data.length);
-		}
 		try {
 			// a group object ETS marked as secure is sent authenticated (and encrypted); otherwise the plain APDU goes out
 			final var secured = base.secureApplicationLayer().secureGroupObject(address(), ga, apdu);
 			base.getDeviceLink().sendRequest(ga, Priority.LOW, secured.orElse(apdu));
-			log("tx", "GroupValueWrite " + address() + " -> " + ga + " value " + value + " (object " + go + " " + oname
+			log("tx", "GroupValueWrite " + address() + " -> " + ga + " value " + shown + " (object " + go + " " + oname
 					+ (secured.isPresent() ? ", KNX Data Secure" : "") + ")");
 			return true;
 		}
@@ -1415,6 +1427,29 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	void changed() {
 		for (final var l : listeners)
 			l.changed(this);
+	}
+
+	/** Where a behaviour may keep its own data in the persisted device memory (above the application slots and the coupler filter table). */
+	static final int USER_MEMORY = 0x4000, USER_MEMORY_SIZE = 0x8000;
+
+	/** Reads the user data block (a 4 byte length followed by the bytes); empty if none was ever saved. */
+	byte[] readUserData() {
+		final var mem = base.deviceMemory();
+		final byte[] h = mem.get(USER_MEMORY, 4);
+		final int n = ((h[0] & 0xff) << 24) | ((h[1] & 0xff) << 16) | ((h[2] & 0xff) << 8) | (h[3] & 0xff);
+		if (n <= 0 || n > USER_MEMORY_SIZE - 4)
+			return new byte[0];
+		return mem.get(USER_MEMORY + 4, n);
+	}
+
+	/** Stores the user data block in the device memory (saved with the device). */
+	void writeUserData(final byte[] data) {
+		if (data.length > USER_MEMORY_SIZE - 4)
+			throw new IllegalArgumentException("too large: " + data.length + " bytes, at most " + (USER_MEMORY_SIZE - 4));
+		final var mem = base.deviceMemory();
+		mem.set(USER_MEMORY, intBytes(data.length));
+		if (data.length > 0)
+			mem.set(USER_MEMORY + 4, data);
 	}
 
 	byte[] snapshotMemory(final int from, final int length) { return base.deviceMemory().get(from, length); }

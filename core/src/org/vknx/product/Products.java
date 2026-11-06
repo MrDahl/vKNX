@@ -378,6 +378,88 @@ public final class Products {
 
 	public static final ProductDef INFO_DISPLAY = infoDisplay();
 
+	// ------------------------------------------------------------------ logic module + time master
+
+	public static final int LOGIC_INPUTS = 16, LOGIC_OUTPUTS = 16, TIMERS = 8;
+	/** Parameter bytes: per input/output enable(1) + name(16); the time block; per timer 18 bytes. */
+	public static final int LOGIC_IO_BYTES = 17, TIME_BASE = 544, TIMER_BASE = 552, TIMER_BYTES = 18, TIMER_NAME_CHARS = 12;
+	/** Object numbers: inputs 1-16, outputs 17-32, then date, time, date and time and one output per timer. */
+	public static final int OBJ_DATE = 33, OBJ_TIME = 34, OBJ_DATETIME = 35;
+	public static int logicInputObject(final int n) { return n; }
+	public static int logicOutputObject(final int n) { return LOGIC_INPUTS + n; }
+	public static int timerObject(final int n) { return 35 + n; }
+	public static final List<String> DAYS = List.of("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+
+	/**
+	 * Logic module and time master in one device. Sixteen 1 bit inputs and sixteen 1 bit outputs, all hidden until they are
+	 * enabled (and named) in the ETS parameters. What happens between them is drawn in the logic editor of the vKNX control
+	 * panel (not in ETS) and kept inside the simulated device. The time master can send the time, the date or both and has
+	 * eight weekday timers, each with a 1 bit output that switches on and/or off at a set time on the chosen weekdays.
+	 */
+	private static ProductDef logicModule() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		for (int kind = 0; kind < 2; kind++) {
+			final boolean in = kind == 0;
+			final int count = in ? LOGIC_INPUTS : LOGIC_OUTPUTS;
+			for (int n = 1; n <= count; n++) {
+				final String pre = (in ? "In" : "Out") + n, en = pre + "Enable";
+				final int b = (in ? 0 : LOGIC_INPUTS * LOGIC_IO_BYTES) + (n - 1) * LOGIC_IO_BYTES;
+				final String page = (in ? "Inputs " : "Outputs ") + (n <= 8 ? "1-8" : "9-16");
+				params.add(new ParamDef(id++, en, (in ? "Input " : "Output ") + n + " in use", b, 0, 1, 0, NO_YES).inGroup(page));
+				params.add(ParamDef.text(id++, pre + "Name", (in ? "Input " : "Output ") + n + " name", b + 1, NAME_CHARS, (in ? "Input " : "Output ") + n)
+						.inGroup(page).showWhen(en, 1));
+				if (in)
+					objs.add(new ObjDef(logicInputObject(n), pre, "Input " + n, "Input", 1, "DPST-1-1", false, true, false, true)
+							.inGroup(page).showWhen(en, 1).withReadOnInit());
+			}
+		}
+		for (int n = 1; n <= LOGIC_OUTPUTS; n++) {
+			final String pre = "Out" + n, page = "Outputs " + (n <= 8 ? "1-8" : "9-16");
+			objs.add(new ObjDef(logicOutputObject(n), pre, "Output " + n, "Output", 1, "DPST-1-1", true, false, true, false)
+					.inGroup(page).showWhen(pre + "Enable", 1));
+		}
+		final String tp = "Date and time";
+		params.add(new ParamDef(id++, "TimeObjects", "Send", TIME_BASE, 0, 4, 0, List.of(new Choice(0, "Nothing"),
+				new Choice(1, "Time (DPT 10.001)"), new Choice(2, "Date (DPT 11.001)"), new Choice(3, "Time and date, two objects"),
+				new Choice(4, "Date and time in one object (DPT 19.001)"))).inGroup(tp));
+		params.add(new ParamDef(id++, "TimeAtStart", "Send after a download and at start", TIME_BASE + 1, 0, 1, 1, NO_YES)
+				.inGroup(tp).showWhen("TimeObjects", 1, 2, 3, 4));
+		params.add(ParamDef.number(id++, "TimeInterval", "Send every (minutes, 0 = not cyclic)", TIME_BASE + 2, 16, 60, 0, 1440)
+				.inGroup(tp).showWhen("TimeObjects", 1, 2, 3, 4));
+		objs.add(new ObjDef(OBJ_DATE, "Date", "Date", "Output", 24, "DPST-11-1", false, false, true, false)
+				.inGroup(tp).showWhen("TimeObjects", 2, 3));
+		objs.add(new ObjDef(OBJ_TIME, "Time", "Time of day", "Output", 24, "DPST-10-1", false, false, true, false)
+				.inGroup(tp).showWhen("TimeObjects", 1, 3));
+		objs.add(new ObjDef(OBJ_DATETIME, "DateTime", "Date and time", "Output", 64, "DPST-19-1", false, false, true, false)
+				.inGroup(tp).showWhen("TimeObjects", 4));
+		for (int t = 1; t <= TIMERS; t++) {
+			final String pre = "Tm" + t, page = "Timer " + t, en = pre + "Enable";
+			final int b = TIMER_BASE + (t - 1) * TIMER_BYTES;
+			params.add(new ParamDef(id++, en, "Timer " + t + " in use", b, 0, 1, 0, NO_YES).inGroup(page));
+			params.add(ParamDef.text(id++, pre + "Name", "Name", b + 6, TIMER_NAME_CHARS, "Timer " + t).inGroup(page).showWhen(en, 1));
+			for (int d = 0; d < 7; d++)
+				params.add(new ParamDef(id++, pre + "Day" + d, DAYS.get(d), b, d + 1, 1, 1, NO_YES).inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "OnEnable", "Switch on", b + 1, 0, 1, 1, NO_YES).inGroup(page).showWhen(en, 1));
+			params.add(ParamDef.number(id++, pre + "OnHour", "Switch on at: hour", b + 2, 8, 7, 0, 23).inGroup(page)
+					.showWhen(en, 1).showWhen(pre + "OnEnable", 1));
+			params.add(ParamDef.number(id++, pre + "OnMinute", "Switch on at: minute", b + 3, 8, 0, 0, 59).inGroup(page)
+					.showWhen(en, 1).showWhen(pre + "OnEnable", 1));
+			params.add(new ParamDef(id++, pre + "OffEnable", "Switch off", b + 1, 1, 1, 1, NO_YES).inGroup(page).showWhen(en, 1));
+			params.add(ParamDef.number(id++, pre + "OffHour", "Switch off at: hour", b + 4, 8, 22, 0, 23).inGroup(page)
+					.showWhen(en, 1).showWhen(pre + "OffEnable", 1));
+			params.add(ParamDef.number(id++, pre + "OffMinute", "Switch off at: minute", b + 5, 8, 0, 0, 59).inGroup(page)
+					.showWhen(en, 1).showWhen(pre + "OffEnable", 1));
+			objs.add(new ObjDef(timerObject(t), pre, "Timer " + t + " output", "Output", 1, "DPST-1-1", true, false, true, false)
+					.inGroup(page).showWhen(en, 1));
+		}
+		return new ProductDef("logic", 0x0A0D, V, "vKNX Logic Module and Time Master", "VKNXLG1", 0x0A0D,
+				TIMER_BASE + TIMERS * TIMER_BYTES, params, objs);
+	}
+
+	public static final ProductDef LOGIC = logicModule();
+
 	// ------------------------------------------------------------------ couplers
 
 	/**
@@ -392,7 +474,7 @@ public final class Products {
 	public static final Map<String, ProductDef> ALL;
 	static {
 		final var m = new java.util.LinkedHashMap<String, ProductDef>();
-		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, SECURE_PUSH_BUTTON, SECURE_SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, INFO_DISPLAY, COUPLER))
+		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, SECURE_PUSH_BUTTON, SECURE_SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, INFO_DISPLAY, LOGIC, COUPLER))
 			m.put(p.key(), p);
 		ALL = java.util.Collections.unmodifiableMap(m);
 	}

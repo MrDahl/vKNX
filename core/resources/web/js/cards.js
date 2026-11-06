@@ -5,6 +5,7 @@ import { S, emit, showGroupAddress } from './bus.js';
 import { SENSORS, productOf, statusOf } from './devinfo.js';
 import { naturalCmp } from './util.js';
 import { paintIcon } from './iconStore.js';
+import { openLogicEditor } from './logicEditor.js';
 
 /** Reports a failed operation with the concrete reason; never claims success. */
 export async function operate(label, fn) {
@@ -193,6 +194,43 @@ export function createCard(d, handlers) {
         L.hd.hidden = !any; L.none.hidden = any; L.prev.disabled = L.next.disabled = !any || (v.count || 0) < 2;
         setText(L.name, v.name || ('Screen ' + v.cur)); setText(L.pos, (v.count || 0) > 1 ? v.pos + ' / ' + v.count : '');
         L.r.forEach((r, i) => { const n = i + 1, used = any && v['r' + n + 't'] > 0; r.row.hidden = !used; setText(r.l, v['r' + n + 'l'] || ''); setText(r.v, v['r' + n + 'v'] || '–'); });
+      };
+      break;
+    }
+    case 'logic': {
+      const chip = () => { const led = h('span.keyled'); const nm = h('span.nm'); return { el: h('div.lg-io', led, nm), led, nm }; };
+      L.i = range(1, 16).map(chip); L.o = range(1, 16).map(chip);
+      L.inHd = h('div.lg-hd', 'Inputs'); L.outHd = h('div.lg-hd', 'Outputs');
+      L.none = h('div.hint', 'No input or output is enabled. Enable them in the ETS parameters (pages "Inputs 1-8", "Outputs 1-8"), then download.');
+      L.tm = range(1, 8).map(() => { const nm = h('span.nm'); const v = h('b'); return { el: h('div.disp-row', nm, v), nm, v }; });
+      L.clock = h('div.lg-clock'); L.clockTxt = h('b'); L.clockSub = h('span.mute'); L.clock.append(L.clockTxt, L.clockSub);
+      L.tmHd = h('div.lg-hd', 'Timers');
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(L.clock, L.none, L.inHd, h('div.lg-grid', L.i.map(c => c.el)), L.outHd, h('div.lg-grid', L.o.map(c => c.el)), L.tmHd, ...L.tm.map(t => t.el));
+      L.day = h('select', { 'aria-label': 'Weekday of the simulated clock', onchange: e => operate('Weekday', () => api.act(d.name, 'setDay', e.target.value)) },
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((t, i) => h('option', { value: i }, t)));
+      L.time = h('input', { type: 'time', 'aria-label': 'Time of day of the simulated clock', onchange: e => { const m = /^(\d\d):(\d\d)/.exec(e.target.value); if (m) operate('Time', () => api.act(d.name, 'setTime', +m[1] * 60 + +m[2])); } });
+      L.speed = h('select', { 'aria-label': 'Speed of the simulated clock', onchange: e => operate('Clock speed', () => api.act(d.name, 'speed', e.target.value)) },
+        [[1, 'Real time'], [60, '60 times faster'], [600, '600 times faster'], [3600, '3600 times faster']].map(([v, t]) => h('option', { value: v }, t)));
+      controls.append(
+        h('button.btn.primary', { type: 'button', onclick: () => openLogicEditor(d.name) }, icon('logic'), 'Open logic editor'),
+        h('div.lg-ctl', h('label', 'Clock', L.day, L.time, L.speed), h('div.btn-row', h('button.btn', { type: 'button', onclick: () => operate('PC clock', () => api.act(d.name, 'pcClock', 0)) }, 'PC clock'),
+          h('button.btn', { type: 'button', onclick: () => operate('Send time', () => api.act(d.name, 'sendTime', 0)) }, 'Send time now'))),
+        howTo('The logic is drawn in the logic editor (button above). Inputs, outputs and timers appear here when they are enabled in the ETS parameters. The clock runs on the PC clock; set another weekday or time, or run it faster, to test the timers. The time and date objects are sent as set in ETS (page "Date and time").'));
+      const sync = (el, val) => { if (document.activeElement !== el && el.value !== String(val)) el.value = val; };
+      face = (v, dev) => {
+        let any = false;
+        L.i.forEach((c, k) => { const n = k + 1, e = v['ie' + n] === true; c.el.hidden = !e; any = any || e; setCls(c.led, 'on', !!v['iv' + n]); setText(c.nm, v['in' + n] || ''); });
+        L.o.forEach((c, k) => { const n = k + 1, e = v['oe' + n] === true; c.el.hidden = !e; any = any || e; setCls(c.led, 'on', !!v['ov' + n]); setText(c.nm, v['on' + n] || ''); });
+        L.inHd.hidden = !L.i.some(c => !c.el.hidden); L.outHd.hidden = !L.o.some(c => !c.el.hidden); L.none.hidden = any;
+        let tms = 0;
+        L.tm.forEach((t, k) => { const n = k + 1, e = v['te' + n] === true; t.el.hidden = !e; if (e) tms++; setText(t.nm, v['tn' + n] || ''); setText(t.v, v['tv' + n] ? 'On' : 'Off'); });
+        L.tmHd.hidden = !tms;
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        setText(L.clockTxt, `${days[v.dow ?? 0]} ${v.date || ''} ${v.time || ''}`);
+        setText(L.clockSub, ' ' + (v.pcClock ? 'PC clock' : (v.speed > 1 ? 'simulated, ' + v.speed + '×' : 'simulated')));
+        sync(L.day, v.dow ?? 0); sync(L.speed, v.speed ?? 1);
+        if (document.activeElement !== L.time && v.time) { const hm = v.time.slice(0, 5); if (L.time.dataset.hm !== hm) { L.time.dataset.hm = hm; L.time.value = hm; } }
       };
       break;
     }

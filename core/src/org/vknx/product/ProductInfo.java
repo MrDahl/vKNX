@@ -27,6 +27,8 @@ public final class ProductInfo {
 					"CO₂, humidity, brightness, temperature, pressure and wind. Each value has its own object and send settings in ETS and can be disabled.")),
 			Map.entry("info-display", new Info("Info display, 5 screens", "Display", "display",
 					"Shows values it receives from the bus on up to five named screens with six rows each: on/off status, percent (dimming value, blind position), the active scene and the multisensor values. Which rows a screen shows is set in the ETS parameters; the screens can be paged on the card or with two group objects.")),
+			Map.entry("logic", new Info("Logic module and time master", "Logic", "logic",
+					"Sixteen 1 bit inputs and sixteen 1 bit outputs that you enable and name in ETS, wired together with gates, delays, a stairway timer and an impulse relay in the logic editor of the control panel. Also sends time and date and has eight weekday timers.")),
 			Map.entry("coupler", new Info("Coupler (line / area)", "Coupler", "router",
 					"One coupler for both roles: x.y.0 connects a line to its main line, x.0.0 connects a main line to the backbone. Routing and the filter table come from the ETS download; a missing download shows up as blocked telegrams.")));
 
