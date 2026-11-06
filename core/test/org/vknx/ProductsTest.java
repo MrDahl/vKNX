@@ -47,6 +47,16 @@ public final class ProductsTest {
 	static int ga(final int a, final int b, final int c) { return new GroupAddress(a, b, c).getRawAddress(); }
 
 	public static void main(final String[] args) throws Exception {
+		// ETS texts: the KNX schema limits many text attributes (enumeration texts in particular) to 50 characters; a longer one makes the import fail
+		final List<String> tooLong = new ArrayList<>();
+		for (final ProductDef p : Products.ALL.values()) {
+			final var m = java.util.regex.Pattern.compile("<(\\w+)\\s[^>]*?\\bText=\"([^\"]*)\"").matcher(org.vknx.tools.ProductXmlGenerator.generate(p));
+			while (m.find())
+				if (m.group(2).length() > 50)
+					tooLong.add(p.key() + " " + m.group(1) + ": " + m.group(2));
+		}
+		check("no ETS text (enumeration, parameter, object, block) is longer than 50 characters: " + tooLong, tooLong.isEmpty());
+
 		// the checked-in ETS product XML must be what the generator makes from the product definitions today
 		// (it was once forgotten after a product change: ETS then showed the old parameters)
 		final java.nio.file.Path prodDir = java.nio.file.Path.of("products");

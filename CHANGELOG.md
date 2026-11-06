@@ -8,7 +8,10 @@ The text under each version is also shown as the release notes on GitHub and in 
 ### Fixed
 - **The scenes of 0.9.0 were missing in ETS.** The ETS product files (`products/*.xml`, and the `.knxprod` made from them) were not generated again after the scenes were added, so they were still application version 3 without any scene parameters. They are regenerated now (application version 4). The release build now generates the product XML itself, and a test checks that the checked-in XML matches the product definitions, so this cannot happen again. **Create the `.knxprod` files again (`make-knxprod.ps1`), re-import them in ETS and update/download the devices.**
 
+- **The push buttons did not show up with scenes in ETS.** The ETS texts of the key option "Long press" (scene keys) were longer than the 50 characters ETS allows for such texts, so the push button and secure push button files could not be used. They are shorter now, and a test checks that no ETS text exceeds 50 characters.
+
 ### Added
+- **Slider push button: scene key.** A second key on the slider device (parameter *Scene key*, scene number 1-64, optional long press that stores the scene, own object 5 "Scene (call / store)"). The card shows a Scene button when it is enabled.
 - **Scene slots can "keep the current state".** In a scene slot of the switch actuator the output can be *Off*, *On* or *Keep the current state*; in the dimming actuator a slot sets a brightness (%) or *Keeps the current brightness* (for example scene 1 = 30 %, scene 6 = 100 %, scene 9 = keep). A store telegram replaces a "keep" slot by the stored value.
 
 ## [0.9.0] - 2026-11-05

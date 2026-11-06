@@ -283,8 +283,8 @@
               </ParameterType>
               <ParameterType Id="M-00FA_A-0A10-04-0000_PT-Key1SceneStore" Name="Key1SceneStore">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Does nothing (the scene is called at once when the key is pressed)" Value="0" Id="M-00FA_A-0A10-04-0000_PT-Key1SceneStore_EN-0" />
-                  <Enumeration Text="Stores the scene in the actuators (short press calls it)" Value="1" Id="M-00FA_A-0A10-04-0000_PT-Key1SceneStore_EN-1" />
+                  <Enumeration Text="Nothing (scene called when pressed)" Value="0" Id="M-00FA_A-0A10-04-0000_PT-Key1SceneStore_EN-0" />
+                  <Enumeration Text="Stores the scene (short press calls it)" Value="1" Id="M-00FA_A-0A10-04-0000_PT-Key1SceneStore_EN-1" />
                 </TypeRestriction>
               </ParameterType>
               <ParameterType Id="M-00FA_A-0A10-04-0000_PT-Key2Scene" Name="Key2Scene">
@@ -292,8 +292,8 @@
               </ParameterType>
               <ParameterType Id="M-00FA_A-0A10-04-0000_PT-Key2SceneStore" Name="Key2SceneStore">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Does nothing (the scene is called at once when the key is pressed)" Value="0" Id="M-00FA_A-0A10-04-0000_PT-Key2SceneStore_EN-0" />
-                  <Enumeration Text="Stores the scene in the actuators (short press calls it)" Value="1" Id="M-00FA_A-0A10-04-0000_PT-Key2SceneStore_EN-1" />
+                  <Enumeration Text="Nothing (scene called when pressed)" Value="0" Id="M-00FA_A-0A10-04-0000_PT-Key2SceneStore_EN-0" />
+                  <Enumeration Text="Stores the scene (short press calls it)" Value="1" Id="M-00FA_A-0A10-04-0000_PT-Key2SceneStore_EN-1" />
                 </TypeRestriction>
               </ParameterType>
               <ParameterType Id="M-00FA_A-0A10-04-0000_PT-Key3Scene" Name="Key3Scene">
@@ -301,8 +301,8 @@
               </ParameterType>
               <ParameterType Id="M-00FA_A-0A10-04-0000_PT-Key3SceneStore" Name="Key3SceneStore">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Does nothing (the scene is called at once when the key is pressed)" Value="0" Id="M-00FA_A-0A10-04-0000_PT-Key3SceneStore_EN-0" />
-                  <Enumeration Text="Stores the scene in the actuators (short press calls it)" Value="1" Id="M-00FA_A-0A10-04-0000_PT-Key3SceneStore_EN-1" />
+                  <Enumeration Text="Nothing (scene called when pressed)" Value="0" Id="M-00FA_A-0A10-04-0000_PT-Key3SceneStore_EN-0" />
+                  <Enumeration Text="Stores the scene (short press calls it)" Value="1" Id="M-00FA_A-0A10-04-0000_PT-Key3SceneStore_EN-1" />
                 </TypeRestriction>
               </ParameterType>
               <ParameterType Id="M-00FA_A-0A10-04-0000_PT-Key4Scene" Name="Key4Scene">
@@ -310,8 +310,8 @@
               </ParameterType>
               <ParameterType Id="M-00FA_A-0A10-04-0000_PT-Key4SceneStore" Name="Key4SceneStore">
                 <TypeRestriction Base="Value" SizeInBit="1">
-                  <Enumeration Text="Does nothing (the scene is called at once when the key is pressed)" Value="0" Id="M-00FA_A-0A10-04-0000_PT-Key4SceneStore_EN-0" />
-                  <Enumeration Text="Stores the scene in the actuators (short press calls it)" Value="1" Id="M-00FA_A-0A10-04-0000_PT-Key4SceneStore_EN-1" />
+                  <Enumeration Text="Nothing (scene called when pressed)" Value="0" Id="M-00FA_A-0A10-04-0000_PT-Key4SceneStore_EN-0" />
+                  <Enumeration Text="Stores the scene (short press calls it)" Value="1" Id="M-00FA_A-0A10-04-0000_PT-Key4SceneStore_EN-1" />
                 </TypeRestriction>
               </ParameterType>
             </ParameterTypes>

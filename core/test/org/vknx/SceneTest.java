@@ -174,6 +174,21 @@ public final class SceneTest {
 			Thread.sleep(300);
 			check("FollowStatus=No: the status is ignored", Boolean.FALSE.equals(slider.view().get("state")));
 
+			// ---- slider scene key: SceneEnable=Yes, scene 5, long press stores
+			check("slider scene key is off by default (old downloads show no scene key)", sl.param("SceneEnable") == 0 && Integer.valueOf(0).equals(slider.view().get("sceneKey")));
+			ets.downloadAll(new IndividualAddress(1, 1, 5), new int[] { gaScene.getRawAddress() }, new int[][] { { 1, 5 } }, flags(5, 5, FLAGS_SEND),
+					Products.PUSH_SLIDER.params("SceneEnable", 1, "Scene", 5, "SceneStore", 1));
+			check("slider reloaded with the scene key", await(() -> sl.applicationLoaded() && sl.param("SceneEnable") == 1));
+			check("slider card shows the scene key (scene 5)", Integer.valueOf(5).equals(slider.view().get("sceneKey")));
+			slider.act("down", 1);
+			Thread.sleep(150);
+			slider.act("up", 1); // released before the long-press time: call
+			check("slider short press calls scene 5 in the actuators", await(() -> String.valueOf(sa.behavior().view().get("scene")).startsWith("Scene 5 called")));
+			slider.act("down", 1); // held: stores
+			check("slider long press stores scene 5 in the actuators", await(() -> String.valueOf(sa.behavior().view().get("scene")).startsWith("Scene 5 stored")));
+			slider.act("up", 1);
+			check("the slider reports the last scene it sent", String.valueOf(slider.view().get("scene")).startsWith("Store scene 5"));
+
 			// ---- an application downloaded before version 4 (shorter parameter area) still works, scene slots read as unused
 			check("a shorter old parameter area reads the new parameters as defaults",
 					Products.SWITCH_ACTUATOR.param("Out1Scene1").read(new byte[161]) == 0);

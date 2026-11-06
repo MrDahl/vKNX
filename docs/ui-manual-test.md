@@ -59,3 +59,5 @@ Developer tests (in-process mini-ETS, `SceneTest`) cover call, store and learn o
 37. **Switch actuator card** with all 8 outputs enabled: nothing is cut off at the right edge, also in a narrow window.
 38. **Keep in a scene slot:** set a switch actuator slot to *Keep the current state* and a dimming actuator slot to *Keep the current brightness*; calling that scene must leave those outputs/channels as they are while other slots of the same scene number still change.
 39. **Check the application version in ETS** after the import (4) and that the key function **Scene** and the scene slots (Output n / Channel n pages) appear.
+
+40. **Slider push button:** switch *Scene key* to Yes in ETS, set scene number and link object 5; after the download the card shows a Scene button; a short press calls the scene, with *Long press = stores* a long press stores it.

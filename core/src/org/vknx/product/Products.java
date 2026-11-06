@@ -99,8 +99,8 @@ public final class Products {
 			params.add(ParamDef.number(id++, pre + "Scene", "Scene number (1-64)", b + 18, 8, 1, 1, 64)
 					.inGroup(page).showWhen(en, 1).showWhen(fn, 3));
 			params.add(new ParamDef(id++, pre + "SceneStore", "Long press", b + 19, 0, 1, 1, List.of(
-					new Choice(0, "Does nothing (the scene is called at once when the key is pressed)"),
-					new Choice(1, "Stores the scene in the actuators (short press calls it)")))
+					new Choice(0, "Nothing (scene called when pressed)"),
+					new Choice(1, "Stores the scene (short press calls it)")))
 					.inGroup(page).showWhen(en, 1).showWhen(fn, 3));
 			objs.add(new ObjDef(20 + k, pre + "Scene", t + "scene (call / store)", "Output", 8, "DPST-18-1", false, false, true, false)
 					.inGroup(page).showWhen(en, 1).showWhen(fn, 3));
@@ -158,17 +158,26 @@ public final class Products {
 
 	/** Push button with a slider: switch + 1-byte brightness value, with a switch status and a brightness status input. */
 	public static final ProductDef PUSH_SLIDER = new ProductDef(
-			"push-slider", 0x0A04, V, "vKNX Slider push 1-fold", "VKNXSL1", 0x0A04, 1,
+			"push-slider", 0x0A04, V, "vKNX Slider push 1-fold", "VKNXSL1", 0x0A04, 3,
 			List.of(
 				new ParamDef(1, "ButtonFunction", "Button function", 0, 0, 2, 0, BUTTON_FUNCTION),
 				new ParamDef(2, "SliderSend", "Slider sends", 0, 2, 1, 0, List.of(
 					new Choice(0, "Only when released"), new Choice(1, "Continuously while sliding"))),
-				new ParamDef(3, "FollowStatus", "Follow switch status object", 0, 3, 1, 1, NO_YES)),
+				new ParamDef(3, "FollowStatus", "Follow switch status object", 0, 3, 1, 1, NO_YES),
+				// scene button (added in application version 4): a second key on the device that sends a scene number
+				new ParamDef(4, "SceneEnable", "Scene key", 1, 0, 1, 0, NO_YES),
+				ParamDef.number(5, "Scene", "Scene number (1-64)", 2, 8, 1, 1, 64).showWhen("SceneEnable", 1),
+				new ParamDef(6, "SceneStore", "Long press", 1, 1, 1, 0, List.of(
+						new Choice(0, "Nothing (scene called when pressed)"),
+						new Choice(1, "Stores the scene (short press calls it)"))).showWhen("SceneEnable", 1),
+				new ParamDef(7, "SceneLongPress", "Long-press time", 1, 2, 2, 1, List.of(
+						new Choice(0, "0.4 s"), new Choice(1, "0.6 s"), new Choice(2, "1.0 s"))).showWhen("SceneEnable", 1).showWhen("SceneStore", 1)),
 			List.of(
 				new ObjDef(1, "Switch", "Switch", "Output", 1, "DPST-1-1", false, false, true, false),
 				new ObjDef(2, "Brightness", "Brightness (value)", "Output", 8, "DPST-5-1", false, false, true, false),
 				new ObjDef(3, "BrightnessStatus", "Brightness status", "Input", 8, "DPST-5-1", false, true, false, true),
-				new ObjDef(4, "SwitchStatus", "Switch status", "Input", 1, "DPST-1-1", false, true, false, true)));
+				new ObjDef(4, "SwitchStatus", "Switch status", "Input", 1, "DPST-1-1", false, true, false, true),
+				new ObjDef(5, "SceneKey", "Scene (call / store)", "Output", 8, "DPST-18-1", false, false, true, false).showWhen("SceneEnable", 1)));
 
 	// ------------------------------------------------------------------ dimming actuator (4 channels)
 

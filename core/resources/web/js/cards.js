@@ -117,8 +117,12 @@ export function createCard(d, handlers) {
       L.s.addEventListener('live', e => setText(L.v, e.detail + ' %'));
       state.append(L.v, h('div.hint', 'brightness value'));
       L.led = h('span.keyled');
-      controls.append(h('button.btn.primary.press-btn', { type: 'button', onclick: () => operate('Button press', () => api.act(d.name, 'press', 0)) }, L.led, icon('button'), 'Press (on/off)'), L.s);
-      face = v => { setCls(L.led, 'on', !!v.state); if (!L.s.busy()) { setText(L.v, (v.level ?? 0) + ' %'); if (+L.s.value !== v.level) L.s.value = v.level ?? 0; } };
+      L.scene = holdButton(d.name, 1, 'Scene', 'scene'); L.scene.hidden = true; L.sceneInfo = h('div.hint'); L.sceneInfo.hidden = true;
+      controls.append(h('button.btn.primary.press-btn', { type: 'button', onclick: () => operate('Button press', () => api.act(d.name, 'press', 0)) }, L.led, icon('button'), 'Press (on/off)'), L.s, L.scene, L.sceneInfo);
+      face = v => {
+        setCls(L.led, 'on', !!v.state);
+        const sk = v.sceneKey || 0; L.scene.hidden = !sk; L.sceneInfo.hidden = !sk;
+        if (sk) { setText(L.scene.lbl, 'Scene ' + sk); setText(L.sceneInfo, v.scene ? 'Last: ' + v.scene : 'Press for scene ' + sk + '; a long press stores it if ETS says so.'); } if (!L.s.busy()) { setText(L.v, (v.level ?? 0) + ' %'); if (+L.s.value !== v.level) L.s.value = v.level ?? 0; } };
       break;
     }
     case 'switch-actuator': {
