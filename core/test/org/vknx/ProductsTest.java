@@ -47,6 +47,21 @@ public final class ProductsTest {
 	static int ga(final int a, final int b, final int c) { return new GroupAddress(a, b, c).getRawAddress(); }
 
 	public static void main(final String[] args) throws Exception {
+		// the checked-in ETS product XML must be what the generator makes from the product definitions today
+		// (it was once forgotten after a product change: ETS then showed the old parameters)
+		final java.nio.file.Path prodDir = java.nio.file.Path.of("products");
+		if (Files.isDirectory(prodDir)) {
+			final List<String> stale = new ArrayList<>();
+			for (final ProductDef p : Products.ALL.values())
+				try {
+					final java.nio.file.Path f = prodDir.resolve("vknx-" + p.key() + ".xml");
+					if (!Files.exists(f) || !Files.readString(f).equals(org.vknx.tools.ProductXmlGenerator.generate(p)))
+						stale.add(p.key());
+				}
+				catch (final java.io.IOException e) { stale.add(p.key() + " (" + e.getMessage() + ")"); }
+			check("products/*.xml are up to date with Products.java (regenerate with tools/gen-products if not): stale = " + stale, stale.isEmpty());
+		}
+
 		final var dir = Files.createTempDirectory("vknx-products");
 		final List<String> trace = new ArrayList<>();
 		final VirtualDevice.Listener listener = (src, cat, text) -> {

@@ -139,8 +139,8 @@ public final class Products {
 			for (int s = 1; s <= SCENE_SLOTS; s++) {
 				final int at = g + 1 + (c - 1) * SCENE_SLOTS * 2 + (s - 1) * 2;
 				params.add(sceneNumber(id++, pre + "Scene" + s, s, at, page).showWhen(pre + "Enable", 1));
-				params.add(new ParamDef(id++, pre + "Scene" + s + "Value", "Scene " + s + ": output is", at + 1, 0, 1, 1, List.of(
-						new Choice(0, "Off"), new Choice(1, "On"))).inGroup(page).showWhen(pre + "Enable", 1));
+				params.add(new ParamDef(id++, pre + "Scene" + s + "Value", "Scene " + s + ": output is", at + 1, 0, 2, 1, List.of(
+						new Choice(0, "Off"), new Choice(1, "On"), new Choice(2, "Keep the current state"))).inGroup(page).showWhen(pre + "Enable", 1));
 			}
 		}
 		objs.add(new ObjDef(2 * n + 1, "Scene", "Scene (call / store)", "Input", 8, "DPST-18-1", false, true, false, false));
@@ -206,14 +206,16 @@ public final class Products {
 		for (int c = 1; c <= 4; c++) {
 			final String pre = "Ch" + c, page = "Channel " + c;
 			for (int s = 1; s <= SCENE_SLOTS; s++) {
-				final int at = g + (c - 1) * SCENE_SLOTS * 2 + (s - 1) * 2;
+				final int at = g + (c - 1) * SCENE_SLOTS * 3 + (s - 1) * 3;
 				params.add(sceneNumber(id++, pre + "Scene" + s, s, at, page).showWhen(pre + "Enable", 1));
-				params.add(ParamDef.number(id++, pre + "Scene" + s + "Value", "Scene " + s + ": brightness (%)", at + 1, 8, 100, 0, 100)
-						.inGroup(page).showWhen(pre + "Enable", 1));
+				params.add(new ParamDef(id++, pre + "Scene" + s + "Mode", "Scene " + s + ": brightness is", at + 1, 0, 1, 0, List.of(
+						new Choice(0, "Set to a value"), new Choice(1, "Keep the current brightness"))).inGroup(page).showWhen(pre + "Enable", 1));
+				params.add(ParamDef.number(id++, pre + "Scene" + s + "Value", "Scene " + s + ": brightness (%)", at + 2, 8, 100, 0, 100)
+						.inGroup(page).showWhen(pre + "Enable", 1).showWhen(pre + "Scene" + s + "Mode", 0));
 			}
 		}
 		objs.add(new ObjDef(21, "Scene", "Scene (call / store)", "Input", 8, "DPST-18-1", false, true, false, false));
-		return new ProductDef("dimmer", 0x0A05, V, "vKNX Dimming Actuator 4-fold", "VKNXDM4", 0x0A05, g + 4 * SCENE_SLOTS * 2, params, objs);
+		return new ProductDef("dimmer", 0x0A05, V, "vKNX Dimming Actuator 4-fold", "VKNXDM4", 0x0A05, g + 4 * SCENE_SLOTS * 3, params, objs);
 	}
 
 	public static final ProductDef DIMMER = dimmer();

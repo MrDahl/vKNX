@@ -71,7 +71,13 @@ public final class SwitchActuatorBehavior extends DeviceBehavior {
 				}
 				else {
 					final boolean before = closed(c);
-					obj[c] = dev.param(pre + "Value");
+					final int v = dev.param(pre + "Value");
+					if (v == 2) {
+						dev.log("relay", "output " + (c + 1) + " (" + dev.paramText("Out" + (c + 1) + "Name") + "): scene " + n + " (slot " + s + ") keeps the current state ("
+								+ (obj[c] == 1 ? "ON" : "OFF") + ")");
+						continue;
+					}
+					obj[c] = v;
 					dev.log("relay", "output " + (c + 1) + " (" + dev.paramText("Out" + (c + 1) + "Name") + "): scene " + n + " (slot " + s + ") -> "
 							+ (obj[c] == 1 ? "ON" : "OFF") + ", relay " + (closed(c) ? "closed" : "open"));
 					if (before != closed(c))

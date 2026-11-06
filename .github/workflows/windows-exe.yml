@@ -89,6 +89,9 @@ jobs:
       - name: Assemble app folder
         shell: pwsh
         run: |
+          # always ship product XML made from the very same product definitions as the simulator (never a stale checked-in copy)
+          java -p dist/mods -m org.vknx/org.vknx.tools.ProductXmlGenerator products
+          if ($LASTEXITCODE) { throw 'product XML generation failed' }
           Copy-Item products dist/app/products -Recurse
           New-Item -ItemType Directory -Force dist/app/icons | Out-Null
           Copy-Item launcher/penguin.ico, launcher/vknx-v.ico dist/app/icons/

@@ -70,8 +70,9 @@ public final class SceneTest {
 
 			// ---- downloads: key 1 of the push button calls scene 5 at once; two outputs, two channels use scene 5
 			final var saParams = Products.SWITCH_ACTUATOR.params("Out1Scene1", 5, "Out1Scene1Value", 1, "Out2Scene1", 5, "Out2Scene1Value", 0,
-					"Out3Scene2", 6, "Out3Scene2Value", 1);
-			final var dmParams = Products.DIMMER.params("Ch1Scene1", 5, "Ch1Scene1Value", 40, "Ch2Scene3", 5, "Ch2Scene3Value", 100, "Ch3Scene1", 6, "Ch3Scene1Value", 70);
+					"Out3Scene2", 6, "Out3Scene2Value", 1, "Out3Scene3", 8, "Out3Scene3Value", 2, "Out4Scene1", 8, "Out4Scene1Value", 1);
+			final var dmParams = Products.DIMMER.params("Ch1Scene1", 5, "Ch1Scene1Value", 40, "Ch2Scene3", 5, "Ch2Scene3Value", 100, "Ch3Scene1", 6, "Ch3Scene1Value", 70,
+					"Ch3Scene2", 8, "Ch3Scene2Mode", 1, "Ch3Scene2Value", 10, "Ch4Scene1", 8, "Ch4Scene1Value", 33);
 			ets.downloadAll(new IndividualAddress(1, 1, 1), new int[] { gaScene.getRawAddress() }, new int[][] { { 1, 21 } }, flags(24, 21, FLAGS_SEND),
 					Products.PUSH_BUTTON.params("Key1Function", 3, "Key1Scene", 5, "Key1SceneStore", 0));
 			ets.downloadAll(new IndividualAddress(1, 1, 3), new int[] { gaScene.getRawAddress(), gaOut1.getRawAddress() }, new int[][] { { 1, 17 }, { 2, 1 } },
@@ -99,6 +100,13 @@ public final class SceneTest {
 			etsLink.sendRequestWait(gaScene, Priority.LOW, write8(5)); // scene 6 (number - 1)
 			check("scene 6: output 3 on, output 1 unchanged", await(() -> sw.lampLit(3)) && sw.lampLit(1));
 			check("scene 6: dimmer channel 3 at 70 %", await(() -> dim.levelPct(2) == 70));
+
+			// ---- "keep the current state/brightness" in a slot: scene 8 leaves output 3 and channel 3 alone, but sets output 4 and channel 4
+			etsLink.sendRequestWait(gaScene, Priority.LOW, write8(7));
+			check("scene 8: output 4 on (slot says On)", await(() -> sw.lampLit(4)));
+			check("scene 8: output 3 keeps its state (slot says Keep)", sw.lampLit(3));
+			check("scene 8: channel 4 at 33 %", await(() -> dim.levelPct(3) == 33));
+			check("scene 8: channel 3 keeps 70 % (slot says Keep, the stored 10 % is ignored)", dim.levelPct(2) == 70);
 
 			// ---- a scene number nobody has changes nothing
 			etsLink.sendRequestWait(gaScene, Priority.LOW, write8(60));

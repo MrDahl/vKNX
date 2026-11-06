@@ -119,9 +119,12 @@ public final class DimmerBehavior extends DeviceBehavior {
 					continue;
 				hit++;
 				if (store) {
+					dev.setParam(pre + "Mode", 0);
 					dev.setParam(pre + "Value", levelPct(c));
 					dev.log("dimmer", who(c) + ": scene " + n + " stored in slot " + s + ": " + levelPct(c) + " % (replaces the ETS value until the next download)");
 				}
+				else if (dev.param(pre + "Mode") == 1)
+					dev.log("dimmer", who(c) + ": scene " + n + " (slot " + s + ") keeps the current brightness (" + levelPct(c) + " %)");
 				else {
 					stopRamp(c);
 					if (level[c] > 0)

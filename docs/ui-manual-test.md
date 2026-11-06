@@ -57,4 +57,5 @@ Developer tests (in-process mini-ETS, `SceneTest`) cover call, store and learn o
 35. **Secure variants:** the same with secure push button and secure switch actuator after commissioning with a FDSK (scene telegrams are then secure telegrams).
 36. **Slider push:** link the new switch status object to the group address of a switch actuator output: switching the output from another key must light the lamp on the Press button; *Follow switch status object = No* must ignore it.
 37. **Switch actuator card** with all 8 outputs enabled: nothing is cut off at the right edge, also in a narrow window.
-
+38. **Keep in a scene slot:** set a switch actuator slot to *Keep the current state* and a dimming actuator slot to *Keep the current brightness*; calling that scene must leave those outputs/channels as they are while other slots of the same scene number still change.
+39. **Check the application version in ETS** after the import (4) and that the key function **Scene** and the scene slots (Output n / Channel n pages) appear.
