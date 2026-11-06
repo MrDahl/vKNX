@@ -898,7 +898,39 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 							.append(pd.isText() ? paramText(pd.name()) : String.valueOf(param(pd.name())));
 			log("download", "application started; parameter memory " + HexFormat.of().formatHex(area) + " -> " + sb);
 			behavior.onApplicationLoaded();
+			readOnInit();
 		}
+	}
+
+	/**
+	 * Objects with the ETS flag "Read on init" ask the bus for their value when the application starts (a display that
+	 * would otherwise show nothing until the next change). One read per group address, spread out so it does not flood.
+	 */
+	private void readOnInit() {
+		final var t = tables;
+		final var done = new java.util.HashSet<GroupAddress>();
+		int n = 0;
+		for (int go = 1; go <= t.goConfig().length; go++) {
+			final int cfg = t.config(go);
+			if ((cfg & F_COMM) == 0 || (cfg & F_READ_ON_INIT) == 0)
+				continue;
+			final GroupAddress ga = t.sendAddress(go);
+			if (ga == null || !done.add(ga))
+				continue;
+			final int object = go;
+			later(() -> {
+				try {
+					base.getDeviceLink().sendRequest(ga, Priority.LOW, new byte[] { 0x00, 0x00 });
+					log("tx", "GroupValueRead " + address() + " -> " + ga + " (object " + object + " "
+							+ product.object(object).map(ObjDef::name).orElse("?") + ", read on init)");
+				}
+				catch (final KNXException ex) {
+					log("tx", "read on init failed: " + ex);
+				}
+			}, 1500L + 150L * n++, java.util.concurrent.TimeUnit.MILLISECONDS);
+		}
+		if (n > 0)
+			log("config", n + " object(s) with the flag \"read on init\": asking the bus for their values");
 	}
 
 	/** Timer thread shared by the behaviours (dimming ramps, blind travel, cyclic sending). */

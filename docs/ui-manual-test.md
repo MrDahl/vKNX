@@ -61,3 +61,7 @@ Developer tests (in-process mini-ETS, `SceneTest`) cover call, store and learn o
 39. **Check the application version in ETS** after the import (4) and that the key function **Scene** and the scene slots (Output n / Channel n pages) appear.
 
 40. **Slider push button:** switch *Scene key* to Yes in ETS, set scene number and link object 5; after the download the card shows a Scene button; a short press calls the scene, with *Long press = stores* a long press stores it.
+41. **Info display in ETS:** import `vknx-info-display.knxprod`, add the device, enable screens and set row types on the pages "Screen 1" ... "Screen 5"; for each row only the group object of the chosen type may appear (1 bit, 1 byte or 2 byte). Link rows to the status objects of an actuator, the multisensor and a scene group address, download.
+42. **Info display card:** the rows show the values (On/Off, %, Scene n, temperature ...); *Previous/Next* page through the enabled screens (disabled screens are skipped); a row without a value yet shows a dash; after a restart of vKNX the status rows fill in again by themselves (Read on init; the group address must be answered by a device that has the Read flag, e.g. the status objects of the actuators and the multisensor).
+43. **Info display paging over the bus:** link "Next screen" to a push button key (switch function) and press it: the card must show the next screen.
+

@@ -60,6 +60,7 @@ export function pointDefault(p) {
     case 'slider': return 'slider';
     case 'blind': return 'blind';
     case 'sensor': return SENSORS[p.sensor].icon;
+    case 'display': return 'display';
     default: return 'info';
   }
 }

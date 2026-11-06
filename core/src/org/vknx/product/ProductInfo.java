@@ -25,6 +25,8 @@ public final class ProductInfo {
 					"Four blinds with move up/down, stop and position status, separate travel times up and down. Each blind can be disabled and named.")),
 			Map.entry("multisensor", new Info("Multisensor", "Sensor", "temp",
 					"CO₂, humidity, brightness, temperature, pressure and wind. Each value has its own object and send settings in ETS and can be disabled.")),
+			Map.entry("info-display", new Info("Info display, 5 screens", "Display", "display",
+					"Shows values it receives from the bus on up to five named screens with six rows each: on/off status, percent (dimming value, blind position), the active scene and the multisensor values. Which rows a screen shows is set in the ETS parameters; the screens can be paged on the card or with two group objects.")),
 			Map.entry("coupler", new Info("Coupler (line / area)", "Coupler", "router",
 					"One coupler for both roles: x.y.0 connects a line to its main line, x.0.0 connects a main line to the backbone. Routing and the filter table come from the ETS download; a missing download shows up as blocked telegrams.")));
 

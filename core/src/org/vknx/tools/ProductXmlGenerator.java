@@ -128,7 +128,7 @@ public final class ProductXmlGenerator {
 					.append(o.etsObjectSize()).append("\" ReadFlag=\"").append(flag(o.read())).append("\" WriteFlag=\"")
 					.append(flag(o.write())).append("\" CommunicationFlag=\"Enabled\" TransmitFlag=\"")
 					.append(flag(o.transmit())).append("\" UpdateFlag=\"").append(flag(o.update()))
-					.append("\" ReadOnInitFlag=\"Disabled\" DatapointType=\"").append(o.dpt()).append("\" />\n");
+					.append("\" ReadOnInitFlag=\"").append(flag(o.readOnInit())).append("\" DatapointType=\"").append(o.dpt()).append("\" />\n");
 		x.append("            </ComObjectTable>\n");
 		x.append("            <ComObjectRefs>\n");
 		for (final ObjDef o : p.objects())

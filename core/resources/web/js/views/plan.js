@@ -155,6 +155,14 @@ export function createPlan() {
         body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
+      case 'display': {
+        const t = h('span.t');
+        const ib = h('span.mk-ico', icon('display'));
+        body.append(ib, t);
+        upd = q => { paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.text; };
+        body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        break;
+      }
       case 'sensor': {
         const t = h('span.t');
         const ib = h('span.mk-ico', icon(SENSORS[p.sensor].icon));

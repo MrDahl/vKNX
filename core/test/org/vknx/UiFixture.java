@@ -16,7 +16,7 @@ import io.calimero.process.ProcessCommunicatorImpl;
 /**
  * Test helper for UI screenshots: acts like ETS against a RUNNING vKNX (KNXnet/IP port, web port as arguments) and gives
  * every device an address and a download, then produces some bus traffic. Not a compatibility test.
- * Devices expected: Button1 Dimmer1 Switch1 Sensor1 Blind1 Slider1 (see tools/ui-test.sh).
+ * Devices expected: Button1 Dimmer1 Switch1 Sensor1 Blind1 Slider1 Display1 (info-display) (see tools/ui-test.sh).
  */
 public final class UiFixture {
 	static final int W = 0x04 | 0x10 | 0x03, SEND = 0x04 | 0x40 | 0x03, STATUS_OUT = 0x04 | 0x08 | 0x40 | 0x03, STATUS_IN = 0x04 | 0x10 | 0x80 | 0x03;
@@ -30,6 +30,13 @@ public final class UiFixture {
 
 	static int ga(final int a, final int b, final int c) { return new GroupAddress(a, b, c).getRawAddress(); }
 
+	private static int[] displayFlags(final int f) {
+		final var a = new int[2 + 5 * 6 * 4];
+		for (final int[] r : new int[][] { { 1, 1, 0 }, { 1, 2, 1 }, { 1, 3, 2 }, { 1, 4, 3 }, { 1, 5, 3 }, { 1, 6, 3 } })
+			a[org.vknx.product.Products.displayObject(r[0], r[1], r[2]) - 1] = f;
+		return a;
+	}
+
 	public static void main(final String[] args) throws Exception {
 		final int knxPort = Integer.parseInt(args[0]);
 		web = Integer.parseInt(args[1]);
@@ -38,7 +45,7 @@ public final class UiFixture {
 		try (var tunnel = KNXNetworkLinkIP.newTunnelingLink(new InetSocketAddress(host, 0), new InetSocketAddress(host, knxPort), false,
 				new TPSettings(new IndividualAddress(0)))) {
 			final var ets = new SelfTest.EtsLikeClient(tunnel);
-			final String[] names = { "Button1", "Dimmer1", "Switch1", "Sensor1", "Blind1", "Slider1" };
+			final String[] names = { "Button1", "Dimmer1", "Switch1", "Sensor1", "Blind1", "Slider1", "Display1" };
 			int h = 1;
 			final var addr = new java.util.HashMap<String, IndividualAddress>();
 			for (final String n : names) {
@@ -62,8 +69,19 @@ public final class UiFixture {
 			final int gMove = ga(3, 0, 1), gStop = ga(3, 0, 2), gPos = ga(3, 0, 3);
 			ets.downloadAll(addr.get("Blind1"), new int[] { gMove, gStop, gPos }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } },
 					new int[] { W, W, STATUS_OUT }, org.vknx.product.Products.BLIND_ACTUATOR.params("Ch1UpTime", 20, "Ch1DownTime", 20, "Ch3Enable", 0));
+			final int gScene = ga(5, 0, 1);
+			final int disp = STATUS_IN | 0x20;
+			ets.downloadAll(addr.get("Display1"), new int[] { gSwSt, gValSt, gScene, gTemp, gCo2, gLux },
+					new int[][] { { 1, org.vknx.product.Products.displayObject(1, 1, 0) }, { 2, org.vknx.product.Products.displayObject(1, 2, 1) },
+						{ 3, org.vknx.product.Products.displayObject(1, 3, 2) }, { 4, org.vknx.product.Products.displayObject(1, 4, 3) },
+						{ 5, org.vknx.product.Products.displayObject(1, 5, 3) }, { 6, org.vknx.product.Products.displayObject(1, 6, 3) } },
+					displayFlags(disp), org.vknx.product.Products.INFO_DISPLAY.params("S1Enable", 1, "S1Name", "Living room",
+						"S1R1Type", 1, "S1R1Label", "Light", "S1R2Type", 2, "S1R2Label", "Desk dimmer", "S1R3Type", 3, "S1R3Label", "Scene",
+						"S1R4Type", 4, "S1R4Label", "Temperature", "S1R5Type", 6, "S1R5Label", "CO2", "S1R6Type", 7, "S1R6Label", "Brightness",
+						"S2Enable", 1, "S2Name", "Spare", "S2R1Type", 1, "S2R1Label", "Light"));
 			final var pc = new ProcessCommunicatorImpl(tunnel);
 			System.out.println("fixture ready");
+			pc.write(new GroupAddress(gScene), 2, io.calimero.dptxlator.DPTXlator8BitUnsigned.DPT_VALUE_1_UCOUNT.getID());
 			// some traffic: switch lamps, dim, group read of unknown address
 			for (int i = 0; i < 4; i++) {
 				pc.write(new GroupAddress(gSw), i % 2 == 0);

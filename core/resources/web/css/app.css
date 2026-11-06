@@ -573,3 +573,13 @@ details.howto[open] > summary { margin-bottom: .25rem; }
   .tabs { padding: 0; }
 }
 .card, .card-state { min-width: 0; }
+
+/* info display card */
+.disp { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: .6rem .8rem; display: grid; gap: .25rem; }
+.disp-hd { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; padding-bottom: .3rem; margin-bottom: .1rem; border-bottom: 1px solid var(--border); }
+.disp-hd b { font-size: 1.05rem; }
+.disp-row { display: flex; justify-content: space-between; align-items: baseline; gap: .8rem; }
+.disp-row .l { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.disp-row .v { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.btn-row { display: flex; gap: .5rem; }
+.btn-row .btn { flex: 1; }

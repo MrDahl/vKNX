@@ -36,6 +36,7 @@ export function pointsOf(d) {
     case 'switch-actuator': for (let i = 1; i <= 8; i++) if (on(i)) add('l' + i, 'lamp', { on: (v.lamps || '')[i - 1] === '1', label: n + ' ' + (v['n' + i] || 'Output ' + i), name: v['n' + i] || 'Output ' + i }); break;
     case 'dimmer': for (let i = 1; i <= 4; i++) if (on(i)) add('d' + i, 'lamp', { on: (v['level' + i] ?? 0) > 0, pct: v['level' + i] ?? 0, label: n + ' ' + (v['n' + i] || 'Channel ' + i), name: v['n' + i] || 'Channel ' + i }); break;
     case 'blind-actuator': for (let i = 1; i <= 4; i++) if (on(i)) add('b' + i, 'blind', { pos: v['pos' + i] ?? 0, label: n + ' ' + (v['n' + i] || 'Blind ' + i), name: v['n' + i] || 'Blind ' + i }); break;
+    case 'info-display': add('scr', 'display', { name: 'Display', text: v.cur ? (v.name || 'Screen ' + v.cur) : 'No screen' }); break;
     case 'multisensor': SENSORS.forEach((s, i) => { if (v['e' + i] !== false) add('s' + i, 'sensor', { text: (v['s' + i] ?? '–') + ' ' + s.unit, label: n + ' ' + s.name, name: s.name, sensor: i }); }); break;
   }
   return P;

@@ -311,6 +311,73 @@ public final class Products {
 	/** Multisensor: six measurements, each with its own group object and its own ETS page (value or random range + interval). */
 	public static final ProductDef MULTISENSOR = multisensor();
 
+
+	// ------------------------------------------------------------------ info display
+
+	public static final int DISPLAY_SCREENS = 5, DISPLAY_ROWS = 6;
+	/** Parameter bytes per screen: enable(1) + name(16) + six rows of type(1) + label(12). */
+	public static final int DISPLAY_SCREEN_BYTES = 96, DISPLAY_ROW_BYTES = 13, DISPLAY_LABEL_CHARS = 12;
+	/** What a row shows. The value is the ETS parameter value; the unit is only for the text on the display. */
+	public record RowType(int value, String text, String unit, String dpt, int sizeBits, double scale) {}
+	public static final List<RowType> ROW_TYPES = List.of(
+		new RowType(1, "On / off status", "", "DPST-1-1", 1, 1),
+		new RowType(2, "Percent (brightness, blind position)", "%", "DPST-5-1", 8, 1),
+		new RowType(3, "Active scene (DPT 18.001)", "", "DPST-18-1", 8, 1),
+		new RowType(4, "Temperature", "°C", "DPT-9", 16, 1),
+		new RowType(5, "Humidity", "%", "DPT-9", 16, 1),
+		new RowType(6, "CO2", "ppm", "DPT-9", 16, 1),
+		new RowType(7, "Illuminance", "lux", "DPT-9", 16, 1),
+		new RowType(8, "Air pressure (value in Pa)", "hPa", "DPT-9", 16, 0.01),
+		new RowType(9, "Wind speed", "m/s", "DPT-9", 16, 1));
+
+	/** Object number of one row's object: {@code kind} 0 = 1 bit, 1 = percent, 2 = scene, 3 = 2-byte value. Objects 1 and 2 page through the screens. */
+	public static int displayObject(final int screen, final int row, final int kind) {
+		return 3 + ((screen - 1) * DISPLAY_ROWS + (row - 1)) * 4 + kind;
+	}
+
+	/**
+	 * Info display: up to five screens (named, each can be left out) with six rows each. A row has a label and a type
+	 * (on/off status, percent, scene or one of the multisensor values) and its own group object of the matching size.
+	 * It only listens; objects 1 and 2 (1 bit) switch to the next and previous screen.
+	 */
+	private static ProductDef infoDisplay() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		objs.add(new ObjDef(1, "NextScreen", "Next screen (1 = show)", "Input", 1, "DPST-1-1", false, true, false, false));
+		objs.add(new ObjDef(2, "PreviousScreen", "Previous screen (1 = show)", "Input", 1, "DPST-1-1", false, true, false, false));
+		final var choices = new ArrayList<Choice>();
+		choices.add(new Choice(0, "Not used"));
+		for (final var t : ROW_TYPES)
+			choices.add(new Choice(t.value(), t.text()));
+		for (int s = 1; s <= DISPLAY_SCREENS; s++) {
+			final String page = "Screen " + s, en = "S" + s + "Enable";
+			final int b = (s - 1) * DISPLAY_SCREEN_BYTES;
+			params.add(new ParamDef(id++, en, "Show this screen", b, 0, 1, s == 1 ? 1 : 0, NO_YES).inGroup(page));
+			params.add(ParamDef.text(id++, "S" + s + "Name", "Name of the screen", b + 1, 16, "Screen " + s).inGroup(page).showWhen(en, 1));
+			for (int r = 1; r <= DISPLAY_ROWS; r++) {
+				final String pre = "S" + s + "R" + r, ty = pre + "Type";
+				final int rb = b + 17 + (r - 1) * DISPLAY_ROW_BYTES;
+				params.add(new ParamDef(id++, ty, "Row " + r + " shows", rb, 0, 4, 0, choices).inGroup(page).showWhen(en, 1));
+				params.add(ParamDef.text(id++, pre + "Label", "Row " + r + " text", rb + 1, DISPLAY_LABEL_CHARS, "Value " + r)
+						.inGroup(page).showWhen(en, 1).showWhen(ty, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+				final String t = page + " row " + r + ": ";
+				objs.add(new ObjDef(displayObject(s, r, 0), pre + "Status", t + "on/off status", "Input", 1, "DPST-1-1", false, true, false, true)
+						.inGroup(page).showWhen(en, 1).showWhen(ty, 1).withReadOnInit());
+				objs.add(new ObjDef(displayObject(s, r, 1), pre + "Percent", t + "percent value", "Input", 8, "DPST-5-1", false, true, false, true)
+						.inGroup(page).showWhen(en, 1).showWhen(ty, 2).withReadOnInit());
+				objs.add(new ObjDef(displayObject(s, r, 2), pre + "Scene", t + "active scene", "Input", 8, "DPST-18-1", false, true, false, true)
+						.inGroup(page).showWhen(en, 1).showWhen(ty, 3));
+				objs.add(new ObjDef(displayObject(s, r, 3), pre + "Value", t + "measured value", "Input", 16, "DPT-9", false, true, false, true)
+						.inGroup(page).showWhen(en, 1).showWhen(ty, 4, 5, 6, 7, 8, 9).withReadOnInit());
+			}
+		}
+		return new ProductDef("info-display", 0x0A0A, V, "vKNX Info Display", "VKNXID1", 0x0A0A,
+				DISPLAY_SCREENS * DISPLAY_SCREEN_BYTES, params, objs);
+	}
+
+	public static final ProductDef INFO_DISPLAY = infoDisplay();
+
 	// ------------------------------------------------------------------ couplers
 
 	/**
@@ -325,7 +392,7 @@ public final class Products {
 	public static final Map<String, ProductDef> ALL;
 	static {
 		final var m = new java.util.LinkedHashMap<String, ProductDef>();
-		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, SECURE_PUSH_BUTTON, SECURE_SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, COUPLER))
+		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, SECURE_PUSH_BUTTON, SECURE_SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, INFO_DISPLAY, COUPLER))
 			m.put(p.key(), p);
 		ALL = java.util.Collections.unmodifiableMap(m);
 	}

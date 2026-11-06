@@ -177,6 +177,25 @@ export function createCard(d, handlers) {
       face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; paintIcon(L.sib[i], d.name + '|s' + i, s.icon); L.cellEl[i].hidden = v['e' + i] === false; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
       break;
     }
+    case 'info-display': {
+      L.hd = h('div.disp-hd'); L.name = h('b'); L.pos = h('span.mute');
+      L.hd.append(L.name, L.pos);
+      L.r = [1, 2, 3, 4, 5, 6].map(() => ({ row: h('div.disp-row'), l: h('span.l'), v: h('b.v') }));
+      L.r.forEach(r => r.row.append(r.l, r.v));
+      L.none = h('div.hint', 'No screen is enabled. Switch one on in the ETS parameters (page "Screen 1") and download.');
+      state.append(h('div.disp', L.hd, ...L.r.map(r => r.row), L.none));
+      L.prev = h('button.btn', { type: 'button', onclick: () => operate('Previous screen', () => api.act(d.name, 'prev', 0)) }, '‹ Previous');
+      L.next = h('button.btn', { type: 'button', onclick: () => operate('Next screen', () => api.act(d.name, 'next', 0)) }, 'Next ›');
+      controls.append(h('div.btn-row', L.prev, L.next),
+        howTo('The display only shows what it receives from the bus; the values cannot be changed here. Use the buttons, or the next/previous screen objects, to page through the screens. A row set to "Active scene" shows the scene number of the last scene call on its group address.'));
+      face = (v, dev) => {
+        const any = !!v.cur;
+        L.hd.hidden = !any; L.none.hidden = any; L.prev.disabled = L.next.disabled = !any || (v.count || 0) < 2;
+        setText(L.name, v.name || ('Screen ' + v.cur)); setText(L.pos, (v.count || 0) > 1 ? v.pos + ' / ' + v.count : '');
+        L.r.forEach((r, i) => { const n = i + 1, used = any && v['r' + n + 't'] > 0; r.row.hidden = !used; setText(r.l, v['r' + n + 'l'] || ''); setText(r.v, v['r' + n + 'v'] || '–'); });
+      };
+      break;
+    }
     case 'coupler': {
       L.rows = [['groupMainSub', 'Group, main → sub'], ['groupSubMain', 'Group, sub → main'],
         ['physMainSub', 'Individual, main → sub'], ['physSubMain', 'Individual, sub → main']].map(([k, t]) => ({ k, t, v: h('b') }));
