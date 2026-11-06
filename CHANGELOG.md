@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.9.1] - 2026-11-06
 
 ### Fixed
 - **The scenes of 0.9.0 were missing in ETS.** The ETS product files (`products/*.xml`, and the `.knxprod` made from them) were not generated again after the scenes were added, so they were still application version 3 without any scene parameters. They are regenerated now (application version 4). The release build now generates the product XML itself, and a test checks that the checked-in XML matches the product definitions, so this cannot happen again. **Create the `.knxprod` files again (`make-knxprod.ps1`), re-import them in ETS and update/download the devices.**
