@@ -1,0 +1,60 @@
+Nov 07, 2026 2:16:00 PM io.calimero.device.KnxDeviceServiceLogic setDeviceAddress
+INFO: set new device address 1.1.2 (old 15.15.255)
+Nov 07, 2026 2:16:05 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+Nov 07, 2026 2:16:05 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  only the device in programming mode answers; ETS-style address sequence works
+PASS  actuator took address 1.1.2
+PASS  push button kept factory address
+PASS  actuator left programming mode after the sequence (restart)
+Nov 07, 2026 2:16:16 PM io.calimero.device.KnxDeviceServiceLogic setDeviceAddress
+INFO: set new device address 1.1.1 (old 15.15.255)
+Nov 07, 2026 2:16:22 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+Nov 07, 2026 2:16:22 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  second address sequence on the button
+PASS  push button took address 1.1.1
+PASS  actuator address unchanged by second assignment
+Nov 07, 2026 2:16:28 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+PASS  device descriptor is 0x07B0 (System B)
+PASS  unprogrammed actuator ignores GroupValueWrite
+  (download to 1.1.2 retried after: 1.1.2 disconnected while awaiting ACK)
+Nov 07, 2026 2:16:31 PM io.calimero.device.ManagementServiceNotifier send
+WARNING: 1.1.2->0.2.255 A_Property.response 5b d6 01 05 10 01 00: 0.2.255 disconnected while awaiting ACK, destination 0.2.255 (TL 15.15.255) Destroyed
+Nov 07, 2026 2:16:46 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+Nov 07, 2026 2:16:55 PM io.calimero.device.ManagementServiceNotifier send
+WARNING: 1.1.1->0.2.255 A_Property.response 4f d6 04 07 10 01 00 00 10 00: 0.2.255 disconnected while awaiting ACK, destination 0.2.255 (TL 15.15.255) Destroyed
+Nov 07, 2026 2:16:55 PM io.calimero.device.KnxDeviceServiceLogic writeProperty
+WARNING: property 0|8 is read-only (write access to a read-only or write-protected property)
+Nov 07, 2026 2:17:00 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  actuator application loaded
+PASS  push button application loaded
+PASS  device reports the last ETS action as a finished full download
+PASS  address assignment was recorded as an ETS action before (and the download replaced it)
+PASS  button press switches lamp on (via bus, from 1.1.1)
+PASS  telegram on the bus came from 1.1.1 to 1/0/1
+PASS  second press (toggle; status followed) switches lamp off
+PASS  status telegram sent by actuator from 1.1.2 to 1/0/2
+Nov 07, 2026 2:17:06 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  inverted relay logic: ON telegram now opens the relay (lamp off)
+PASS  inverted relay logic: OFF telegram closes the relay (lamp on)
+Nov 07, 2026 2:17:13 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  old group address no longer reaches the actuator
+PASS  new group address now switches the actuator
+Nov 07, 2026 2:17:20 PM io.calimero.device.ManagementServiceNotifier linkClosed
+INFO: attached link was closed
+Nov 07, 2026 2:17:20 PM io.calimero.device.ManagementServiceNotifier linkClosed
+INFO: attached link was closed
+PASS  restart: individual addresses kept
+PASS  restart: applications still loaded
+PASS  restart: downloaded parameter kept (Out1Logic normal, status on)
+PASS  restart: downloaded association still drives the actuator
+ALL PASSED
+exit=0

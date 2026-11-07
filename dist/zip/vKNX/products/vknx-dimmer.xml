@@ -1,0 +1,1253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <Catalog>
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
+          <CatalogItem Id="M-00FA_H-2565-1_HP-0A05-04-0000_CI-VKNXDM4-1" Name="vKNX Dimming Actuator 4-fold" Number="1" ProductRefId="M-00FA_H-2565-1_P-VKNXDM4" Hardware2ProgramRefId="M-00FA_H-2565-1_HP-0A05-04-0000" DefaultLanguage="en-US" />
+        </CatalogSection>
+      </Catalog>
+      <ApplicationPrograms>
+        <ApplicationProgram Id="M-00FA_A-0A05-04-0000" ApplicationNumber="2565" ApplicationVersion="4" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Dimming Actuator 4-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2 3">
+          <Static>
+            <Code>
+              <RelativeSegment Id="M-00FA_A-0A05-04-0000_RS-04-00000" Name="Parameters" Offset="0" Size="128" LoadStateMachine="4" />
+            </Code>
+            <ParameterTypes>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Enable" Name="Ch1Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Name" Name="Ch1Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1DimTime" Name="Ch1DimTime">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="2 s" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1DimTime_EN-0" />
+                  <Enumeration Text="5 s" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1DimTime_EN-1" />
+                  <Enumeration Text="10 s" Value="2" Id="M-00FA_A-0A05-04-0000_PT-Ch1DimTime_EN-2" />
+                  <Enumeration Text="20 s" Value="3" Id="M-00FA_A-0A05-04-0000_PT-Ch1DimTime_EN-3" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1OnLevel" Name="Ch1OnLevel">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Last level" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1OnLevel_EN-0" />
+                  <Enumeration Text="100 %" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1OnLevel_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1StartupState" Name="Ch1StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A05-04-0000_PT-Ch1StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1SendStatus" Name="Ch1SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Enable" Name="Ch2Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Name" Name="Ch2Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2DimTime" Name="Ch2DimTime">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="2 s" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2DimTime_EN-0" />
+                  <Enumeration Text="5 s" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2DimTime_EN-1" />
+                  <Enumeration Text="10 s" Value="2" Id="M-00FA_A-0A05-04-0000_PT-Ch2DimTime_EN-2" />
+                  <Enumeration Text="20 s" Value="3" Id="M-00FA_A-0A05-04-0000_PT-Ch2DimTime_EN-3" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2OnLevel" Name="Ch2OnLevel">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Last level" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2OnLevel_EN-0" />
+                  <Enumeration Text="100 %" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2OnLevel_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2StartupState" Name="Ch2StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A05-04-0000_PT-Ch2StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2SendStatus" Name="Ch2SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Enable" Name="Ch3Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Name" Name="Ch3Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3DimTime" Name="Ch3DimTime">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="2 s" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3DimTime_EN-0" />
+                  <Enumeration Text="5 s" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3DimTime_EN-1" />
+                  <Enumeration Text="10 s" Value="2" Id="M-00FA_A-0A05-04-0000_PT-Ch3DimTime_EN-2" />
+                  <Enumeration Text="20 s" Value="3" Id="M-00FA_A-0A05-04-0000_PT-Ch3DimTime_EN-3" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3OnLevel" Name="Ch3OnLevel">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Last level" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3OnLevel_EN-0" />
+                  <Enumeration Text="100 %" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3OnLevel_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3StartupState" Name="Ch3StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A05-04-0000_PT-Ch3StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3SendStatus" Name="Ch3SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Enable" Name="Ch4Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Name" Name="Ch4Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4DimTime" Name="Ch4DimTime">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="2 s" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4DimTime_EN-0" />
+                  <Enumeration Text="5 s" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4DimTime_EN-1" />
+                  <Enumeration Text="10 s" Value="2" Id="M-00FA_A-0A05-04-0000_PT-Ch4DimTime_EN-2" />
+                  <Enumeration Text="20 s" Value="3" Id="M-00FA_A-0A05-04-0000_PT-Ch4DimTime_EN-3" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4OnLevel" Name="Ch4OnLevel">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Last level" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4OnLevel_EN-0" />
+                  <Enumeration Text="100 %" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4OnLevel_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4StartupState" Name="Ch4StartupState">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4StartupState_EN-0" />
+                  <Enumeration Text="On" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4StartupState_EN-1" />
+                  <Enumeration Text="Unchanged" Value="2" Id="M-00FA_A-0A05-04-0000_PT-Ch4StartupState_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4SendStatus" Name="Ch4SendStatus">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4SendStatus_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4SendStatus_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene1" Name="Ch1Scene1">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene1Mode" Name="Ch1Scene1Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene1Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene1Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene1Value" Name="Ch1Scene1Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene2" Name="Ch1Scene2">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene2Mode" Name="Ch1Scene2Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene2Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene2Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene2Value" Name="Ch1Scene2Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene3" Name="Ch1Scene3">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene3Mode" Name="Ch1Scene3Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene3Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene3Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene3Value" Name="Ch1Scene3Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene4" Name="Ch1Scene4">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene4Mode" Name="Ch1Scene4Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene4Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene4Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch1Scene4Value" Name="Ch1Scene4Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene1" Name="Ch2Scene1">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene1Mode" Name="Ch2Scene1Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene1Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene1Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene1Value" Name="Ch2Scene1Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene2" Name="Ch2Scene2">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene2Mode" Name="Ch2Scene2Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene2Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene2Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene2Value" Name="Ch2Scene2Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene3" Name="Ch2Scene3">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene3Mode" Name="Ch2Scene3Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene3Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene3Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene3Value" Name="Ch2Scene3Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene4" Name="Ch2Scene4">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene4Mode" Name="Ch2Scene4Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene4Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene4Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch2Scene4Value" Name="Ch2Scene4Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene1" Name="Ch3Scene1">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene1Mode" Name="Ch3Scene1Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene1Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene1Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene1Value" Name="Ch3Scene1Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene2" Name="Ch3Scene2">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene2Mode" Name="Ch3Scene2Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene2Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene2Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene2Value" Name="Ch3Scene2Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene3" Name="Ch3Scene3">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene3Mode" Name="Ch3Scene3Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene3Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene3Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene3Value" Name="Ch3Scene3Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene4" Name="Ch3Scene4">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene4Mode" Name="Ch3Scene4Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene4Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene4Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch3Scene4Value" Name="Ch3Scene4Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene1" Name="Ch4Scene1">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene1Mode" Name="Ch4Scene1Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene1Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene1Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene1Value" Name="Ch4Scene1Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene2" Name="Ch4Scene2">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene2Mode" Name="Ch4Scene2Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene2Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene2Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene2Value" Name="Ch4Scene2Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene3" Name="Ch4Scene3">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene3Mode" Name="Ch4Scene3Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene3Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene3Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene3Value" Name="Ch4Scene3Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene4" Name="Ch4Scene4">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="64" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene4Mode" Name="Ch4Scene4Mode">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Set to a value" Value="0" Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene4Mode_EN-0" />
+                  <Enumeration Text="Keep the current brightness" Value="1" Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene4Mode_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A05-04-0000_PT-Ch4Scene4Value" Name="Ch4Scene4Value">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="100" />
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-1" Name="Ch1Enable" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Enable" Text="Enable channel" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-2" Name="Ch1Name" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Name" Text="Name" Value="Channel 1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="2" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-3" Name="Ch1DimTime" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1DimTime" Text="Time 0-100 % for relative dimming" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="0" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-4" Name="Ch1OnLevel" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1OnLevel" Text="Level when switched on" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="0" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-5" Name="Ch1StartupState" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="0" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-6" Name="Ch1SendStatus" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1SendStatus" Text="Send status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="0" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-7" Name="Ch2Enable" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Enable" Text="Enable channel" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="20" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-8" Name="Ch2Name" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Name" Text="Name" Value="Channel 2">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="22" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-9" Name="Ch2DimTime" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2DimTime" Text="Time 0-100 % for relative dimming" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="20" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-10" Name="Ch2OnLevel" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2OnLevel" Text="Level when switched on" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="20" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-11" Name="Ch2StartupState" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="20" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-12" Name="Ch2SendStatus" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2SendStatus" Text="Send status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="20" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-13" Name="Ch3Enable" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Enable" Text="Enable channel" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="40" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-14" Name="Ch3Name" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Name" Text="Name" Value="Channel 3">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="42" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-15" Name="Ch3DimTime" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3DimTime" Text="Time 0-100 % for relative dimming" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="40" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-16" Name="Ch3OnLevel" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3OnLevel" Text="Level when switched on" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="40" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-17" Name="Ch3StartupState" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="40" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-18" Name="Ch3SendStatus" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3SendStatus" Text="Send status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="40" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-19" Name="Ch4Enable" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Enable" Text="Enable channel" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="60" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-20" Name="Ch4Name" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Name" Text="Name" Value="Channel 4">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="62" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-21" Name="Ch4DimTime" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4DimTime" Text="Time 0-100 % for relative dimming" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="60" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-22" Name="Ch4OnLevel" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4OnLevel" Text="Level when switched on" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="60" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-23" Name="Ch4StartupState" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4StartupState" Text="State after download/restart" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="60" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-24" Name="Ch4SendStatus" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4SendStatus" Text="Send status" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="60" BitOffset="6" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-25" Name="Ch1Scene1" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene1" Text="Scene 1: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="80" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-26" Name="Ch1Scene1Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene1Mode" Text="Scene 1: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="81" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-27" Name="Ch1Scene1Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene1Value" Text="Scene 1: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="82" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-28" Name="Ch1Scene2" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene2" Text="Scene 2: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="83" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-29" Name="Ch1Scene2Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene2Mode" Text="Scene 2: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="84" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-30" Name="Ch1Scene2Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene2Value" Text="Scene 2: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="85" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-31" Name="Ch1Scene3" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene3" Text="Scene 3: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="86" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-32" Name="Ch1Scene3Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene3Mode" Text="Scene 3: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="87" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-33" Name="Ch1Scene3Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene3Value" Text="Scene 3: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="88" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-34" Name="Ch1Scene4" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene4" Text="Scene 4: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="89" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-35" Name="Ch1Scene4Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene4Mode" Text="Scene 4: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="90" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-36" Name="Ch1Scene4Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch1Scene4Value" Text="Scene 4: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="91" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-37" Name="Ch2Scene1" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene1" Text="Scene 1: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="92" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-38" Name="Ch2Scene1Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene1Mode" Text="Scene 1: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="93" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-39" Name="Ch2Scene1Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene1Value" Text="Scene 1: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="94" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-40" Name="Ch2Scene2" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene2" Text="Scene 2: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="95" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-41" Name="Ch2Scene2Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene2Mode" Text="Scene 2: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="96" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-42" Name="Ch2Scene2Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene2Value" Text="Scene 2: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="97" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-43" Name="Ch2Scene3" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene3" Text="Scene 3: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="98" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-44" Name="Ch2Scene3Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene3Mode" Text="Scene 3: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="99" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-45" Name="Ch2Scene3Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene3Value" Text="Scene 3: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="100" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-46" Name="Ch2Scene4" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene4" Text="Scene 4: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="101" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-47" Name="Ch2Scene4Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene4Mode" Text="Scene 4: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="102" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-48" Name="Ch2Scene4Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch2Scene4Value" Text="Scene 4: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="103" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-49" Name="Ch3Scene1" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene1" Text="Scene 1: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="104" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-50" Name="Ch3Scene1Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene1Mode" Text="Scene 1: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="105" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-51" Name="Ch3Scene1Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene1Value" Text="Scene 1: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="106" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-52" Name="Ch3Scene2" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene2" Text="Scene 2: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="107" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-53" Name="Ch3Scene2Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene2Mode" Text="Scene 2: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="108" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-54" Name="Ch3Scene2Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene2Value" Text="Scene 2: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="109" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-55" Name="Ch3Scene3" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene3" Text="Scene 3: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="110" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-56" Name="Ch3Scene3Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene3Mode" Text="Scene 3: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="111" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-57" Name="Ch3Scene3Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene3Value" Text="Scene 3: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="112" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-58" Name="Ch3Scene4" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene4" Text="Scene 4: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="113" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-59" Name="Ch3Scene4Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene4Mode" Text="Scene 4: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="114" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-60" Name="Ch3Scene4Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch3Scene4Value" Text="Scene 4: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="115" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-61" Name="Ch4Scene1" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene1" Text="Scene 1: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="116" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-62" Name="Ch4Scene1Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene1Mode" Text="Scene 1: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="117" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-63" Name="Ch4Scene1Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene1Value" Text="Scene 1: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="118" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-64" Name="Ch4Scene2" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene2" Text="Scene 2: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="119" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-65" Name="Ch4Scene2Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene2Mode" Text="Scene 2: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="120" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-66" Name="Ch4Scene2Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene2Value" Text="Scene 2: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="121" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-67" Name="Ch4Scene3" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene3" Text="Scene 3: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="122" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-68" Name="Ch4Scene3Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene3Mode" Text="Scene 3: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="123" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-69" Name="Ch4Scene3Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene3Value" Text="Scene 3: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="124" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-70" Name="Ch4Scene4" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene4" Text="Scene 4: scene number (0 = not used, 1-64)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="125" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-71" Name="Ch4Scene4Mode" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene4Mode" Text="Scene 4: brightness is" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="126" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A05-04-0000_P-72" Name="Ch4Scene4Value" ParameterType="M-00FA_A-0A05-04-0000_PT-Ch4Scene4Value" Text="Scene 4: brightness (%)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A05-04-0000_RS-04-00000" Offset="127" BitOffset="0" />
+              </Parameter>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-1_R-1" RefId="M-00FA_A-0A05-04-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-2_R-2" RefId="M-00FA_A-0A05-04-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-3_R-3" RefId="M-00FA_A-0A05-04-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-4_R-4" RefId="M-00FA_A-0A05-04-0000_P-4" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-5_R-5" RefId="M-00FA_A-0A05-04-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-6_R-6" RefId="M-00FA_A-0A05-04-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-7_R-7" RefId="M-00FA_A-0A05-04-0000_P-7" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-8_R-8" RefId="M-00FA_A-0A05-04-0000_P-8" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-9_R-9" RefId="M-00FA_A-0A05-04-0000_P-9" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-10_R-10" RefId="M-00FA_A-0A05-04-0000_P-10" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-11_R-11" RefId="M-00FA_A-0A05-04-0000_P-11" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-12_R-12" RefId="M-00FA_A-0A05-04-0000_P-12" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-13_R-13" RefId="M-00FA_A-0A05-04-0000_P-13" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-14_R-14" RefId="M-00FA_A-0A05-04-0000_P-14" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-15_R-15" RefId="M-00FA_A-0A05-04-0000_P-15" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-16_R-16" RefId="M-00FA_A-0A05-04-0000_P-16" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-17_R-17" RefId="M-00FA_A-0A05-04-0000_P-17" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-18_R-18" RefId="M-00FA_A-0A05-04-0000_P-18" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-19_R-19" RefId="M-00FA_A-0A05-04-0000_P-19" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-20_R-20" RefId="M-00FA_A-0A05-04-0000_P-20" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-21_R-21" RefId="M-00FA_A-0A05-04-0000_P-21" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-22_R-22" RefId="M-00FA_A-0A05-04-0000_P-22" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-23_R-23" RefId="M-00FA_A-0A05-04-0000_P-23" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-24_R-24" RefId="M-00FA_A-0A05-04-0000_P-24" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-25_R-25" RefId="M-00FA_A-0A05-04-0000_P-25" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-26_R-26" RefId="M-00FA_A-0A05-04-0000_P-26" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-27_R-27" RefId="M-00FA_A-0A05-04-0000_P-27" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-28_R-28" RefId="M-00FA_A-0A05-04-0000_P-28" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-29_R-29" RefId="M-00FA_A-0A05-04-0000_P-29" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-30_R-30" RefId="M-00FA_A-0A05-04-0000_P-30" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-31_R-31" RefId="M-00FA_A-0A05-04-0000_P-31" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-32_R-32" RefId="M-00FA_A-0A05-04-0000_P-32" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-33_R-33" RefId="M-00FA_A-0A05-04-0000_P-33" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-34_R-34" RefId="M-00FA_A-0A05-04-0000_P-34" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-35_R-35" RefId="M-00FA_A-0A05-04-0000_P-35" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-36_R-36" RefId="M-00FA_A-0A05-04-0000_P-36" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-37_R-37" RefId="M-00FA_A-0A05-04-0000_P-37" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-38_R-38" RefId="M-00FA_A-0A05-04-0000_P-38" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-39_R-39" RefId="M-00FA_A-0A05-04-0000_P-39" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-40_R-40" RefId="M-00FA_A-0A05-04-0000_P-40" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-41_R-41" RefId="M-00FA_A-0A05-04-0000_P-41" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-42_R-42" RefId="M-00FA_A-0A05-04-0000_P-42" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-43_R-43" RefId="M-00FA_A-0A05-04-0000_P-43" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-44_R-44" RefId="M-00FA_A-0A05-04-0000_P-44" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-45_R-45" RefId="M-00FA_A-0A05-04-0000_P-45" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-46_R-46" RefId="M-00FA_A-0A05-04-0000_P-46" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-47_R-47" RefId="M-00FA_A-0A05-04-0000_P-47" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-48_R-48" RefId="M-00FA_A-0A05-04-0000_P-48" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-49_R-49" RefId="M-00FA_A-0A05-04-0000_P-49" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-50_R-50" RefId="M-00FA_A-0A05-04-0000_P-50" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-51_R-51" RefId="M-00FA_A-0A05-04-0000_P-51" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-52_R-52" RefId="M-00FA_A-0A05-04-0000_P-52" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-53_R-53" RefId="M-00FA_A-0A05-04-0000_P-53" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-54_R-54" RefId="M-00FA_A-0A05-04-0000_P-54" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-55_R-55" RefId="M-00FA_A-0A05-04-0000_P-55" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-56_R-56" RefId="M-00FA_A-0A05-04-0000_P-56" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-57_R-57" RefId="M-00FA_A-0A05-04-0000_P-57" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-58_R-58" RefId="M-00FA_A-0A05-04-0000_P-58" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-59_R-59" RefId="M-00FA_A-0A05-04-0000_P-59" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-60_R-60" RefId="M-00FA_A-0A05-04-0000_P-60" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-61_R-61" RefId="M-00FA_A-0A05-04-0000_P-61" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-62_R-62" RefId="M-00FA_A-0A05-04-0000_P-62" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-63_R-63" RefId="M-00FA_A-0A05-04-0000_P-63" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-64_R-64" RefId="M-00FA_A-0A05-04-0000_P-64" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-65_R-65" RefId="M-00FA_A-0A05-04-0000_P-65" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-66_R-66" RefId="M-00FA_A-0A05-04-0000_P-66" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-67_R-67" RefId="M-00FA_A-0A05-04-0000_P-67" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-68_R-68" RefId="M-00FA_A-0A05-04-0000_P-68" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-69_R-69" RefId="M-00FA_A-0A05-04-0000_P-69" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-70_R-70" RefId="M-00FA_A-0A05-04-0000_P-70" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-71_R-71" RefId="M-00FA_A-0A05-04-0000_P-71" />
+              <ParameterRef Id="M-00FA_A-0A05-04-0000_P-72_R-72" RefId="M-00FA_A-0A05-04-0000_P-72" />
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-1" Name="Ch1Switch" Text="Channel 1: switch" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-2" Name="Ch1RelativeDimming" Text="Channel 1: relative dimming (4 bit)" Number="2" FunctionText="Input" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-3" Name="Ch1BrightnessValue" Text="Channel 1: brightness (value)" Number="3" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-4" Name="Ch1SwitchStatus" Text="Channel 1: switch status" Number="4" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-5" Name="Ch1BrightnessStatus" Text="Channel 1: brightness status" Number="5" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-6" Name="Ch2Switch" Text="Channel 2: switch" Number="6" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-7" Name="Ch2RelativeDimming" Text="Channel 2: relative dimming (4 bit)" Number="7" FunctionText="Input" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-8" Name="Ch2BrightnessValue" Text="Channel 2: brightness (value)" Number="8" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-9" Name="Ch2SwitchStatus" Text="Channel 2: switch status" Number="9" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-10" Name="Ch2BrightnessStatus" Text="Channel 2: brightness status" Number="10" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-11" Name="Ch3Switch" Text="Channel 3: switch" Number="11" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-12" Name="Ch3RelativeDimming" Text="Channel 3: relative dimming (4 bit)" Number="12" FunctionText="Input" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-13" Name="Ch3BrightnessValue" Text="Channel 3: brightness (value)" Number="13" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-14" Name="Ch3SwitchStatus" Text="Channel 3: switch status" Number="14" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-15" Name="Ch3BrightnessStatus" Text="Channel 3: brightness status" Number="15" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-16" Name="Ch4Switch" Text="Channel 4: switch" Number="16" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-17" Name="Ch4RelativeDimming" Text="Channel 4: relative dimming (4 bit)" Number="17" FunctionText="Input" ObjectSize="4 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-3-7" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-18" Name="Ch4BrightnessValue" Text="Channel 4: brightness (value)" Number="18" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-19" Name="Ch4SwitchStatus" Text="Channel 4: switch status" Number="19" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-20" Name="Ch4BrightnessStatus" Text="Channel 4: brightness status" Number="20" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A05-04-0000_O-21" Name="Scene" Text="Scene (call / store)" Number="21" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-18-1" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-1_R-1" RefId="M-00FA_A-0A05-04-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-2_R-2" RefId="M-00FA_A-0A05-04-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-3_R-3" RefId="M-00FA_A-0A05-04-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-4_R-4" RefId="M-00FA_A-0A05-04-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-5_R-5" RefId="M-00FA_A-0A05-04-0000_O-5" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-6_R-6" RefId="M-00FA_A-0A05-04-0000_O-6" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-7_R-7" RefId="M-00FA_A-0A05-04-0000_O-7" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-8_R-8" RefId="M-00FA_A-0A05-04-0000_O-8" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-9_R-9" RefId="M-00FA_A-0A05-04-0000_O-9" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-10_R-10" RefId="M-00FA_A-0A05-04-0000_O-10" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-11_R-11" RefId="M-00FA_A-0A05-04-0000_O-11" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-12_R-12" RefId="M-00FA_A-0A05-04-0000_O-12" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-13_R-13" RefId="M-00FA_A-0A05-04-0000_O-13" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-14_R-14" RefId="M-00FA_A-0A05-04-0000_O-14" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-15_R-15" RefId="M-00FA_A-0A05-04-0000_O-15" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-16_R-16" RefId="M-00FA_A-0A05-04-0000_O-16" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-17_R-17" RefId="M-00FA_A-0A05-04-0000_O-17" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-18_R-18" RefId="M-00FA_A-0A05-04-0000_O-18" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-19_R-19" RefId="M-00FA_A-0A05-04-0000_O-19" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-20_R-20" RefId="M-00FA_A-0A05-04-0000_O-20" />
+              <ComObjectRef Id="M-00FA_A-0A05-04-0000_O-21_R-21" RefId="M-00FA_A-0A05-04-0000_O-21" />
+            </ComObjectRefs>
+            <AddressTable MaxEntries="255" />
+            <AssociationTable MaxEntries="255" />
+            <LoadProcedures>
+              <LoadProcedure MergeId="2">
+                <LdCtrlRelSegment LsmIdx="4" Size="128" Mode="1" Fill="0" AppliesTo="full" />
+                <LdCtrlRelSegment LsmIdx="4" Size="128" Mode="0" Fill="0" AppliesTo="par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="4">
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="128" Verify="true" AppliesTo="full,par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="7">
+                <LdCtrlLoadImageProp ObjIdx="1" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="2" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="3" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="4" PropId="27" />
+              </LoadProcedure>
+            </LoadProcedures>
+            <Options />
+          </Static>
+          <Dynamic>
+            <ChannelIndependentBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-04-0000_PB-1" Name="Channel1" Text="Channel 1">
+                <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-1_R-1" />
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-2_R-2" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-3_R-3" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-4_R-4" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-5_R-5" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-6_R-6" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-25_R-25" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-26_R-26" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-26_R-26">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-27_R-27" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-28_R-28" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-29_R-29" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-29_R-29">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-30_R-30" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-31_R-31" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-32_R-32" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-32_R-32">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-33_R-33" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-34_R-34" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-35_R-35" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-35_R-35">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-36_R-36" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-1_R-1" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-2_R-2" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-3_R-3" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-4_R-4" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-5_R-5" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-04-0000_PB-2" Name="Channel2" Text="Channel 2">
+                <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-7_R-7" />
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-8_R-8" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-9_R-9" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-10_R-10" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-11_R-11" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-12_R-12" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-37_R-37" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-38_R-38" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-38_R-38">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-39_R-39" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-40_R-40" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-41_R-41" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-41_R-41">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-42_R-42" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-43_R-43" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-44_R-44" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-44_R-44">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-45_R-45" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-46_R-46" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-47_R-47" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-47_R-47">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-48_R-48" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-6_R-6" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-7_R-7" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-8_R-8" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-9_R-9" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-10_R-10" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-04-0000_PB-3" Name="Channel3" Text="Channel 3">
+                <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-13_R-13" />
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-14_R-14" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-15_R-15" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-16_R-16" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-17_R-17" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-18_R-18" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-49_R-49" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-50_R-50" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-50_R-50">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-51_R-51" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-52_R-52" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-53_R-53" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-53_R-53">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-54_R-54" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-55_R-55" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-56_R-56" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-56_R-56">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-57_R-57" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-58_R-58" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-59_R-59" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-59_R-59">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-60_R-60" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-11_R-11" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-12_R-12" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-13_R-13" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-14_R-14" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-15_R-15" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-04-0000_PB-4" Name="Channel4" Text="Channel 4">
+                <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-19_R-19" />
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-20_R-20" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-21_R-21" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-22_R-22" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-23_R-23" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-24_R-24" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-61_R-61" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-62_R-62" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-62_R-62">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-63_R-63" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-64_R-64" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-65_R-65" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-65_R-65">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-66_R-66" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-67_R-67" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-68_R-68" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-68_R-68">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-69_R-69" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-70_R-70" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-71_R-71" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <choose ParamRefId="M-00FA_A-0A05-04-0000_P-71_R-71">
+                      <when test="0">
+                        <ParameterRefRef RefId="M-00FA_A-0A05-04-0000_P-72_R-72" />
+                      </when>
+                    </choose>
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-16_R-16" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-17_R-17" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-18_R-18" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-19_R-19" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A05-04-0000_P-19_R-19">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-20_R-20" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A05-04-0000_PB-5" Name="General" Text="General">
+                <ComObjectRefRef RefId="M-00FA_A-0A05-04-0000_O-21_R-21" />
+              </ParameterBlock>
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Hardware>
+        <Hardware Id="M-00FA_H-2565-1" Name="vKNX Dimming Actuator 4-fold" SerialNumber="2565" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+          <Products>
+            <Product Id="M-00FA_H-2565-1_P-VKNXDM4" Text="vKNX Dimming Actuator 4-fold" OrderNumber="VKNXDM4" IsRailMounted="false" DefaultLanguage="en-US">
+              <RegistrationInfo RegistrationStatus="Registered" />
+            </Product>
+          </Products>
+          <Hardware2Programs>
+            <Hardware2Program Id="M-00FA_H-2565-1_HP-0A05-04-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A05-04-0000" />
+              <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
+            </Hardware2Program>
+          </Hardware2Programs>
+        </Hardware>
+      </Hardware>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>
