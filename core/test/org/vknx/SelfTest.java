@@ -189,13 +189,19 @@ public final class SelfTest {
 
 		void downloadAll(final IndividualAddress dev, final int[] gas, final int[][] assoc, final int[] goFlags,
 				final byte[] app) throws Exception {
-			try {
-				downloadAllOnce(dev, gas, assoc, goFlags, app);
-			}
-			catch (final io.calimero.KNXException e) { // a download starts with UNLOAD, so repeating it is safe; ETS retries too
-				System.out.println("  (download to " + dev + " retried after: " + e.getMessage() + ")");
-				Thread.sleep(1000);
-				downloadAllOnce(dev, gas, assoc, goFlags, app);
+			// a download starts with UNLOAD, so repeating it is safe; ETS retries too. A busy machine can make the
+			// connection layer miss an acknowledgement (3 s), so up to three attempts are made.
+			for (int attempt = 1;; attempt++) {
+				try {
+					downloadAllOnce(dev, gas, assoc, goFlags, app);
+					return;
+				}
+				catch (final io.calimero.KNXException e) {
+					if (attempt >= 3)
+						throw e;
+					System.out.println("  (download to " + dev + " retried after: " + e.getMessage() + ")");
+					Thread.sleep(15000); // see CouplerTest.couplerDownload: the device may still wait for the lost acknowledgement
+				}
 			}
 		}
 

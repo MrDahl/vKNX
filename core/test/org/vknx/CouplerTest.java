@@ -27,16 +27,26 @@ import static org.vknx.SelfTest.check;
 public final class CouplerTest {
 	static final int SEND = SelfTest.FLAGS_SEND, W = SelfTest.FLAGS_RECEIVE;
 	static final int ROUTE = 1, BLOCK = 2, FILTER = 3;
+	/** The trace of the running test, so that a missing answer can print what happened just before it. */
+	static volatile java.util.List<String> traceRef;
 
 	static int routerIndex(final SelfTest.EtsLikeClient ets, final Destination d) throws Exception {
 		for (int i = 0; i < 20; i++) {
-			try {
-				final byte[] t = ets.mc.readProperty(d, i, 1, 1, 1);
-				if (t.length >= 2 && (((t[0] & 0xff) << 8) | (t[1] & 0xff)) == 6)
-					return i;
-			}
-			catch (final io.calimero.KNXException e) {
-				break;
+			for (int attempt = 1;; attempt++) {
+				try {
+					final byte[] t = ets.mc.readProperty(d, i, 1, 1, 1);
+					if (t.length >= 2 && (((t[0] & 0xff) << 8) | (t[1] & 0xff)) == 6)
+						return i;
+					break;
+				}
+				catch (final io.calimero.KNXTimeoutException e) { // no answer: ask again (a busy machine can lose an acknowledgement)
+					if (attempt >= 3)
+						throw new IllegalStateException("no answer from the device when looking for the router object", e);
+				}
+				catch (final io.calimero.KNXException e) { // negative answer: there is no such interface object
+					i = 20;
+					break;
+				}
 			}
 		}
 		throw new IllegalStateException("no router object found");
@@ -44,8 +54,29 @@ public final class CouplerTest {
 
 	static int cfg(final int mode) { return mode << 2 | mode | 0x10; }
 
-	/** The MV-0912 "load all" procedure: unload, load, properties 52-55, clear filter table, write it, load completed. */
+	/**
+	 * The MV-0912 "load all" procedure, repeated like ETS does when a telegram gets no answer (it starts with UNLOAD, so
+	 * repeating is safe): a busy machine can make the connection layer miss an acknowledgement.
+	 */
 	static void couplerDownload(final SelfTest.EtsLikeClient ets, final IndividualAddress addr, final int mainSub,
+			final int subMain, final Set<Integer> routedGroups, final boolean fullWrite) throws Exception {
+		for (int attempt = 1;; attempt++) {
+			try {
+				couplerDownloadOnce(ets, addr, mainSub, subMain, routedGroups, fullWrite);
+				return;
+			}
+			catch (final io.calimero.KNXException | IllegalStateException e) {
+				final boolean noAnswer = e instanceof io.calimero.KNXException || e.getCause() instanceof io.calimero.KNXException;
+				if (!noAnswer || attempt >= 3)
+					throw e;
+				System.out.println("  (coupler download to " + addr + " retried after: " + e.getMessage() + ")");
+				Thread.sleep(15000); // the device may still wait for the lost acknowledgement (two tries of 3 s plus the 6 s connection timeout) and would drop a new connection from the same address
+			}
+		}
+	}
+
+	/** The MV-0912 "load all" procedure: unload, load, properties 52-55, clear filter table, write it, load completed. */
+	private static void couplerDownloadOnce(final SelfTest.EtsLikeClient ets, final IndividualAddress addr, final int mainSub,
 			final int subMain, final Set<Integer> routedGroups, final boolean fullWrite) throws Exception {
 		final Destination d = ets.mc.createDestination(addr, true);
 		try {
@@ -72,7 +103,20 @@ public final class CouplerTest {
 						ets.mc.openRoutingTable(d);
 					opened = true;
 					final byte[] piece = java.util.Arrays.copyOfRange(table, off, off + n);
-					final byte[] back = ets.mc.writeRoutingTable(d, 0x200 + off, piece);
+					final long t0 = System.nanoTime();
+					final byte[] back;
+					try {
+						back = ets.mc.writeRoutingTable(d, 0x200 + off, piece);
+					}
+					catch (final io.calimero.KNXTimeoutException e) {
+						if (traceRef != null && System.getProperty("vknx.threads") != null)
+							synchronized (traceRef) {
+								System.out.println("---- last trace lines before the missing answer ----");
+								traceRef.stream().skip(Math.max(0, traceRef.size() - 25)).forEach(System.out::println);
+							}
+						throw new IllegalStateException("no answer to the filter table write at offset " + off + " after "
+								+ (System.nanoTime() - t0) / 1_000_000 + " ms (state " + d.getState() + ")", e);
+					}
 					if (!java.util.Arrays.equals(back, piece))
 						throw new IllegalStateException("filter table write not verified at " + off + ": sent " + java.util.HexFormat.of().formatHex(piece) + " got " + java.util.HexFormat.of().formatHex(back));
 				}
@@ -125,6 +169,7 @@ public final class CouplerTest {
 	public static void main(final String[] args) throws Exception {
 		final var dir = Files.createTempDirectory("vknx-coupler");
 		final List<String> trace = new ArrayList<>();
+		traceRef = trace;
 		final VirtualDevice.Listener listener = (src, cat, text) -> {
 			synchronized (trace) { trace.add(SelfTest.ms() + src.name() + " [" + cat + "] " + text); }
 		};
@@ -290,6 +335,16 @@ public final class CouplerTest {
 			net.topology().setEnabled(false);
 			press(pb, 1);
 			check("routing off (flat line): couplers have no effect", until(2000, () -> dim.levelPct() == 100));
+		}
+		catch (final Throwable t) { // an exception must count as a failure and still print the trace below
+			t.printStackTrace(System.out);
+			SelfTest.failed++;
+			if (System.getProperty("vknx.threads") != null)
+				Thread.getAllStackTraces().forEach((th, st) -> {
+					System.out.println("THREAD " + th.getName() + " " + th.getState());
+					for (int i = 0; i < Math.min(st.length, 12); i++)
+						System.out.println("    at " + st[i]);
+				});
 		}
 		finally {
 			if (SelfTest.failed > 0 || System.getProperty("vknx.trace") != null)

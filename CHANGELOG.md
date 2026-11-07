@@ -14,6 +14,10 @@ The text under each version is also shown as the release notes on GitHub and in 
   - **Eight weekday timers.** Each timer (ETS pages "Timer 1" ... "Timer 8") has a name, weekdays Monday-Sunday, a switch-on time and a switch-off time and its own 1 bit object. The timers follow the simulated clock, also when it runs faster.
 - Devices can send telegrams with more than 2 bytes of data and have a persistent user memory area (used for the circuit).
 
+### Fixed
+- **The device log of the secure devices could stay empty.** The messages of the secure layer (decrypt, MAC, sync) are forwarded to the device log through Java's logging system, which holds its loggers only weakly: after a garbage collection the forwarding could silently stop. It is held firmly now.
+- **Tests:** the download helpers of the self-tests (`SelfTest`, `CouplerTest`) repeat a download up to three times when an acknowledgement is lost, as ETS does, and wait long enough for the device to drop the old connection. `CouplerTest` failed now and then on a busy machine (24 of 24 runs pass with four test runs in parallel on two cores); an exception in it is counted as a failure and prints the telegram trace. The old failure of `SecureTest` was the same logging problem and did not appear again.
+
 ### Not tried in ETS yet
 - The product file `vknx-logic.knxprod` (32 input/output parameter pages, 8 timer pages, 3 and 8 byte time objects, *Read on init* on the inputs) has only been checked by our own tests (ETS-like client in the test suite); ETS itself has not imported it yet. Behaviour of the circuit, the time telegrams (decoded with Calimero) and the timers are covered by tests, the editor by a browser check.
 - This is not an ETS plug-in (like the ABB logic controller has): the editor lives in the vKNX window.

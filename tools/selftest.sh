@@ -5,5 +5,5 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 B=build
 T=${1:-SelfTest}
-java -p $B/core:$B/device:$B/server:$B/vknx --patch-module org.vknx=$B/test \
+java ${VKNX_JOPTS:-} -p $B/core:$B/device:$B/server:$B/vknx --patch-module org.vknx=$B/test \
   --add-modules org.vknx --add-reads org.vknx=ALL-UNNAMED -m org.vknx/org.vknx.$T

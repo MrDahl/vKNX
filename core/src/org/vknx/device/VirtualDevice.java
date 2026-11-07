@@ -302,6 +302,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	private static final java.util.Map<String, VirtualDevice> SECURE_DEVICES = new java.util.concurrent.ConcurrentHashMap<>();
 	private static volatile boolean secureLogInstalled;
+	private static final java.util.List<java.util.logging.Logger> SECURE_LOGGERS = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	private static synchronized void installSecureLogBridge() {
 		if (secureLogInstalled)
@@ -334,6 +335,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			final var l = java.util.logging.Logger.getLogger(n);
 			l.setLevel(java.util.logging.Level.FINE);
 			l.addHandler(handler);
+			// java.util.logging keeps loggers only weakly: without a strong reference a garbage collection can drop the
+			// logger together with its level and handler, and the secure log would silently stay empty
+			SECURE_LOGGERS.add(l);
 		}
 	}
 
