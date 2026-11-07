@@ -610,8 +610,9 @@ details.howto[open] > summary { margin-bottom: .25rem; }
 .disp-row { display: flex; justify-content: space-between; align-items: baseline; gap: .8rem; }
 .disp-row .l { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .disp-row .v { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.btn-row { display: flex; gap: .5rem; }
-.btn-row .btn { flex: 1; }
+.btn-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+.btn-row .btn { flex: 1 1 auto; }
+.btn-row .btn.icon { flex: none; }
 
 /* ---------- logic module card and logic editor ---------- */
 .lg-clock { display: flex; align-items: baseline; gap: .4rem; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
