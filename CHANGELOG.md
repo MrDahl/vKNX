@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.10.0] - 2026-11-07
 
 ### Added
 - **New product: Logic module and time master** (one combined device). 
