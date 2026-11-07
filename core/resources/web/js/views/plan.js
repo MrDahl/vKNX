@@ -46,8 +46,9 @@ export function createPlan() {
 
   // ----- canvas -----
   const img = h('img', { alt: 'Floor plan', draggable: false });
-  const emptyMsg = h('div', { style: 'text-align:center;padding:2rem' }, icon('plan'), h('div', { style: 'margin:.4rem 0' }, 'No floor plan image yet.'),
-    h('button.btn.primary', { onclick: () => file.click() }, icon('upload'), 'Upload floor plan image'), h('div.hint', { style: 'margin-top:.4rem' }, 'PNG, JPG, SVG, WebP or GIF, up to 12 MB.'));
+  const emptyMsg = h('div', { style: 'text-align:center;padding:2rem' }, icon('plan'), h('div', { style: 'margin:.4rem 0;font-weight:600' }, 'No floor plan image yet.'),
+    h('div', { style: 'max-width:26rem;margin:0 auto' }, 'To add one, switch to ', h('b', 'Edit plan'), ', open ', h('b', 'Plan settings'), ' at the top right and choose ', h('b', 'Upload plan image…'), '.'),
+    h('div.hint', { style: 'margin-top:.4rem' }, 'PNG, JPG, SVG, WebP or GIF, up to 12 MB.'));
   const layer = h('div.plan-layer');
   const canvas = h('div.plan-canvas.empty', emptyMsg, img, layer);
   img.hidden = true;
@@ -119,7 +120,7 @@ export function createPlan() {
         const ib = h('span.mk-ico', icon('lampOff')); const t = h('span.t');
         body.append(ib, t);
         upd = q => { setCls(el, 'on', q.on); paintIcon(ib, p.id, pointDefault(p), q.on); setText(t, q.pct != null && q.on ? q.pct + ' %' : ''); return q.on + ':' + q.pct + ':' + (S.icons[p.id]?.n || ''); };
-        body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
       case 'button': {
@@ -152,7 +153,7 @@ export function createPlan() {
         const w = h('i'); const t = h('span.t'); const win = h('div.mk-win', w); const ib = h('span.mk-ico', icon('blind'));
         body.append(win, ib, t);
         upd = q => { const own = hasCustomIcon(p.id); win.hidden = own; ib.hidden = !own; if (own) paintIcon(ib, p.id, pointDefault(p)); setStyle(w, 'height', q.pos + '%'); setText(t, q.pos + ' %'); body.title = 'Blind position: ' + q.pos + ' % closed'; return q.pos; };
-        body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
       case 'display': {
@@ -160,7 +161,7 @@ export function createPlan() {
         const ib = h('span.mk-ico', icon('display'));
         body.append(ib, t);
         upd = q => { paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.text; };
-        body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
       case 'logic': {
@@ -168,7 +169,7 @@ export function createPlan() {
         const ib = h('span.mk-ico', icon('logic'));
         body.append(ib, t);
         upd = q => { paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.text; };
-        body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
       case 'sensor': {
@@ -176,7 +177,7 @@ export function createPlan() {
         const ib = h('span.mk-ico', icon(SENSORS[p.sensor].icon));
         body.append(ib, t);
         upd = q => { paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.text; };
-        body.style.cursor = 'pointer'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
     }

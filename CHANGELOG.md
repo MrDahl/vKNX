@@ -3,6 +3,12 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [0.10.1] - 2026-11-07
+
+### Changed
+- **Empty floor plan:** the blue "Upload floor plan image" button is gone. It looked like the way to upload, but the upload lives in **Plan settings** (only visible in *Edit plan*). The empty plan now shows a text that explains this.
+- **Mouse pointers:** the app uses its own pointers (arrow, hand, grab, move, crosshair, resize, not allowed) with a dark fill and a white outline. The Windows system pointers could turn white without their outline inside the app window and then disappeared on the white background.
+
 ## [0.10.0] - 2026-11-07
 
 ### Added
