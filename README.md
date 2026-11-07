@@ -1,6 +1,6 @@
 # vKNX
 
-Open-source teaching simulator for KNX. Goal: students program **virtual devices from real ETS** (import the products, assign an individual address, set parameters and group addresses, press the programming button, download) without any physical KNX hardware – and then operate buttons, lamps, dimmers, blinds and sensors in a single control panel. Windows is the target platform; only our own generic teaching products are included.
+Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://www.marcdahl.dk). Goal: students program **virtual devices from real ETS** (import the products, assign an individual address, set parameters and group addresses, press the programming button, download) without any physical KNX hardware – and then operate buttons, lamps, dimmers, blinds and sensors in a single control panel. Windows is the target platform; only our own generic teaching products are included.
 
 > ## Status: prototype
 > Confirmed in ETS 6.4 by the project owner (older versions): connection, import, addressing and download for the former single-channel products. **The multi-channel products of 0.5.0 have not been tried in ETS yet.** The installer/auto-update has not been tried on real student PCs. See `docs/limitations.md`. Nothing may be described as "tested with ETS" before that test has been run.
@@ -45,13 +45,13 @@ vKNX uses a penguin as its program icon. The original blue "V" icon is built int
 |---|---|---|
 | **Java 21 (JDK)** | Programming language and runtime. Everything is built with plain `javac` – no Maven/Gradle (Maven Central is not needed) | GPLv2+CPE (OpenJDK) |
 | **[Calimero](https://github.com/calimero-project)** (`calimero-core`, `calimero-device`, `calimero-server`) | The KNX protocol in Java: telegrams, datapoint types, virtual devices with memory and tables (`calimero-device`), and the KNXnet/IP server that ETS sees as an IP interface (`calimero-server`). Fetched at build time at the pinned commits in `third_party/PINS.txt`, not copied into the repo. One small local patch (`third_party/patches/`) lets devices live on any area/line | GPLv2 + Classpath exception |
-| **vKNX code** (`core/`) | Product descriptions, device behaviour (buttons, actuators, dimmer, blinds, multisensor), ETS download handling, persistence, web panel and telegram monitor | MIT |
+| **vKNX code** (`core/`) | Product descriptions, device behaviour (buttons, actuators, dimmer, blinds, multisensor), ETS download handling, persistence, web panel and telegram monitor | Apache-2.0 |
 | **Web panel** (built-in HTTP server + plain HTML/JS) | Operating buttons, showing lamps/dimmers/blinds/sensors and the telegram monitor | part of vKNX |
 | **Product XML generator** (`ProductXmlGenerator`) | Writes the ETS product files (`products/*.xml`) from the same product definitions the simulator uses, so ETS parameters and simulator cannot drift apart | part of vKNX |
 | **[OpenKNXproducer](https://github.com/OpenKNX/OpenKNXproducer)** | Converts product XML to `.knxprod`, which ETS can import. Called through `tools/make-knxprod.ps1`. Needs ETS installed on the PC because it uses ETS's own signing DLLs | GPL-3.0 (used as an external tool, not bundled) |
 | **ETS 6 (KNX Association)** | Programs the virtual devices (group addresses, parameters, download) – exactly as in a real installation | commercial, not included |
 | **jpackage + GitHub Actions** | Builds the Windows application (Java runtime included), so nothing has to be installed to run the simulator | part of the build process |
-| **WebView2 launcher** (`launcher/`) | Small Windows program that shows the control panel in its own window and starts/stops the simulator in the background | MIT; uses Microsoft WebView2 |
+| **WebView2 launcher** (`launcher/`) | Small Windows program that shows the control panel in its own window and starts/stops the simulator in the background | Apache-2.0; uses Microsoft WebView2 |
 | **Inno Setup** | Builds the Windows installer | Inno Setup license (free) |
 | **[Material Design Icons](https://pictogrammers.com/library/mdi/)** | Icons in the control panel | Apache-2.0 |
 | **PowerShell scripts** (`tools/*.ps1`) | Start, build, self-test and conversion on Windows | part of vKNX |
@@ -73,4 +73,4 @@ vKNX uses a penguin as its program icon. The original blue "V" icon is built int
 | `docs/limitations.md` | Known limitations |
 
 ## License
-vKNX's own code is under the **MIT license** (`LICENSE`) – free to use, change and share, also commercially. Third-party components (Calimero, Java, OpenKNXproducer) have their own licenses, see `THIRD-PARTY-NOTICES.md`. KNX and ETS are registered trademarks of KNX Association; vKNX is independent and not certified.
+vKNX's own code is under the **Apache License 2.0** (`LICENSE`) – free to use, change and share, also commercially. If you distribute vKNX or a work based on it, you must keep the notice in `NOTICE`: **vKNX was developed by Marc Sonne Dahl (<https://www.marcdahl.dk>)**. Third-party components (Calimero, Java, OpenKNXproducer) have their own licenses, see `THIRD-PARTY-NOTICES.md`. KNX and ETS are registered trademarks of KNX Association; vKNX is independent and not certified.

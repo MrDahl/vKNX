@@ -20,6 +20,7 @@ BEGIN
       VALUE "CompanyName", "Marc Sonne Dahl"
       VALUE "FileDescription", "vKNX - virtual KNX installation for teaching"
       VALUE "FileVersion", VER_STRING
+      VALUE "LegalCopyright", "Copyright 2026 Marc Sonne Dahl (www.marcdahl.dk), Apache License 2.0"
       VALUE "InternalName", "vKNX"
       VALUE "OriginalFilename", "vKNX.exe"
       VALUE "ProductName", "vKNX"

@@ -3,6 +3,13 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [0.10.2] - 2026-11-07
+
+### Changed
+- **New license: Apache License 2.0** (before: MIT). vKNX stays free to use, change and sell, but whoever distributes vKNX or a work based on it must keep the notice in the new `NOTICE` file: *vKNX was developed by Marc Sonne Dahl (https://www.marcdahl.dk)*. `LICENSE` is the full Apache-2.0 text; `NOTICE` is shipped in the installer and the zip.
+- **Credit in the app:** Settings > About shows who developed vKNX, with a link to www.marcdahl.dk, and the license. The launcher program carries the copyright line too (file properties of `vKNX.exe`).
+- The releases 0.9.0 to 0.10.1 (MIT) were removed from the release page. Copies that were already downloaded and the earlier commits in the repository stay under the MIT license they were published under; from this release on, new versions are Apache-2.0 only. No functional change.
+
 ## [0.10.1] - 2026-11-07
 
 ### Changed

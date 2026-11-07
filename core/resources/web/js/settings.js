@@ -150,7 +150,7 @@ export function openSettings() {
       sec('Status', h('p.hint', { style: 'margin-top:0' }, 'Whether ETS or another IP client is connected, and when the last frame arrived.'), h('button.btn', { onclick: openConnection }, icon('info'), 'Show connection status'))]],
     ['simulation', 'Simulation', () => [sec('Lines and couplers', routing)]],
     ['maintenance', 'Maintenance', () => [dataSection()]],
-    ['about', 'About', () => [sec('About', h('div', 'Version ', h('b', S.state?.version || '?')), h('p.hint', { style: 'margin:.3rem 0 .6rem' }, 'vKNX is an open-source teaching simulator. The generated product files are not made or endorsed by the KNX Association.'), check, upd)]],
+    ['about', 'About', () => [sec('About', h('div', 'Version ', h('b', S.state?.version || '?')), h('p', { style: 'margin:.3rem 0' }, 'Developed by ', h('b', 'Marc Sonne Dahl'), ' · ', h('a', { href: 'https://www.marcdahl.dk', target: '_blank', rel: 'noopener' }, 'www.marcdahl.dk')), h('p.hint', { style: 'margin:.3rem 0' }, 'Open source under the Apache License 2.0 · ', h('a', { href: 'https://github.com/MrDahl/vKNX', target: '_blank', rel: 'noopener' }, 'github.com/MrDahl/vKNX')), h('p.hint', { style: 'margin:.3rem 0 .6rem' }, 'vKNX is an open-source teaching simulator. The generated product files are not made or endorsed by the KNX Association.'), check, upd)]],
   ];
   const bar = h('div.tabs', { role: 'tablist', 'aria-label': 'Settings sections', style: 'padding:0;margin:-.3rem 0 .9rem' });
   const pane = h('div', { role: 'tabpanel' });

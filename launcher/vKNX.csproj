@@ -12,6 +12,7 @@
     <Version>0.0.0</Version>
     <Product>vKNX</Product>
     <Company>Marc Sonne Dahl</Company>
+    <Copyright>Copyright 2026 Marc Sonne Dahl (www.marcdahl.dk), Apache License 2.0</Copyright>
     <Description>vKNX - virtual KNX installation for teaching</Description>
   </PropertyGroup>
   <ItemGroup>

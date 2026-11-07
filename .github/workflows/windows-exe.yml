@@ -97,7 +97,7 @@ jobs:
           Copy-Item launcher/penguin.ico, launcher/vknx-v.ico dist/app/icons/
           Copy-Item tools/make-knxprod.ps1 dist/app/
           Copy-Item docs dist/app/docs -Recurse
-          foreach ($f in 'README.md','CHANGELOG.md','LICENSE','THIRD-PARTY-NOTICES.md') { Copy-Item $f dist/app/ }
+          foreach ($f in 'README.md','CHANGELOG.md','LICENSE','NOTICE','THIRD-PARTY-NOTICES.md') { Copy-Item $f dist/app/ }
           Get-ChildItem dist/app | Select-Object Name | Format-Table | Out-String | Write-Host
 
       - name: Smoke test 1 - server starts, answers and shuts down (portable)

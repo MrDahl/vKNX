@@ -31,6 +31,9 @@ A browser cannot speak UDP/KNXnet/IP. UI = JDK `HttpServer` on `127.0.0.1` + sta
 ## D9. License (decided by the owner 2026-10-29)
 The owner wanted "as open source as possible": vKNX's own code is **MIT**. This is possible because Calimero has a Classpath exception (code that links to it may use another license). Calimero and Java remain GPLv2+CPE and are not copied into the repo; see `THIRD-PARTY-NOTICES.md`. OpenKNXproducer (GPL-3.0) is only used as an external tool. Zennio reference code must never be published. KNX Explorer code is not reused (only the owner's own non-commercial license applies there).
 
+## D9b. License changed to Apache-2.0 (decided by the owner 2026-11-07)
+The owner wants vKNX to stay free to use, change and sell, but wants the author named when others build on it. Apache-2.0 does that: it allows commercial use and changes, and section 4(d) requires derivative works to keep the attribution notices of the `NOTICE` file. The `NOTICE` names Marc Sonne Dahl and https://www.marcdahl.dk. Calimero's Classpath exception still allows this. The older releases (0.9.0-0.10.1, MIT) were taken down from the release page; copies that were already downloaded, and the earlier commits in the repository history, stay under the MIT license they were published under (a license that has been granted cannot be withdrawn). New releases are Apache-2.0 only.
+
 ## D10. English only (decided by the owner 2026-10-29)
 The application, the product catalogue (`.knxprod`), the documentation and the GitHub pages are English only, so that anyone can understand and extend the project. Product application versions were raised to 2 for this release.
 

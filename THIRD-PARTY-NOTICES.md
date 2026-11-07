@@ -1,6 +1,6 @@
 # Third-party components
 
-vKNX's own code is under MIT (see `LICENSE`). The following is not vKNX code and has its own licenses:
+vKNX's own code is under the Apache License 2.0 (see `LICENSE` and `NOTICE`; developed by Marc Sonne Dahl, https://www.marcdahl.dk). The following is not vKNX code and has its own licenses:
 
 | Component | License | How it is used |
 |---|---|---|

@@ -648,3 +648,7 @@ details.howto[open] > summary { margin-bottom: .25rem; }
 .lgx-wire.temp { stroke: var(--ok); stroke-dasharray: 6 5; }
 .lgx-wire-hit { fill: none; stroke: transparent; stroke-width: 16; cursor: var(--cur-pointer); }
 @media (max-width: 720px) { .lgx-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .lgx-side { max-height: 38vh; border-right: 0; border-bottom: 1px solid var(--border); } }
+
+/* links (About screen, hints): theme colour, readable in the dark theme too */
+a { color: var(--accent); }
+a:hover { color: var(--accent-hover); }
