@@ -1,5 +1,11 @@
 # vKNX
 
+<img src="assets/Pingi.svg" alt="vKNX Pingi Logo" width="170">
+
+<p align="left">
+  <img src="assets/marc_dahl_logo.svg" alt="Marc Sonne Dahl" width="200">
+</p>
+
 Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://www.marcdahl.dk). Goal: students program **virtual devices from real ETS** (import the products, assign an individual address, set parameters and group addresses, press the programming button, download) without any physical KNX hardware – and then operate buttons, lamps, dimmers, blinds and sensors in a single control panel. Windows is the target platform; only our own generic teaching products are included.
 
 > ## Status: prototype
@@ -74,3 +80,9 @@ vKNX uses a penguin as its program icon. The original blue "V" icon is built int
 
 ## License
 vKNX's own code is under the **Apache License 2.0** (`LICENSE`) – free to use, change and share, also commercially. If you distribute vKNX or a work based on it, you must keep the notice in `NOTICE`: **vKNX was developed by Marc Sonne Dahl (<https://www.marcdahl.dk>)**. Third-party components (Calimero, Java, OpenKNXproducer) have their own licenses, see `THIRD-PARTY-NOTICES.md`. KNX and ETS are registered trademarks of KNX Association; vKNX is independent and not certified.
+
+---
+
+<p align="center">
+  <img src="assets/made_in_dk.svg" alt="Made in Denmark" width="250">
+</p>
