@@ -29,6 +29,14 @@ public final class ProductInfo {
 					"Shows values it receives from the bus on up to five named screens with six rows each: on/off status, percent (dimming value, blind position), the active scene and the multisensor values. Which rows a screen shows is set in the ETS parameters; the screens can be paged on the card or with two group objects.")),
 			Map.entry("logic", new Info("Logic module and time master", "Logic", "logic",
 					"Sixteen 1 bit inputs and sixteen 1 bit outputs that you enable and name in ETS, wired together with gates, delays, a stairway timer and an impulse relay in the logic editor of the control panel. Also sends time and date and has eight weekday timers.")),
+			Map.entry("binary-input", new Info("Binary input, 4 inputs", "Input", "contact",
+					"Four inputs for potential-free contacts (push buttons, switches, window contacts). Each input switches, dims or controls blinds when its contact closes and opens, as set in ETS. Close the contacts on the card.")),
+			Map.entry("thermostat", new Info("Room thermostat", "Controller", "thermostat",
+					"Heating thermostat with a simulated room, four operating modes and setpoints, an optional window contact and a two-point or PI control value. Pair it with the heating actuator.")),
+			Map.entry("heating-actuator", new Info("Heating actuator, 6 valves", "Actuator", "radiator",
+					"Six outputs for thermal valve drives with on/off or continuous (PWM) control value, normally closed or open valves, valve status and monitoring of the control value with an emergency position.")),
+			Map.entry("weather-station", new Info("Weather station", "Sensor", "weather",
+					"Outdoor temperature, wind speed and brightness (fixed or random like the multisensor), a rain sensor and a wind alarm. Blind actuators retract awnings on the alarm objects.")),
 			Map.entry("coupler", new Info("Coupler (line / area)", "Coupler", "router",
 					"One coupler for both roles: x.y.0 connects a line to its main line, x.0.0 connects a main line to the backbone. Routing and the filter table come from the ETS download; a missing download shows up as blocked telegrams.")));
 

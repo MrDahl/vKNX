@@ -383,6 +383,21 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
   .conn .conn-text { display: none; }
   .btn .btn-text.opt { display: none; }
 }
+/* narrow windows: the three workspaces show only their icons (the name stays as tooltip and screen reader label), the version is hidden */
+@media (max-width: 600px) {
+  .topbar { min-width: 0; }
+  .nav { min-width: 0; }
+  .nav button { padding: 0 .7rem; }
+  .nav .nav-text { display: none; }
+  .version { display: none; }
+  .conn { padding: 0 .55rem; }
+}
+@media (max-width: 380px) {
+  .brand svg { width: 24px; height: 24px; }
+  .nav button { padding: 0 .5rem; }
+  .topbar { gap: .25rem; padding: 0 .35rem; }
+  .topbar .right { gap: .1rem; }
+}
 .back-only { display: none; }
 #app.stale .mk-body, #app.stale .bulb, #app.stale .meter, #app.stale .window, #app.stale .sens-grid, #app.stale .lamp-grid, #app.stale .blinds { opacity: .5; }
 
@@ -652,3 +667,17 @@ details.howto[open] > summary { margin-bottom: .25rem; }
 /* links (About screen, hints): theme colour, readable in the dark theme too */
 a { color: var(--accent); }
 a:hover { color: var(--accent-hover); }
+
+/* binary input, thermostat, heating actuator, weather station */
+.keytile .btn:not(.keycap) { margin-top: .3rem; width: 100%; font-size: .85rem; }
+.th-main { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+.th-ctl { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: .4rem; }
+.heatflag { display: inline-grid; place-items: center; color: var(--muted); }
+.heatflag .ic { width: 1.3rem; height: 1.3rem; }
+.heatflag.on { color: var(--danger, #c2410c); }
+.valve-cell { min-width: 0; display: grid; gap: .1rem; justify-items: center; text-align: center; padding: .4rem .3rem; border-radius: var(--radius); background: var(--surface-2); border: 1px solid var(--border); }
+.valve-cell b { font-size: .95rem; }
+.valve-cell .dslider { width: 100%; }
+.valve-cell .hint { font-size: .75rem; line-height: 1.2; }
+.sens.alarm .n { color: var(--danger, #c2410c); }
+.alarm-line { color: var(--danger, #c2410c); font-weight: 600; min-height: 1em; }

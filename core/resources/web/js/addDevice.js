@@ -4,7 +4,8 @@ import { S, emit, selectDevice, hooks } from './bus.js';
 import { modal, toast } from './dialogs.js';
 
 const PREFIX = { 'push-button': 'Button', 'secure-push-button': 'SecButton', 'secure-switch-actuator': 'SecSwitch', 'push-slider': 'Slider', 'switch-actuator': 'Switch', dimmer: 'Dimmer', 'blind-actuator': 'Blind',
-  multisensor: 'Sensor', 'info-display': 'Display', logic: 'Logic', coupler: 'Coupler' };
+  multisensor: 'Sensor', 'info-display': 'Display', logic: 'Logic', coupler: 'Coupler',
+  'binary-input': 'Input', thermostat: 'Thermostat', 'heating-actuator': 'Heating', 'weather-station': 'Weather' };
 const NAME_RE = /^[A-Za-z0-9_-]{1,20}$/;
 
 function suggest(key) {
@@ -14,7 +15,7 @@ function suggest(key) {
   return base;
 }
 
-const CATS = [['all', 'All'], ['Input', 'Inputs'], ['Actuator', 'Actuators'], ['Sensor', 'Sensors'], ['Display', 'Displays'], ['Logic', 'Logic and time'], ['Coupler', 'Couplers']];
+const CATS = [['all', 'All'], ['Input', 'Inputs'], ['Actuator', 'Actuators'], ['Sensor', 'Sensors'], ['Controller', 'Controllers'], ['Display', 'Displays'], ['Logic', 'Logic and time'], ['Coupler', 'Couplers']];
 const isSecure = p => p.key.startsWith('secure-');
 
 /**

@@ -164,8 +164,10 @@ export function createCard(d, handlers) {
       L.c = [1, 2, 3, 4].map(() => ({ w: h('i'), v: h('div.v'), dir: h('div.hint'), nm: h('div.hint'), ga: h('div.cga') }));
       const blinds = h('div.blinds');
       L.c.forEach(c => { c.box = h('div.blind', c.nm, h('div.window', c.w), c.v, c.dir, c.ga); blinds.append(c.box); });
-      state.append(blinds);
-      face = (v, dev) => L.c.forEach((c, i) => { const n = i + 1, p = v['pos' + n] ?? 0, dr = v['dir' + n] ?? 0; c.box.hidden = v['e' + n] === false; setCls(c.box, 'moving', dr !== 0); setCls(c.box, 'up', dr < 0); setText(c.ga, dev ? gaText(dev, range(3 * (n - 1) + 1, 3)) : ''); setText(c.nm, v['n' + n] || 'Blind ' + n); setStyle(c.w, 'height', p + '%'); setText(c.v, p + ' % closed'); setText(c.dir, dr > 0 ? '↓ moving down' : dr < 0 ? '↑ moving up' : 'stopped'); });
+      L.al = h('div.hint.alarm-line');
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(blinds, L.al);
+      face = (v, dev) => { const al = [v.windAlarm ? 'wind alarm' + (v.windSilent ? ' (station silent)' : '') : '', v.rainAlarm ? 'rain alarm' + (v.rainSilent ? ' (station silent)' : '') : ''].filter(Boolean); setText(L.al, al.length ? 'Active: ' + al.join(', ') : ''); L.c.forEach((c, i) => { const n = i + 1, p = v['pos' + n] ?? 0, dr = v['dir' + n] ?? 0; c.box.hidden = v['e' + n] === false; setCls(c.box, 'moving', dr !== 0); setCls(c.box, 'up', dr < 0); setText(c.ga, dev ? gaText(dev, range(3 * (n - 1) + 1, 3)) : ''); setText(c.nm, v['n' + n] || 'Blind ' + n); setStyle(c.w, 'height', p + '%'); setText(c.v, p + ' % closed'); setText(c.dir, (dr > 0 ? '↓ moving down' : dr < 0 ? '↑ moving up' : 'stopped') + (v['lock' + n] ? ' · locked by alarm' : '')); }); };
       break;
     }
     case 'multisensor': {
@@ -176,6 +178,83 @@ export function createCard(d, handlers) {
       state.append(grid);
       controls.append(howTo('The values are sent by the sensor according to its ETS parameters. They cannot be changed here.'));
       face = v => SENSORS.forEach((s, i) => { const el = L.n[i]; paintIcon(L.sib[i], d.name + '|s' + i, s.icon); L.cellEl[i].hidden = v['e' + i] === false; const val = v['s' + i]; const txt = val === undefined ? '–' : String(val); if (el.dataset.v !== txt) { el.dataset.v = txt; el.replaceChildren(txt + ' ', h('small', s.unit)); } });
+      break;
+    }
+    case 'binary-input': {
+      const pad = h('div.keypad');
+      L.k = [1, 2, 3, 4].map(i => ({ row: h('div.keytile'), btn: holdButton(d.name, i, 'Input ' + i, 'contact'), latch: h('button.btn', { type: 'button', 'aria-pressed': 'false', onclick: () => operate('Contact', () => api.act(d.name, 'toggle', i)) }, 'Close the contact'),
+        d: h('div.hint'), l: h('span.mono'), ga: h('div.cga') }));
+      L.k.forEach(k => { k.row.append(k.btn, k.latch, k.d, k.l, k.ga); pad.append(k.row); });
+      state.append(pad);
+      controls.append(howTo('Each input has two ways to operate its contact: hold the large button to close it while pressed (a push button), or use the small button below it to close and open it for good (a switch or window contact). The light on a button is on while the contact is closed. What the input sends when the contact closes or opens is set in ETS.'));
+      face = (v, dev) => L.k.forEach((k, i) => {
+        const n = i + 1, en = v['e' + n] !== false, cl = !!v['c' + n];
+        k.row.hidden = !en; setText(k.btn.lbl, v['n' + n] || 'Input ' + n); setText(k.d, v['d' + n] || '');
+        setText(k.l, (cl ? 'Contact closed' : 'Contact open') + (v['l' + n] ? ' · sent: ' + v['l' + n] : ''));
+        setCls(k.row, 'on', cl); setCls(k.btn.led, 'on', cl); setText(k.latch, cl ? 'Open the contact' : 'Close the contact'); setAttr(k.latch, 'aria-pressed', String(cl));
+        setText(k.ga, dev ? gaText(dev, range(4 * (n - 1) + 1, 4)) : '');
+      });
+      break;
+    }
+    case 'thermostat': {
+      L.t = h('div.value'); L.sp = h('div.hint'); L.mode = h('div.hint'); L.win = h('div.hint'); L.ga = h('div.cga');
+      L.fill = h('i.fill'); L.bar = h('div.dslider', { role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-label': 'Heating control value (display only)' }, L.fill);
+      L.heat = h('span.heatflag', icon('flame')); L.ctl = h('b');
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(h('div.th-main', L.t, L.sp), h('div.th-ctl', L.heat, L.ctl, L.bar), L.mode, L.win, L.ga);
+      L.modes = [['Comfort', 1], ['Standby', 2], ['Economy', 3], ['Protection', 4]].map(([t, m]) => h('button.btn', { type: 'button', 'aria-pressed': 'false', title: m === 4 ? 'Building protection' : t, onclick: () => operate('Operating mode', () => api.act(d.name, 'mode', m)) }, t));
+      L.down = h('button.btn.icon', { type: 'button', 'aria-label': 'Lower the setpoint by 0.5 K', title: 'Lower the setpoint by 0.5 K', onclick: () => operate('Setpoint', () => api.act(d.name, 'shift', -1)) }, icon('down'));
+      L.up = h('button.btn.icon', { type: 'button', 'aria-label': 'Raise the setpoint by 0.5 K', title: 'Raise the setpoint by 0.5 K', onclick: () => operate('Setpoint', () => api.act(d.name, 'shift', 1)) }, icon('up'));
+      controls.append(h('div.btn-row', ...L.modes), h('div.btn-row', h('span.hint', { style: 'align-self:center' }, 'Setpoint'), L.down, L.up),
+        howTo('The keys change the operating mode and shift the setpoint by 0.5 K (at most 3 K); the operating mode object does the same from the bus. The room temperature comes from the ETS settings: a simulated room that warms up while the heating is on, a fixed value or an external sensor. The control value goes to the heating actuator through a group address.'));
+      face = (v, dev) => {
+        setText(L.t, v.temp == null ? '– °C' : v.temp.toFixed(1) + ' °C');
+        setText(L.sp, v.sp == null ? '' : 'Setpoint ' + v.sp.toFixed(1) + ' °C' + (v.shift ? ' (shifted ' + (v.shift > 0 ? '+' : '') + v.shift.toFixed(1) + ' K)' : ''));
+        const names = ['', 'Comfort', 'Standby', 'Economy', 'Building protection'];
+        setText(L.mode, 'Operating mode: ' + (names[v.mode] || '–') + (v.win && v.winUsed ? ' (window open)' : ''));
+        L.modes.forEach((b, i) => setAttr(b, 'aria-pressed', String(v.local === i + 1)));
+        setText(L.win, v.winUsed ? 'Window: ' + (v.win ? 'open' : 'closed') : '');
+        L.win.hidden = !v.winUsed;
+        const c = v.ctrl ?? 0; setStyle(L.fill, 'width', c + '%'); setAttr(L.bar, 'aria-valuenow', c);
+        setText(L.ctl, v.pi ? c + ' %' : (c > 0 ? 'On' : 'Off')); setCls(L.heat, 'on', c > 0);
+        setText(L.ga, dev ? gaText(dev, [1, 2, 3, 4, 5, 6, 7, 8]) : '');
+      };
+      break;
+    }
+    case 'heating-actuator': {
+      L.c = range(1, 6).map(() => ({ cell: h('div.valve-cell'), nm: h('span.hint'), fl: h('span.heatflag', icon('radiator')), st: h('b'), fill: h('i.fill'), ex: h('div.hint'), ga: h('span.cga') }));
+      const grid = h('div.lamp-grid.dim-grid');
+      L.c.forEach(c => { c.trk = h('div.dslider', { role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-label': 'Control value (display only)' }, c.fill); c.cell.append(c.fl, c.nm, c.st, c.trk, c.ex, c.ga); grid.append(c.cell); });
+      L.fault = h('div.hint');
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(grid, L.fault);
+      controls.append(howTo('The bars show the control value each valve receives; the valve opens (on/off) or pulses open for that part of every cycle (PWM). A normally closed drive is energised to open, a normally open drive is energised to close. If the control value stops coming and monitoring is on in ETS, the valve goes to its emergency position and the alarm object is sent. These values cannot be changed here.'));
+      face = (v, dev) => {
+        let alarm = false;
+        L.c.forEach((c, i) => {
+          const n = i + 1, pct = v['pct' + n] ?? 0, open = !!v['open' + n];
+          c.cell.hidden = v['e' + n] === false; setText(c.nm, v['n' + n] || 'Valve ' + n);
+          setCls(c.fl, 'on', open); setText(c.st, open ? 'Open' : 'Closed'); setStyle(c.fill, 'width', pct + '%'); setAttr(c.trk, 'aria-valuenow', pct);
+          setText(c.ex, (v['pwm' + n] ? pct + ' % PWM' : pct > 0 ? 'On' : 'Off') + (v['nc' + n] === false ? ' · drive ' : ' · drive ') + (v['energised' + n] ? 'energised' : 'off') + (v['em' + n] ? ' · EMERGENCY POSITION' : ''));
+          setText(c.ga, dev ? gaText(dev, range(3 * (n - 1) + 1, 3)) : ''); alarm = alarm || !!v['em' + n];
+        });
+        setText(L.fault, alarm ? 'Alarm: control value missing (object 19 sent)' : '');
+      };
+      break;
+    }
+    case 'weather-station': {
+      const grid = h('div.sens-grid');
+      const mk = (ic, name) => { const n = h('span.n'); const sb = h('span.sb', icon(ic)); const el = h('div.sens', h('div.l', sb, name), n); grid.append(el); return { n, sb, el }; };
+      L.w = [['temp', 'Temperature', '°C'], ['wind', 'Wind speed', 'm/s'], ['lux', 'Brightness', 'lux']].map(([ic, nm, un]) => ({ ...mk(ic, nm), unit: un, ic }));
+      L.rain = mk('rain', 'Rain'); L.alarm = mk('wind', 'Wind alarm');
+      state.append(grid);
+      controls.append(howTo('The values are sent by the station according to its ETS parameters; they cannot be changed here. The wind alarm switches on when the wind speed reaches the threshold and off again below threshold minus hysteresis. Connect the alarm to the wind alarm input of a blind actuator and the awnings retract.'));
+      const put = (c, txt, unit) => { if (c.n.dataset.v !== txt) { c.n.dataset.v = txt; c.n.replaceChildren(txt, unit ? h('small', ' ' + unit) : ''); } };
+      face = v => {
+        L.w.forEach((c, i) => { paintIcon(c.sb, d.name + '|w' + i, c.ic); c.el.hidden = v['e' + i] === false; put(c, v['s' + i] === undefined ? '–' : String(v['s' + i]), c.unit); });
+        L.rain.el.hidden = v.rainE === false; put(L.rain, v.rain ? 'Rain' : 'Dry');
+        L.alarm.el.hidden = v.alarmE === false; put(L.alarm, v.alarm ? 'ALARM' : 'Off'); setCls(L.alarm.el, 'alarm', !!v.alarm); setCls(L.rain.el, 'alarm', !!v.rain);
+      };
       break;
     }
     case 'info-display': {
@@ -283,6 +362,7 @@ export function createCard(d, handlers) {
   function resetFace(dev) {
     // not programmed: show neutral placeholders instead of stale values
     face({ lamps: '0'.repeat(8) }, null);
+    if (dev.product === 'weather-station') L.w.forEach(c => { c.n.dataset.v = ''; c.n.textContent = '–'; });
     if (dev.product === 'multisensor') L.n.forEach(n => { n.dataset.v = ''; n.textContent = '–'; });
     if (dev.product === 'blind-actuator') L.c.forEach(c => setText(c.v, '–'));
   }

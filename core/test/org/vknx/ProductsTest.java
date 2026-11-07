@@ -262,13 +262,13 @@ public final class ProductsTest {
 			// ---------------- multisensor: temperature fixed 21.5 degC every 1 s, CO2 random 400..500 every 1 s
 			final int gTemp = ga(4, 0, 4), gCo2 = ga(4, 0, 7);
 			final byte[] msParams = Products.MULTISENSOR.params("CO2Mode", 1, "CO2Interval", 1, "CO2Min", 400, "CO2Max", 500,
-					"TemperatureMode", 0, "TemperatureInterval", 1, "TemperatureValue", 215, "WindSpeedEnable", 0);
+					"TemperatureMode", 0, "TemperatureInterval", 1, "TemperatureValue", 21, "TemperatureTenths", 5, "WindSpeedEnable", 0);
 			ets.downloadAll(ms.address(), new int[] { gTemp, gCo2 }, new int[][] { { 1, 4 }, { 2, 1 } },
 					new int[] { SEND, 0, 0, SEND, 0, 0 }, msParams);
 			check("multisensor application loaded with per-channel ETS parameters",
 					await(3000, ms::applicationLoaded) && ms.param("CO2Mode") == 1 && ms.param("CO2Min") == 400
 							&& ms.param("CO2Max") == 500 && ms.param("TemperatureInterval") == 1
-							&& ms.param("TemperatureValue") == 215);
+							&& ms.param("TemperatureValue") == 21 && ms.param("TemperatureTenths") == 5);
 			final var mb = (MultisensorBehavior) ms.behavior();
 			check("a disabled multisensor channel is reported as disabled", Boolean.FALSE.equals(mb.view().get("e5")) && Boolean.TRUE.equals(mb.view().get("e3")));
 			check("multisensor sends temperature 21.5 degC as DPT9 0x0C33 to 4/0/4", await(6000, () -> {

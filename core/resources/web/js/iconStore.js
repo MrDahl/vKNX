@@ -62,7 +62,9 @@ export function pointDefault(p) {
     case 'sensor': return SENSORS[p.sensor].icon;
     case 'display': return 'display';
     case 'logic': return 'logic';
+    case 'contact': return 'contact';
+    case 'info': return p.sym || 'info';
     default: return 'info';
   }
 }
-export const pointKind = p => ({ lamp: 'light', key: 'key', button: 'key', slider: 'slider', blind: 'blind', sensor: 'sensor' }[p.type] || 'device');
+export const pointKind = p => ({ lamp: 'light', key: 'key', button: 'key', contact: 'key', slider: 'slider', blind: 'blind', sensor: 'sensor' }[p.type] || 'device');

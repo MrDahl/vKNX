@@ -9,6 +9,9 @@ import org.vknx.product.ProductDef;
 public abstract class DeviceBehavior {
 	protected final VirtualDevice dev;
 
+	/** Simulated seconds per real second for the slow supervision times (minutes) of some products. Always 1 in the application; the tests run faster. */
+	public static volatile double timeScale = 1;
+
 	protected DeviceBehavior(final VirtualDevice dev) { this.dev = dev; }
 
 	static DeviceBehavior forProduct(final ProductDef p, final VirtualDevice dev) {
@@ -21,6 +24,10 @@ public abstract class DeviceBehavior {
 			case "multisensor" -> new MultisensorBehavior(dev);
 			case "info-display" -> new InfoDisplayBehavior(dev);
 			case "logic" -> new LogicBehavior(dev);
+			case "binary-input" -> new BinaryInputBehavior(dev);
+			case "thermostat" -> new ThermostatBehavior(dev);
+			case "heating-actuator" -> new HeatingActuatorBehavior(dev);
+			case "weather-station" -> new WeatherStationBehavior(dev);
 			case "coupler" -> new CouplerBehavior(dev);
 			default -> throw new IllegalArgumentException("no behaviour for product " + p.key());
 		};

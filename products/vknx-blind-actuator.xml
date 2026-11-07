@@ -11,7 +11,7 @@
         <ApplicationProgram Id="M-00FA_A-0A06-04-0000" ApplicationNumber="2566" ApplicationVersion="4" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Blind Actuator 4-fold" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2 3">
           <Static>
             <Code>
-              <RelativeSegment Id="M-00FA_A-0A06-04-0000_RS-04-00000" Name="Parameters" Offset="0" Size="81" LoadStateMachine="4" />
+              <RelativeSegment Id="M-00FA_A-0A06-04-0000_RS-04-00000" Name="Parameters" Offset="0" Size="87" LoadStateMachine="4" />
             </Code>
             <ParameterTypes>
               <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch1Enable" Name="Ch1Enable">
@@ -80,6 +80,82 @@
                   <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A06-04-0000_PT-SendPosition_EN-1" />
                 </TypeRestriction>
               </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-WindMonitor" Name="WindMonitor">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A06-04-0000_PT-WindMonitor_EN-0" />
+                  <Enumeration Text="5 minutes" Value="5" Id="M-00FA_A-0A06-04-0000_PT-WindMonitor_EN-5" />
+                  <Enumeration Text="10 minutes" Value="10" Id="M-00FA_A-0A06-04-0000_PT-WindMonitor_EN-10" />
+                  <Enumeration Text="15 minutes" Value="15" Id="M-00FA_A-0A06-04-0000_PT-WindMonitor_EN-15" />
+                  <Enumeration Text="30 minutes" Value="30" Id="M-00FA_A-0A06-04-0000_PT-WindMonitor_EN-30" />
+                  <Enumeration Text="60 minutes" Value="60" Id="M-00FA_A-0A06-04-0000_PT-WindMonitor_EN-60" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-RainMonitor" Name="RainMonitor">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Off" Value="0" Id="M-00FA_A-0A06-04-0000_PT-RainMonitor_EN-0" />
+                  <Enumeration Text="5 minutes" Value="5" Id="M-00FA_A-0A06-04-0000_PT-RainMonitor_EN-5" />
+                  <Enumeration Text="10 minutes" Value="10" Id="M-00FA_A-0A06-04-0000_PT-RainMonitor_EN-10" />
+                  <Enumeration Text="15 minutes" Value="15" Id="M-00FA_A-0A06-04-0000_PT-RainMonitor_EN-15" />
+                  <Enumeration Text="30 minutes" Value="30" Id="M-00FA_A-0A06-04-0000_PT-RainMonitor_EN-30" />
+                  <Enumeration Text="60 minutes" Value="60" Id="M-00FA_A-0A06-04-0000_PT-RainMonitor_EN-60" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch1WindReaction" Name="Ch1WindReaction">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Ignores the alarm" Value="0" Id="M-00FA_A-0A06-04-0000_PT-Ch1WindReaction_EN-0" />
+                  <Enumeration Text="Moves up (retracts)" Value="1" Id="M-00FA_A-0A06-04-0000_PT-Ch1WindReaction_EN-1" />
+                  <Enumeration Text="Moves down" Value="2" Id="M-00FA_A-0A06-04-0000_PT-Ch1WindReaction_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch1RainReaction" Name="Ch1RainReaction">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Ignores the alarm" Value="0" Id="M-00FA_A-0A06-04-0000_PT-Ch1RainReaction_EN-0" />
+                  <Enumeration Text="Moves up (retracts)" Value="1" Id="M-00FA_A-0A06-04-0000_PT-Ch1RainReaction_EN-1" />
+                  <Enumeration Text="Moves down" Value="2" Id="M-00FA_A-0A06-04-0000_PT-Ch1RainReaction_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch2WindReaction" Name="Ch2WindReaction">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Ignores the alarm" Value="0" Id="M-00FA_A-0A06-04-0000_PT-Ch2WindReaction_EN-0" />
+                  <Enumeration Text="Moves up (retracts)" Value="1" Id="M-00FA_A-0A06-04-0000_PT-Ch2WindReaction_EN-1" />
+                  <Enumeration Text="Moves down" Value="2" Id="M-00FA_A-0A06-04-0000_PT-Ch2WindReaction_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch2RainReaction" Name="Ch2RainReaction">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Ignores the alarm" Value="0" Id="M-00FA_A-0A06-04-0000_PT-Ch2RainReaction_EN-0" />
+                  <Enumeration Text="Moves up (retracts)" Value="1" Id="M-00FA_A-0A06-04-0000_PT-Ch2RainReaction_EN-1" />
+                  <Enumeration Text="Moves down" Value="2" Id="M-00FA_A-0A06-04-0000_PT-Ch2RainReaction_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch3WindReaction" Name="Ch3WindReaction">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Ignores the alarm" Value="0" Id="M-00FA_A-0A06-04-0000_PT-Ch3WindReaction_EN-0" />
+                  <Enumeration Text="Moves up (retracts)" Value="1" Id="M-00FA_A-0A06-04-0000_PT-Ch3WindReaction_EN-1" />
+                  <Enumeration Text="Moves down" Value="2" Id="M-00FA_A-0A06-04-0000_PT-Ch3WindReaction_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch3RainReaction" Name="Ch3RainReaction">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Ignores the alarm" Value="0" Id="M-00FA_A-0A06-04-0000_PT-Ch3RainReaction_EN-0" />
+                  <Enumeration Text="Moves up (retracts)" Value="1" Id="M-00FA_A-0A06-04-0000_PT-Ch3RainReaction_EN-1" />
+                  <Enumeration Text="Moves down" Value="2" Id="M-00FA_A-0A06-04-0000_PT-Ch3RainReaction_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch4WindReaction" Name="Ch4WindReaction">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Ignores the alarm" Value="0" Id="M-00FA_A-0A06-04-0000_PT-Ch4WindReaction_EN-0" />
+                  <Enumeration Text="Moves up (retracts)" Value="1" Id="M-00FA_A-0A06-04-0000_PT-Ch4WindReaction_EN-1" />
+                  <Enumeration Text="Moves down" Value="2" Id="M-00FA_A-0A06-04-0000_PT-Ch4WindReaction_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A06-04-0000_PT-Ch4RainReaction" Name="Ch4RainReaction">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Ignores the alarm" Value="0" Id="M-00FA_A-0A06-04-0000_PT-Ch4RainReaction_EN-0" />
+                  <Enumeration Text="Moves up (retracts)" Value="1" Id="M-00FA_A-0A06-04-0000_PT-Ch4RainReaction_EN-1" />
+                  <Enumeration Text="Moves down" Value="2" Id="M-00FA_A-0A06-04-0000_PT-Ch4RainReaction_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
             </ParameterTypes>
             <Parameters>
               <Parameter Id="M-00FA_A-0A06-04-0000_P-1" Name="Ch1Enable" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch1Enable" Text="Enable blind" Value="1">
@@ -133,6 +209,36 @@
               <Parameter Id="M-00FA_A-0A06-04-0000_P-17" Name="SendPosition" ParameterType="M-00FA_A-0A06-04-0000_PT-SendPosition" Text="Send position as status" Value="1">
                 <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="80" BitOffset="0" />
               </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-18" Name="WindMonitor" ParameterType="M-00FA_A-0A06-04-0000_PT-WindMonitor" Text="Monitor the wind alarm, timeout" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="81" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-19" Name="RainMonitor" ParameterType="M-00FA_A-0A06-04-0000_PT-RainMonitor" Text="Monitor the rain alarm, timeout" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="82" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-20" Name="Ch1WindReaction" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch1WindReaction" Text="Wind alarm: blind" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="83" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-21" Name="Ch1RainReaction" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch1RainReaction" Text="Rain alarm: blind" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="83" BitOffset="2" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-22" Name="Ch2WindReaction" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch2WindReaction" Text="Wind alarm: blind" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="84" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-23" Name="Ch2RainReaction" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch2RainReaction" Text="Rain alarm: blind" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="84" BitOffset="2" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-24" Name="Ch3WindReaction" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch3WindReaction" Text="Wind alarm: blind" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="85" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-25" Name="Ch3RainReaction" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch3RainReaction" Text="Rain alarm: blind" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="85" BitOffset="2" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-26" Name="Ch4WindReaction" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch4WindReaction" Text="Wind alarm: blind" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="86" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A06-04-0000_P-27" Name="Ch4RainReaction" ParameterType="M-00FA_A-0A06-04-0000_PT-Ch4RainReaction" Text="Rain alarm: blind" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A06-04-0000_RS-04-00000" Offset="86" BitOffset="2" />
+              </Parameter>
             </Parameters>
             <ParameterRefs>
               <ParameterRef Id="M-00FA_A-0A06-04-0000_P-1_R-1" RefId="M-00FA_A-0A06-04-0000_P-1" />
@@ -152,6 +258,16 @@
               <ParameterRef Id="M-00FA_A-0A06-04-0000_P-15_R-15" RefId="M-00FA_A-0A06-04-0000_P-15" />
               <ParameterRef Id="M-00FA_A-0A06-04-0000_P-16_R-16" RefId="M-00FA_A-0A06-04-0000_P-16" />
               <ParameterRef Id="M-00FA_A-0A06-04-0000_P-17_R-17" RefId="M-00FA_A-0A06-04-0000_P-17" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-18_R-18" RefId="M-00FA_A-0A06-04-0000_P-18" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-19_R-19" RefId="M-00FA_A-0A06-04-0000_P-19" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-20_R-20" RefId="M-00FA_A-0A06-04-0000_P-20" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-21_R-21" RefId="M-00FA_A-0A06-04-0000_P-21" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-22_R-22" RefId="M-00FA_A-0A06-04-0000_P-22" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-23_R-23" RefId="M-00FA_A-0A06-04-0000_P-23" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-24_R-24" RefId="M-00FA_A-0A06-04-0000_P-24" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-25_R-25" RefId="M-00FA_A-0A06-04-0000_P-25" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-26_R-26" RefId="M-00FA_A-0A06-04-0000_P-26" />
+              <ParameterRef Id="M-00FA_A-0A06-04-0000_P-27_R-27" RefId="M-00FA_A-0A06-04-0000_P-27" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="M-00FA_A-0A06-04-0000_O-1" Name="Ch1Move" Text="Blind 1: up/down" Number="1" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-8" />
@@ -166,6 +282,8 @@
               <ComObject Id="M-00FA_A-0A06-04-0000_O-10" Name="Ch4Move" Text="Blind 4: up/down" Number="10" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-8" />
               <ComObject Id="M-00FA_A-0A06-04-0000_O-11" Name="Ch4Stop" Text="Blind 4: stop" Number="11" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-7" />
               <ComObject Id="M-00FA_A-0A06-04-0000_O-12" Name="Ch4Position" Text="Blind 4: position status" Number="12" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+              <ComObject Id="M-00FA_A-0A06-04-0000_O-13" Name="WindAlarm" Text="Wind alarm (1 = alarm)" Number="13" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-5" />
+              <ComObject Id="M-00FA_A-0A06-04-0000_O-14" Name="RainAlarm" Text="Rain alarm (1 = alarm)" Number="14" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-5" />
             </ComObjectTable>
             <ComObjectRefs>
               <ComObjectRef Id="M-00FA_A-0A06-04-0000_O-1_R-1" RefId="M-00FA_A-0A06-04-0000_O-1" />
@@ -180,16 +298,18 @@
               <ComObjectRef Id="M-00FA_A-0A06-04-0000_O-10_R-10" RefId="M-00FA_A-0A06-04-0000_O-10" />
               <ComObjectRef Id="M-00FA_A-0A06-04-0000_O-11_R-11" RefId="M-00FA_A-0A06-04-0000_O-11" />
               <ComObjectRef Id="M-00FA_A-0A06-04-0000_O-12_R-12" RefId="M-00FA_A-0A06-04-0000_O-12" />
+              <ComObjectRef Id="M-00FA_A-0A06-04-0000_O-13_R-13" RefId="M-00FA_A-0A06-04-0000_O-13" />
+              <ComObjectRef Id="M-00FA_A-0A06-04-0000_O-14_R-14" RefId="M-00FA_A-0A06-04-0000_O-14" />
             </ComObjectRefs>
             <AddressTable MaxEntries="255" />
             <AssociationTable MaxEntries="255" />
             <LoadProcedures>
               <LoadProcedure MergeId="2">
-                <LdCtrlRelSegment LsmIdx="4" Size="81" Mode="1" Fill="0" AppliesTo="full" />
-                <LdCtrlRelSegment LsmIdx="4" Size="81" Mode="0" Fill="0" AppliesTo="par" />
+                <LdCtrlRelSegment LsmIdx="4" Size="87" Mode="1" Fill="0" AppliesTo="full" />
+                <LdCtrlRelSegment LsmIdx="4" Size="87" Mode="0" Fill="0" AppliesTo="par" />
               </LoadProcedure>
               <LoadProcedure MergeId="4">
-                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="81" Verify="true" AppliesTo="full,par" />
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="87" Verify="true" AppliesTo="full,par" />
               </LoadProcedure>
               <LoadProcedure MergeId="7">
                 <LdCtrlLoadImageProp ObjIdx="1" PropId="27" />
@@ -217,6 +337,16 @@
                 <choose ParamRefId="M-00FA_A-0A06-04-0000_P-1_R-1">
                   <when test="1">
                     <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-4_R-4" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A06-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-20_R-20" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A06-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-21_R-21" />
                   </when>
                 </choose>
                 <choose ParamRefId="M-00FA_A-0A06-04-0000_P-1_R-1">
@@ -254,6 +384,16 @@
                 </choose>
                 <choose ParamRefId="M-00FA_A-0A06-04-0000_P-5_R-5">
                   <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-22_R-22" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A06-04-0000_P-5_R-5">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-23_R-23" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A06-04-0000_P-5_R-5">
+                  <when test="1">
                     <ComObjectRefRef RefId="M-00FA_A-0A06-04-0000_O-4_R-4" />
                   </when>
                 </choose>
@@ -283,6 +423,16 @@
                 <choose ParamRefId="M-00FA_A-0A06-04-0000_P-9_R-9">
                   <when test="1">
                     <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-12_R-12" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A06-04-0000_P-9_R-9">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-24_R-24" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A06-04-0000_P-9_R-9">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-25_R-25" />
                   </when>
                 </choose>
                 <choose ParamRefId="M-00FA_A-0A06-04-0000_P-9_R-9">
@@ -320,6 +470,16 @@
                 </choose>
                 <choose ParamRefId="M-00FA_A-0A06-04-0000_P-13_R-13">
                   <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-26_R-26" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A06-04-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-27_R-27" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A06-04-0000_P-13_R-13">
+                  <when test="1">
                     <ComObjectRefRef RefId="M-00FA_A-0A06-04-0000_O-10_R-10" />
                   </when>
                 </choose>
@@ -336,6 +496,12 @@
               </ParameterBlock>
               <ParameterBlock Id="M-00FA_A-0A06-04-0000_PB-5" Name="General" Text="General">
                 <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-17_R-17" />
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A06-04-0000_PB-6" Name="Weatheralarms" Text="Weather alarms">
+                <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-18_R-18" />
+                <ParameterRefRef RefId="M-00FA_A-0A06-04-0000_P-19_R-19" />
+                <ComObjectRefRef RefId="M-00FA_A-0A06-04-0000_O-13_R-13" />
+                <ComObjectRefRef RefId="M-00FA_A-0A06-04-0000_O-14_R-14" />
               </ParameterBlock>
             </ChannelIndependentBlock>
           </Dynamic>

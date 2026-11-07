@@ -254,8 +254,27 @@ public final class Products {
 					.inGroup(page).showWhen(en, 1));
 		}
 		params.add(new ParamDef(id++, "SendPosition", "Send position as status", g, 0, 1, 1, NO_YES));
-		return new ProductDef("blind-actuator", 0x0A06, V, "vKNX Blind Actuator 4-fold", "VKNXBL4", 0x0A06, g + 1, params, objs);
+		// weather alarms (added in this release, so they come last): one wind and one rain alarm object for the whole device,
+		// a monitoring time for each, and per channel what the blind does when an alarm is active
+		final String wa = "Weather alarms";
+		params.add(new ParamDef(id++, "WindMonitor", "Monitor the wind alarm, timeout", g + 1, 0, 8, 0, MONITOR_CHOICES).inGroup(wa));
+		params.add(new ParamDef(id++, "RainMonitor", "Monitor the rain alarm, timeout", g + 2, 0, 8, 0, MONITOR_CHOICES).inGroup(wa));
+		for (int c = 1; c <= 4; c++) {
+			final String pre = "Ch" + c, page = "Blind " + c;
+			params.add(new ParamDef(id++, pre + "WindReaction", "Wind alarm: blind", g + 2 + c, 0, 2, 1, ALARM_REACTION)
+					.inGroup(page).showWhen(pre + "Enable", 1));
+			params.add(new ParamDef(id++, pre + "RainReaction", "Rain alarm: blind", g + 2 + c, 2, 2, 0, ALARM_REACTION)
+					.inGroup(page).showWhen(pre + "Enable", 1));
+		}
+		objs.add(new ObjDef(13, "WindAlarm", "Wind alarm (1 = alarm)", "Input", 1, "DPST-1-5", false, true, false, false).inGroup(wa));
+		objs.add(new ObjDef(14, "RainAlarm", "Rain alarm (1 = alarm)", "Input", 1, "DPST-1-5", false, true, false, false).inGroup(wa));
+		return new ProductDef("blind-actuator", 0x0A06, V, "vKNX Blind Actuator 4-fold", "VKNXBL4", 0x0A06, g + 7, params, objs);
 	}
+
+	private static final List<Choice> MONITOR_CHOICES = List.of(new Choice(0, "Off"), new Choice(5, "5 minutes"), new Choice(10, "10 minutes"),
+			new Choice(15, "15 minutes"), new Choice(30, "30 minutes"), new Choice(60, "60 minutes"));
+	private static final List<Choice> ALARM_REACTION = List.of(new Choice(0, "Ignores the alarm"), new Choice(1, "Moves up (retracts)"),
+			new Choice(2, "Moves down"));
 
 	public static final ProductDef BLIND_ACTUATOR = blindActuator();
 
@@ -266,20 +285,26 @@ public final class Products {
 			int min, int max, String valueText) {}
 
 	/**
-	 * The six measurements. A parameter value is converted to the engineering value with {@code unitsPerStep}
-	 * (e.g. 0.1 for temperature in tenths of a degree) and to the DPT 9 value that is sent on the bus with {@code toDpt}
-	 * (pressure is entered in hPa and sent in Pa).
+	 * The six measurements. A parameter value is converted to the engineering value with {@code unitsPerStep} and to the
+	 * DPT 9 value that is sent on the bus with {@code toDpt} (pressure is entered in hPa and sent in Pa). Temperature and
+	 * wind speed are entered in whole units plus a separate "tenths" parameter (see {@link #TENTHS_OFFSET}), so that
+	 * 21 and 5 mean 21.5 °C (before 0.10.3 the parameter was in tenths, which made 20 look like 2.0 °C).
 	 */
 	public static final List<Channel> CHANNELS = List.of(
 		new Channel("CO2", "CO2", "DPST-9-8", "ppm", 1, 1, 600, 0, 5000, "Value (ppm)"),
 		new Channel("Humidity", "Humidity", "DPST-9-7", "%", 1, 1, 45, 0, 100, "Value (%)"),
 		new Channel("Illuminance", "Illuminance", "DPST-9-4", "lux", 1, 1, 300, 0, 65000, "Value (lux)"),
-		new Channel("Temperature", "Temperature", "DPST-9-1", "°C", 0.1, 0.1, 215, -300, 600, "Value (0.1 °C, 215 = 21.5 °C)"),
+		new Channel("Temperature", "Temperature", "DPST-9-1", "°C", 1, 1, 21, -30, 60, "Value (whole °C, tenths below)"),
 		new Channel("Pressure", "Air pressure", "DPST-9-6", "hPa", 1, 100, 1013, 300, 1100, "Value (hPa)"),
-		new Channel("WindSpeed", "Wind speed", "DPST-9-5", "m/s", 0.1, 0.1, 30, 0, 500, "Value (0.1 m/s, 30 = 3.0 m/s)"));
+		new Channel("WindSpeed", "Wind speed", "DPST-9-5", "m/s", 1, 1, 3, 0, 50, "Value (whole m/s, tenths below)"));
 
 	/** Bytes per channel in the parameter area: mode(1) + pad(1) + interval(2) + value(2) + min(2) + max(2). */
 	public static final int CHANNEL_BYTES = 10;
+
+	/** Temperature and wind speed have a "tenths" parameter (0-9, one byte each) after the channel blocks. Value: whole units. */
+	public static final Map<String, Integer> TENTHS_OFFSET = Map.of("Temperature", CHANNELS.size() * CHANNEL_BYTES,
+			"WindSpeed", CHANNELS.size() * CHANNEL_BYTES + 1);
+	public static final Map<String, Integer> TENTHS_DEFAULT = Map.of("Temperature", 5, "WindSpeed", 0);
 
 	private static ProductDef multisensor() {
 		final var params = new ArrayList<ParamDef>();
@@ -297,6 +322,9 @@ public final class Products {
 					.inGroup(c.page()).showWhen(pre + "Enable", 1));
 			params.add(ParamDef.number(id++, pre + "Value", c.valueText(), b + 4, 16, c.def(), c.min(), c.max())
 					.inGroup(c.page()).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 0));
+			if (TENTHS_OFFSET.containsKey(pre))
+				params.add(ParamDef.number(id++, pre + "Tenths", "Tenths (0-9, added to the value)", TENTHS_OFFSET.get(pre), 8,
+						TENTHS_DEFAULT.get(pre), 0, 9).inGroup(c.page()).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 0));
 			params.add(ParamDef.number(id++, pre + "Min", "Random minimum", b + 6, 16, c.min() < 0 ? c.min() : c.def() / 2, c.min(), c.max())
 					.inGroup(c.page()).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 1));
 			params.add(ParamDef.number(id++, pre + "Max", "Random maximum", b + 8, 16, c.def() + Math.max(1, Math.abs(c.def()) / 2),
@@ -304,7 +332,7 @@ public final class Products {
 			objs.add(new ObjDef(i + 1, pre, c.page() + " (" + c.unit() + ")", "Output", 16, c.dpt(), true, false, true, false)
 					.inGroup(c.page()).showWhen(pre + "Enable", 1));
 		}
-		return new ProductDef("multisensor", 0x0A09, V, "vKNX Multisensor", "VKNXMS1", 0x0A09, CHANNELS.size() * CHANNEL_BYTES,
+		return new ProductDef("multisensor", 0x0A09, V, "vKNX Multisensor", "VKNXMS1", 0x0A09, CHANNELS.size() * CHANNEL_BYTES + 2,
 				params, objs);
 	}
 
@@ -460,6 +488,255 @@ public final class Products {
 
 	public static final ProductDef LOGIC = logicModule();
 
+	// ------------------------------------------------------------------ binary input (4 inputs)
+
+	public static final int BI_INPUTS = 4;
+	private static final List<Choice> EDGE_COMMAND = List.of(new Choice(0, "Nothing"), new Choice(1, "On"), new Choice(2, "Off"),
+			new Choice(3, "Toggle (alternating on/off)"));
+
+	/**
+	 * Binary input with four inputs for potential-free contacts (push buttons, switches, window contacts). Per input (block
+	 * of {@link #STRIDE} bytes): byte 0 = Enable, Function, command on closing, command on opening, DimDir; byte 1 = DimStep,
+	 * BlindMode, LongPress; bytes 2-17 = name; bytes 18-19 = cyclic sending (seconds). Objects per input: 4 (switch, relative
+	 * dimming, blind move, blind step/stop), shown by function.
+	 */
+	private static ProductDef binaryInput() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		for (int k = 1; k <= BI_INPUTS; k++) {
+			final String pre = "In" + k, page = "Input " + k, en = pre + "Enable", fn = pre + "Function";
+			final int b = (k - 1) * STRIDE, o = (k - 1) * 4;
+			params.add(enable(id++, pre, b, "Enable input", page));
+			params.add(nameParam(id++, pre, b, "Input " + k, page));
+			params.add(new ParamDef(id++, fn, "Function", b, 1, 2, 0, List.of(new Choice(0, "Switching (reacts to closing and opening)"),
+					new Choice(1, "Relative dimming (short and long press)"), new Choice(2, "Blinds (short and long press)")))
+					.inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "Closing", "When the contact closes, send", b, 3, 2, 1, EDGE_COMMAND)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 0));
+			params.add(new ParamDef(id++, pre + "Opening", "When the contact opens, send", b, 5, 2, 2, EDGE_COMMAND)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 0));
+			params.add(ParamDef.number(id++, pre + "Cyclic", "Send cyclically every (seconds, 0 = never)", b + 18, 16, 0, 0, 65535)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 0));
+			params.add(new ParamDef(id++, pre + "DimDir", "Direction", b, 7, 1, 0, List.of(
+					new Choice(0, "Brighter (short press: on)"), new Choice(1, "Darker (short press: off)")))
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 1));
+			params.add(new ParamDef(id++, pre + "DimStep", "Dimming step", b + 1, 0, 3, 3, List.of(
+					new Choice(1, "100 % (run to end)"), new Choice(2, "50 %"), new Choice(3, "25 %"), new Choice(4, "12.5 %"),
+					new Choice(5, "6.25 %"))).inGroup(page).showWhen(en, 1).showWhen(fn, 1));
+			params.add(new ParamDef(id++, pre + "BlindMode", "Contact sends", b + 1, 3, 2, 2, List.of(new Choice(0, "Up"),
+					new Choice(1, "Down"), new Choice(2, "Up / Down (alternating)")))
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 2));
+			params.add(new ParamDef(id++, pre + "LongPress", "Long-press time", b + 1, 5, 2, 1, List.of(
+					new Choice(0, "0.4 s"), new Choice(1, "0.6 s"), new Choice(2, "1.0 s"))).inGroup(page).showWhen(en, 1).showWhen(fn, 1, 2));
+			final String t = page + ": ";
+			objs.add(new ObjDef(o + 1, pre + "Switch", t + "switch", "Output", 1, "DPST-1-1", true, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 0, 1));
+			objs.add(new ObjDef(o + 2, pre + "Dimming", t + "relative dimming", "Output", 4, "DPST-3-7", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 1));
+			objs.add(new ObjDef(o + 3, pre + "Move", t + "blind move up/down", "Output", 1, "DPST-1-8", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 2));
+			objs.add(new ObjDef(o + 4, pre + "StepStop", t + "blind step / stop", "Output", 1, "DPST-1-7", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 2));
+		}
+		return new ProductDef("binary-input", 0x0A0E, V, "vKNX Binary Input 4-fold", "VKNXBI4", 0x0A0E, BI_INPUTS * STRIDE, params, objs);
+	}
+
+	public static final ProductDef BINARY_INPUT = binaryInput();
+
+	// ------------------------------------------------------------------ room thermostat (heating)
+
+	/** Thermostat parameter bytes (see {@link #thermostat()}). */
+	public static final int TH_SIZE = 19;
+	/** Room speed choices (simulated time per real time) and the hysteresis / proportional band / integral time choices. */
+	public static final List<Integer> ROOM_SPEEDS = List.of(1, 10, 60, 240);
+
+	/**
+	 * Room thermostat for heating. The room temperature comes from a simulated room (it warms up while the control value is
+	 * above 0 and cools towards the outside temperature), a fixed value or an external sensor object. Four operating modes
+	 * (comfort, standby, economy, building protection) with a setpoint each; a window contact switches to building
+	 * protection. The control value is two-point (1 bit) or continuous PI (1 byte). Objects: 1 room temperature, 2 external
+	 * temperature, 3 operating mode (DPT 20.102), 4 operating mode status, 5 window contact, 6 setpoint status, 7 control value
+	 * (1 bit), 8 control value (1 byte).
+	 */
+	private static ProductDef thermostat() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		final String room = "Room temperature", sp = "Setpoints", ctl = "Controller", op = "Operation";
+		params.add(new ParamDef(id++, "TempSource", "Room temperature comes from", 0, 0, 2, 0, List.of(
+				new Choice(0, "Simulated room (heats up and cools down)"), new Choice(1, "Fixed value"),
+				new Choice(2, "External sensor (group object)"))).inGroup(room));
+		params.add(ParamDef.number(id++, "FixedTemp", "Room temperature (whole °C)", 1, 8, 20, 0, 40).inGroup(room).showWhen("TempSource", 1));
+		params.add(ParamDef.number(id++, "FixedTenths", "Tenths (0-9, added to the value)", 2, 8, 0, 0, 9).inGroup(room).showWhen("TempSource", 1));
+		params.add(ParamDef.number(id++, "StartTemp", "Start temperature (whole °C)", 3, 8, 19, 5, 30).inGroup(room).showWhen("TempSource", 0));
+		params.add(ParamDef.number(id++, "Ambient", "Outside temperature (whole °C)", 4, 16, 15, -20, 35).inGroup(room).showWhen("TempSource", 0));
+		params.add(new ParamDef(id++, "RoomSpeed", "Simulation speed", 6, 0, 8, 60, List.of(new Choice(1, "Real time"),
+				new Choice(10, "10 times faster"), new Choice(60, "60 times faster (1 minute = 1 hour)"),
+				new Choice(240, "240 times faster"))).inGroup(room).showWhen("TempSource", 0));
+		params.add(ParamDef.number(id++, "TempCycle", "Send temperature every (seconds, 0 = never)", 17, 16, 60, 0, 65535).inGroup(room));
+		params.add(new ParamDef(id++, "StartMode", "Operating mode after download", 0, 4, 3, 1, List.of(new Choice(1, "Comfort"),
+				new Choice(2, "Standby"), new Choice(3, "Economy"), new Choice(4, "Building protection"))).inGroup(op));
+		params.add(new ParamDef(id++, "WindowUsed", "Window contact", 0, 3, 1, 0, List.of(new Choice(0, "Not used"),
+				new Choice(1, "Used (open window = building protection)"))).inGroup(op));
+		final String[] modes = { "Comfort", "Standby", "Economy" };
+		final int[] defs = { 21, 19, 17 };
+		for (int m = 0; m < 3; m++) {
+			params.add(ParamDef.number(id++, modes[m] + "Setpoint", modes[m] + " setpoint (whole °C)", 7 + m, 8, defs[m], 5, 35).inGroup(sp));
+			params.add(new ParamDef(id++, modes[m] + "Half", modes[m] + ": add 0.5 °C", 11, m, 1, 0, NO_YES).inGroup(sp));
+		}
+		params.add(ParamDef.number(id++, "ProtectionSetpoint", "Building protection setpoint (whole °C)", 10, 8, 7, 5, 15).inGroup(sp));
+		params.add(new ParamDef(id++, "ControlType", "Control value", 0, 2, 1, 0, List.of(new Choice(0, "Two-point (on / off, 1 bit)"),
+				new Choice(1, "Continuous PI (0-100 %, 1 byte)"))).inGroup(ctl));
+		params.add(new ParamDef(id++, "Hysteresis", "Hysteresis (total band)", 12, 0, 8, 5, List.of(new Choice(2, "0.2 K"),
+				new Choice(3, "0.3 K"), new Choice(5, "0.5 K"), new Choice(10, "1.0 K"))).inGroup(ctl).showWhen("ControlType", 0));
+		params.add(new ParamDef(id++, "PBand", "Proportional band", 13, 0, 8, 4, List.of(new Choice(2, "2 K"), new Choice(3, "3 K"),
+				new Choice(4, "4 K"), new Choice(5, "5 K"), new Choice(8, "8 K"))).inGroup(ctl).showWhen("ControlType", 1));
+		params.add(new ParamDef(id++, "IntTime", "Integral time", 14, 0, 8, 30, List.of(new Choice(0, "None (P controller)"),
+				new Choice(15, "15 minutes"), new Choice(30, "30 minutes"), new Choice(60, "60 minutes"), new Choice(120, "120 minutes")))
+				.inGroup(ctl).showWhen("ControlType", 1));
+		params.add(ParamDef.number(id++, "ControlCycle", "Send control value every (seconds, 0 = on change)", 15, 16, 60, 0, 65535).inGroup(ctl));
+
+		objs.add(new ObjDef(1, "RoomTemp", "Room temperature", "Output", 16, "DPST-9-1", true, false, true, false).inGroup(room));
+		objs.add(new ObjDef(2, "ExtTemp", "External temperature sensor", "Input", 16, "DPST-9-1", false, true, false, true)
+				.inGroup(room).showWhen("TempSource", 2).withReadOnInit());
+		objs.add(new ObjDef(3, "Mode", "Operating mode (DPT 20.102)", "Input", 8, "DPST-20-102", false, true, false, false).inGroup(op));
+		objs.add(new ObjDef(4, "ModeStatus", "Operating mode status", "Output", 8, "DPST-20-102", true, false, true, false).inGroup(op));
+		objs.add(new ObjDef(5, "Window", "Window contact (1 = open)", "Input", 1, "DPST-1-19", false, true, false, false)
+				.inGroup(op).showWhen("WindowUsed", 1));
+		objs.add(new ObjDef(6, "SetpointStatus", "Current setpoint", "Output", 16, "DPST-9-1", true, false, true, false).inGroup(sp));
+		objs.add(new ObjDef(7, "ControlOnOff", "Heating control value (on / off)", "Output", 1, "DPST-1-1", true, false, true, false)
+				.inGroup(ctl).showWhen("ControlType", 0));
+		objs.add(new ObjDef(8, "ControlPercent", "Heating control value (%)", "Output", 8, "DPST-5-1", true, false, true, false)
+				.inGroup(ctl).showWhen("ControlType", 1));
+		return new ProductDef("thermostat", 0x0A0F, V, "vKNX Room Thermostat", "VKNXRT1", 0x0A0F, TH_SIZE, params, objs);
+	}
+
+	public static final ProductDef THERMOSTAT = thermostat();
+
+	// ------------------------------------------------------------------ heating actuator (6 channels)
+
+	public static final int HA_CHANNELS = 6;
+	public static final List<Integer> PWM_CYCLES = List.of(1, 2, 5, 10, 15, 20);
+	public static final List<Integer> MONITOR_TIMES = List.of(0, 5, 10, 15, 30, 60);
+	/** Object number of the "control value missing" alarm of the heating actuator. */
+	public static final int HA_FAULT_OBJECT = 3 * HA_CHANNELS + 1;
+
+	/**
+	 * Heating actuator with six channels for thermal valve drives. Per channel (block of {@link #STRIDE} bytes): byte 0 =
+	 * Enable, control value type, valve type; byte 1 = PWM cycle (minutes); byte 2 = monitoring time (minutes); byte 3 =
+	 * emergency position (%); bytes 4-19 = name. Objects per channel: 3 (control value 1 bit, control value 1 byte, valve
+	 * status), then one alarm object for the whole device.
+	 */
+	private static ProductDef heatingActuator() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		final var cycles = new ArrayList<Choice>();
+		for (final int c : PWM_CYCLES)
+			cycles.add(new Choice(c, c == 1 ? "1 minute" : c + " minutes"));
+		final var monitors = new ArrayList<Choice>();
+		for (final int m : MONITOR_TIMES)
+			monitors.add(new Choice(m, m == 0 ? "Off" : m + " minutes"));
+		for (int c = 1; c <= HA_CHANNELS; c++) {
+			final String pre = "Ch" + c, page = "Valve " + c, en = pre + "Enable", ty = pre + "Type", mon = pre + "Monitor";
+			final int b = (c - 1) * STRIDE, o = (c - 1) * 3;
+			params.add(enable(id++, pre, b, "Enable valve", page));
+			params.add(ParamDef.text(id++, pre + "Name", "Name", b + 4, NAME_CHARS, "Valve " + c).inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, ty, "Control value", b, 1, 1, 0, List.of(new Choice(0, "On / off (1 bit)"),
+					new Choice(1, "Continuous 0-100 % (1 byte, PWM)"))).inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "ValveType", "Valve without current is", b, 2, 1, 0, List.of(
+					new Choice(0, "Closed (normally closed)"), new Choice(1, "Open (normally open)"))).inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "Cycle", "PWM cycle time", b + 1, 0, 8, 2, cycles).inGroup(page).showWhen(en, 1).showWhen(ty, 1));
+			params.add(new ParamDef(id++, mon, "Monitor the control value, timeout", b + 2, 0, 8, 0, monitors).inGroup(page).showWhen(en, 1));
+			params.add(ParamDef.number(id++, pre + "Emergency", "Valve position on timeout (%)", b + 3, 8, 30, 0, 100)
+					.inGroup(page).showWhen(en, 1).showWhen(mon, 5, 10, 15, 30, 60));
+			final String t = page + ": ";
+			objs.add(new ObjDef(o + 1, pre + "ControlBit", t + "control value (on / off)", "Input", 1, "DPST-1-1", false, true, false, false)
+					.inGroup(page).showWhen(en, 1).showWhen(ty, 0));
+			objs.add(new ObjDef(o + 2, pre + "ControlByte", t + "control value (%)", "Input", 8, "DPST-5-1", false, true, false, false)
+					.inGroup(page).showWhen(en, 1).showWhen(ty, 1));
+			objs.add(new ObjDef(o + 3, pre + "Status", t + "valve status (1 = open)", "Output", 1, "DPST-1-1", true, false, true, false)
+					.inGroup(page).showWhen(en, 1));
+		}
+		objs.add(new ObjDef(HA_FAULT_OBJECT, "Fault", "Control value missing (1 = alarm)", "Output", 1, "DPST-1-5", true, false, true, false));
+		return new ProductDef("heating-actuator", 0x0A12, V, "vKNX Heating Actuator 6-fold", "VKNXHA6", 0x0A12, HA_CHANNELS * STRIDE, params, objs);
+	}
+
+	public static final ProductDef HEATING_ACTUATOR = heatingActuator();
+
+	// ------------------------------------------------------------------ weather station
+
+	/** The three measured values of the weather station (same scheme as the multisensor: whole units plus a tenths parameter). */
+	public static final List<Channel> WEATHER_CHANNELS = List.of(
+		new Channel("Temperature", "Outdoor temperature", "DPST-9-1", "°C", 1, 1, 8, -30, 60, "Value (whole °C, tenths below)"),
+		new Channel("WindSpeed", "Wind speed", "DPST-9-5", "m/s", 1, 1, 4, 0, 50, "Value (whole m/s, tenths below)"),
+		new Channel("Illuminance", "Brightness", "DPST-9-4", "lux", 1, 1, 20000, 0, 65000, "Value (lux)"));
+	public static final Map<String, Integer> WEATHER_TENTHS_OFFSET = Map.of("Temperature", WEATHER_CHANNELS.size() * CHANNEL_BYTES,
+			"WindSpeed", WEATHER_CHANNELS.size() * CHANNEL_BYTES + 1);
+	public static final Map<String, Integer> WEATHER_TENTHS_DEFAULT = Map.of("Temperature", 5, "WindSpeed", 0);
+	/** Byte offsets of the rain block (enable, mode, interval(2), chance) and the wind alarm block (enable, threshold, hysteresis, interval(2)). */
+	public static final int RAIN_BASE = WEATHER_CHANNELS.size() * CHANNEL_BYTES + 2, ALARM_BASE = RAIN_BASE + 5, WEATHER_SIZE = ALARM_BASE + 5;
+	/** Object numbers: the three measurements 1-3, then rain and wind alarm. */
+	public static final int OBJ_RAIN = 4, OBJ_WIND_ALARM = 5;
+
+	/**
+	 * Weather station: outdoor temperature, wind speed and brightness (fixed value or random range, like the multisensor),
+	 * a rain sensor and a wind alarm. Rain is a fixed state (dry or rain) or random with a chance per send interval. The wind
+	 * alarm switches on when the wind speed reaches the threshold and off again when it is below the threshold minus the
+	 * hysteresis; it is sent when it changes and cyclically. Blind and awning actuators react to the alarm objects.
+	 */
+	private static ProductDef weatherStation() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		for (int i = 0; i < WEATHER_CHANNELS.size(); i++) {
+			final Channel c = WEATHER_CHANNELS.get(i);
+			final int b = i * CHANNEL_BYTES;
+			final String pre = c.name(), page = c.page();
+			params.add(new ParamDef(id++, pre + "Enable", "Enable " + page.toLowerCase(), b + 1, 0, 1, 1, NO_YES).inGroup(page));
+			params.add(new ParamDef(id++, pre + "Mode", "Send", b, 0, 2, 0,
+					List.of(new Choice(0, "Fixed value"), new Choice(1, "Random value between minimum and maximum")))
+					.inGroup(page).showWhen(pre + "Enable", 1));
+			params.add(ParamDef.number(id++, pre + "Interval", "Send cyclically every (seconds, 0 = never)", b + 2, 16, 30, 0, 65535)
+					.inGroup(page).showWhen(pre + "Enable", 1));
+			params.add(ParamDef.number(id++, pre + "Value", c.valueText(), b + 4, 16, c.def(), c.min(), c.max())
+					.inGroup(page).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 0));
+			if (WEATHER_TENTHS_OFFSET.containsKey(pre))
+				params.add(ParamDef.number(id++, pre + "Tenths", "Tenths (0-9, added to the value)", WEATHER_TENTHS_OFFSET.get(pre), 8,
+						WEATHER_TENTHS_DEFAULT.get(pre), 0, 9).inGroup(page).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 0));
+			params.add(ParamDef.number(id++, pre + "Min", "Random minimum", b + 6, 16, c.min() < 0 ? c.min() : c.def() / 2, c.min(), c.max())
+					.inGroup(page).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 1));
+			params.add(ParamDef.number(id++, pre + "Max", "Random maximum", b + 8, 16, c.def() + Math.max(1, Math.abs(c.def()) / 2),
+					c.min(), c.max()).inGroup(page).showWhen(pre + "Enable", 1).showWhen(pre + "Mode", 1));
+			objs.add(new ObjDef(i + 1, pre, page + " (" + c.unit() + ")", "Output", 16, c.dpt(), true, false, true, false)
+					.inGroup(page).showWhen(pre + "Enable", 1));
+		}
+		final String rain = "Rain";
+		params.add(new ParamDef(id++, "RainEnable", "Enable rain sensor", RAIN_BASE, 0, 1, 1, NO_YES).inGroup(rain));
+		params.add(new ParamDef(id++, "RainMode", "Rain sensor", RAIN_BASE + 1, 0, 2, 2, List.of(new Choice(0, "Always dry"),
+				new Choice(1, "Always raining"), new Choice(2, "Random (chance of rain at every send)"))).inGroup(rain).showWhen("RainEnable", 1));
+		params.add(ParamDef.number(id++, "RainChance", "Chance of rain at every send (%)", RAIN_BASE + 4, 8, 30, 0, 100)
+				.inGroup(rain).showWhen("RainEnable", 1).showWhen("RainMode", 2));
+		params.add(ParamDef.number(id++, "RainInterval", "Send cyclically every (seconds, 0 = never)", RAIN_BASE + 2, 16, 30, 0, 65535)
+				.inGroup(rain).showWhen("RainEnable", 1));
+		objs.add(new ObjDef(OBJ_RAIN, "Rain", "Rain alarm (1 = rain)", "Output", 1, "DPST-1-5", true, false, true, false)
+				.inGroup(rain).showWhen("RainEnable", 1));
+		final String wind = "Wind alarm";
+		params.add(new ParamDef(id++, "AlarmEnable", "Enable wind alarm", ALARM_BASE, 0, 1, 1, NO_YES).inGroup(wind).showWhen("WindSpeedEnable", 1));
+		params.add(ParamDef.number(id++, "AlarmThreshold", "Alarm when the wind speed reaches (m/s)", ALARM_BASE + 1, 8, 12, 0, 50)
+				.inGroup(wind).showWhen("WindSpeedEnable", 1).showWhen("AlarmEnable", 1));
+		params.add(ParamDef.number(id++, "AlarmHysteresis", "Alarm ends below threshold minus (m/s)", ALARM_BASE + 2, 8, 2, 0, 20)
+				.inGroup(wind).showWhen("WindSpeedEnable", 1).showWhen("AlarmEnable", 1));
+		params.add(ParamDef.number(id++, "AlarmInterval", "Send cyclically every (seconds, 0 = on change)", ALARM_BASE + 3, 16, 30, 0, 65535)
+				.inGroup(wind).showWhen("WindSpeedEnable", 1).showWhen("AlarmEnable", 1));
+		objs.add(new ObjDef(OBJ_WIND_ALARM, "WindAlarm", "Wind alarm (1 = alarm)", "Output", 1, "DPST-1-5", true, false, true, false)
+				.inGroup(wind).showWhen("WindSpeedEnable", 1).showWhen("AlarmEnable", 1));
+		return new ProductDef("weather-station", 0x0A13, V, "vKNX Weather Station", "VKNXWS1", 0x0A13, WEATHER_SIZE, params, objs);
+	}
+
+	public static final ProductDef WEATHER_STATION = weatherStation();
+
 	// ------------------------------------------------------------------ couplers
 
 	/**
@@ -474,7 +751,8 @@ public final class Products {
 	public static final Map<String, ProductDef> ALL;
 	static {
 		final var m = new java.util.LinkedHashMap<String, ProductDef>();
-		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, SECURE_PUSH_BUTTON, SECURE_SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, INFO_DISPLAY, LOGIC, COUPLER))
+		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, SECURE_PUSH_BUTTON, SECURE_SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, INFO_DISPLAY, LOGIC, COUPLER,
+				BINARY_INPUT, THERMOSTAT, HEATING_ACTUATOR, WEATHER_STATION))
 			m.put(p.key(), p);
 		ALL = java.util.Collections.unmodifiableMap(m);
 	}

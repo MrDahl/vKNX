@@ -24,7 +24,7 @@ public final class MultisensorBehavior extends DeviceBehavior {
 	MultisensorBehavior(final VirtualDevice dev) {
 		super(dev);
 		for (int i = 0; i < n; i++)
-			value[i] = CH.get(i).def() * CH.get(i).unitsPerStep();
+			value[i] = CH.get(i).def() * CH.get(i).unitsPerStep() + Products.TENTHS_DEFAULT.getOrDefault(CH.get(i).name(), 0) / 10.0;
 	}
 
 	private String p(final int i, final String what) { return CH.get(i).name() + what; }
@@ -53,10 +53,11 @@ public final class MultisensorBehavior extends DeviceBehavior {
 		dev.changed();
 	}
 
+	private boolean hasTenths(final int i) { return Products.TENTHS_OFFSET.containsKey(CH.get(i).name()); }
+
 	/** Computes the next value of channel i (fixed or random) from the ETS parameters, in engineering units. */
 	private void next(final int i) {
 		final Channel c = CH.get(i);
-		int raw;
 		if (dev.param(p(i, "Mode")) == 1) {
 			int lo = dev.param(p(i, "Min")), hi = dev.param(p(i, "Max"));
 			if (lo > hi) {
@@ -64,11 +65,27 @@ public final class MultisensorBehavior extends DeviceBehavior {
 				lo = hi;
 				hi = t;
 			}
-			raw = lo == hi ? lo : ThreadLocalRandom.current().nextInt(lo, hi + 1);
+			if (hasTenths(i)) { // whole-unit range, but the random value has a resolution of 0.1
+				final int a = lo * 10, b = hi * 10;
+				value[i] = (a == b ? a : ThreadLocalRandom.current().nextInt(a, b + 1)) / 10.0;
+			}
+			else
+				value[i] = (lo == hi ? lo : ThreadLocalRandom.current().nextInt(lo, hi + 1)) * c.unitsPerStep();
+			return;
+		}
+		final int raw = dev.param(p(i, "Value"));
+		if (hasTenths(i)) {
+			final int tenths = Math.max(0, Math.min(9, dev.param(p(i, "Tenths"))));
+			value[i] = raw < 0 ? raw - tenths / 10.0 : raw + tenths / 10.0;
 		}
 		else
-			raw = dev.param(p(i, "Value"));
-		value[i] = raw * c.unitsPerStep();
+			value[i] = raw * c.unitsPerStep();
+	}
+
+	/** The number that is DPT 9 encoded and sent: tenths for temperature and wind speed, the parameter scale for the rest. */
+	private double onBus(final int i) {
+		final Channel c = CH.get(i);
+		return hasTenths(i) ? Math.round(value[i] * 10) / 10.0 : Math.round(value[i] / c.unitsPerStep()) * c.toDpt();
 	}
 
 	@Override
@@ -82,14 +99,14 @@ public final class MultisensorBehavior extends DeviceBehavior {
 		final Channel c = CH.get(i);
 		next(i);
 		sent[i]++;
-		dev.transmit(i + 1, Dpt9.encode(Math.round(value[i] / c.unitsPerStep()) * c.toDpt()), true);
+		dev.transmit(i + 1, Dpt9.encode(onBus(i)), true);
 		dev.log("sensor", c.name() + " " + fmt(i) + " sent (#" + sent[i] + ")");
 		dev.changed();
 	}
 
 	private String fmt(final int i) {
 		final Channel c = CH.get(i);
-		return String.format(java.util.Locale.ROOT, c.unitsPerStep() < 1 ? "%.1f %s" : "%.0f %s", value[i], c.unit());
+		return String.format(java.util.Locale.ROOT, c.unitsPerStep() < 1 || hasTenths(i) ? "%.1f %s" : "%.0f %s", value[i], c.unit());
 	}
 
 	@Override
@@ -100,7 +117,7 @@ public final class MultisensorBehavior extends DeviceBehavior {
 		if (go < 1 || go > n || !enabled(go - 1))
 			return null;
 		final Channel c = CH.get(go - 1);
-		return Dpt9.encode(Math.round(value[go - 1] / c.unitsPerStep()) * c.toDpt());
+		return Dpt9.encode(onBus(go - 1));
 	}
 
 	@Override

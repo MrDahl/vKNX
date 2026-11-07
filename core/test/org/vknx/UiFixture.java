@@ -64,7 +64,7 @@ public final class UiFixture {
 			ets.downloadAll(addr.get("Switch1"), new int[] { gC1, gC2, gC3 }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } }, new int[] { W, W, W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, org.vknx.product.Products.SWITCH_ACTUATOR.params("Out2Name", "Window", "Out6Enable", 0));
 			final int gTemp = ga(4, 0, 4), gCo2 = ga(4, 0, 7), gLux = ga(4, 0, 5);
 			final byte[] ms = org.vknx.product.Products.MULTISENSOR.params("CO2Interval", 3, "CO2Value", 600, "IlluminanceInterval", 4,
-					"IlluminanceValue", 300, "TemperatureInterval", 2, "TemperatureValue", 224, "PressureEnable", 0);
+					"IlluminanceValue", 300, "TemperatureInterval", 2, "TemperatureValue", 22, "TemperatureTenths", 4, "PressureEnable", 0);
 			ets.downloadAll(addr.get("Sensor1"), new int[] { gTemp, gCo2, gLux }, new int[][] { { 1, 4 }, { 2, 1 }, { 3, 3 } }, new int[] { SEND, 0, 0, SEND, 0, 0 }, ms);
 			final int gMove = ga(3, 0, 1), gStop = ga(3, 0, 2), gPos = ga(3, 0, 3);
 			ets.downloadAll(addr.get("Blind1"), new int[] { gMove, gStop, gPos }, new int[][] { { 1, 1 }, { 2, 2 }, { 3, 3 } },

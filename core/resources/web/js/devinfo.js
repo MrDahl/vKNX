@@ -38,6 +38,15 @@ export function pointsOf(d) {
     case 'blind-actuator': for (let i = 1; i <= 4; i++) if (on(i)) add('b' + i, 'blind', { pos: v['pos' + i] ?? 0, label: n + ' ' + (v['n' + i] || 'Blind ' + i), name: v['n' + i] || 'Blind ' + i }); break;
     case 'logic': add('lg', 'logic', { name: 'Logic', text: 'Logic' }); break;
     case 'info-display': add('scr', 'display', { name: 'Display', text: v.cur ? (v.name || 'Screen ' + v.cur) : 'No screen' }); break;
+    case 'binary-input': for (let i = 1; i <= 4; i++) if (on(i)) add('c' + i, 'contact', { keyNo: i, closed: !!v['c' + i], label: n + ' ' + (v['n' + i] || 'Input ' + i), name: v['n' + i] || 'Input ' + i }); break;
+    case 'thermostat': add('th', 'info', { sym: 'thermostat', name: 'Thermostat', on: !!v.heat, text: (v.temp ?? '–') + ' → ' + (v.sp ?? '–') + ' °C' }); break;
+    case 'heating-actuator': for (let i = 1; i <= 6; i++) if (on(i)) add('v' + i, 'info', { sym: 'radiator', on: !!v['open' + i], text: (v['pct' + i] ?? 0) + ' %', label: n + ' ' + (v['n' + i] || 'Valve ' + i), name: v['n' + i] || 'Valve ' + i, objs: [3 * (i - 1) + 1, 3 * (i - 1) + 2, 3 * (i - 1) + 3] }); break;
+    case 'weather-station': {
+      [['temp', 'Temperature', '°C'], ['wind', 'Wind speed', 'm/s'], ['lux', 'Brightness', 'lux']].forEach(([sym, nm, un], i) => { if (on(i)) add('w' + i, 'info', { sym, name: nm, text: (v['s' + i] ?? '–') + ' ' + un, label: n + ' ' + nm.toLowerCase(), objs: [i + 1] }); });
+      if (v.rainE !== false) add('rain', 'info', { sym: 'rain', name: 'Rain', on: !!v.rain, text: v.rain ? 'Rain' : 'Dry', label: n + ' rain', objs: [4] });
+      if (v.alarmE !== false) add('alarm', 'info', { sym: 'wind', name: 'Wind alarm', on: !!v.alarm, text: v.alarm ? 'ALARM' : 'No alarm', label: n + ' wind alarm', objs: [5] });
+      break;
+    }
     case 'multisensor': SENSORS.forEach((s, i) => { if (v['e' + i] !== false) add('s' + i, 'sensor', { text: (v['s' + i] ?? '–') + ' ' + s.unit, label: n + ' ' + s.name, name: s.name, sensor: i }); }); break;
   }
   return P;
@@ -46,6 +55,7 @@ export function pointsOf(d) {
 /** Object numbers that belong to one plan channel (falls back to all objects of the device). */
 export function objectsOfPoint(d, p) {
   const all = (S.cat[d.product]?.objects || []).map(o => o.number);
+  if (p.objs) return p.objs;
   const n = +(p.k.match(/\d+$/)?.[0] || 0);
   switch (d.product.replace(/^secure-/, '')) {
     case 'push-button': return [1, 2, 3, 4, 5].map(i => 5 * (n - 1) + i).concat(20 + n);
@@ -53,6 +63,7 @@ export function objectsOfPoint(d, p) {
     case 'switch-actuator': return [n, 8 + n, 17];
     case 'blind-actuator': return [3 * (n - 1) + 1, 3 * (n - 1) + 2, 3 * (n - 1) + 3];
     case 'multisensor': return [p.sensor + 1];
+    case 'binary-input': return [1, 2, 3, 4].map(i => 4 * (n - 1) + i);
     default: return all;
   }
 }

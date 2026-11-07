@@ -172,6 +172,21 @@ export function createPlan() {
         body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
+      case 'contact': {
+        const ib = h('span.mk-ico', icon('contact'));
+        const b = h('button.mk-btn', { type: 'button', 'aria-label': p.name + ' of ' + p.dev, title: p.name + ': click to close or open the contact' }, ib);
+        b.addEventListener('click', () => { if (!S.planEdit) operate('Contact', () => api.act(p.dev, 'toggle', p.keyNo)); });
+        const t = h('span.t'); body.append(b, t);
+        upd = q => { setCls(el, 'on', q.closed); paintIcon(ib, p.id, pointDefault(p)); setText(t, q.closed ? 'Closed' : 'Open'); return q.closed + ':' + (S.icons[p.id]?.n || ''); };
+        break;
+      }
+      case 'info': {
+        const t = h('span.t'); const ib = h('span.mk-ico', icon(p.sym));
+        body.append(ib, t);
+        upd = q => { setCls(el, 'on', !!q.on); paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.on + ':' + q.text + ':' + (S.icons[p.id]?.n || ''); };
+        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        break;
+      }
       case 'sensor': {
         const t = h('span.t');
         const ib = h('span.mk-ico', icon(SENSORS[p.sensor].icon));

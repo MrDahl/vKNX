@@ -17,7 +17,7 @@ const navBtns = {};
 const nav = h('nav.nav', { 'aria-label': 'Workspaces' });
 for (const [key, label, ic] of NAV) {
   const count = h('span.count');
-  navBtns[key] = { btn: h('button', { type: 'button', onclick: () => navigate(key) }, icon(ic), h('span', label), key === 'installation' ? count : null), count };
+  navBtns[key] = { btn: h('button', { type: 'button', title: label, 'aria-label': label, onclick: () => navigate(key) }, icon(ic), h('span.nav-text', label), key === 'installation' ? count : null), count };
   nav.append(navBtns[key].btn);
 }
 const connBtn = h('button.conn', { type: 'button', onclick: openConnection, 'aria-label': 'Connection status' }, h('span.shape'), h('span.conn-text'));

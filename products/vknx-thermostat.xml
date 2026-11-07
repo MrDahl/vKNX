@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <Catalog>
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
+          <CatalogItem Id="M-00FA_H-2575-1_HP-0A0F-04-0000_CI-VKNXRT1-1" Name="vKNX Room Thermostat" Number="1" ProductRefId="M-00FA_H-2575-1_P-VKNXRT1" Hardware2ProgramRefId="M-00FA_H-2575-1_HP-0A0F-04-0000" DefaultLanguage="en-US" />
+        </CatalogSection>
+      </Catalog>
+      <ApplicationPrograms>
+        <ApplicationProgram Id="M-00FA_A-0A0F-04-0000" ApplicationNumber="2575" ApplicationVersion="4" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Room Thermostat" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2 3">
+          <Static>
+            <Code>
+              <RelativeSegment Id="M-00FA_A-0A0F-04-0000_RS-04-00000" Name="Parameters" Offset="0" Size="19" LoadStateMachine="4" />
+            </Code>
+            <ParameterTypes>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-TempSource" Name="TempSource">
+                <TypeRestriction Base="Value" SizeInBit="2">
+                  <Enumeration Text="Simulated room (heats up and cools down)" Value="0" Id="M-00FA_A-0A0F-04-0000_PT-TempSource_EN-0" />
+                  <Enumeration Text="Fixed value" Value="1" Id="M-00FA_A-0A0F-04-0000_PT-TempSource_EN-1" />
+                  <Enumeration Text="External sensor (group object)" Value="2" Id="M-00FA_A-0A0F-04-0000_PT-TempSource_EN-2" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-FixedTemp" Name="FixedTemp">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="40" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-FixedTenths" Name="FixedTenths">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="0" maxInclusive="9" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-StartTemp" Name="StartTemp">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="5" maxInclusive="30" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-Ambient" Name="Ambient">
+                <TypeNumber SizeInBit="16" Type="signedInt" minInclusive="-20" maxInclusive="35" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-RoomSpeed" Name="RoomSpeed">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Real time" Value="1" Id="M-00FA_A-0A0F-04-0000_PT-RoomSpeed_EN-1" />
+                  <Enumeration Text="10 times faster" Value="10" Id="M-00FA_A-0A0F-04-0000_PT-RoomSpeed_EN-10" />
+                  <Enumeration Text="60 times faster (1 minute = 1 hour)" Value="60" Id="M-00FA_A-0A0F-04-0000_PT-RoomSpeed_EN-60" />
+                  <Enumeration Text="240 times faster" Value="240" Id="M-00FA_A-0A0F-04-0000_PT-RoomSpeed_EN-240" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-TempCycle" Name="TempCycle">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-StartMode" Name="StartMode">
+                <TypeRestriction Base="Value" SizeInBit="3">
+                  <Enumeration Text="Comfort" Value="1" Id="M-00FA_A-0A0F-04-0000_PT-StartMode_EN-1" />
+                  <Enumeration Text="Standby" Value="2" Id="M-00FA_A-0A0F-04-0000_PT-StartMode_EN-2" />
+                  <Enumeration Text="Economy" Value="3" Id="M-00FA_A-0A0F-04-0000_PT-StartMode_EN-3" />
+                  <Enumeration Text="Building protection" Value="4" Id="M-00FA_A-0A0F-04-0000_PT-StartMode_EN-4" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-WindowUsed" Name="WindowUsed">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Not used" Value="0" Id="M-00FA_A-0A0F-04-0000_PT-WindowUsed_EN-0" />
+                  <Enumeration Text="Used (open window = building protection)" Value="1" Id="M-00FA_A-0A0F-04-0000_PT-WindowUsed_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-ComfortSetpoint" Name="ComfortSetpoint">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="5" maxInclusive="35" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-ComfortHalf" Name="ComfortHalf">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A0F-04-0000_PT-ComfortHalf_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A0F-04-0000_PT-ComfortHalf_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-StandbySetpoint" Name="StandbySetpoint">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="5" maxInclusive="35" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-StandbyHalf" Name="StandbyHalf">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A0F-04-0000_PT-StandbyHalf_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A0F-04-0000_PT-StandbyHalf_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-EconomySetpoint" Name="EconomySetpoint">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="5" maxInclusive="35" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-EconomyHalf" Name="EconomyHalf">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A0F-04-0000_PT-EconomyHalf_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A0F-04-0000_PT-EconomyHalf_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-ProtectionSetpoint" Name="ProtectionSetpoint">
+                <TypeNumber SizeInBit="8" Type="unsignedInt" minInclusive="5" maxInclusive="15" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-ControlType" Name="ControlType">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="Two-point (on / off, 1 bit)" Value="0" Id="M-00FA_A-0A0F-04-0000_PT-ControlType_EN-0" />
+                  <Enumeration Text="Continuous PI (0-100 %, 1 byte)" Value="1" Id="M-00FA_A-0A0F-04-0000_PT-ControlType_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-Hysteresis" Name="Hysteresis">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="0.2 K" Value="2" Id="M-00FA_A-0A0F-04-0000_PT-Hysteresis_EN-2" />
+                  <Enumeration Text="0.3 K" Value="3" Id="M-00FA_A-0A0F-04-0000_PT-Hysteresis_EN-3" />
+                  <Enumeration Text="0.5 K" Value="5" Id="M-00FA_A-0A0F-04-0000_PT-Hysteresis_EN-5" />
+                  <Enumeration Text="1.0 K" Value="10" Id="M-00FA_A-0A0F-04-0000_PT-Hysteresis_EN-10" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-PBand" Name="PBand">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="2 K" Value="2" Id="M-00FA_A-0A0F-04-0000_PT-PBand_EN-2" />
+                  <Enumeration Text="3 K" Value="3" Id="M-00FA_A-0A0F-04-0000_PT-PBand_EN-3" />
+                  <Enumeration Text="4 K" Value="4" Id="M-00FA_A-0A0F-04-0000_PT-PBand_EN-4" />
+                  <Enumeration Text="5 K" Value="5" Id="M-00FA_A-0A0F-04-0000_PT-PBand_EN-5" />
+                  <Enumeration Text="8 K" Value="8" Id="M-00FA_A-0A0F-04-0000_PT-PBand_EN-8" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-IntTime" Name="IntTime">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="None (P controller)" Value="0" Id="M-00FA_A-0A0F-04-0000_PT-IntTime_EN-0" />
+                  <Enumeration Text="15 minutes" Value="15" Id="M-00FA_A-0A0F-04-0000_PT-IntTime_EN-15" />
+                  <Enumeration Text="30 minutes" Value="30" Id="M-00FA_A-0A0F-04-0000_PT-IntTime_EN-30" />
+                  <Enumeration Text="60 minutes" Value="60" Id="M-00FA_A-0A0F-04-0000_PT-IntTime_EN-60" />
+                  <Enumeration Text="120 minutes" Value="120" Id="M-00FA_A-0A0F-04-0000_PT-IntTime_EN-120" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A0F-04-0000_PT-ControlCycle" Name="ControlCycle">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-1" Name="TempSource" ParameterType="M-00FA_A-0A0F-04-0000_PT-TempSource" Text="Room temperature comes from" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-2" Name="FixedTemp" ParameterType="M-00FA_A-0A0F-04-0000_PT-FixedTemp" Text="Room temperature (whole °C)" Value="20">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="1" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-3" Name="FixedTenths" ParameterType="M-00FA_A-0A0F-04-0000_PT-FixedTenths" Text="Tenths (0-9, added to the value)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="2" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-4" Name="StartTemp" ParameterType="M-00FA_A-0A0F-04-0000_PT-StartTemp" Text="Start temperature (whole °C)" Value="19">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="3" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-5" Name="Ambient" ParameterType="M-00FA_A-0A0F-04-0000_PT-Ambient" Text="Outside temperature (whole °C)" Value="15">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="4" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-6" Name="RoomSpeed" ParameterType="M-00FA_A-0A0F-04-0000_PT-RoomSpeed" Text="Simulation speed" Value="60">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="6" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-7" Name="TempCycle" ParameterType="M-00FA_A-0A0F-04-0000_PT-TempCycle" Text="Send temperature every (seconds, 0 = never)" Value="60">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="17" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-8" Name="StartMode" ParameterType="M-00FA_A-0A0F-04-0000_PT-StartMode" Text="Operating mode after download" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="0" BitOffset="4" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-9" Name="WindowUsed" ParameterType="M-00FA_A-0A0F-04-0000_PT-WindowUsed" Text="Window contact" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="0" BitOffset="3" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-10" Name="ComfortSetpoint" ParameterType="M-00FA_A-0A0F-04-0000_PT-ComfortSetpoint" Text="Comfort setpoint (whole °C)" Value="21">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="7" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-11" Name="ComfortHalf" ParameterType="M-00FA_A-0A0F-04-0000_PT-ComfortHalf" Text="Comfort: add 0.5 °C" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="11" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-12" Name="StandbySetpoint" ParameterType="M-00FA_A-0A0F-04-0000_PT-StandbySetpoint" Text="Standby setpoint (whole °C)" Value="19">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="8" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-13" Name="StandbyHalf" ParameterType="M-00FA_A-0A0F-04-0000_PT-StandbyHalf" Text="Standby: add 0.5 °C" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="11" BitOffset="1" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-14" Name="EconomySetpoint" ParameterType="M-00FA_A-0A0F-04-0000_PT-EconomySetpoint" Text="Economy setpoint (whole °C)" Value="17">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="9" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-15" Name="EconomyHalf" ParameterType="M-00FA_A-0A0F-04-0000_PT-EconomyHalf" Text="Economy: add 0.5 °C" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="11" BitOffset="2" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-16" Name="ProtectionSetpoint" ParameterType="M-00FA_A-0A0F-04-0000_PT-ProtectionSetpoint" Text="Building protection setpoint (whole °C)" Value="7">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="10" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-17" Name="ControlType" ParameterType="M-00FA_A-0A0F-04-0000_PT-ControlType" Text="Control value" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="0" BitOffset="2" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-18" Name="Hysteresis" ParameterType="M-00FA_A-0A0F-04-0000_PT-Hysteresis" Text="Hysteresis (total band)" Value="5">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="12" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-19" Name="PBand" ParameterType="M-00FA_A-0A0F-04-0000_PT-PBand" Text="Proportional band" Value="4">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="13" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-20" Name="IntTime" ParameterType="M-00FA_A-0A0F-04-0000_PT-IntTime" Text="Integral time" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="14" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A0F-04-0000_P-21" Name="ControlCycle" ParameterType="M-00FA_A-0A0F-04-0000_PT-ControlCycle" Text="Send control value every (seconds, 0 = on change)" Value="60">
+                <Memory CodeSegment="M-00FA_A-0A0F-04-0000_RS-04-00000" Offset="15" BitOffset="0" />
+              </Parameter>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-1_R-1" RefId="M-00FA_A-0A0F-04-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-2_R-2" RefId="M-00FA_A-0A0F-04-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-3_R-3" RefId="M-00FA_A-0A0F-04-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-4_R-4" RefId="M-00FA_A-0A0F-04-0000_P-4" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-5_R-5" RefId="M-00FA_A-0A0F-04-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-6_R-6" RefId="M-00FA_A-0A0F-04-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-7_R-7" RefId="M-00FA_A-0A0F-04-0000_P-7" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-8_R-8" RefId="M-00FA_A-0A0F-04-0000_P-8" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-9_R-9" RefId="M-00FA_A-0A0F-04-0000_P-9" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-10_R-10" RefId="M-00FA_A-0A0F-04-0000_P-10" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-11_R-11" RefId="M-00FA_A-0A0F-04-0000_P-11" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-12_R-12" RefId="M-00FA_A-0A0F-04-0000_P-12" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-13_R-13" RefId="M-00FA_A-0A0F-04-0000_P-13" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-14_R-14" RefId="M-00FA_A-0A0F-04-0000_P-14" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-15_R-15" RefId="M-00FA_A-0A0F-04-0000_P-15" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-16_R-16" RefId="M-00FA_A-0A0F-04-0000_P-16" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-17_R-17" RefId="M-00FA_A-0A0F-04-0000_P-17" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-18_R-18" RefId="M-00FA_A-0A0F-04-0000_P-18" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-19_R-19" RefId="M-00FA_A-0A0F-04-0000_P-19" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-20_R-20" RefId="M-00FA_A-0A0F-04-0000_P-20" />
+              <ParameterRef Id="M-00FA_A-0A0F-04-0000_P-21_R-21" RefId="M-00FA_A-0A0F-04-0000_P-21" />
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="M-00FA_A-0A0F-04-0000_O-1" Name="RoomTemp" Text="Room temperature" Number="1" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-1" />
+              <ComObject Id="M-00FA_A-0A0F-04-0000_O-2" Name="ExtTemp" Text="External temperature sensor" Number="2" FunctionText="Input" ObjectSize="2 Bytes" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Enabled" DatapointType="DPST-9-1" />
+              <ComObject Id="M-00FA_A-0A0F-04-0000_O-3" Name="Mode" Text="Operating mode (DPT 20.102)" Number="3" FunctionText="Input" ObjectSize="1 Byte" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-20-102" />
+              <ComObject Id="M-00FA_A-0A0F-04-0000_O-4" Name="ModeStatus" Text="Operating mode status" Number="4" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-20-102" />
+              <ComObject Id="M-00FA_A-0A0F-04-0000_O-5" Name="Window" Text="Window contact (1 = open)" Number="5" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-19" />
+              <ComObject Id="M-00FA_A-0A0F-04-0000_O-6" Name="SetpointStatus" Text="Current setpoint" Number="6" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-1" />
+              <ComObject Id="M-00FA_A-0A0F-04-0000_O-7" Name="ControlOnOff" Text="Heating control value (on / off)" Number="7" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A0F-04-0000_O-8" Name="ControlPercent" Text="Heating control value (%)" Number="8" FunctionText="Output" ObjectSize="1 Byte" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-5-1" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="M-00FA_A-0A0F-04-0000_O-1_R-1" RefId="M-00FA_A-0A0F-04-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A0F-04-0000_O-2_R-2" RefId="M-00FA_A-0A0F-04-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A0F-04-0000_O-3_R-3" RefId="M-00FA_A-0A0F-04-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A0F-04-0000_O-4_R-4" RefId="M-00FA_A-0A0F-04-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0A0F-04-0000_O-5_R-5" RefId="M-00FA_A-0A0F-04-0000_O-5" />
+              <ComObjectRef Id="M-00FA_A-0A0F-04-0000_O-6_R-6" RefId="M-00FA_A-0A0F-04-0000_O-6" />
+              <ComObjectRef Id="M-00FA_A-0A0F-04-0000_O-7_R-7" RefId="M-00FA_A-0A0F-04-0000_O-7" />
+              <ComObjectRef Id="M-00FA_A-0A0F-04-0000_O-8_R-8" RefId="M-00FA_A-0A0F-04-0000_O-8" />
+            </ComObjectRefs>
+            <AddressTable MaxEntries="255" />
+            <AssociationTable MaxEntries="255" />
+            <LoadProcedures>
+              <LoadProcedure MergeId="2">
+                <LdCtrlRelSegment LsmIdx="4" Size="19" Mode="1" Fill="0" AppliesTo="full" />
+                <LdCtrlRelSegment LsmIdx="4" Size="19" Mode="0" Fill="0" AppliesTo="par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="4">
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="19" Verify="true" AppliesTo="full,par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="7">
+                <LdCtrlLoadImageProp ObjIdx="1" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="2" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="3" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="4" PropId="27" />
+              </LoadProcedure>
+            </LoadProcedures>
+            <Options />
+          </Static>
+          <Dynamic>
+            <ChannelIndependentBlock>
+              <ParameterBlock Id="M-00FA_A-0A0F-04-0000_PB-1" Name="Roomtemperature" Text="Room temperature">
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-1_R-1" />
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-2_R-2" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-1_R-1">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-3_R-3" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-1_R-1">
+                  <when test="0">
+                    <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-4_R-4" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-1_R-1">
+                  <when test="0">
+                    <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-5_R-5" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-1_R-1">
+                  <when test="0">
+                    <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-6_R-6" />
+                  </when>
+                </choose>
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-7_R-7" />
+                <ComObjectRefRef RefId="M-00FA_A-0A0F-04-0000_O-1_R-1" />
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-1_R-1">
+                  <when test="2">
+                    <ComObjectRefRef RefId="M-00FA_A-0A0F-04-0000_O-2_R-2" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A0F-04-0000_PB-2" Name="Operation" Text="Operation">
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-8_R-8" />
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-9_R-9" />
+                <ComObjectRefRef RefId="M-00FA_A-0A0F-04-0000_O-3_R-3" />
+                <ComObjectRefRef RefId="M-00FA_A-0A0F-04-0000_O-4_R-4" />
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-9_R-9">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A0F-04-0000_O-5_R-5" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A0F-04-0000_PB-3" Name="Setpoints" Text="Setpoints">
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-10_R-10" />
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-11_R-11" />
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-12_R-12" />
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-13_R-13" />
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-14_R-14" />
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-15_R-15" />
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-16_R-16" />
+                <ComObjectRefRef RefId="M-00FA_A-0A0F-04-0000_O-6_R-6" />
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A0F-04-0000_PB-4" Name="Controller" Text="Controller">
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-17_R-17" />
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-17_R-17">
+                  <when test="0">
+                    <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-18_R-18" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-17_R-17">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-19_R-19" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-17_R-17">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-20_R-20" />
+                  </when>
+                </choose>
+                <ParameterRefRef RefId="M-00FA_A-0A0F-04-0000_P-21_R-21" />
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-17_R-17">
+                  <when test="0">
+                    <ComObjectRefRef RefId="M-00FA_A-0A0F-04-0000_O-7_R-7" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A0F-04-0000_P-17_R-17">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A0F-04-0000_O-8_R-8" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Hardware>
+        <Hardware Id="M-00FA_H-2575-1" Name="vKNX Room Thermostat" SerialNumber="2575" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+          <Products>
+            <Product Id="M-00FA_H-2575-1_P-VKNXRT1" Text="vKNX Room Thermostat" OrderNumber="VKNXRT1" IsRailMounted="false" DefaultLanguage="en-US">
+              <RegistrationInfo RegistrationStatus="Registered" />
+            </Product>
+          </Products>
+          <Hardware2Programs>
+            <Hardware2Program Id="M-00FA_H-2575-1_HP-0A0F-04-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A0F-04-0000" />
+              <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
+            </Hardware2Program>
+          </Hardware2Programs>
+        </Hardware>
+      </Hardware>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>
