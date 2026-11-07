@@ -192,7 +192,7 @@ public final class BlindBehavior extends DeviceBehavior {
 	}
 
 	@Override
-	public Map<String, Object> view() {
+	public synchronized Map<String, Object> view() {
 		final var m = newView();
 		for (int c = 0; c < N; c++) {
 			final int n = c + 1;
@@ -200,7 +200,14 @@ public final class BlindBehavior extends DeviceBehavior {
 			m.put("n" + n, dev.paramText(pre(c) + "Name"));
 			m.put("pos" + n, (int) Math.round(pos[c]));
 			m.put("dir" + n, dir[c]);
+			m.put("lock" + n, locked(c));
+			m.put("wr" + n, reaction(c, 0));
+			m.put("rr" + n, reaction(c, 1));
 		}
+		m.put("windAlarm", alarm[0]);
+		m.put("rainAlarm", alarm[1]);
+		m.put("windSilent", silent[0]);
+		m.put("rainSilent", silent[1]);
 		return m;
 	}
 }

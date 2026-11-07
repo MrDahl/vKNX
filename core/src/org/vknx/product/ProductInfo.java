@@ -22,7 +22,7 @@ public final class ProductInfo {
 			Map.entry("dimmer", new Info("Dimming actuator, 4 channels", "Actuator", "lamp",
 					"Four channels with switch, relative dimming (4 bit), brightness value (1 byte) and status. Each channel can be disabled and named.")),
 			Map.entry("blind-actuator", new Info("Blind actuator, 4 channels", "Actuator", "blind",
-					"Four blinds with move up/down, stop and position status, separate travel times up and down. Each blind can be disabled and named.")),
+					"Four blinds with move up/down, stop and position status, separate travel times up and down. Wind and rain alarm objects retract awnings and lock the blinds. Each blind can be disabled and named.")),
 			Map.entry("multisensor", new Info("Multisensor", "Sensor", "temp",
 					"CO₂, humidity, brightness, temperature, pressure and wind. Each value has its own object and send settings in ETS and can be disabled.")),
 			Map.entry("info-display", new Info("Info display, 5 screens", "Display", "display",
