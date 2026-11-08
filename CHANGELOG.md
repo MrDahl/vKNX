@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.11.1] - 2026-11-08
 
 ### Fixed
 - **A partial download from ETS could fail with "Device does not respond" and leave the device at "Download in progress"** (full download after removing the device fixed it). Cause: after vKNX had been restarted, a device restored from its state file told ETS that its *verify mode* was on, but did not act on it: it wrote the first memory block (the log said `memory write ... -> ok`) and never answered it, so ETS waited, repeated the write and gave up. The device now takes verify mode from the property ETS reads, so what ETS sees and what the device does is the same. Found in the telegram log and vKNX log of a failing weather station download; a new test (`DownloadResumeTest`) restores a device from its state file and sends the same classic 12 byte memory write; it fails without the fix and passes with it. Devices that were stuck need no special treatment: download again.
