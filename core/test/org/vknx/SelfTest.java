@@ -71,6 +71,21 @@ public final class SelfTest {
 			return sendWait(d, Priority.LOW, apdu, 0x3D6, 4, 254, Duration.ofSeconds(3));
 		}
 
+		/**
+		 * The classic A_Memory_Write (0x280) as ETS sends it, answered with A_Memory_Response (0x240) when the device is in
+		 * verify mode. Calimero's own writeMemory takes the extended memory services for our devices, which always answer.
+		 * Returns the response APDU; throws KNXTimeoutException when the device does not answer.
+		 */
+		byte[] classicMemoryWrite(final Destination d, final int address, final byte[] data) throws Exception {
+			final byte[] asdu = new byte[3 + data.length];
+			asdu[0] = (byte) data.length;
+			asdu[1] = (byte) (address >> 8);
+			asdu[2] = (byte) address;
+			System.arraycopy(data, 0, asdu, 3, data.length);
+			return sendWait(d, Priority.LOW, io.calimero.DataUnitBuilder.createLengthOptimizedAPDU(0x280, asdu), 0x240, 2, 65,
+					Duration.ofSeconds(3));
+		}
+
 		/** A_Open_Routing_Table_Req (0x3C0): ETS sends it before it touches the coupler's filter table; no response. */
 		void openRoutingTable(final Destination d) throws Exception {
 			send(d, Priority.LOW, io.calimero.DataUnitBuilder.createAPDU(0x3C0));

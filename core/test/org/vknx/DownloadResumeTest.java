@@ -73,13 +73,15 @@ public final class DownloadResumeTest {
 				final byte[] mem = ets.mc.readMemory(d, tableRef, 10);
 				boolean answered;
 				try {
-					ets.mc.writeMemory(d, tableRef, mem);
-					answered = true;
+					// the classic memory write with 12 bytes, as ETS sent it (maximum APDU length 15 - 3)
+					final byte[] twelve = java.util.Arrays.copyOf(mem, 12);
+					final byte[] apdu = ets.mc.classicMemoryWrite(d, tableRef, twelve);
+					answered = apdu != null;
 				}
 				catch (final io.calimero.KNXTimeoutException | io.calimero.KNXRemoteException e) {
 					answered = false;
 				}
-				check("a 10 byte memory write to the restored device is answered (verify mode)", answered);
+				check("a 12 byte memory write to the restored device is answered (verify mode)", answered);
 			}
 			finally {
 				d.destroy();
