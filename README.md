@@ -9,7 +9,7 @@
 Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://www.marcdahl.dk). Goal: students program **virtual devices from real ETS** (import the products, assign an individual address, set parameters and group addresses, press the programming button, download) without any physical KNX hardware – and then operate buttons, lamps, dimmers, blinds and sensors in a single control panel. Windows is the target platform; only our own generic teaching products are included.
 
 > ## Status: prototype
-> Confirmed in ETS 6.4 by the project owner (older versions): connection, import, addressing and download for the former single-channel products. **The multi-channel products of 0.5.0 have not been tried in ETS yet.** The installer/auto-update has not been tried on real student PCs. See `docs/limitations.md`. Nothing may be described as "tested with ETS" before that test has been run.
+> Confirmed in ETS 6.4 by the project owner: connection, import, addressing and download for the push button, switch actuator, dimmer, slider push button and the multisensor (version 1). **The newest products (binary input, room thermostat, heating actuator, weather station), the weather alarms of the blind actuator, the changed multisensor and the other products listed below as "not tried" have not been tried in ETS yet.** See `docs/limitations.md`. Nothing may be described as "tested with ETS" before that test has been run.
 
 ## What is included
 - Java 21 + [Calimero](https://github.com/calimero-project) (KNXnet/IP server, virtual devices) – see `docs/decisions.md`
@@ -17,7 +17,7 @@ Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://w
 - ETS product XML generated from the same product definition the backend runs on
 - Control panel (light/dark) with three workspaces: *Installation* (catalogue, device details, programming button, parameters, objects), *Simulation* (operating cards or floor plan, compact telegram monitor underneath) and *Monitor* (telegram table with filters, group address overview with configured-vs-observed)
 - Windows application with installer, its own window (WebView2) and "Check for updates" – see `CHANGELOG.md`
-- Not yet: scenes/environment panel, logic controller (see `docs/limitations.md`)
+- Not yet: an environment panel (sun, outdoor weather shown on the plan), cooling in the thermostat, an ETS plug-in for the logic editor (see `docs/limitations.md`)
 
 ## Build and run
 Requires JDK 21 and git (no Maven/Gradle).
@@ -51,7 +51,7 @@ vKNX uses a penguin as its program icon. The original blue "V" icon is built int
 |---|---|---|
 | **Java 21 (JDK)** | Programming language and runtime. Everything is built with plain `javac` – no Maven/Gradle (Maven Central is not needed) | GPLv2+CPE (OpenJDK) |
 | **[Calimero](https://github.com/calimero-project)** (`calimero-core`, `calimero-device`, `calimero-server`) | The KNX protocol in Java: telegrams, datapoint types, virtual devices with memory and tables (`calimero-device`), and the KNXnet/IP server that ETS sees as an IP interface (`calimero-server`). Fetched at build time at the pinned commits in `third_party/PINS.txt`, not copied into the repo. One small local patch (`third_party/patches/`) lets devices live on any area/line | GPLv2 + Classpath exception |
-| **vKNX code** (`core/`) | Product descriptions, device behaviour (buttons, actuators, dimmer, blinds, multisensor), ETS download handling, persistence, web panel and telegram monitor | Apache-2.0 |
+| **vKNX code** (`core/`) | Product descriptions, device behaviour (buttons, binary input, actuators, dimmer, blinds, heating, thermostat, sensors), ETS download handling, persistence, web panel and telegram monitor | Apache-2.0 |
 | **Web panel** (built-in HTTP server + plain HTML/JS) | Operating buttons, showing lamps/dimmers/blinds/sensors and the telegram monitor | part of vKNX |
 | **Product XML generator** (`ProductXmlGenerator`) | Writes the ETS product files (`products/*.xml`) from the same product definitions the simulator uses, so ETS parameters and simulator cannot drift apart | part of vKNX |
 | **[OpenKNXproducer](https://github.com/OpenKNX/OpenKNXproducer)** | Converts product XML to `.knxprod`, which ETS can import. Called through `tools/make-knxprod.ps1`. Needs ETS installed on the PC because it uses ETS's own signing DLLs | GPL-3.0 (used as an external tool, not bundled) |

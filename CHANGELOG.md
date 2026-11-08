@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.11.0] - 2026-11-08
 
 ### Added
 - **New product: Binary input, 4 inputs.** Four inputs for potential-free contacts (push buttons, switches, window contacts). Every input can be disabled and named in ETS and has one function: **Switching** (a command - on, off, toggle or nothing - when the contact closes and another when it opens, with optional cyclic sending of the state), **Relative dimming** (short press switches, long press dims, opening after a long press sends STOP) or **Blinds** (short press step/stop, long press move up or down). On the card every input has a large button that closes the contact while you hold it (a push button) and a small button that closes and opens it for good (a switch or window contact). Also on the floor plan: click the symbol to close or open the contact.
@@ -16,6 +16,7 @@ The text under each version is also shown as the release notes on GitHub and in 
 ### Fixed
 - **Multisensor: temperature (and wind speed) from ETS were shown divided by 10.** The parameter was in tenths of a degree, so 20 in ETS (meaning 20 degrees) was shown as 2.0 degrees. The parameter is now in **whole degrees** (and whole m/s) with a separate **Tenths (0-9)** parameter (21 and 5 mean 21.5 degrees; for negative values the tenths go away from zero: -3 and 4 mean -3.4). The random range is entered in whole degrees too and the random values have a resolution of 0.1. The other four measurements were never affected.
   - **You must import the new `vknx-multisensor.knxprod` and download the multisensor again.** Parameter values stored in an old ETS project (for example 215 for 21.5 degrees) are outside the new range; set them again.
+- **Thermostat card:** the operating mode buttons and the setpoint buttons wrap inside the card instead of running out of it.
 - **Top bar:** the top bar no longer runs out of the window on narrow windows (below 600 px the tabs show only their icons, below 380 px everything gets a little tighter); the version number is hidden when the window is narrow.
 
 ### Tests
