@@ -114,8 +114,14 @@ public record ParamDef(int id, String name, String text, int byteOffset, int bit
 			if ((b & 0xC0) == 0x80)
 				continue; // continuation byte, look further back
 			final int need = b >= 0xF0 ? 4 : b >= 0xE0 ? 3 : b >= 0xC0 ? 2 : 1;
-			if (need > back)
-				end = len - back;
+			if (need > back) {
+				// only if the rest is really UTF-8 text (has multi-byte characters); a lone byte after plain ASCII is a Latin-1 letter
+				boolean multi = false;
+				for (int i = 0; i < len - back; i++)
+					multi |= (a[off + i] & 0x80) != 0;
+				if (multi)
+					end = len - back;
+			}
 			break;
 		}
 		try {
