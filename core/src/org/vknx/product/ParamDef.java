@@ -97,8 +97,27 @@ public record ParamDef(int id, String name, String text, int byteOffset, int bit
 		int n = 0;
 		while (n < sizeBytes() && area[byteOffset + n] != 0)
 			n++;
-		final String s = new String(area, byteOffset, n, StandardCharsets.ISO_8859_1).stripTrailing();
+		final String s = decode(area, byteOffset, n).stripTrailing();
 		return s.isEmpty() ? defaultText : s;
+	}
+
+	/**
+	 * Text as ETS stored it. Western text (like the Danish letters) is one byte per character (ISO 8859-1); other scripts,
+	 * if ETS stores them at all, can only be UTF-8. Bytes that form valid UTF-8 are read as UTF-8, everything else as
+	 * ISO 8859-1; a character cut in half at the end of the field (the field is a fixed number of bytes) is dropped.
+	 */
+	static String decode(final byte[] a, final int off, final int len) {
+		for (int cut = 0; cut <= 3 && cut <= len; cut++) {
+			try {
+				return StandardCharsets.UTF_8.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+						.onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+						.decode(java.nio.ByteBuffer.wrap(a, off, len - cut)).toString();
+			}
+			catch (final java.nio.charset.CharacterCodingException e) {
+				// try again without the last byte(s)
+			}
+		}
+		return new String(a, off, len, StandardCharsets.ISO_8859_1);
 	}
 
 	/** Writes a value into a parameter area (used for defaults and by tests; the inverse of {@link #read}). */
@@ -113,7 +132,8 @@ public record ParamDef(int id, String name, String text, int byteOffset, int bit
 	}
 
 	public void writeText(final byte[] area, final String s) {
-		final byte[] b = s.getBytes(StandardCharsets.ISO_8859_1);
+		final byte[] b = StandardCharsets.ISO_8859_1.newEncoder().canEncode(s) ? s.getBytes(StandardCharsets.ISO_8859_1)
+				: s.getBytes(StandardCharsets.UTF_8);
 		for (int i = 0; i < sizeBytes(); i++)
 			area[byteOffset + i] = i < b.length ? b[i] : 0;
 	}

@@ -16,7 +16,11 @@ import org.vknx.ui.EventLog;
 
 /** The set of virtual devices of this simulator instance; added/removed from the control panel and remembered in devices.txt. */
 public final class DeviceRegistry {
-	private static final Pattern NAME = Pattern.compile("[A-Za-z0-9_-]{1,20}");
+	/** Names that were allowed before 0.11.1: their state file keeps the name, so older installations still find it. */
+	private static final Pattern PLAIN = Pattern.compile("[A-Za-z0-9_-]{1,20}");
+	/** A name must not look like the line suffix devices.txt appends ("@1.2!"). */
+	private static final Pattern LOOKS_LIKE_LINE = Pattern.compile(".*@\\d{1,2}\\.\\d{1,2}!");
+	public static final int MAX_NAME = 40;
 	private final Path dir;
 	private final Subnet net;
 	private final EventLog log;
@@ -52,10 +56,10 @@ public final class DeviceRegistry {
 			// "name" or "name@a.l!": a "!" marks a line the user chose by hand; without it the device is placed by its address.
 			// (Versions 0.6.2/0.6.3 wrote "name@a.l" for every device, which pinned them to the interface line: ignored.)
 			final String rest = p.length > 1 ? p[1] : p[0];
-			final int at = rest.indexOf('@');
-			final String name = at < 0 ? rest : rest.substring(0, at);
-			final Line where = at < 0 || !rest.endsWith("!") ? null : parseLine(rest.substring(at + 1, rest.length() - 1));
-			add(p[0], name, where);
+			final int at = rest.lastIndexOf('@'); // the name itself may contain an "@"
+			final Line parsed = at < 0 || !rest.endsWith("!") ? null : parseLine(rest.substring(at + 1, rest.length() - 1));
+			final String name = parsed == null ? rest : rest.substring(0, at);
+			add(p[0], name, parsed);
 		}
 		save();
 	}
@@ -88,16 +92,52 @@ public final class DeviceRegistry {
 		final var product = Products.ALL.get(productKey);
 		if (product == null)
 			throw new IllegalArgumentException("unknown product " + productKey);
-		if (!NAME.matcher(name).matches())
-			throw new IllegalArgumentException("name must be 1-20 letters, digits, - or _");
+		final String bad = checkName(name);
+		if (bad != null)
+			throw new IllegalArgumentException(bad);
 		if (devices.stream().anyMatch(d -> d.name().equalsIgnoreCase(name)))
 			throw new IllegalArgumentException("a device called " + name + " already exists");
-		final boolean stored = Files.exists(dir.resolve(name + ".state"));
-		final var d = VirtualDevice.create(name, product, serialFor(name), dir.resolve(name + ".state"), net,
+		final var d = VirtualDevice.create(name, product, serialFor(name), dir.resolve(fileStem(name) + ".state"), net,
 				(src, cat, text) -> log.add(cat, src.name(), text), where);
 		devices.add(d);
 		save();
 		return d;
+	}
+
+	/**
+	 * Any name is allowed: letters of any script, digits, spaces and special characters. Only what would break the
+	 * storage is refused: empty names, line breaks and other control characters, leading or trailing blanks, more than
+	 * {@value #MAX_NAME} characters. @return the problem in words, or null if the name is fine
+	 */
+	public static String checkName(final String name) {
+		if (name == null || name.isEmpty())
+			return "The name must not be empty.";
+		if (!name.equals(name.strip()))
+			return "The name must not start or end with a space.";
+		if (name.codePointCount(0, name.length()) > MAX_NAME)
+			return "The name can have at most " + MAX_NAME + " characters.";
+		if (name.codePoints().anyMatch(c -> Character.isISOControl(c) || c == 0x2028 || c == 0x2029 || c == 0xFFFD))
+			return "The name must not contain line breaks or control characters.";
+		if (LOOKS_LIKE_LINE.matcher(name).matches())
+			return "The name must not end with a line suffix like @1.2!";
+		return null;
+	}
+
+	/**
+	 * Name of the state file (without ".state") for a device. Plain names (letters, digits, - and _, as before) are used
+	 * unchanged; any other name gets its ASCII letters plus a short checksum, so that the file name is valid on every
+	 * file system, the same name always gives the same file and different names give different files.
+	 */
+	public static String fileStem(final String name) {
+		if (PLAIN.matcher(name).matches())
+			return name;
+		final var slug = new StringBuilder();
+		for (final char c : name.toCharArray())
+			if (slug.length() < 12 && (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '-' || c == '_'))
+				slug.append(c);
+		final var crc = new java.util.zip.CRC32();
+		crc.update(name.toLowerCase(java.util.Locale.ROOT).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+		return (slug.length() == 0 ? "device" : slug) + "~" + String.format("%08x", crc.getValue());
 	}
 
 	public synchronized void remove(final String name) throws IOException {
@@ -105,11 +145,12 @@ public final class DeviceRegistry {
 			if (d.name().equals(name)) {
 				d.close();
 				devices.remove(d);
+				final String stem = fileStem(name);
 				try (Stream<Path> s = Files.list(dir)) {
-					for (final Path f : s.filter(f -> f.getFileName().toString().startsWith(name + ".state")).toList())
+					for (final Path f : s.filter(f -> f.getFileName().toString().startsWith(stem + ".state")).toList())
 						Files.deleteIfExists(f);
 				}
-				org.vknx.app.DataFiles.deleteBackupsOf(dir, name);
+				org.vknx.app.DataFiles.deleteBackupsOf(dir, stem);
 				log.add("device", name, "removed (state files deleted)");
 				save();
 				return;

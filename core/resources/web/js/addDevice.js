@@ -6,7 +6,15 @@ import { modal, toast } from './dialogs.js';
 const PREFIX = { 'push-button': 'Button', 'secure-push-button': 'SecButton', 'secure-switch-actuator': 'SecSwitch', 'push-slider': 'Slider', 'switch-actuator': 'Switch', dimmer: 'Dimmer', 'blind-actuator': 'Blind',
   multisensor: 'Sensor', 'info-display': 'Display', logic: 'Logic', coupler: 'Coupler',
   'binary-input': 'Input', thermostat: 'Thermostat', 'heating-actuator': 'Heating', 'weather-station': 'Weather' };
-const NAME_RE = /^[A-Za-z0-9_-]{1,20}$/;
+const MAX_NAME = 40;
+// any characters are fine (spaces, other alphabets, special characters); only what would break the storage is refused (same rules as the server)
+function nameProblem(n) {
+  if (!n) return 'The name must not be empty.';
+  if (Array.from(n).length > MAX_NAME) return `The name can have at most ${MAX_NAME} characters.`;
+  if (/[\u0000-\u001f\u007f-\u009f\u2028\u2029\ufffd]/.test(n)) return 'The name must not contain line breaks or control characters.';
+  if (/@\d{1,2}\.\d{1,2}!$/.test(n)) return 'The name must not end with a line suffix like @1.2!';
+  return '';
+}
 
 function suggest(key) {
   const base = PREFIX[key] || 'Device';
@@ -67,7 +75,8 @@ export function openAddDevice() {
   async function submit(close) {
     const n = name.value.trim();
     if (!chosen) { err.textContent = 'Choose a product first.'; return; }
-    if (!NAME_RE.test(n)) { err.textContent = 'The name must be 1–20 characters: letters, digits, "-" or "_" (no spaces).'; name.focus(); return; }
+    const bad = nameProblem(n);
+    if (bad) { err.textContent = bad; name.focus(); return; }
     if ((S.state?.devices || []).some(d => d.name.toLowerCase() === n.toLowerCase())) { err.textContent = `A device called "${n}" already exists. Choose another name.`; name.focus(); return; }
     const ln = lineIn.value.trim();
     if (ln && !/^\d{1,2}\.\d{1,2}$/.test(ln)) { err.textContent = 'The physical line must look like 1.1 (area.line), or be empty for automatic placement.'; lineIn.focus(); return; }
@@ -90,7 +99,7 @@ export function openAddDevice() {
     title: 'Add device', wide: true,
     body: [h('div', { style: 'display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.7rem' }, search, seg),
       h('div.add-layout', grid, detail),
-      h('div.hint#name-help', { style: 'margin-top:.6rem' }, 'The device is created on the virtual line; ETS then finds it through its programming button. Names: letters, digits, "-" and "_", up to 20 characters.'), err],
+      h('div.hint#name-help', { style: 'margin-top:.6rem' }, 'The device is created on the virtual line; ETS then finds it through its programming button. The name can be anything you like (spaces, any alphabet, special characters), up to 40 characters.'), err],
     buttons: close => { addBtn.onclick = () => submit(close); return [h('label.grow', { style: 'display:flex;gap:.5rem;align-items:center;font-weight:600' }, 'Name', name), h('button.btn', { onclick: close }, 'Cancel'), addBtn]; },
   });
   name.addEventListener('keydown', e => { if (e.key === 'Enter') addBtn.click(); });

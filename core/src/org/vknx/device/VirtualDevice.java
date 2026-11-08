@@ -591,6 +591,24 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		return super.readMemory(startAddress, bytes);
 	}
 
+	/**
+	 * Verify mode (bit 2 of the device control property): ETS reads the property and, if the bit is already set, does not
+	 * write it again; every memory write is then expected to be answered with the data now in memory. Calimero keeps the
+	 * mode in a field that only a property <em>write</em> sets, but the property itself is restored from the state file
+	 * after vKNX has been restarted. Then ETS saw "verify mode on", the device did not answer the first memory write and
+	 * the download failed ("Device does not respond") and stayed at "Download in progress". The property is the truth.
+	 */
+	@Override
+	public boolean isVerifyModeEnabled() {
+		try {
+			final byte[] v = base.getInterfaceObjectServer().getProperty(0, PID.DEVICE_CONTROL, 1, 1);
+			return v != null && v.length > 0 && (v[0] & 0x04) != 0;
+		}
+		catch (final RuntimeException e) {
+			return super.isVerifyModeEnabled();
+		}
+	}
+
 	@Override
 	public ServiceResult<Void> writeMemory(final int startAddress, final byte[] data) {
 		final var r = super.writeMemory(startAddress, data);
