@@ -74,6 +74,35 @@ public final class Main {
 					+ org.vknx.sim.FrameFormatter.format(f), tg);
 		});
 
+		// ETS connections come and go without a trace in the telegram log: write them to the log (what a disconnect looked like)
+		final var watcher = new Thread(() -> {
+			final var known = new java.util.HashMap<String, Long>();
+			while (!Thread.currentThread().isInterrupted()) {
+				try {
+					Thread.sleep(400);
+				}
+				catch (final InterruptedException e) {
+					return;
+				}
+				final var now = new java.util.HashMap<String, Subnet.Tunnel>();
+				for (final var t : net.linkStatus().tunnels())
+					now.put(t.address() + " " + t.type(), t);
+				for (final var e : now.entrySet())
+					if (known.putIfAbsent(e.getKey(), System.currentTimeMillis()) == null)
+						log.add("connection", "", "KNXnet/IP connection opened: " + e.getKey() + " (" + now.size() + " open)");
+				for (final var it = known.entrySet().iterator(); it.hasNext();) {
+					final var e = it.next();
+					if (!now.containsKey(e.getKey())) {
+						log.add("connection", "", "KNXnet/IP connection closed: " + e.getKey() + " after "
+								+ (System.currentTimeMillis() - e.getValue()) / 1000 + " s (" + now.size() + " open)");
+						it.remove();
+					}
+				}
+			}
+		}, "vknx-connection-log");
+		watcher.setDaemon(true);
+		watcher.start();
+
 		final var registry = new DeviceRegistry(dir, net, log);
 		for (final String spec : specs)
 			if (!Products.ALL.containsKey(spec.split(":", 2)[0])) {

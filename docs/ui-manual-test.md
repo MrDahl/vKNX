@@ -84,3 +84,8 @@ Developer tests (in-process mini-ETS, `SceneTest`) cover call, store and learn o
 57. **Weather station + blind actuator (awnings):** link *Wind alarm* of the weather station to *Wind alarm* of the blind actuator (and *Rain alarm* to *Rain alarm*). Set the wind to random 0 to 20 m/s with the threshold 12: when the alarm comes on the blinds set to *Moves up (retracts)* move up and are locked (the card says so; Move/Stop from a key is ignored, the monitor/log says why); when it ends the blinds stay and can be used again. Check the hysteresis (the alarm ends only below threshold minus hysteresis) and the rain alarm.
 58. **Alarm monitoring:** set *Monitor the wind alarm* to 5 minutes on the blind actuator and stop the weather station (remove it or disable the alarm): after five minutes the card shows the wind alarm as active ("station silent") and the blinds retract.
 
+
+## Added after 0.11.0 (free names, restored devices, connection log)
+59. **Free names:** add a device called "Stue lys", one called "Лампа 1" and one with an apostrophe and an ampersand (`Mor's & Far's`). They must appear on the card, in the device list, in the ETS-side list of the monitor and on the floor plan; restart vKNX: the names and the downloads are still there. Remove one: it disappears and its state file is gone from the data folder.
+60. **Partial download after a restart:** download a device from ETS, close and start vKNX again, change one parameter in ETS and do a *partial* download: it must finish (before: "Device does not respond" and "Download in progress").
+61. **Connection log:** open ETS' group monitor, then close it; `vknx.log` (Settings, or the data folder) must have `[connection]` lines for every connection that opened or closed.

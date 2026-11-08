@@ -33,6 +33,7 @@ Import, addressing and download for push button, switch actuator, dimmer, slider
 - No building or environment simulation (only the thermostat's simple room model and the random values of the sensors); no ETS project import.
 - Memory writes are at most 10 data bytes per telegram (device max APDU length 15, Calimero default); ETS follows the property by itself.
 - The multisensor value and interval are set in ETS only; the panel just shows them.
+- Device names are free (40 characters). Text typed into ETS parameters (key, output and channel names) is stored by ETS in a fixed number of bytes: Western letters take one byte, other alphabets (if ETS stores them at all) several, so fewer characters fit; vKNX reads them as UTF-8 when possible and otherwise as ISO 8859-1. What ETS does with non-Latin characters in a text parameter has not been tried.
 
 ## Design
 - Persistence is written on shutdown; a hard kill can lose changes.

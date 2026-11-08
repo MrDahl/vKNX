@@ -3,6 +3,19 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Fixed
+- **A partial download from ETS could fail with "Device does not respond" and leave the device at "Download in progress"** (full download after removing the device fixed it). Cause: after vKNX had been restarted, a device restored from its state file told ETS that its *verify mode* was on, but did not act on it: it wrote the first memory block (the log said `memory write ... -> ok`) and never answered it, so ETS waited, repeated the write and gave up. The device now takes verify mode from the property ETS reads, so what ETS sees and what the device does is the same. Found in the telegram log and vKNX log of a failing weather station download; a new test (`DownloadResumeTest`) restores a device from its state file and sends the same classic 12 byte memory write; it fails without the fix and passes with it. Devices that were stuck need no special treatment: download again.
+
+### Changed
+- **Device names can be anything:** spaces, letters of any alphabet (Cyrillic, Greek, Chinese ...), accents, special characters and emoji, up to 40 characters (before: 20 characters, letters, digits, "-" and "_"). Only empty names, names with line breaks or control characters, names with a space at the start or end, and names ending in `@1.2!` are refused. Names that were allowed before keep their state file; other names get a file name made of their ASCII letters and a checksum (`Name~1a2b3c4d.state`), so the file name is valid on every file system. A device called "Lamp 1" and one called "lamp 1" are still the same name.
+- **Text parameters from ETS (the names of keys, outputs, channels):** read as UTF-8 when the bytes are valid UTF-8, otherwise as ISO 8859-1 as before, so the Danish letters work as they did and other alphabets work if ETS stores them as UTF-8. **Not tried in ETS:** what ETS really writes into a text parameter when you type Cyrillic letters (it may replace them by "?" itself).
+- **Connection log:** vKNX writes every KNXnet/IP connection that opens or closes (address, type, how long it was open) to the log (`vknx.log`, category `connection`), to find out what happens when ETS opens its group monitor.
+
+### Tests
+- New `DownloadResumeTest` and `NamesTest`.
+
 ## [0.11.0] - 2026-11-08
 
 ### Added
