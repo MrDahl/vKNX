@@ -36,12 +36,21 @@ public final class DownloadResumeTest {
 			Thread.sleep(300);
 			ets.downloadAll(addr, new int[] { 0x0B01 }, new int[][] { { 1, 4 } }, new int[5], Products.WEATHER_STATION.params("WindSpeedMode", 1));
 			// like ETS in a full download: write the device control property (verify mode on)
-			var d = ets.mc.createDestination(addr, true);
-			try {
-				ets.mc.rawPropertyWrite(d, 0, PID.DEVICE_CONTROL, new byte[] { 0x04 });
-			}
-			finally {
-				d.destroy();
+			// (the connection of the download may still be closing: wait and repeat, as the other tests do)
+			for (int attempt = 1;; attempt++) {
+				Thread.sleep(2000);
+				final var d0 = ets.mc.createDestination(addr, true);
+				try {
+					ets.mc.rawPropertyWrite(d0, 0, PID.DEVICE_CONTROL, new byte[] { 0x04 });
+					break;
+				}
+				catch (final io.calimero.KNXException e) {
+					if (attempt >= 3)
+						throw e;
+				}
+				finally {
+					d0.destroy();
+				}
 			}
 			link.close();
 
@@ -55,7 +64,7 @@ public final class DownloadResumeTest {
 			ets = new EtsLikeClient(link);
 
 			// ETS only READS the device control property ...
-			d = ets.mc.createDestination(addr, true, false, true);
+			final var d = ets.mc.createDestination(addr, true, false, true);
 			try {
 				final byte[] dc = ets.mc.readProperty(d, 0, PID.DEVICE_CONTROL, 1, 1);
 				check("the restored device reports verify mode on", dc.length > 0 && (dc[0] & 0x04) != 0);
