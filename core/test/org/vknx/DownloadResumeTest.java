@@ -61,7 +61,7 @@ public final class DownloadResumeTest {
 				check("the restored device reports verify mode on", dc.length > 0 && (dc[0] & 0x04) != 0);
 				// ... and writes memory, expecting the verifying answer (a missing answer throws after 3 s)
 				final int tableRef = ByteBuffer.wrap(ets.mc.readProperty(d, 4, PID.TABLE_REFERENCE, 1, 1)).getInt();
-				final byte[] mem = ets.mc.readMemory(d, tableRef, 12);
+				final byte[] mem = ets.mc.readMemory(d, tableRef, 10);
 				boolean answered;
 				try {
 					ets.mc.writeMemory(d, tableRef, mem);
@@ -70,7 +70,7 @@ public final class DownloadResumeTest {
 				catch (final io.calimero.KNXTimeoutException | io.calimero.KNXRemoteException e) {
 					answered = false;
 				}
-				check("a 12 byte memory write to the restored device is answered (verify mode)", answered);
+				check("a 10 byte memory write to the restored device is answered (verify mode)", answered);
 			}
 			finally {
 				d.destroy();

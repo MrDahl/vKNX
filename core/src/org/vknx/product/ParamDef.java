@@ -107,17 +107,25 @@ public record ParamDef(int id, String name, String text, int byteOffset, int bit
 	 * ISO 8859-1; a character cut in half at the end of the field (the field is a fixed number of bytes) is dropped.
 	 */
 	static String decode(final byte[] a, final int off, final int len) {
-		for (int cut = 0; cut <= 3 && cut <= len; cut++) {
-			try {
-				return StandardCharsets.UTF_8.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
-						.onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
-						.decode(java.nio.ByteBuffer.wrap(a, off, len - cut)).toString();
-			}
-			catch (final java.nio.charset.CharacterCodingException e) {
-				// try again without the last byte(s)
-			}
+		int end = len;
+		// a UTF-8 character cut in half at the end of the field: lead byte without all its continuation bytes
+		for (int back = 1; back <= 3 && back <= len; back++) {
+			final int b = a[off + len - back] & 0xff;
+			if ((b & 0xC0) == 0x80)
+				continue; // continuation byte, look further back
+			final int need = b >= 0xF0 ? 4 : b >= 0xE0 ? 3 : b >= 0xC0 ? 2 : 1;
+			if (need > back)
+				end = len - back;
+			break;
 		}
-		return new String(a, off, len, StandardCharsets.ISO_8859_1);
+		try {
+			return StandardCharsets.UTF_8.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+					.onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+					.decode(java.nio.ByteBuffer.wrap(a, off, end)).toString();
+		}
+		catch (final java.nio.charset.CharacterCodingException e) {
+			return new String(a, off, len, StandardCharsets.ISO_8859_1);
+		}
 	}
 
 	/** Writes a value into a parameter area (used for defaults and by tests; the inverse of {@link #read}). */
