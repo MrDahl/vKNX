@@ -34,7 +34,7 @@ public final class DownloadResumeTest {
 			ws.toggleProgrammingMode();
 			check("address assigned", ets.assignAddress(addr));
 			Thread.sleep(300);
-			ets.downloadAll(addr, new int[] { 0x0B01 }, new int[][] { { 1, 4 } }, new int[5], Products.WEATHER_STATION.params());
+			ets.downloadAll(addr, new int[] { 0x0B01 }, new int[][] { { 1, 4 } }, new int[5], Products.WEATHER_STATION.params("WindSpeedMode", 1));
 			// like ETS in a full download: write the device control property (verify mode on)
 			var d = ets.mc.createDestination(addr, true);
 			try {
