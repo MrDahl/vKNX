@@ -19,7 +19,7 @@ import org.vknx.sim.Subnet;
  */
 public final class ApduStartTest {
 	public static void main(final String[] args) throws Exception {
-		final int runs = args.length > 0 ? Integer.parseInt(args[0]) : 40;
+		final int runs = args.length > 0 ? Integer.parseInt(args[0]) : 120;
 		final InetAddress host = java.net.NetworkInterface.networkInterfaces().filter(n -> { try { return n.isUp() && !n.isLoopback(); } catch (Exception e) { return false; } })
 				.flatMap(n -> n.inetAddresses()).filter(a -> a instanceof java.net.Inet4Address).findFirst().orElseThrow();
 		int bad = 0;
