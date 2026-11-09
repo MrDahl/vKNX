@@ -1,0 +1,22 @@
+diff --git a/src/main/java/io/calimero/device/BaseKnxDevice.java b/src/main/java/io/calimero/device/BaseKnxDevice.java
+index 78a584a..0f7e6a3 100644
+--- a/src/main/java/io/calimero/device/BaseKnxDevice.java
++++ b/src/main/java/io/calimero/device/BaseKnxDevice.java
+@@ -789,6 +789,17 @@ public class BaseKnxDevice implements KnxDevice, AutoCloseable
+ 		saveIos();
+ 	}
+ 
++	/**
++	 * vKNX patch: writes the device memory and the interface objects to the state file without closing the device
++	 * (used when a running installation is exported).
++	 */
++	public synchronized void saveState() {
++		if (closed.get())
++			return;
++		saveDeviceMemory();
++		saveIos();
++	}
++
+ 	private void saveIos() {
+ 		if ("".equals(iosResource.toString()))
+ 			return;

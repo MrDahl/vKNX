@@ -1480,6 +1480,11 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		return new byte[] { (byte) (v >>> 24), (byte) (v >>> 16), (byte) (v >>> 8), (byte) v };
 	}
 
+	/** Writes the state of the device (address, download, parameters, logic) to its state file now; the device keeps running. */
+	public void saveState() {
+		base.saveState();
+	}
+
 	@Override
 	public void close() {
 		if (behavior instanceof final CouplerBehavior cb && subnet != null)

@@ -107,7 +107,7 @@ export function createCard(d, handlers) {
       controls.append(howTo('Press and hold a key for a long press. The small light on a key is its status LED. A key set to Scene calls its scene when pressed; if ETS lets the long press store the scene, a short press calls it and a long press stores it. Functions and names are set in ETS.'));
       face = (v, dev) => L.k.forEach((k, i) => {
         const n = i + 1, en = v['e' + n] !== false;
-        k.row.hidden = !en; paintIcon(k.btn.ico, d.name + '|k' + n, /^Scene/.test(v['d' + n] || '') ? 'scene' : 'button'); setText(k.btn.lbl, v['n' + n] || 'Key ' + n); setText(k.d, v['d' + n] || ''); setText(k.l, v['l' + n] || '');
+        k.row.hidden = !en; paintIcon(k.btn.ico, d.name + '|k' + n, /^Scene/.test(v['d' + n] || '') ? 'scene' : 'button'); setText(k.btn.lbl, v['n' + n] || 'Key ' + n); k.btn.title = v['n' + n] || 'Key ' + n; setText(k.d, v['d' + n] || ''); setText(k.l, v['l' + n] || '');
         setCls(k.row, 'on', !!v['s' + n]); setCls(k.btn.led, 'on', !!v['s' + n]);
         setText(k.ga, dev ? gaText(dev, [...range(5 * (n - 1) + 1, 5), 20 + n]) : '');
       });

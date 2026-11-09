@@ -72,6 +72,8 @@ public final class WebUi {
 		server.createContext("/api/logic", this::logic);
 		server.createContext("/api/data", this::dataEndpoint);
 		server.createContext("/api/icons", this::icons);
+		server.createContext("/api/export", this::exportEndpoint);
+		server.createContext("/api/import", this::importEndpoint);
 		server.createContext("/api/add", this::add);
 		server.createContext("/api/location", this::location);
 		server.createContext("/api/remove", ex -> {
@@ -205,6 +207,77 @@ public final class WebUi {
 		}
 		catch (final Exception e) {
 			send(ex, 500, "text/plain", utf8(String.valueOf(e.getMessage())));
+		}
+	}
+
+	/** GET /api/export: the installation as one {@code .vknx} file (devices with state, floor plan, layout, icons). */
+	private void exportEndpoint(final HttpExchange ex) throws IOException {
+		try {
+			final byte[] zip = org.vknx.device.InstallationFile.export(registry, org.vknx.app.Version.current());
+			final String stamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"));
+			ex.getResponseHeaders().add("Content-Disposition", "attachment; filename=\"vKNX-installation-" + stamp + org.vknx.device.InstallationFile.EXTENSION + "\"");
+			log.add("installation", "-", "exported " + devices.size() + " device(s)");
+			send(ex, 200, "application/zip", zip);
+		}
+		catch (final Exception e) {
+			send(ex, 500, "text/plain", utf8("Could not export the installation: " + e.getMessage()));
+		}
+	}
+
+	/**
+	 * POST /api/import?dry=1 (body: the file): checks the file and answers what it contains, changing nothing.
+	 * POST /api/import: replaces the installation by the file. The current installation is first saved as
+	 * backup-before-import.vknx in the data folder.
+	 */
+	private void importEndpoint(final HttpExchange ex) throws IOException {
+		if (!"POST".equals(ex.getRequestMethod())) {
+			send(ex, 405, "text/plain", utf8("POST the .vknx file"));
+			return;
+		}
+		// replaces everything: only our own page may ask for it (a custom header cannot be sent by another web site
+		// without a CORS preflight, which this server never allows)
+		if (ex.getRequestHeaders().getFirst("X-Vknx") == null) {
+			send(ex, 403, "text/plain", utf8("not from the vKNX page"));
+			return;
+		}
+		try {
+			final byte[] body = ex.getRequestBody().readNBytes((int) org.vknx.device.InstallationFile.MAX_COMPRESSED + 1);
+			final org.vknx.device.InstallationFile.Content c;
+			try {
+				c = org.vknx.device.InstallationFile.read(body);
+			}
+			catch (final IllegalArgumentException e) {
+				send(ex, 400, "text/plain", utf8(e.getMessage()));
+				return;
+			}
+			String backup = "";
+			if (!"1".equals(param(ex.getRequestURI(), "dry", ""))) {
+				final var f = registry.dir().resolve("backup-before-import" + org.vknx.device.InstallationFile.EXTENSION);
+				java.nio.file.Files.write(f, org.vknx.device.InstallationFile.export(registry, org.vknx.app.Version.current()));
+				backup = f.toAbsolutePath().toString();
+				registry.importInstallation(c);
+			}
+			final var sm = c.summary();
+			final var sb = new StringBuilder("{\"vknx\":").append(q(sm.vknx())).append(",\"created\":").append(q(sm.created()))
+					.append(",\"plan\":").append(sm.plan()).append(",\"layout\":").append(sm.layout()).append(",\"icons\":").append(sm.icons())
+					.append(",\"backup\":").append(q(backup)).append(",\"devices\":[");
+			boolean first = true;
+			for (final var d : sm.devices()) {
+				sb.append(first ? "" : ",").append("{\"product\":").append(q(d.product())).append(",\"productName\":").append(q(d.productName()))
+						.append(",\"name\":").append(q(d.name())).append(",\"line\":").append(d.line() == null ? "null" : q(d.line()))
+						.append(",\"secure\":").append(d.secure()).append(",\"state\":").append(d.hasState()).append('}');
+				first = false;
+			}
+			sb.append("],\"skipped\":[");
+			first = true;
+			for (final var n : sm.skipped()) {
+				sb.append(first ? "" : ",").append(q(n));
+				first = false;
+			}
+			send(ex, 200, "application/json; charset=utf-8", utf8(sb.append("]}").toString()));
+		}
+		catch (final Exception e) {
+			send(ex, 500, "text/plain", utf8("Could not import the installation: " + e.getMessage()));
 		}
 	}
 

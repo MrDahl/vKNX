@@ -5,12 +5,12 @@ export const conn = { ok: true, failures: 0, lostAt: 0, lastOk: Date.now() };
 
 export class ApiError extends Error {}
 
-async function req(url, { method = 'GET', body, timeout = 5000, raw = false } = {}) {
+async function req(url, { method = 'GET', body, timeout = 5000, raw = false, headers } = {}) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), timeout);
   let res;
   try {
-    res = await fetch(url, { method, body, signal: ctl.signal, cache: 'no-store' });
+    res = await fetch(url, { method, body, headers, signal: ctl.signal, cache: 'no-store' });
   } catch (e) {
     markFail();
     throw new ApiError('The simulator is not responding. Is vKNX still running?');
@@ -58,6 +58,12 @@ export const api = {
   saveLine: v => req('/api/settings?' + q({ line: v }), { method: 'POST' }),
   saveRouting: v => req('/api/settings?' + q({ routing: String(v) }), { method: 'POST' }),
   restart: () => req('/api/restart', { method: 'POST' }),
+  exportInstallation: async () => {
+    const res = await req('/api/export', { raw: true, timeout: 60000 });
+    const m = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') || '');
+    return { blob: await res.blob(), name: m ? m[1] : 'vKNX-installation.vknx' };
+  },
+  importInstallation: (file, dry) => req('/api/import' + (dry ? '?dry=1' : ''), { method: 'POST', body: file, timeout: 120000, headers: { 'X-Vknx': '1' } }),
   dataInfo: () => req('/api/data'),
   dataClear: (what, extra = {}) => req('/api/data/clear?' + q({ what, ...extra }), { method: 'POST', timeout: 30000 }),
 };

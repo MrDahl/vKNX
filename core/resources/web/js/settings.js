@@ -90,6 +90,57 @@ function dataSection() {
   return h('section.section', { style: 'border:0;margin-bottom:1.1rem' }, h('h3', { style: 'margin-bottom:.5rem' }, 'Data and cleanup'), box);
 }
 
+/** "Share": the whole installation as one file, to send to somebody else (export) or to open one that was sent (import). */
+function shareSection() {
+  const sec = (title, ...c) => h('section.section', { style: 'border:0;margin-bottom:1.1rem' }, h('h3', { style: 'margin-bottom:.5rem' }, title), ...c);
+  const exportMsg = h('div.hint', { style: 'margin-top:.5rem' });
+  async function doExport(btn) {
+    btn.disabled = true; setText(exportMsg, 'Packing…'); exportMsg.className = 'hint';
+    try {
+      const { blob, name } = await api.exportInstallation();
+      const url = URL.createObjectURL(blob);
+      const a = h('a', { href: url, download: name, style: 'display:none' });
+      document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      setText(exportMsg, `Saved as ${name} (${fmtBytes(blob.size)}). Look in your Downloads folder.`);
+    } catch (e) { setText(exportMsg, 'Could not export: ' + e.message); exportMsg.className = 'error-text'; }
+    finally { btn.disabled = false; }
+  }
+  const exportBtn = h('button.btn.primary', { onclick: () => doExport(exportBtn) }, icon('download'), 'Export installation');
+
+  const importMsg = h('div.hint', { style: 'margin-top:.5rem' });
+  const picker = h('input', { type: 'file', accept: '.vknx,application/zip', style: 'display:none', 'aria-label': 'Choose a vKNX installation file',
+    onchange: () => { const f = picker.files[0]; picker.value = ''; if (f) doImport(f); } });
+  async function doImport(file) {
+    setText(importMsg, 'Checking ' + file.name + '…'); importMsg.className = 'hint';
+    let sm;
+    try { sm = await api.importInstallation(file, true); }
+    catch (e) { setText(importMsg, e.message); importMsg.className = 'error-text'; return; }
+    setText(importMsg, '');
+    const when = sm.created ? new Date(sm.created) : null;
+    const current = S.state?.devices?.length ?? 0;
+    const rows = sm.devices.map(d => h('tr', h('td', h('b', d.name)), h('td.hint', d.productName), h('td.mono', d.line || ''), h('td', d.state ? '' : h('span.chip.warn', 'no download'))));
+    const body = h('div',
+      h('p', { style: 'margin-top:0' }, `${file.name}: ${sm.devices.length} device${sm.devices.length === 1 ? '' : 's'}`
+        + (sm.plan ? ', floor plan' : '') + (sm.icons ? ', icons' : '') + (when && !isNaN(when) ? `, saved ${when.toLocaleString()}` : '') + (sm.vknx && sm.vknx !== '?' ? ` with vKNX ${sm.vknx}` : '') + '.'),
+      rows.length ? h('div', { style: 'max-height:14rem;overflow:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:.7rem' }, h('table.tbl', h('tbody', rows))) : null,
+      sm.skipped.length ? h('p.error-text', 'Not imported, because this vKNX does not know the product: ' + sm.skipped.join(', ') + '.') : null,
+      sm.devices.some(d => d.secure) ? h('p.hint', 'The file contains secure devices and their keys.') : null,
+      h('p', h('b', 'This replaces your current installation'), ` (${current} device${current === 1 ? '' : 's'}, its floor plan and icons). A copy of it is saved first as backup-before-import.vknx in the vKNX data folder; import that file to get it back.`));
+    if (!await confirmDialog({ title: 'Import this installation?', message: body, confirmLabel: 'Replace my installation', danger: true })) { setText(importMsg, 'Nothing was changed.'); return; }
+    setText(importMsg, 'Importing…');
+    try { await api.importInstallation(file, false); toast('Installation imported.', 'ok'); setTimeout(() => location.reload(), 600); }
+    catch (e) { setText(importMsg, 'Could not import: ' + e.message); importMsg.className = 'error-text'; }
+  }
+  const importBtn = h('button.btn', { onclick: () => picker.click() }, icon('import'), 'Import installation…');
+  return h('div',
+    sec('Export', h('p.hint', { style: 'margin-top:0' }, 'Saves the whole installation in one file (.vknx) that you can send to someone else: the devices with their addresses and everything ETS has downloaded to them (group addresses, parameters, logic circuits), the floor plan with the placed devices, and the icons you chose.'),
+      exportBtn, exportMsg,
+      h('p.hint', 'The file also contains the security keys of secure devices. To change parameters and group addresses, the receiver still needs your ETS project: send it along.')),
+    sec('Import', h('p.hint', { style: 'margin-top:0' }, 'Opens an installation file from someone else. You see what is in it first, and nothing changes until you confirm. The installation then runs on your computer exactly as it was saved, and you can operate it without ETS.'),
+      importBtn, picker, importMsg));
+}
+
 export function openSettings() {
   const upd = h('div'); const lineMsg = h('div.hint'); 
   const line = h('input.input', { type: 'text', size: 6, value: S.state?.line || '1.1', 'aria-label': 'Line', style: 'width:6rem' });
@@ -149,6 +200,7 @@ export function openSettings() {
         h('div', { style: 'display:flex;gap:.5rem;align-items:center' }, line, h('button.btn', { onclick: saveLine }, icon('restart'), 'Save and restart')), lineMsg),
       sec('Status', h('p.hint', { style: 'margin-top:0' }, 'Whether ETS or another IP client is connected, and when the last frame arrived.'), h('button.btn', { onclick: openConnection }, icon('info'), 'Show connection status'))]],
     ['simulation', 'Simulation', () => [sec('Lines and couplers', routing)]],
+    ['share', 'Share', () => [shareSection()]],
     ['maintenance', 'Maintenance', () => [dataSection()]],
     ['about', 'About', () => [sec('About', h('div', 'Version ', h('b', S.state?.version || '?')), h('p', { style: 'margin:.3rem 0' }, 'Developed by ', h('b', 'Marc Sonne Dahl'), ' · ', h('a', { href: 'https://www.marcdahl.dk', target: '_blank', rel: 'noopener' }, 'www.marcdahl.dk')), h('p.hint', { style: 'margin:.3rem 0' }, 'Open source under the Apache License 2.0 · ', h('a', { href: 'https://github.com/MrDahl/vKNX', target: '_blank', rel: 'noopener' }, 'github.com/MrDahl/vKNX')), h('p.hint', { style: 'margin:.3rem 0 .6rem' }, 'vKNX is an open-source teaching simulator. The generated product files are not made or endorsed by the KNX Association.'), check, upd)]],
   ];

@@ -48,24 +48,38 @@ public final class DeviceRegistry {
 			list.addAll(List.of("push-button:Tryk1", "switch-actuator:Lampe1"));
 		resetOldSchema();
 		for (final String spec : list) {
-			final String[] p = spec.split(":", 2);
-			if (!Products.ALL.containsKey(p[0])) {
-				log.add("device", p.length > 1 ? p[1] : p[0], "skipped: product " + p[0] + " no longer exists in this vKNX version (add the new product instead)");
+			final var sp = parseSpec(spec);
+			if (!Products.ALL.containsKey(sp.product())) {
+				log.add("device", sp.name(), "skipped: product " + sp.product() + " no longer exists in this vKNX version (add the new product instead)");
 				continue;
 			}
-			// "name" or "name@a.l!": a "!" marks a line the user chose by hand; without it the device is placed by its address.
-			// (Versions 0.6.2/0.6.3 wrote "name@a.l" for every device, which pinned them to the interface line: ignored.)
-			final String rest = p.length > 1 ? p[1] : p[0];
-			final int at = rest.lastIndexOf('@'); // the name itself may contain an "@"
-			final Line parsed = at < 0 || !rest.endsWith("!") ? null : parseLine(rest.substring(at + 1, rest.length() - 1));
-			final String name = parsed == null ? rest : rest.substring(0, at);
-			add(p[0], name, parsed);
+			add(sp.product(), sp.name(), sp.line());
 		}
 		save();
 	}
 
+	/** One line of devices.txt: the product, the name and the line the device was wired to by hand (null = placed by its address). */
+	record Spec(String product, String name, Line line) {}
+
+	/**
+	 * Reads "product:name" or "product:name@a.l!": a "!" marks a line the user chose by hand; without it the device is
+	 * placed by its address. (Versions 0.6.2/0.6.3 wrote "name@a.l" for every device, which pinned them to the interface
+	 * line: ignored.)
+	 */
+	static Spec parseSpec(final String spec) {
+		final String[] p = spec.split(":", 2);
+		final String rest = p.length > 1 ? p[1] : p[0];
+		final int at = rest.lastIndexOf('@'); // the name itself may contain an "@"
+		final Line parsed = at < 0 || !rest.endsWith("!") ? null : parseLine(rest.substring(at + 1, rest.length() - 1));
+		return new Spec(p[0], parsed == null ? rest : rest.substring(0, at), parsed);
+	}
+
+	static String specLine(final String product, final String name, final Line line) {
+		return product + ":" + name + (line == null ? "" : "@" + line + "!");
+	}
+
 	/** Version of the stored device state. Changed when products were redesigned: older state (download, parameters) is dropped. */
-	private static final String SCHEMA = "4";
+	static final String SCHEMA = "4";
 
 	private void resetOldSchema() throws IOException {
 		final Path f = dir.resolve("state-schema.txt");
@@ -197,9 +211,42 @@ public final class DeviceRegistry {
 
 	public void closeAll() { devices.forEach(VirtualDevice::close); }
 
+	/** The lines of devices.txt for the devices as they are now. */
+	List<String> specLines() {
+		return devices.stream().map(d -> specLine(d.product().key(), d.name(), d.location())).toList();
+	}
+
+	/** Writes the state of every running device to its state file (used when the installation is exported). */
+	public synchronized void saveAll() {
+		devices.forEach(VirtualDevice::saveState);
+	}
+
+	/**
+	 * Replaces the whole installation (devices with their state, floor plan, layout, icons) by the content of an
+	 * installation file. The current devices are closed and their files deleted first; the imported devices are then
+	 * restored from the imported state files, exactly as after a restart.
+	 */
+	public synchronized void importInstallation(final InstallationFile.Content c) throws Exception {
+		for (final var d : devices)
+			d.close();
+		devices.clear();
+		try (Stream<Path> s = Files.list(dir)) {
+			for (final Path f : s.filter(Files::isRegularFile).toList()) {
+				final String n = f.getFileName().toString();
+				if (n.contains(".state") || n.equals("devices.txt") || org.vknx.app.DataFiles.isPlan(n))
+					Files.delete(f);
+			}
+		}
+		for (final var e : c.files().entrySet())
+			Files.write(dir.resolve(e.getKey()), e.getValue());
+		Files.writeString(dir.resolve("state-schema.txt"), SCHEMA);
+		restoreOrDefault(List.of());
+		log.add("device", "-", "installation imported: " + devices.size() + " device(s)");
+	}
+
+
 	private void save() throws IOException {
-		Files.write(dir.resolve("devices.txt"),
-				devices.stream().map(d -> d.product().key() + ":" + d.name() + (d.location() == null ? "" : "@" + d.location() + "!")).toList());
+		Files.write(dir.resolve("devices.txt"), specLines());
 	}
 
 	static byte[] serialFor(final String name) {

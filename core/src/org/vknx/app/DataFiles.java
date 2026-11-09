@@ -48,7 +48,8 @@ public final class DataFiles {
 				new Item("plan", (int) plan[0], plan[1]), new Item("state", (int) state[0], state[1]));
 	}
 
-	private static boolean isPlan(final String n) {
+	/** True for the floor plan image, its layout and the icon choices. */
+	public static boolean isPlan(final String n) {
 		if (n.equals("plan-layout.json") || n.equals("icons.json"))
 			return true;
 		return n.startsWith("plan.") && PLAN_TYPES.contains(n.substring(5));
