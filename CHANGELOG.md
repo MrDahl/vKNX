@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.12.0] - 2026-11-09
 
 ### Added
 - **Share an installation: export and import (Settings → Share).** *Export installation* saves everything in one file (`vKNX-installation-<date>.vknx`, a zip, a few KB to a few MB): the devices with their addresses and everything ETS downloaded to them (group addresses, parameters, logic circuits), the lines they are wired to, the floor plan with the placed devices and the icons. Whoever opens it with *Import installation…* sees the same simulation, with the same addresses and group addresses, and can operate it without ETS (to change parameters the receiver still needs your ETS project, so send it along). Import first **checks the file and shows what is in it**, and changes nothing until you confirm. It **replaces** the current installation; a copy of the current one is saved first as `backup-before-import.vknx` in the data folder (import that file to get it back). Refused with a reason in words: files that are not a vKNX installation, files from a newer vKNX or with another device layout, invalid or duplicate device names; products this vKNX does not know are skipped and listed. The file is read as untrusted input: only the known file names are taken, nothing is written to a path from the file, sizes are limited. The import call must come from the vKNX page itself (a custom header), so another web page cannot trigger it. The file contains the security keys of secure devices.

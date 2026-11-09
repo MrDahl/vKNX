@@ -90,7 +90,7 @@ Developer tests (in-process mini-ETS, `SceneTest`) cover call, store and learn o
 60. **Partial download after a restart:** download a device from ETS, close and start vKNX again, change one parameter in ETS and do a *partial* download: it must finish (before: "Device does not respond" and "Download in progress").
 61. **Connection log:** open ETS' group monitor, then close it; `vknx.log` (Settings, or the data folder) must have `[connection]` lines for every connection that opened or closed.
 
-## Added after 0.11.1 (share, key grid)
+## Added in 0.12.0 (share, key grid)
 62. **Key grid:** give a push button long key names in ETS (for example "Tryk - Persienne - Stue - 1") and download: the keys on the card stay inside the card, the name wraps over two lines and the full name is the tooltip. Try the narrow window and the Large size setting.
 63. **Export:** Settings → Share → Export installation. The Windows window must save `vKNX-installation-<date>.vknx` (look in Downloads; **check that the WebView2 window really offers the download**). The file is a zip: open it and see `devices.txt`, `*.state`, `plan.*`.
 64. **Import:** on a second PC (or after *Start a new installation*) choose *Import installation…* and the file: the dialog lists the devices and says what will be replaced; *Cancel* changes nothing; *Replace my installation* loads it. The devices have the addresses and downloads of the sender, the floor plan and icons are there, `backup-before-import.vknx` is in the data folder. Then download a *partial* change from ETS to an imported device (the sender's ETS project is needed). Try a wrong file (a .zip or .txt renamed to .vknx): the message says it is not an installation file.
