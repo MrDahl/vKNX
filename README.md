@@ -1,6 +1,6 @@
 # vKNX
 
-<img src="assets/Pingi.svg" alt="vKNX Pingi Logo" width="170">
+<img src="assets/og-image.png" alt="vKNX Banner Logo" width="100%">
 
 <p align="left">
   <img src="assets/marc_dahl_logo.svg" alt="Marc Sonne Dahl" width="200">
