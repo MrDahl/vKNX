@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.12.1] - 2026-11-09
 
 ### Fixed
 - **The interface could start with a maximum APDU length of 15 and then stay at 15 until vKNX was restarted** (ETS: "restricted to 15 by capabilities of the bus interface"; downloads that need long frames failed; restarting vKNX or changing area/line helped, but only until the next unlucky start). Cause found and reproduced: while the KNXnet/IP server starts, Calimero writes the TP1 default (15) into the interface objects. vKNX set 254 once at start, and on a busy computer the server's own write could come *after* that; since 0.8 clients cannot write the value (read only), so the 15 stayed. In a test that starts the server 40 times on a busy machine one start ended at 15. Now the server never writes anything but 254 (a small patch, `calimero-server-keep-apdu.patch`), and the same 120 starts on a busy machine all end at 254. As a second line of defence vKNX checks twice a second that the three places that hold the value (device object pid 56, cEMI server object pid 68, the medium settings) still say 254 and puts them back if not, writing `[interface] ... set back to 254` to `vknx.log`. The server's own messages about reset requests, refused writes and warnings now also go to `vknx.log` (`[interface] server: ...`). Other ways to get 15 (UDP and TCP tunnels, abruptly ended connections, address changes, device management writes, reset, writes over the bus) were tried in `ApduStaysTest` and none changes it. If ETS keeps its own copy of the value, a stored 15 there is not touched by this.
