@@ -22,6 +22,8 @@ import org.vknx.ui.WebUi;
  * </pre>
  */
 public final class Main {
+	private static java.util.logging.Logger serverLog;
+
 	public static void main(final String[] args) throws Exception {
 		Path dir = Path.of("runtime");
 		int port = 3671, web = 8080;
@@ -74,6 +76,19 @@ public final class Main {
 					+ org.vknx.sim.FrameFormatter.format(f), tg);
 		});
 
+		// what the KNXnet/IP server itself says about resets and refused writes (it only logs to the console): into vknx.log too
+		serverLog = java.util.logging.Logger.getLogger("io.calimero.server"); // kept in a field: java.util.logging only holds loggers weakly
+		serverLog.addHandler(new java.util.logging.Handler() {
+			@Override public void publish(final java.util.logging.LogRecord r) {
+				final String m = r.getMessage() == null ? "" : r.getMessage();
+				if (r.getLevel().intValue() >= java.util.logging.Level.WARNING.intValue()
+						|| m.contains("reset request") || m.contains("refuse write") || m.contains("restarting"))
+					log.add("interface", "", "server: " + java.text.MessageFormat.format(m, r.getParameters() == null ? new Object[0] : r.getParameters()));
+			}
+			@Override public void flush() {}
+			@Override public void close() {}
+		});
+
 		// ETS connections come and go without a trace in the telegram log: write them to the log (what a disconnect looked like)
 		final var watcher = new Thread(() -> {
 			final var known = new java.util.HashMap<String, Long>();
@@ -84,6 +99,9 @@ public final class Main {
 				catch (final InterruptedException e) {
 					return;
 				}
+				final String repaired = net.keepLongFrames();
+				if (repaired != null)
+					log.add("interface", "", repaired + " (an ETS download that needs long frames would have failed with 'restricted to 15')");
 				final var now = new java.util.HashMap<String, Subnet.Tunnel>();
 				for (final var t : net.linkStatus().tunnels())
 					now.put(t.address() + " " + t.type(), t);

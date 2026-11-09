@@ -3,6 +3,11 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Changed
+- **Interface maximum APDU length (254) is guarded.** Several users of ETS saw the interface drop to 15 bytes now and then ("restricted to 15 by capabilities of the bus interface"), which stopped downloads that need long frames until vKNX was restarted. vKNX checks twice a second that the three places that hold the value (device object pid 56, cEMI server object pid 68, the medium settings the server writes them from) still say 254, puts them back if not, and writes a line `[interface] ... was 15 ... set back to 254` to `vknx.log`. The server's own messages about reset requests, refused writes and warnings now also go to `vknx.log` (`[interface] server: ...`), so a log taken right after the problem shows what happened. **The cause is not found:** the new `ApduStaysTest` opens and closes UDP and TCP tunnels, ends a connection abruptly, changes the interface address, writes 15 over device management (UDP and TCP), writes to the interface over the bus and resets the interface, and the value stays 254 after every step. If ETS keeps its own copy of the value, this does not help; send `vknx.log` (and `console.log`) from right after it happens.
+
 ## [0.12.0] - 2026-11-09
 
 ### Added

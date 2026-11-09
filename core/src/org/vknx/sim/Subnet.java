@@ -98,6 +98,56 @@ public final class Subnet implements AutoCloseable {
 		}
 	}
 
+	/** The interface objects of the KNXnet/IP server itself (what ETS reads over device management); null without a server. */
+	public io.calimero.device.ios.InterfaceObjectServer serverObjects() {
+		try {
+			return server == null ? null : server.getGateway().getServer().getInterfaceObjectServer();
+		}
+		catch (final RuntimeException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Keeps the interface's maximum APDU length at 254: ETS reads it when it connects and refuses every download that
+	 * needs long frames if it sees 15. If anything has changed one of the three places that hold it (the device object,
+	 * the cEMI server object, the medium settings the server writes them from), it is put back.
+	 *
+	 * @return what had to be repaired, in words (for the log), or null if everything was as it should be
+	 */
+	public String keepLongFrames() {
+		if (server == null)
+			return null;
+		try {
+			final var gw = server.getGateway();
+			if (gw == null)
+				return null;
+			final var srv = gw.getServer();
+			final var ios = srv.getInterfaceObjectServer();
+			final var found = new java.util.ArrayList<String>();
+			final byte[] v = { 0, (byte) 254 };
+			final int[][] places = { { io.calimero.device.ios.InterfaceObject.DEVICE_OBJECT, 56 },
+					{ io.calimero.device.ios.InterfaceObject.CEMI_SERVER_OBJECT, 68 } };
+			for (final int[] p : places) {
+				final byte[] now = ios.getProperty(p[0], 1, p[1], 1, 1);
+				final int len = now == null || now.length < 2 ? -1 : ((now[0] & 0xff) << 8) | (now[1] & 0xff);
+				if (len != 254) {
+					found.add((p[0] == io.calimero.device.ios.InterfaceObject.DEVICE_OBJECT ? "device object pid 56" : "cEMI server object pid 68") + " was " + len);
+					ios.setProperty(p[0], 1, p[1], 1, 1, v);
+				}
+			}
+			for (final var sc : srv.getServiceContainers())
+				if (sc.getMediumSettings().maxApduLength() != 254) {
+					found.add("medium settings were " + sc.getMediumSettings().maxApduLength());
+					sc.getMediumSettings().setMaxApduLength(254);
+				}
+			return found.isEmpty() ? null : "interface maximum APDU length changed (" + String.join(", ", found) + "): set back to 254";
+		}
+		catch (final RuntimeException e) {
+			return null; // server starting or shutting down
+		}
+	}
+
 	public static String serverConfig(final String friendlyName, final int port, final int area, final int line) {
 		return """
 				<?xml version="1.0" encoding="UTF-8"?>
