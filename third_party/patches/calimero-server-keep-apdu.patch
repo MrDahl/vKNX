@@ -1,0 +1,26 @@
+--- a/src/io/calimero/server/knxnetip/KNXnetIPServer.java
++++ b/src/io/calimero/server/knxnetip/KNXnetIPServer.java
+@@ -420,7 +420,10 @@
+ 		setProperty(InterfaceObject.CEMI_SERVER_OBJECT, 1, PID.MEDIUM_TYPE, (byte) 0, (byte) medium);
+ 
+ 		final int pidMaxInterfaceApduLength = 68;
+-		setProperty(InterfaceObject.CEMI_SERVER_OBJECT, 1, pidMaxInterfaceApduLength, bytesFromWord(settings.maxApduLength()));
++		// vKNX: the interface always reports long frames (254); the TP1 default of 15 would be written here while the server starts,
++		// after vKNX had set 254, and ETS would then refuse every download that needs long frames
++		setProperty(InterfaceObject.CEMI_SERVER_OBJECT, 1, pidMaxInterfaceApduLength,
++				bytesFromWord(Boolean.getBoolean("vknx.flatNetwork") ? 254 : settings.maxApduLength()));
+ 		final int pidMaxLocalApduLength = 69;
+ 		setProperty(InterfaceObject.CEMI_SERVER_OBJECT, 1, pidMaxLocalApduLength, bytesFromWord(1400));
+ 
+--- a/src/io/calimero/server/gateway/KnxServerGateway.java
++++ b/src/io/calimero/server/gateway/KnxServerGateway.java
+@@ -400,7 +400,8 @@
+ 		// connection status notification of the link (closed/open)
+ 		void connectionStatus(final boolean connected) {
+ 			final var sc = subnet.getServiceContainer();
+-			final byte[] data = bytesFromWord(sc.getMediumSettings().maxApduLength());
++			// vKNX: see KNXnetIPServer, the interface always reports 254
++			final byte[] data = bytesFromWord(Boolean.getBoolean("vknx.flatNetwork") ? 254 : sc.getMediumSettings().maxApduLength());
+ 			final int pidMaxRoutingApduLength = 58;
+ 			setProperty(ROUTER_OBJECT, objectInstance(subnet), pidMaxRoutingApduLength, data);
+ 			if (subnet == connectors.getFirst()) {
