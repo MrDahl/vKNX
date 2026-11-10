@@ -351,6 +351,9 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .mk .mk-info .ic { width: 14px; height: 14px; }
 .mk:hover .mk-info, .mk:focus-within .mk-info, .mk.sel .mk-info { display: grid; }
 .mk input[type=range] { width: calc(110px * var(--mk-scale, 1)); }
+/* The slider symbol: a slim pill. The global range height (28px) made the white box much taller than the other symbols. */
+.mk input[type=range] { height: calc(16px * var(--mk-scale, 1)); }
+.mk .mk-body:has(> input[type=range]) { padding-block: calc(1px * var(--mk-scale, 1)); border-radius: 999px; }
 .mk .mk-win { width: calc(22px * var(--mk-scale, 1)); height: calc(28px * var(--mk-scale, 1)); border: 2px solid var(--border-strong); position: relative; overflow: hidden; border-radius: 3px; background: var(--surface-3); }
 .mk .mk-win > i { position: absolute; left: 0; right: 0; top: 0; background: repeating-linear-gradient(180deg, var(--muted) 0 2px, transparent 2px 4px); }
 .mk.edit { cursor: var(--cur-move); }

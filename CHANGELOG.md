@@ -3,6 +3,11 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Changed
+- **The slider symbol on the floor plan is slimmer.** The white box around the blue slider was about twice as tall as the other symbols (the global 28 px height of a slider); it is now a slim pill about 20 px high (it follows the symbol size setting), so it covers less of the plan. The box stays white so the slider and the value are easy to read on a busy plan.
+
 ## [0.12.3] - 2026-11-10
 
 ### Fixed
