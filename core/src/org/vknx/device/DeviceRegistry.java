@@ -172,6 +172,89 @@ public final class DeviceRegistry {
 	}
 
 	/**
+	 * Gives a device another name. Address, download, parameters and keys are kept (they are in the state file, which is
+	 * moved to the new name); the device is closed and started again, exactly as at a restart, so what is only live
+	 * (lamp on or off, blind position) starts from its default. The place on the floor plan and the chosen icons follow
+	 * the new name. If anything goes wrong the device is put back under its old name.
+	 */
+	public synchronized void rename(final String oldName, final String newName) throws Exception {
+		final var d = devices.stream().filter(x -> x.name().equals(oldName)).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("there is no device called " + oldName));
+		if (oldName.equals(newName))
+			return;
+		final String bad = checkName(newName);
+		if (bad != null)
+			throw new IllegalArgumentException(bad);
+		if (devices.stream().anyMatch(x -> x != d && x.name().equalsIgnoreCase(newName)))
+			throw new IllegalArgumentException("a device called " + newName + " already exists");
+		final var product = d.product();
+		final var where = d.location();
+		final int index = devices.indexOf(d);
+		final String oldStem = fileStem(oldName), newStem = fileStem(newName);
+		d.saveState();
+		d.close();
+		devices.remove(d);
+		boolean moved = false;
+		try {
+			if (!oldStem.equals(newStem)) {
+				if (!oldStem.equalsIgnoreCase(newStem)) {
+					try (Stream<Path> s = Files.list(dir)) { // leftovers under the new name must not be mistaken for this device
+						for (final Path f : s.filter(f -> f.getFileName().toString().startsWith(newStem + ".state")).toList())
+							Files.deleteIfExists(f);
+					}
+					org.vknx.app.DataFiles.deleteBackupsOf(dir, newStem);
+				}
+				moveState(oldStem, newStem);
+				moved = true;
+			}
+			final var nd = VirtualDevice.create(newName, product, serialFor(newName), dir.resolve(newStem + ".state"), net,
+					(src, cat, text) -> log.add(cat, src.name(), text), where);
+			devices.add(index, nd);
+		}
+		catch (final Exception e) { // put the device back under its old name
+			if (moved)
+				moveState(newStem, oldStem);
+			devices.add(index, VirtualDevice.create(oldName, product, serialFor(oldName), dir.resolve(oldStem + ".state"), net,
+					(src, cat, text) -> log.add(cat, src.name(), text), where));
+			throw e;
+		}
+		renameInJson(dir.resolve("plan-layout.json"), oldName, newName, false);
+		renameInJson(dir.resolve("icons.json"), oldName, newName, true);
+		save();
+		log.add("device", newName, "renamed from " + oldName);
+	}
+
+	private void moveState(final String from, final String to) throws IOException {
+		try (Stream<Path> s = Files.list(dir)) {
+			for (final Path f : s.filter(f -> f.getFileName().toString().startsWith(from + ".state")).toList())
+				Files.move(f, dir.resolve(to + f.getFileName().toString().substring(from.length())),
+						java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		}
+		org.vknx.app.DataFiles.renameBackups(dir, from, to);
+	}
+
+	/**
+	 * The floor plan layout and the icons refer to a device by its name ("name|channel", icons also "name" alone).
+	 * Both files are kept as text for the browser, so the names are replaced in the text.
+	 */
+	private static void renameInJson(final Path file, final String from, final String to, final boolean exactKeys) throws IOException {
+		if (!Files.exists(file))
+			return;
+		final String qf = java.util.regex.Pattern.quote(jsonEscape(from));
+		final String qt = java.util.regex.Matcher.quoteReplacement(jsonEscape(to));
+		String text = Files.readString(file, java.nio.charset.StandardCharsets.UTF_8);
+		// layout: only the value of "id" (a label the user typed that looks like an id stays); icons: only the keys
+		text = exactKeys
+				? text.replaceAll("\"" + qf + "((?:\\|(?:[^\"\\\\]|\\\\.)*)?\"\\s*:)", "\"" + qt + "$1")
+				: text.replaceAll("(\"id\"\\s*:\\s*\")" + qf + "\\|", "$1" + qt + "|");
+		Files.writeString(file, text, java.nio.charset.StandardCharsets.UTF_8);
+	}
+
+	private static String jsonEscape(final String s) {
+		return s.replace("\\", "\\\\").replace("\"", "\\\"");
+	}
+
+	/**
 	 * Starts a new installation: every device is removed and created again in factory state (no address, no download,
 	 * no keys; secure devices get a new factory key). The devices, their names and the line they are wired to stay.
 	 */

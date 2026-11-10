@@ -80,7 +80,7 @@ export function createCard(d, handlers) {
   const sub = h('div.sub.ellipsis', info.title);
   const menu = handlers.menu(d.name);
   const headIco = h('div.ico', icon(info.icon));
-  root.append(h('div.card-head', headIco, h('div.grow', title, sub), menu));
+  root.append(h('div.card-head', headIco, h('div.grow', title, sub), handlers.rename ? h('button.btn.quiet.icon.card-rename', { 'aria-label': `Rename ${d.name}`, title: 'Rename device', onclick: () => handlers.rename(d.name) }, icon('pencil')) : null, menu));
   const state = h('div.card-state'); const controls = h('div.card-controls');
   const addr = h('span.mono'); const chip = h('span.chip'); const prog = h('span.chip.prog', h('span.led.on'), 'Programming mode');
   const lockI = h('span.lock-i', { hidden: true }, icon('lock'));

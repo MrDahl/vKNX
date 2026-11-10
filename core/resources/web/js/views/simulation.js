@@ -1,7 +1,7 @@
 import { h, icon, setCls, setPref, syncKeyed, clamp } from '../util.js';
 import { S, on, emit, selectDevice, navigate } from '../bus.js';
 import { createCard } from '../cards.js';
-import { createDetail, deviceMenu } from '../detail.js';
+import { createDetail, deviceMenu, renameDevice } from '../detail.js';
 import { openAddDevice } from '../addDevice.js';
 import { createMonitor } from './monitor.js';
 import { createPlan } from './plan.js';
@@ -52,7 +52,7 @@ export function createSimulation() {
     if (S.dockOpen) applyDockHeight();
     drawer.hidden = !(S.drawer && S.selected);
     if (S.simMode === 'cards') {
-      syncKeyed(cards, ds, d => d.name, d => { const c = createCard(d, { menu: deviceMenu }); cardOf.set(c.el, c); return c.el; }, (el, d) => {
+      syncKeyed(cards, ds, d => d.name, d => { const c = createCard(d, { menu: deviceMenu, rename: renameDevice }); cardOf.set(c.el, c); return c.el; }, (el, d) => {
         cardOf.get(el).update(d);
         setCls(el, 'hl', !!S.gaSel && (d.assoc || []).some(a => a.ga === S.gaSel));
       });

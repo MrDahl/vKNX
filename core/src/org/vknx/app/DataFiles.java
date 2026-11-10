@@ -118,6 +118,15 @@ public final class DataFiles {
 		}
 	}
 
+	/** Gives the backups of a device the file name stem of its new name. */
+	public static void renameBackups(final Path dir, final String from, final String to) throws IOException {
+		for (final Path f : list(dir)) {
+			final var m = BACKUP.matcher(f.getFileName().toString());
+			if (m.matches() && m.group(1).equals(from))
+				Files.move(f, dir.resolve(to + f.getFileName().toString().substring(from.length())), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		}
+	}
+
 	/** Deletes the floor plan image, the placement of the devices on it and the icons the user chose. */
 	public static long clearPlan(final Path dir) throws IOException {
 		long freed = 0;

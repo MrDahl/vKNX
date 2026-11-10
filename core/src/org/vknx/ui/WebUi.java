@@ -76,6 +76,7 @@ public final class WebUi {
 		server.createContext("/api/import", this::importEndpoint);
 		server.createContext("/api/add", this::add);
 		server.createContext("/api/location", this::location);
+		server.createContext("/api/rename", this::rename);
 		server.createContext("/api/remove", ex -> {
 			final String n = param(ex.getRequestURI(), "dev", "");
 			if (!"POST".equals(ex.getRequestMethod())) {
@@ -460,6 +461,29 @@ public final class WebUi {
 		}
 		catch (final Exception e) {
 			send(ex, 400, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+		}
+	}
+
+	/** Gives a device another name: POST /api/rename?dev=old&to=new. */
+	private void rename(final HttpExchange ex) throws IOException {
+		if (!"POST".equals(ex.getRequestMethod())) {
+			send(ex, 405, "text/plain", "POST only".getBytes(StandardCharsets.UTF_8));
+			return;
+		}
+		final String from = param(ex.getRequestURI(), "dev", ""), to = param(ex.getRequestURI(), "to", "");
+		if (devices.stream().noneMatch(d -> d.name().equals(from))) {
+			send(ex, 404, "text/plain", ("there is no device called " + from).getBytes(StandardCharsets.UTF_8));
+			return;
+		}
+		try {
+			registry.rename(from, to);
+			send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
+		}
+		catch (final IllegalArgumentException e) {
+			send(ex, 400, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+		}
+		catch (final Exception e) {
+			send(ex, 500, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
 		}
 	}
 

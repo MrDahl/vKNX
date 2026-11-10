@@ -32,7 +32,7 @@ const isSecure = p => p.key.startsWith('secure-');
  */
 export function openAddDevice() {
   let chosen = null, nameTouched = false, cat = 'all';
-  const name = h('input.input#new-name', { type: 'text', maxlength: 20, autocomplete: 'off', spellcheck: false, placeholder: 'Device name', 'aria-label': 'Device name', 'aria-describedby': 'name-help', style: 'width:11rem' });
+  const name = h('input.input#new-name', { type: 'text', maxlength: 40, autocomplete: 'off', spellcheck: false, placeholder: 'Device name', 'aria-label': 'Device name', 'aria-describedby': 'name-help', style: 'width:11rem' });
   const lineIn = h('input.input#new-line', { type: 'text', maxlength: 5, autocomplete: 'off', spellcheck: false, placeholder: 'automatic', 'aria-label': 'Physical line (optional)', style: 'width:7rem' });
   name.addEventListener('input', () => { nameTouched = true; err.textContent = ''; });
   const err = h('div.error-text', { role: 'alert' });

@@ -174,6 +174,10 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; position: 
 .row.hl, .card.hl { outline: 3px solid var(--accent); outline-offset: -1px; }
 .row .ico, .card .ico { width: 2.2rem; height: 2.2rem; border-radius: 8px; background: var(--surface-3); color: var(--muted); display: grid; place-items: center; flex: none; }
 .row .name { font-weight: 600; } .row .sub { color: var(--muted); font-size: .88rem; }
+.row-main { display: flex; align-items: center; gap: .8rem; flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left; cursor: inherit; }
+.row-rename, .card-rename { flex: none; }
+.row-rename { opacity: .55; } .row:hover .row-rename, .row-rename:focus-visible, .row[aria-current=true] .row-rename { opacity: 1; }
+@media (hover: none) { .row-rename { opacity: 1; } }
 .detail-panel { overflow-y: auto; min-height: 0; }
 
 .detail { display: flex; flex-direction: column; }

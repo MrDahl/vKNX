@@ -355,6 +355,8 @@ export function createPlan() {
   }
   on('state', () => { if (!root.hidden) update(); });
   on('icons', () => { if (!root.hidden) update(); });
+  // A device was renamed: the server changed the ids in the layout file, so load it again (saving the old copy would undo it).
+  on('renamed', () => { loaded = false; if (!root.hidden) update(); });
   on('devices', () => { if (!root.hidden) update(); });
   on('ga', () => { if (!root.hidden) update(); });
   return { el: root, update: () => { root.hidden = false; update(); } };

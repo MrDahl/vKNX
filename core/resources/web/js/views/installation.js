@@ -1,7 +1,7 @@
 import { h, icon, setText, setCls, setAttr, syncKeyed } from '../util.js';
 import { S, on, selectDevice, hooks } from '../bus.js';
 import { productOf, statusOf } from '../devinfo.js';
-import { createDetail } from '../detail.js';
+import { createDetail, renameDevice } from '../detail.js';
 import { openAddDevice } from '../addDevice.js';
 import { renderGuide, createStatusStrip, createTopologyDiagram, openEtsMessages } from '../guide.js';
 import { paintIcon } from '../iconStore.js';
@@ -49,12 +49,17 @@ export function createInstallation() {
     return [d.name, info.title, d.productName, d.address].some(s => String(s).toLowerCase().includes(q));
   }
 
+  /** Pencil next to a device: rename it. A sibling of the row button, because a button cannot sit inside a button. */
+  const renameBtn = name => h('button.btn.quiet.icon.row-rename', { type: 'button', 'aria-label': `Rename ${name}`, title: 'Rename device', onclick: ev => { ev.stopPropagation(); renameDevice(name); } }, icon('pencil'));
+
   function create(d) {
     const info = productOf(d);
-    const b = h('button.row', { type: 'button', role: 'listitem', onclick: () => selectDevice(d.name) },
-      h('div.ico', icon(info.icon)),
-      h('div.grow', h('div.name.ellipsis', d.name), h('div.sub.ellipsis', info.title)),
-      h('div', { style: 'text-align:right' }, h('div.mono.addr'), h('span.chip.st')));
+    const b = h('div.row', { role: 'listitem', onclick: () => selectDevice(d.name) },
+      h('button.row-main', { type: 'button', onclick: () => selectDevice(d.name) },
+        h('div.ico', icon(info.icon)),
+        h('div.grow', h('div.name.ellipsis', d.name), h('div.sub.ellipsis', info.title)),
+        h('div', { style: 'text-align:right' }, h('div.mono.addr'), h('span.chip.st'))),
+      renameBtn(d.name));
     return b;
   }
   function updRow(el, d) {
@@ -74,9 +79,11 @@ export function createInstallation() {
     const lines = [...byLine.keys()].sort((a, b) => { const [x, y] = a.split('.').map(Number), [p, q] = b.split('.').map(Number); return x - p || y - q; });
     const areas = new Map();
     for (const l of lines) { const a = l.split('.')[0]; if (!areas.has(a)) areas.set(a, []); areas.get(a).push(l); }
-    const dev = d => h('button.row', { type: 'button', onclick: () => selectDevice(d.name), 'aria-current': S.selected === d.name ? 'true' : null },
-      (() => { const b = h('div.ico'); paintIcon(b, d.name, productOf(d).icon); return b; })(), h('div.grow', h('div.name.ellipsis', d.name), h('div.sub.ellipsis', productOf(d).title + (d.location ? ' · wired by hand' : ''))),
-      h('div.mono', d.address));
+    const dev = d => h('div.row', { onclick: () => selectDevice(d.name), 'aria-current': S.selected === d.name ? 'true' : null },
+      h('button.row-main', { type: 'button', onclick: () => selectDevice(d.name) },
+        (() => { const b = h('div.ico'); paintIcon(b, d.name, productOf(d).icon); return b; })(), h('div.grow', h('div.name.ellipsis', d.name), h('div.sub.ellipsis', productOf(d).title + (d.location ? ' · wired by hand' : ''))),
+        h('div.mono', d.address)),
+      renameBtn(d.name));
     diagram.update();
     const kids = [h('div', { style: 'padding:.4rem .85rem' }, diagram.el), h('p.hint', { style: 'margin:.2rem .85rem' }, 'Devices are placed by their physical address as soon as ETS assigns it (a line coupler x.y.0 sits on line x.y, an area coupler x.0.0 on main line x.0). Telegrams only cross between lines through couplers.')];
     for (const [a, ls] of areas) {

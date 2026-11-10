@@ -1489,6 +1489,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public void close() {
 		if (behavior instanceof final CouplerBehavior cb && subnet != null)
 			subnet.topology().unregister(cb);
+		SECURE_DEVICES.remove(name, this);
 		behavior.onStop();
 		scheduler.shutdownNow();
 		base.close();

@@ -44,6 +44,7 @@ export const api = {
   prog: dev => req('/api/prog?' + q({ dev }), { method: 'POST' }),
   add: (product, name, line) => req('/api/add?' + q(line ? { product, name, line } : { product, name }), { method: 'POST' }),
   setLocation: (dev, line) => req('/api/location?' + q({ dev, line }), { method: 'POST' }),
+  rename: (dev, to) => req('/api/rename?' + q({ dev, to }), { method: 'POST' }),
   remove: dev => req('/api/remove?' + q({ dev }), { method: 'POST' }),
   layout: () => req('/api/layout'),
   icons: () => req('/api/icons'),

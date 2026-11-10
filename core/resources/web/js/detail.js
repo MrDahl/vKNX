@@ -3,9 +3,9 @@ import { api } from './api.js';
 import { S, emit, device, showTelegrams, showGroupAddress, selectDevice, hooks } from './bus.js';
 import { statusOf, productOf, badgesOf, DOWNLOAD_TEXT } from './devinfo.js';
 import { renderGuide, createNextBar } from './guide.js';
-import { confirmDialog, menuButton, toast } from './dialogs.js';
+import { confirmDialog, menuButton, toast, modal } from './dialogs.js';
 import { operate } from './cards.js';
-import { paintIcon, forgetIconsOf } from './iconStore.js';
+import { paintIcon, forgetIconsOf, loadIcons } from './iconStore.js';
 import { openIconEditor } from './iconPicker.js';
 
 const openGroups = new Set();
@@ -25,12 +25,62 @@ export async function removeDevice(name) {
   }
 }
 
+const MAX_NAME = 40;
+
+/** Same rules as the server (DeviceRegistry.checkName); the server has the last word. */
+function nameProblem(name, old) {
+  if (!name) return 'Give the device a name.';
+  if (name !== name.trim()) return 'The name cannot start or end with a space.';
+  if (name.length > MAX_NAME) return `The name can be at most ${MAX_NAME} characters.`;
+  if (/[\u0000-\u001f\u007f]/.test(name)) return 'The name cannot contain control characters.';
+  if (name.toLowerCase() !== old.toLowerCase() && (S.state?.devices || []).some(x => x.name.toLowerCase() === name.toLowerCase())) return `A device called "${name}" already exists.`;
+  return '';
+}
+
+/** Asks for a new name and renames the device. Address, download, parameters, keys, plan position and icons are kept. */
+export function renameDevice(name) {
+  const input = h('input.input', { type: 'text', value: name, maxlength: MAX_NAME, 'aria-label': 'New name', style: 'width:100%' });
+  const err = h('div.error-text', { role: 'alert' });
+  const hint = h('div.hint', { style: 'margin-top:.5rem' }, 'The physical address, the ETS download, the parameters, the position on the floor plan and the icons are kept. Lamps and blinds start from their start state again.');
+  let busy = false;
+  const dlg = modal({
+    title: 'Rename device',
+    body: h('div', h('label', { style: 'display:block;margin-bottom:.35rem' }, `New name for "${name}"`), input, err, hint),
+    buttons: close => [
+      h('button.btn', { onclick: close }, 'Cancel'),
+      h('button.btn.primary', { onclick: () => go(close) }, 'Rename')],
+  });
+  input.addEventListener('input', () => { err.textContent = ''; });
+  input.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); go(() => dlg.close()); } });
+  input.focus(); input.select();
+  async function go(close) {
+    if (busy) return;
+    const to = input.value;
+    if (to === name) { close(); return; }
+    const bad = nameProblem(to, name);
+    if (bad) { err.textContent = bad; input.focus(); return; }
+    busy = true;
+    try {
+      await api.rename(name, to);
+    } catch (e) { busy = false; err.textContent = e.message || 'The device could not be renamed.'; input.focus(); return; }
+    close();
+    const wasSelected = S.selected === name;
+    await loadIcons();
+    emit('renamed');
+    await hooks.refresh();
+    if (wasSelected) selectDevice(to);
+    emit('devices');
+    toast(`"${name}" is now called "${to}".`, 'ok');
+  }
+}
+
 export function deviceMenu(name) {
   return menuButton({
     label: `More actions for ${name}`,
     items: () => [
       { label: 'Show details', icon: 'info', onclick: () => { selectDevice(name, { drawer: true }); } },
       { label: 'Show related telegrams', icon: 'devices', onclick: () => showTelegrams(name) },
+      { label: 'Rename device…', icon: 'pencil', onclick: () => renameDevice(name) },
       { label: 'Change icons…', icon: 'edit', onclick: () => openIconEditor(name) },
       'hr',
       { label: 'Remove device…', icon: 'trash', danger: true, onclick: () => removeDevice(name) },
@@ -71,6 +121,7 @@ export function createDetail({ onBack, onClose, empty } = {}) {
       els.ico = h('div.ico', icon(info.icon)),
       h('div.grow', h('h2.ellipsis', d.name), h('div.mute.ellipsis', `${info.title} · ${d.productName}`)),
       els.chip = h('span.chip'), els.progBtn,
+      h('button.btn.quiet.icon', { 'aria-label': `Rename ${name}`, title: 'Rename device', onclick: () => renameDevice(name) }, icon('pencil')),
       deviceMenu(name),
       onClose ? h('button.btn.quiet.icon', { 'aria-label': 'Close details', title: 'Close details', onclick: onClose }, icon('close')) : null);
     els.progTxt = h('div.hint');
