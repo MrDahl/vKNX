@@ -120,10 +120,10 @@ export function createDetail({ onBack, onClose, empty } = {}) {
       onBack ? h('button.btn.quiet.back-only', { 'aria-label': 'Back to the device list', onclick: onBack }, icon('back'), 'Devices') : null,
       els.ico = h('div.ico', icon(info.icon)),
       h('div.grow', h('h2.ellipsis', d.name), h('div.mute.ellipsis', `${info.title} · ${d.productName}`)),
-      els.chip = h('span.chip'), els.progBtn,
+      h('div.head-actions', els.chip = h('span.chip'), els.progBtn),
       h('button.btn.quiet.icon', { 'aria-label': `Rename ${name}`, title: 'Rename device', onclick: () => renameDevice(name) }, icon('pencil')),
       deviceMenu(name),
-      onClose ? h('button.btn.quiet.icon', { 'aria-label': 'Close details', title: 'Close details', onclick: onClose }, icon('close')) : null);
+      onClose ? h('button.btn.quiet.icon.head-close', { 'aria-label': 'Close details (Esc)', title: 'Close details (Esc)', onclick: onClose }, icon('close')) : null);
     els.progTxt = h('div.hint');
     els.addr = h('span'); els.loc = h('span'); els.app = h('span'); els.dl = h('span'); els.dlN = h('span');
     const check = (label, valueEl) => h('li', h('span.label', label), valueEl);

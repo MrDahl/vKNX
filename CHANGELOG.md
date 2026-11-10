@@ -3,6 +3,11 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Fixed
+- **The device details beside the operating cards / floor plan could not be closed.** The close cross was there but was pushed out of the narrow side panel by the other buttons (the device name was squeezed away as well). The head of the side panel now has two rows: icon, name, rename pencil, ··· menu and the close cross on top; status and the programming button below. **Esc** also closes the panel (not while a dialog, a menu or a text field is using the key).
+
 ## [0.12.2] - 2026-11-10
 
 ### Added

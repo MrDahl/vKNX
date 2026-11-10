@@ -30,6 +30,13 @@ export function createSimulation() {
   const drawerDetail = createDetail({ onClose: () => { S.drawer = false; emit('select'); } });
   const drawer = h('aside.drawer', { 'aria-label': 'Device details' }, drawerDetail.el);
   root.append(toolbar, h('div.sim-body', main, drawer));
+  // Esc closes the device details, unless a dialog, menu or text field is using the key
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || drawer.hidden || root.offsetParent === null || e.defaultPrevented) return;
+    if (document.querySelector('dialog[open]') || document.querySelector('[role=menu]')) return;
+    const a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+    S.drawer = false; emit('select');
+  });
 
   function setMode(m) { S.simMode = m; setPref('simMode', m); update(); }
   function toggleDock(v) { S.dockOpen = v === undefined ? !S.dockOpen : v; setPref('dockOpen', S.dockOpen); update(); }

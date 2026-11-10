@@ -292,6 +292,11 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 /* detail drawer (simulation) */
 .drawer { width: min(460px, 46vw); flex: none; border-left: 1px solid var(--border); background: var(--surface); overflow-y: auto; min-height: 0; }
 .drawer-close { margin-left: auto; }
+/* In the narrow side panel the head has two rows: name and buttons (with the close cross) on top, status and programming button below. Elsewhere the group is transparent. */
+.head-actions { display: contents; }
+.drawer .detail-head { flex-wrap: wrap; row-gap: .6rem; }
+.drawer .detail-head .grow { flex: 1 1 8rem; min-width: 0; }
+.drawer .head-actions { display: flex; align-items: center; gap: .6rem; flex: 1 0 100%; order: 2; flex-wrap: wrap; }
 
 /* ---------- monitor ---------- */
 .mon { display: flex; flex-direction: column; min-height: 0; flex: 1; background: var(--surface); }
