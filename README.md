@@ -1,4 +1,4 @@
-# vKNX
+# vKNX - Your virtual KNX installation
 
 <img src="assets/og-image.png" alt="vKNX Banner Logo" width="100%">
 
