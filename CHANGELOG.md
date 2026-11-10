@@ -3,7 +3,7 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
-## [Unreleased]
+## [0.12.2] - 2026-11-10
 
 ### Added
 - **Rename a device.** A pencil icon next to every device in the Installation list (also in the topology tree), at the top of the device details, and on every operating card; *Rename device…* is also in the device's ··· menu. The dialog checks the name with the same rules as *Add device* (1-40 characters, no space first or last, not already used - letter case does not count) and says in words why a name is refused. The physical address, serial number, everything ETS downloaded (group addresses, parameters, logic circuits), security keys, the position on the floor plan, the icons and the backups of the state follow the new name, so ETS sees the same device. The device is restarted under its new name: **live values (lamp on/off, blind position, dimmer level) start from their start state again**, as after a restart of vKNX. If anything fails the old device is put back. Before this a device could only be removed and added again, which lost the address and the download.
