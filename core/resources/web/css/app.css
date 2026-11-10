@@ -344,6 +344,7 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .mk .mk-body .ic { width: calc(1.35rem * var(--mk-scale, 1)); height: calc(1.35rem * var(--mk-scale, 1)); }
 .mk.on .mk-body { background: var(--lamp-soft); border-color: var(--lamp); color: var(--lamp); box-shadow: 0 0 calc(14px * var(--mk-scale, 1)) calc(3px * var(--mk-scale, 1)) color-mix(in srgb, var(--lamp) 50%, transparent); }
 .mk.on .mk-body .t { color: var(--text); }
+.mk .mk-label .mk-val { margin-left: .4em; font-weight: 700; font-variant-numeric: tabular-nums; }
 .mk .mk-label { background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--border); border-radius: 4px; padding: 0 .35em; color: var(--text); white-space: nowrap; font-weight: 500; max-width: 16em; overflow: hidden; text-overflow: ellipsis; }
 .mk .mk-btn { border: 0; background: transparent; cursor: var(--cur-pointer); display: grid; place-items: center; padding: 2px; border-radius: 6px; }
 .mk .mk-btn.down, .mk .mk-btn:active { background: var(--accent); color: var(--accent-ink); }

@@ -138,14 +138,16 @@ export function createPlan() {
         body.append(b); upd = () => { paintIcon(ib, p.id, pointDefault(p)); return S.icons[p.id]?.n || ''; }; break;
       }
       case 'slider': {
-        const r = h('input', { type: 'range', min: 0, max: 100, value: 0, 'aria-label': 'Slider of ' + p.dev }); const t = h('span.t', { style: 'min-width:2.6em;text-align:right' });
+        const r = h('input', { type: 'range', min: 0, max: 100, value: 0, 'aria-label': 'Slider of ' + p.dev }); const t = h('span.t.mk-val');
         let active = false, until = 0;
         r.addEventListener('pointerdown', () => { active = true; }); const end = () => { active = false; until = Date.now() + 500; };
         r.addEventListener('pointerup', end); r.addEventListener('pointercancel', end);
         r.addEventListener('input', () => { setText(t, r.value + ' %'); api.act(p.dev, 'sliderLive', r.value).catch(() => {}); });
         r.addEventListener('change', () => operate('Slider', () => api.act(p.dev, 'slider', r.value)));
         const ib = h('span.mk-ico', icon('slider'));
-        body.append(ib, r, t);
+        // the value stands behind the name under the symbol, so the symbol itself is just the slider
+        const nm = h('span'); label.append(nm, t); label._name = nm;
+        body.append(ib, r);
         upd = q => { ib.hidden = !hasCustomIcon(p.id); if (!ib.hidden) paintIcon(ib, p.id, pointDefault(p)); if (!active && Date.now() > until && document.activeElement !== r) { if (+r.value !== q.val) r.value = q.val; setText(t, q.val + ' %'); } return ''; };
         break;
       }
@@ -227,7 +229,7 @@ export function createPlan() {
     const sig = el._upd(p);
     if (el._sig !== undefined && el._sig !== sig && !S.planEdit) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
     el._sig = sig;
-    setText(el._label, it.label || p.label);
+    setText(el._label._name || el._label, it.label || p.label);
     setCls(el, 'edit', S.planEdit); setCls(el, 'sel', S.planEdit && sel === p.id);
     setAttr(el, 'tabindex', S.planEdit ? 0 : null);
     const d = device(p.dev);
@@ -292,7 +294,7 @@ export function createPlan() {
     if (props.dataset.sel === sel && props.contains(document.activeElement)) { return; } // typing a label: do not rebuild
     props.dataset.sel = sel;
     const label = h('input.input', { type: 'text', value: it.label || '', placeholder: p.label, maxlength: 40, id: 'mk-label', 'aria-describedby': 'mk-label-help' });
-    label.addEventListener('input', () => { it.label = label.value.trim() || undefined; save(); const el = layer.querySelector(`[data-id="${CSS.escape(sel)}"]`); if (el) setText(el._label, it.label || p.label); });
+    label.addEventListener('input', () => { it.label = label.value.trim() || undefined; save(); const el = layer.querySelector(`[data-id="${CSS.escape(sel)}"]`); if (el) setText(el._label._name || el._label, it.label || p.label); });
     const objs = new Set(objectsOfPoint(d, p));
     const gas = (d.assoc || []).filter(a => objs.has(a.obj));
     const catObjs = S.cat[d.product]?.objects || [];

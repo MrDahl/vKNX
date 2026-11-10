@@ -6,7 +6,7 @@ The text under each version is also shown as the release notes on GitHub and in 
 ## [Unreleased]
 
 ### Changed
-- **The slider symbol on the floor plan is slimmer.** The white box around the blue slider was about twice as tall as the other symbols (the global 28 px height of a slider); it is now a slim pill about 20 px high (it follows the symbol size setting), so it covers less of the plan. The box stays white so the slider and the value are easy to read on a busy plan.
+- **The slider symbol on the floor plan is slimmer.** The white box around the blue slider was about twice as tall as the other symbols (the global 28 px height of a slider); it is now a slim pill about 20 px high (it follows the symbol size setting), and the value (for example 80 %) now stands behind the name under the symbol instead of inside the box, so the slider covers even less of the plan. The box stays white so the slider and the value are easy to read on a busy plan.
 
 ## [0.12.3] - 2026-11-10
 
