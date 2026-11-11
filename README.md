@@ -13,6 +13,7 @@ Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://w
 
 ## What is included
 - Java 21 + [Calimero](https://github.com/calimero-project) (KNXnet/IP server, virtual devices) – see `docs/decisions.md`
+<img src="assets/vKNXSimulator.png" alt="vKNX IP Connection in ETS" width="auto">
 - 15 products (two of them KNX Data Secure variants, see `docs/limitations.md`): push button (4 keys: switch, relative dimming or blinds), slider push button, switch actuator (8 outputs), dimming actuator (4 channels), blind actuator (4 channels; with wind and rain alarm inputs for awnings), binary input (4 inputs for contacts), room thermostat (simulated room, four operating modes, window contact, two-point or PI control value), heating actuator (6 valves, on/off or PWM, normally closed or open, monitoring with emergency position), weather station (outdoor temperature, wind speed, brightness, rain sensor and a wind alarm; **the four new products are not tried in ETS yet**), secure push button and secure switch actuator (KNX Data Secure: serial number and FDSK shown in the device details for ETS; **not tested in ETS yet**), multisensor (6 measurements, each with its own group object and ETS page), info display (up to 5 named screens with 6 rows each that show on/off status, percent values, the active scene and the multisensor values; paged on the card or with two group objects), a logic module and time master (16 inputs and 16 outputs as 1 bit group objects, a gate editor in the control panel, date and time telegrams and eight weekday timers; **not tried in ETS yet**), one coupler for line and area couplers (real line routing with hop count and filter table from the ETS download, not tested in ETS yet). Keys, outputs and channels can be disabled and named in ETS.
 - ETS product XML generated from the same product definition the backend runs on
 - Control panel (light/dark) with three workspaces: *Installation* (catalogue, device details, programming button, parameters, objects), *Simulation* (operating cards or floor plan, compact telegram monitor underneath) and *Monitor* (telegram table with filters, group address overview with configured-vs-observed)
@@ -41,13 +42,15 @@ Options: `--port 3671 --web 8080 --name "vKNX" --dir runtime --line 1.1 --no-bro
 
 ## Getting the products into ETS
 1. Generate the product XML (already included in `products/`; regenerate with `tools/gen-products.ps1` after changing `Products.java`).
+  a. Alternatively download finished and compiled products from `knxprod/` and import to ETS (Catalogs → Import).
 2. Convert all XML files to `.knxprod` with `tools/make-knxprod.ps1` (needs OpenKNXproducer in `%USERPROFILE%\bin` and ETS installed).
 3. Import the `.knxprod` files in ETS (Catalogs → Import), add the devices to a project, add a KNXnet/IP interface pointing at the vKNX address shown in the panel, and program the devices.
 
 > **Note on the manufacturer name in ETS:** ETS shows these products with the manufacturer **"KNX Association"**. That is only because vKNX uses manufacturer ID `0x00FA`, the ID KNX Association reserves for tests and experiments; ETS looks the name up from the ID. **The products and `.knxprod` files are not made by KNX Association** – they are made by the vKNX project and are not certified or endorsed by KNX Association. A different manufacturer name would need an officially assigned KNX manufacturer ID.
 
 ## Icon
-vKNX uses a penguin as its program icon. The original blue "V" icon is built into `vKNX.exe` too: right-click the vKNX shortcut → *Properties* → *Change Icon…* and pick the one you like (the `.ico` files are also in the `icons` folder).
+vKNX uses a penguin (Pingi) as its program icon. The original blue "V" icon is built into `vKNX.exe` too: right-click the vKNX shortcut → *Properties* → *Change Icon…* and pick the one you like (the `.ico` files are also in the `icons` folder).
+<img src="assets/vKNX_icon.png" alt="vKNX change icon for the program" width="auto">
 
 ## What we use for what
 | Part | Used for | License / status |
