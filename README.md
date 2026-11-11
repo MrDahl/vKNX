@@ -46,6 +46,8 @@ Options: `--port 3671 --web 8080 --name "vKNX" --dir runtime --line 1.1 --no-bro
 2. Convert all XML files to `.knxprod` with `tools/make-knxprod.ps1` (needs OpenKNXproducer in `%USERPROFILE%\bin` and ETS installed).
 3. Import the `.knxprod` files in ETS (Catalogs → Import), add the devices to a project, add a KNXnet/IP interface pointing at the vKNX address shown in the panel, and program the devices.
 
+**Tip – several lines, one interface:** you do not have to change the interface address in ETS for every line you download to. Give the vKNX interface the address of the main line, for example **1.0** when you have the lines 1.1, 1.2 and 1.3, and then download to devices on all three lines without switching. Line couplers route the telegrams, and the filter tables are updated from the coupler download.
+
 > **Note on the manufacturer name in ETS:** ETS shows these products with the manufacturer **"KNX Association"**. That is only because vKNX uses manufacturer ID `0x00FA`, the ID KNX Association reserves for tests and experiments; ETS looks the name up from the ID. **The products and `.knxprod` files are not made by KNX Association** – they are made by the vKNX project and are not certified or endorsed by KNX Association. A different manufacturer name would need an officially assigned KNX manufacturer ID.
 
 ## Icon
