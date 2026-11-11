@@ -20,6 +20,8 @@ Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://w
 - Windows application with installer, its own window (WebView2) and "Check for updates" – see `CHANGELOG.md`
 - Not yet: an environment panel (sun, outdoor weather shown on the plan), cooling in the thermostat, an ETS plug-in for the logic editor (see `docs/limitations.md`)
 
+<img src="assets/products.png" alt="vKNX products in ETS 6.4.1" width="100%">
+
 ## Build and run
 Requires JDK 21 and git (no Maven/Gradle).
 
