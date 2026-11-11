@@ -120,7 +120,7 @@ export function createPlan() {
   function createMarker(p) {
     const el = h('div.mk', { dataset: { id: p.id } });
     const body = h('div.mk-body'); const label = h('div.mk-label'); const infoBtn = h('button.mk-info', { type: 'button', 'aria-label': 'Show device details', title: 'Show device details', onclick: ev => { ev.stopPropagation(); selectDevice(p.dev, { drawer: true }); } }, icon('info'));
-    let upd;
+    let upd, press = null; const card = h('div.mk-card');
     switch (p.type) {
       case 'lamp': {
         const ib = h('span.mk-ico', icon('lampOff')); const t = h('span.t');
@@ -131,16 +131,19 @@ export function createPlan() {
       }
       case 'button': {
         const ib = h('span.mk-ico', icon('button'));
-        const b = h('button.mk-btn', { type: 'button', 'aria-label': 'Press ' + p.dev, title: 'Press', onclick: () => { if (!S.planEdit) operate('Button press', () => api.act(p.dev, 'press', 0)); } }, ib);
+        const b = h('button.mk-btn', { type: 'button', 'aria-label': 'Press ' + p.dev, title: 'Press' }, ib);
+        press = b; card.title = 'Press'; card.addEventListener('click', () => { if (!S.planEdit) operate('Button press', () => api.act(p.dev, 'press', 0)); });
         body.append(b); upd = () => { paintIcon(ib, p.id, pointDefault(p)); return S.icons[p.id]?.n || ''; }; break;
       }
       case 'key': {
         const ib = h('span.mk-ico', icon(p.sym));
-        const b = h('button.mk-btn', { type: 'button', 'aria-label': p.name + ' of ' + p.dev, title: p.name + ' (hold for a long press)' }, ib);
+        const b = h('button.mk-btn', { type: 'button', 'aria-label': p.name + ' of ' + p.dev }, ib);
+        press = b; card.title = p.name + ' (hold for a long press)';
+        // the whole card is the key: icon, value and name
         let held = false;
-        const up = () => { if (!held) return; held = false; b.classList.remove('down'); operate('Key', () => api.act(p.dev, 'up', p.keyNo)); };
-        b.addEventListener('pointerdown', e => { if (S.planEdit || held) return; held = true; b.setPointerCapture(e.pointerId); b.classList.add('down'); operate('Key', () => api.act(p.dev, 'down', p.keyNo)); });
-        b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
+        const up = () => { if (!held) return; held = false; card.classList.remove('down'); operate('Key', () => api.act(p.dev, 'up', p.keyNo)); };
+        card.addEventListener('pointerdown', e => { if (S.planEdit || held || e.button !== 0) return; held = true; card.setPointerCapture(e.pointerId); card.classList.add('down'); operate('Key', () => api.act(p.dev, 'down', p.keyNo)); });
+        card.addEventListener('pointerup', up); card.addEventListener('pointercancel', up); card.addEventListener('lostpointercapture', up);
         body.append(b); upd = () => { paintIcon(ib, p.id, pointDefault(p)); return S.icons[p.id]?.n || ''; }; break;
       }
       case 'slider': {
@@ -153,6 +156,7 @@ export function createPlan() {
         // one symbol: on/off button on the left, the slider to the right of it, name and value below
         const ib = h('span.mk-ico', icon('button'));
         const b = h('button.mk-btn', { type: 'button', 'aria-label': 'Press ' + p.dev, title: 'Switch on / off', onclick: () => { if (!S.planEdit) operate('Button press', () => api.act(p.dev, 'press', 0)); } }, ib);
+        b.classList.add('own'); // only the icon block presses; the slider stays a slider
         const nm = h('span'); label.append(nm, t); label._name = nm; el.classList.add('mk-slider');
         body.append(b, r);
         upd = q => { setCls(el, 'on', !!q.on); paintIcon(ib, p.id, 'button'); if (!active && Date.now() > until && document.activeElement !== r) { if (+r.value !== q.val) r.value = q.val; setText(t, q.val + ' %'); } return q.on + ':' + (S.icons[p.id]?.n || ''); };
@@ -184,7 +188,8 @@ export function createPlan() {
       case 'contact': {
         const ib = h('span.mk-ico', icon('contact'));
         const b = h('button.mk-btn', { type: 'button', 'aria-label': p.name + ' of ' + p.dev, title: p.name + ': click to close or open the contact' }, ib);
-        b.addEventListener('click', () => { if (!S.planEdit) operate('Contact', () => api.act(p.dev, 'toggle', p.keyNo)); });
+        press = b; card.title = p.name + ': click to close or open the contact';
+        card.addEventListener('click', () => { if (!S.planEdit) operate('Contact', () => api.act(p.dev, 'toggle', p.keyNo)); });
         const t = h('span.t'); body.append(b, t);
         upd = q => { setCls(el, 'on', q.closed); paintIcon(ib, p.id, pointDefault(p)); setText(t, q.closed ? 'Closed' : 'Open'); return q.closed + ':' + (S.icons[p.id]?.n || ''); };
         break;
@@ -205,7 +210,8 @@ export function createPlan() {
         break;
       }
     }
-    el.append(h('div.mk-card', body, label), infoBtn);
+    card.append(body, label); if (press) card.classList.add('act');
+    el.append(card, infoBtn);
     el._upd = upd; el._label = label;
     el.addEventListener('pointerdown', e => {
       if (!S.planEdit || e.button !== 0) return;

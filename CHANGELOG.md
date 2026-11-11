@@ -5,6 +5,10 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Changed
+- **The whole symbol is the button on the floor plan.** A push button key, a push button and a binary input contact now react to a click (or a hold, for keys) on the whole card: icon, value and name, not only on the icon. The card gets a border in the accent colour when the mouse is over it. On the slider symbol only the icon block presses; the slider is still a slider. Lamps, blinds, sensors and the displays are unchanged (a click opens the details).
+- README: tip on setting the interface to the main line (for example 1.0) so you can download to several lines without switching.
+
 ## [0.13.0] - 2026-11-11
 
 ### Added

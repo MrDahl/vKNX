@@ -361,6 +361,10 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .mk.mk-slider .mk-card .mk-label { grid-column: 1 / -1; grid-row: 2; margin-top: .15em; align-self: auto; text-align: center; font-size: .8em; color: var(--muted); }
 .mk .mk-btn { border: 0; background: transparent; cursor: var(--cur-pointer); display: grid; place-items: center; padding: 2px; border-radius: 6px; }
 .mk .mk-btn.down, .mk .mk-btn:active { background: var(--accent); color: var(--accent-ink); }
+/* the whole card is the button (key, push button, contact); on the slider symbol only the icon block */
+.mk:not(.edit) .mk-card.act { cursor: var(--cur-pointer); touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.mk:not(.edit) .mk-card.act:hover { border-color: var(--accent); }
+.mk .mk-card.act.down .mk-btn, .mk .mk-card.act:active .mk-btn { background: var(--accent); color: var(--accent-ink); }
 .mk .mk-info { position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; padding: 0; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); display: none; place-items: center; cursor: var(--cur-pointer); color: var(--muted); }
 .mk .mk-info .ic { width: 14px; height: 14px; }
 .mk:hover .mk-info, .mk:focus-within .mk-info, .mk.sel .mk-info { display: grid; }
