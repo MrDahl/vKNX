@@ -1,0 +1,15 @@
+diff --git a/src/io/calimero/server/VirtualLink.java b/src/io/calimero/server/VirtualLink.java
+index 5057160..55e0663 100644
+--- a/src/io/calimero/server/VirtualLink.java
++++ b/src/io/calimero/server/VirtualLink.java
+@@ -111,6 +111,10 @@ public class VirtualLink extends AbstractLink<AutoCloseable>
+ 
+ 	@Override
+ 	protected void onClose() {
++		// vKNX patch: a closed device link leaves its uplink's list; before, a removed device stayed on the line and
++		// went on receiving group telegrams
++		if (isDeviceLink)
++			deviceLinks.forEach(uplink -> uplink.deviceLinks.remove(this));
+ 		notifier.getListeners().fire(l -> l.linkClosed(new CloseEvent(this, CloseEvent.USER_REQUEST, "user request")));
+ 	}
+ 

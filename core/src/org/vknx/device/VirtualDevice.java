@@ -1013,6 +1013,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	private synchronized void etsAction(final String text) {
 		lastEts = text;
 		lastEtsAt = System.currentTimeMillis();
+		scheduleSave();
 	}
 
 	/** A new download session starts when the previous activity is more than 20 s ago. */
@@ -1450,6 +1451,37 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	void changed() {
 		for (final var l : listeners)
 			l.changed(this);
+		scheduleSave();
+	}
+
+	private final java.util.concurrent.atomic.AtomicBoolean savePending = new java.util.concurrent.atomic.AtomicBoolean();
+
+	/**
+	 * Writes the state file a few seconds after the last change. Calimero saves a device only when it closes, and a
+	 * master reset (ETS sends one at the end of every secure download) closes it for good: everything after that was
+	 * lost when vKNX restarted, and a force-stopped vKNX (update, crash) lost everything since the start.
+	 */
+	void scheduleSave() {
+		if (scheduler.isShutdown() || !savePending.compareAndSet(false, true))
+			return;
+		try {
+			scheduler.schedule(() -> {
+				savePending.set(false);
+				saveQuietly();
+			}, 3, java.util.concurrent.TimeUnit.SECONDS);
+		}
+		catch (final java.util.concurrent.RejectedExecutionException e) {
+			savePending.set(false);
+		}
+	}
+
+	private void saveQuietly() {
+		try {
+			base.saveState();
+		}
+		catch (final RuntimeException e) {
+			log("device", "saving the state failed: " + e);
+		}
 	}
 
 	/** Where a behaviour may keep its own data in the persisted device memory (above the application slots and the coupler filter table). */
@@ -1493,6 +1525,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		SECURE_DEVICES.remove(name, this);
 		behavior.onStop();
 		scheduler.shutdownNow();
+		saveQuietly(); // Calimero's own save at close does nothing for a device that has had a master reset
 		base.close();
 		// Calimero's device close() saves the state but leaves the device on the line: a removed device would go on
 		// answering ETS with its old address ("address already in use", every answer twice).

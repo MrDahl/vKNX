@@ -1,22 +1,31 @@
 diff --git a/src/main/java/io/calimero/device/BaseKnxDevice.java b/src/main/java/io/calimero/device/BaseKnxDevice.java
-index 78a584a..0f7e6a3 100644
+index 78a584a..92309f4 100644
 --- a/src/main/java/io/calimero/device/BaseKnxDevice.java
 +++ b/src/main/java/io/calimero/device/BaseKnxDevice.java
-@@ -789,6 +789,17 @@ public class BaseKnxDevice implements KnxDevice, AutoCloseable
- 		saveIos();
- 	}
+@@ -785,6 +785,16 @@ public class BaseKnxDevice implements KnxDevice, AutoCloseable
+ 		if (sal != null)
+ 			sal.close();
  
-+	/**
-+	 * vKNX patch: writes the device memory and the interface objects to the state file without closing the device
-+	 * (used when a running installation is exported).
-+	 */
-+	public synchronized void saveState() {
-+		if (closed.get())
-+			return;
-+		saveDeviceMemory();
-+		saveIos();
++		saveState(); // vKNX patch: saves are serialized (the XML writer of the object server is shared)
 +	}
 +
- 	private void saveIos() {
++	/**
++	 * vKNX patch: writes the device memory and the interface objects to the state file without closing the device
++	 * (used when a running installation is exported, and regularly so that a restart of vKNX loses nothing).
++	 * It also works after a master reset: {@link #executeRestart} closes the device (and with it the one save at
++	 * close), but vKNX goes on using it, so everything that changes after the first master reset must still be saved.
++	 */
++	public synchronized void saveState() {
+ 		saveDeviceMemory();
+ 		saveIos();
+ 	}
+@@ -853,8 +863,7 @@ public class BaseKnxDevice implements KnxDevice, AutoCloseable
  		if ("".equals(iosResource.toString()))
  			return;
+ 		try {
+-			saveDeviceMemory();
+-			saveIos();
++			saveState(); // vKNX patch: serialized with the regular saves
+ 			final var src = Path.of(iosResource);
+ 			if (!Files.isRegularFile(src))
+ 				return;
