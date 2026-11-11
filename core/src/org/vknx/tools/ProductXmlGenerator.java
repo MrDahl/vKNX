@@ -107,7 +107,7 @@ public final class ProductXmlGenerator {
 			x.append("              <Parameter Id=\"").append(aid).append("_P-").append(pr.id()).append("\" Name=\"")
 					.append(pr.name()).append("\" ParameterType=\"").append(aid).append("_PT-").append(pr.name())
 					.append("\" Text=\"").append(esc(pr.text())).append("\" Value=\"")
-					.append(pr.isText() ? esc(pr.defaultText()) : String.valueOf(pr.defaultValue()))
+					.append(pr.isText() ? (namesAnObject(p, pr) ? "" : esc(pr.defaultText())) : String.valueOf(pr.defaultValue()))
 					.append("\">\n                <Memory CodeSegment=\"").append(seg).append("\" Offset=\"")
 					.append(pr.byteOffset()).append("\" BitOffset=\"").append(pr.bitOffset())
 					.append("\" />\n              </Parameter>\n");
@@ -123,7 +123,7 @@ public final class ProductXmlGenerator {
 		x.append("            <ComObjectTable>\n");
 		for (final ObjDef o : p.objects())
 			x.append("              <ComObject Id=\"").append(aid).append("_O-").append(o.number()).append("\" Name=\"")
-					.append(o.name()).append("\" Text=\"").append(esc(o.text())).append("\" Number=\"")
+					.append(o.name()).append("\" Text=\"").append(esc(p.dynamicText(o))).append("\" Number=\"")
 					.append(o.number()).append("\" FunctionText=\"").append(o.functionText()).append("\" ObjectSize=\"")
 					.append(o.etsObjectSize()).append("\" ReadFlag=\"").append(flag(o.read())).append("\" WriteFlag=\"")
 					.append(flag(o.write())).append("\" CommunicationFlag=\"Enabled\" TransmitFlag=\"")
@@ -132,8 +132,12 @@ public final class ProductXmlGenerator {
 		x.append("            </ComObjectTable>\n");
 		x.append("            <ComObjectRefs>\n");
 		for (final ObjDef o : p.objects())
+		{
+			final ParamDef np = p.nameParamOf(o);
 			x.append("              <ComObjectRef Id=\"").append(aid).append("_O-").append(o.number()).append("_R-")
-					.append(o.number()).append("\" RefId=\"").append(aid).append("_O-").append(o.number()).append("\" />\n");
+					.append(o.number()).append("\" RefId=\"").append(aid).append("_O-").append(o.number()).append("\"")
+					.append(np == null ? "" : " TextParameterRefId=\"" + aid + "_P-" + np.id() + "_R-" + np.id() + "\"").append(" />\n");
+		}
 		x.append("            </ComObjectRefs>\n");
 		}
 
@@ -199,6 +203,14 @@ public final class ProductXmlGenerator {
 		x.append("        </Hardware>\n      </Hardware>\n");
 		x.append("    </Manufacturer>\n  </ManufacturerData>\n</KNX>\n");
 		return x.toString();
+	}
+
+	/** True when the text parameter names a channel whose objects follow the name (its ETS default is then empty). */
+	private static boolean namesAnObject(final ProductDef p, final ParamDef pr) {
+		for (final ObjDef o : p.objects())
+			if (pr.equals(p.nameParamOf(o)))
+				return true;
+		return false;
 	}
 
 	/**

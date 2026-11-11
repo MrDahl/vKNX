@@ -43,6 +43,51 @@ public record ProductDef(String key, int appNumber, int appVersion, String name,
 		return objects.stream().filter(o -> o.number() == number).findFirst();
 	}
 
+	/** Text shown by ETS for the name of a channel the user has not named. */
+	public static final String NO_NAME = "unnamed";
+
+	/**
+	 * The name parameter of the channel an object belongs to ("Out1Name" for "Out1Switch"), or null. The object name
+	 * starts with the parameter name without "Name" and the next character is a capital letter, so "In1" does not
+	 * match "In10Switch". The info display has screen names, not channel names, so its objects never match.
+	 */
+	public ParamDef nameParamOf(final ObjDef o) {
+		if (key.equals("info-display"))
+			return null;
+		for (final ParamDef p : params) {
+			if (!p.isText() || !p.name().endsWith("Name"))
+				continue;
+			final String pre = p.name().substring(0, p.name().length() - 4);
+			if (o.name().length() > pre.length() && o.name().startsWith(pre) && Character.isUpperCase(o.name().charAt(pre.length())))
+				return p;
+			if (o.name().equals(pre))
+				return p;
+		}
+		return null;
+	}
+
+	/**
+	 * The object text ETS shows when the object follows the name of its channel: "Output 1: switch" becomes
+	 * "Output 1 - {{0:unnamed}}: switch" ({{0:...}} is replaced by the text parameter, the default is shown while the
+	 * name is empty). Objects without a name parameter keep their text.
+	 */
+	public String dynamicText(final ObjDef o) {
+		if (nameParamOf(o) == null)
+			return o.text();
+		final int c = o.text().indexOf(": ");
+		final String slot = " - {{0:" + NO_NAME + "}}";
+		return c < 0 ? o.text() + slot : o.text().substring(0, c) + slot + o.text().substring(c);
+	}
+
+	/** The same text with the current name filled in (what ETS shows), for the simulator's own object lists. */
+	public String displayText(final ObjDef o, final String currentName) {
+		final String t = dynamicText(o);
+		if (t.equals(o.text()))
+			return t;
+		final String n = currentName == null || currentName.isBlank() ? NO_NAME : currentName.strip();
+		return t.replace("{{0:" + NO_NAME + "}}", n);
+	}
+
 	public ParamDef param(final String name) {
 		return params.stream().filter(p -> p.name().equals(name)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("no parameter " + name + " in " + key));

@@ -243,11 +243,57 @@ public final class ProductsTest {
 			check("push button blind objects are 1.008 and 1.007 (1 bit)", Products.PUSH_BUTTON.object(4).get().dpt().equals("DPST-1-8")
 					&& Products.PUSH_BUTTON.object(5).get().dpt().equals("DPST-1-7"));
 
+			// ---------------- push button blind key with "Short press = move at once" (key 1 Down, key 3 Up / Down alternating)
+			ets.downloadAll(brk.address(), new int[] { gMove, gStop }, new int[][] { { 1, 4 }, { 2, 5 }, { 1, 14 }, { 2, 15 } },
+					new int[] { 0, 0, 0, SEND, SEND, 0, 0, 0, 0, 0, 0, 0, 0, SEND, SEND, 0, 0, 0, 0, 0 },
+					Products.PUSH_BUTTON.params("Key1Function", 2, "Key1BlindMode", 1, "Key1BlindShort", 1, "Key1BlindRun", 0,
+							"Key3Function", 2, "Key3BlindMode", 2, "Key3BlindShort", 1, "Key3BlindRun", 1));
+			check("move-at-once blind keys application loaded", await(3000, brk::applicationLoaded));
+			final int b0 = (Integer) bl.view().get("pos1");
+			brk.behavior().act("press", 1);
+			check("short press moves the blind at once (no hold needed)", "Move down".equals(brk.behavior().view().get("l1"))
+					&& await(3000, () -> (Integer) bl.view().get("pos1") > b0));
+			brk.behavior().act("press", 1);
+			final int b1 = (Integer) bl.view().get("pos1");
+			Thread.sleep(500);
+			check("pressing again sends step/stop and the blind stops", "Step/stop".equals(brk.behavior().view().get("l1"))
+					&& (Integer) bl.view().get("pos1") - b1 <= 1);
+			brk.behavior().act("press", 1);
+			check("the next press moves down again", "Move down".equals(brk.behavior().view().get("l1")));
+			brk.behavior().act("press", 1); // stop again
+			brk.behavior().act("press", 3);
+			check("alternating key, move at once: DOWN first", "Move down".equals(brk.behavior().view().get("l3")));
+			brk.behavior().act("press", 3);
+			check("alternating key: second press stops", "Step/stop".equals(brk.behavior().view().get("l3")));
+			brk.behavior().act("press", 3);
+			check("alternating key: next move is UP", "Move up".equals(brk.behavior().view().get("l3")));
+			brk.behavior().act("press", 3);
+			check("move-at-once parameters are part of the product, default = old behaviour (step/stop, long press moves)",
+					Products.PUSH_BUTTON.param("Key1BlindShort").defaultValue() == 0 && Products.PUSH_BUTTON.param("Key1BlindRun").defaultValue() == 2);
+
+			// ---------------- object names follow the channel name in ETS
+			{
+				final var o = Products.SWITCH_ACTUATOR.object(1).get();
+				check("ETS object text follows the output name: " + Products.SWITCH_ACTUATOR.dynamicText(o),
+						"Output 1 - {{0:unnamed}}: switch".equals(Products.SWITCH_ACTUATOR.dynamicText(o))
+								&& "Output 1 - Bathroom: switch".equals(Products.SWITCH_ACTUATOR.displayText(o, "Bathroom"))
+								&& "Output 1 - unnamed: switch".equals(Products.SWITCH_ACTUATOR.displayText(o, "")));
+				check("an object without a channel keeps its text", Products.SWITCH_ACTUATOR.objects().stream()
+						.filter(x -> x.name().equals("Scene")).allMatch(x -> Products.SWITCH_ACTUATOR.dynamicText(x).equals(x.text())));
+				check("input 1 does not take the name of input 10 (logic module)", Products.LOGIC.nameParamOf(Products.LOGIC.objects().stream()
+						.filter(x -> x.name().equals("In10")).findFirst().get()).name().equals("In10Name"));
+				final String xml = org.vknx.tools.ProductXmlGenerator.generate(Products.SWITCH_ACTUATOR);
+				check("the generated XML has the text parameter reference and an empty default name",
+						xml.contains("TextParameterRefId=\"") && xml.contains("Name=\"Out1Name\"") && xml.contains("Text=\"Name\" Value=\"\""));
+				check("the info display keeps its static object texts", Products.INFO_DISPLAY.objects().stream()
+						.allMatch(x -> Products.INFO_DISPLAY.dynamicText(x).equals(x.text())));
+			}
+
 			// ---------------- 8-channel switch actuator: output 2 inverted, output 4 disabled
 			final int gC3 = ga(3, 0, 3), gC2 = ga(3, 0, 2), gC4 = ga(3, 0, 4);
 			ets.downloadAll(sa4.address(), new int[] { gC3, gC2, gC4 }, new int[][] { { 1, 3 }, { 2, 2 }, { 3, 4 } },
 					new int[] { 0, W, W, W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-					Products.SWITCH_ACTUATOR.params("Out2Logic", 1, "Out4Enable", 0, "Out5Name", "Kitchen"));
+					Products.SWITCH_ACTUATOR.params("Out2Logic", 1, "Out4Enable", 0, "Out5Name", "Kitchen", "Out7Name", ""));
 			check("8-fold actuator application loaded", await(3000, sa4::applicationLoaded));
 			etsLink.sendRequestWait(new GroupAddress(gC3), Priority.LOW, w1(1));
 			etsLink.sendRequestWait(new GroupAddress(gC2), Priority.LOW, w1(1));
@@ -257,7 +303,8 @@ public final class ProductsTest {
 					await(2000, () -> "00100000".equals(s4.view().get("lamps"))));
 			Thread.sleep(300);
 			check("disabled output is reported and names come from ETS text parameters", Boolean.FALSE.equals(s4.view().get("e4"))
-					&& Boolean.TRUE.equals(s4.view().get("e3")) && "Kitchen".equals(s4.view().get("n5")) && "Output 6".equals(s4.view().get("n6")));
+					&& Boolean.TRUE.equals(s4.view().get("e3")) && "Kitchen".equals(s4.view().get("n5")) && "Output 6".equals(s4.view().get("n6"))
+					&& "Output 7".equals(s4.view().get("n7")));
 
 			// ---------------- multisensor: temperature fixed 21.5 degC every 1 s, CO2 random 400..500 every 1 s
 			final int gTemp = ga(4, 0, 4), gCo2 = ga(4, 0, 7);

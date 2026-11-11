@@ -11,7 +11,9 @@ import java.util.concurrent.TimeUnit;
  * <li>Relative dimming: short press switches (on for "brighter", off for "darker"), long press sends the dimming
  * command, release after a long press sends STOP;</li>
  * <li>Blinds: Up, Down or Up/Down (alternating): short press sends step/stop, long press sends move; Steps: the key
- * sends a step at once.</li>
+ * sends a step at once. With "Short press = Move at once" the key sends the move command when it is pressed and a
+ * step/stop when it is pressed again within the chosen time (the key cannot see the blind, so it assumes the blind runs
+ * for that long).</li>
  * <li>Scene: sends a scene number (DPT 18.001) to call a scene; with the parameter "long press stores the scene" a
  * short press (sent on release) calls it and a long press sends the store (learn) telegram instead.</li>
  * </ul>
@@ -24,6 +26,9 @@ public final class PushButtonBehavior extends DeviceBehavior {
 	private final boolean[] held = new boolean[KEYS + 1];
 	private final boolean[] longFired = new boolean[KEYS + 1];
 	private final boolean[] nextDown = new boolean[KEYS + 1]; // alternating blind key: next move direction
+	private static final int[] RUN_S = { 10, 20, 30, 60, 120 };
+	private final long[] runUntil = new long[KEYS + 1]; // "move at once" blind key: the blind is assumed to run until then
+	private final int[] runDir = new int[KEYS + 1]; // ... in this direction (0 up, 1 down)
 	private final String[] last = new String[KEYS + 1];
 	private final ScheduledFuture<?>[] pending = new ScheduledFuture<?>[KEYS + 1];
 
@@ -113,6 +118,26 @@ public final class PushButtonBehavior extends DeviceBehavior {
 					last[k] = "Step " + (dir == 0 ? "up" : "down");
 					dev.transmit(base(k) + 5, dir);
 				}
+				else if (dev.param(pre(k) + "BlindShort") == 1) { // short press = move at once, press again to stop
+					final long now = System.currentTimeMillis();
+					if (now < runUntil[k]) {
+						dev.log("button", who + " pressed again while the blind is assumed to run -> sending step/stop (" + (runDir[k] == 0 ? "up" : "down") + ")");
+						last[k] = "Step/stop";
+						dev.transmit(base(k) + 5, runDir[k]);
+						runUntil[k] = 0;
+					}
+					else {
+						final int dir = blindDir(k);
+						dev.log("button", who + " pressed, BlindShort=Move at once -> sending move " + (dir == 0 ? "UP" : "DOWN"));
+						last[k] = "Move " + (dir == 0 ? "up" : "down");
+						dev.transmit(base(k) + 4, dir);
+						runDir[k] = dir;
+						runUntil[k] = now + 1000L * RUN_S[Math.min(4, dev.param(pre(k) + "BlindRun"))];
+						if (mode == 2)
+							nextDown[k] = !nextDown[k];
+					}
+					dev.changed();
+				}
 				else {
 					final int ms = LONG_MS[Math.min(2, dev.param(pre(k) + "LongPress"))];
 					dev.log("button", who + " pressed, waiting " + ms + " ms (parameter LongPress) to tell short from long press");
@@ -163,7 +188,7 @@ public final class PushButtonBehavior extends DeviceBehavior {
 		if (pending[k] != null)
 			pending[k].cancel(false);
 		final int fn = dev.param(pre(k) + "Function");
-		if (fn == 0 || (fn == 2 && dev.param(pre(k) + "BlindMode") == 3) || (fn == 3 && !sceneStore(k)))
+		if (fn == 0 || (fn == 2 && (dev.param(pre(k) + "BlindMode") == 3 || dev.param(pre(k) + "BlindShort") == 1)) || (fn == 3 && !sceneStore(k)))
 			return; // acted on press
 		if (fn == 3) {
 			if (!longFired[k])
@@ -196,6 +221,7 @@ public final class PushButtonBehavior extends DeviceBehavior {
 		java.util.Arrays.fill(on, false);
 		java.util.Arrays.fill(nextDown, true); // an alternating blind key starts with DOWN (blinds start open)
 		java.util.Arrays.fill(last, "");
+		java.util.Arrays.fill(runUntil, 0);
 	}
 
 	@Override
@@ -233,7 +259,8 @@ public final class PushButtonBehavior extends DeviceBehavior {
 			case 3 -> "Scene " + scene(k) + (sceneStore(k) ? " (long press stores)" : "");
 			default -> "Blinds: " + switch (dev.param(pre(k) + "BlindMode")) {
 				case 0 -> "up"; case 1 -> "down"; case 2 -> "up / down";
-				default -> "step " + (dev.param(pre(k) + "BlindDir") == 0 ? "up" : "down"); };
+				default -> "step " + (dev.param(pre(k) + "BlindDir") == 0 ? "up" : "down"); }
+					+ (dev.param(pre(k) + "BlindMode") < 3 && dev.param(pre(k) + "BlindShort") == 1 ? ", short press moves" : "");
 		};
 	}
 

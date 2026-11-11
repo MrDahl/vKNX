@@ -3,6 +3,15 @@
 All notable changes to vKNX. Version numbers follow `v<major>.<minor>.<patch>`.
 The text under each version is also shown as the release notes on GitHub and in the program's "Check for updates".
 
+## [Unreleased]
+
+### Added
+- **Group object names follow the channel name in ETS (application version 5).** A switch actuator output called "Bathroom lights" now shows its group objects as `Output 1 - Bathroom lights: switch` and `Output 1 - Bathroom lights: status` in ETS (the number stays, the name you typed in the *Name* parameter is added). It works the same on all products that have named channels: push buttons (`Key 1 - Hallway: switch`), secure variants, dimming actuator, blind actuator, heating actuator, binary input and the logic module (inputs, outputs, timers). It uses the ETS text parameter of the object (`TextParameterRefId`, text `{{0:...}}`), so the name changes in the group object list as soon as you change the parameter. A channel with no name shows `unnamed`. The *Name* parameter is now empty by default in ETS (vKNX still calls the channel "Output 1", "Key 1" and so on in its own windows and log when the name is empty). The info display is not changed (its names belong to screens, not channels). The text of the dimming actuator object *relative dimming (4 bit)* is now *relative dimming* because ETS texts are limited to 50 characters.
+- **Blind key: short press moves at once.** New parameters on the push button keys with function *Blinds* (key sends Up, Down or Up / Down): *Short press* = *Step / stop (a long press moves)* (as before, the default) or *Move at once (press again to stop)*. With *Move at once* the key sends the move command (1.008) the moment it is pressed, so the key does not have to be held for 0.4 s. A second press within *Press again to stop within* (10 s to 120 s, default 30 s) sends step/stop, because a key cannot see the blind and so assumes it is still running; after that time or after a stop the next press moves again (an Up / Down key then moves the other way). The binary input is not changed.
+
+### Changed
+- **All products are application version 5.** Run `make-knxprod.ps1` again, import the new `.knxprod` files in ETS, update the devices in existing projects to the new version and download again. A device that still holds a version 4 download keeps working.
+
 ## [0.12.4] - 2026-11-10
 
 ### Changed

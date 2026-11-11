@@ -16,7 +16,7 @@ public final class Products {
 	public static final int MANUFACTURER_ID = 0x00FA;
 
 	/** Application version of every product in this release (bumped when texts or the parameter layout change). */
-	static final int V = 4;
+	static final int V = 5;
 
 	private static final List<Choice> NO_YES = List.of(new Choice(0, "No"), new Choice(1, "Yes"));
 	private static final List<Choice> STARTUP = List.of(new Choice(0, "Off"), new Choice(1, "On"), new Choice(2, "Unchanged"));
@@ -37,6 +37,13 @@ public final class Products {
 
 	private static ParamDef enable(final int id, final String pre, final int b, final String label, final String page) {
 		return new ParamDef(id, pre + "Enable", label, b, 0, 1, 1, NO_YES).inGroup(page);
+	}
+
+	private static int indexOfParam(final List<ParamDef> params, final String name) {
+		for (int i = 0; i < params.size(); i++)
+			if (params.get(i).name().equals(name))
+				return i;
+		throw new IllegalArgumentException(name);
 	}
 
 	private static ParamDef nameParam(final int id, final String pre, final int b, final String defaultName, final String page) {
@@ -104,6 +111,19 @@ public final class Products {
 					.inGroup(page).showWhen(en, 1).showWhen(fn, 3));
 			objs.add(new ObjDef(20 + k, pre + "Scene", t + "scene (call / store)", "Output", 8, "DPST-18-1", false, false, true, false)
 					.inGroup(page).showWhen(en, 1).showWhen(fn, 3));
+		}
+		// blind key: press moves at once (added in application version 5; after the older parameters, but listed next to BlindDir)
+		for (int k = 1; k <= 4; k++) {
+			final String pre = "Key" + k, page = "Key " + k, en = pre + "Enable", fn = pre + "Function";
+			final int b = (k - 1) * STRIDE, at = indexOfParam(params, pre + "BlindDir") + 1;
+			final var shortPress = new ParamDef(id++, pre + "BlindShort", "Short press", b + 19, 1, 1, 0, List.of(
+					new Choice(0, "Step / stop (a long press moves)"), new Choice(1, "Move at once (press again to stop)")))
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 2).showWhen(pre + "BlindMode", 0, 1, 2);
+			final var runTime = new ParamDef(id++, pre + "BlindRun", "Press again to stop within", b + 19, 2, 3, 2, List.of(
+					new Choice(0, "10 s"), new Choice(1, "20 s"), new Choice(2, "30 s"), new Choice(3, "60 s"), new Choice(4, "120 s")))
+					.inGroup(page).showWhen(en, 1).showWhen(fn, 2).showWhen(pre + "BlindMode", 0, 1, 2).showWhen(pre + "BlindShort", 1);
+			params.add(at, shortPress);
+			params.add(at + 1, runTime);
 		}
 		return new ProductDef("push-button", 0x0A01, V, "vKNX Push Button 4-fold", "VKNXPB4", 0x0A01, 4 * STRIDE, params, objs);
 	}
@@ -201,7 +221,7 @@ public final class Products {
 			params.add(new ParamDef(id++, pre + "SendStatus", "Send status", b, 6, 1, 1, NO_YES).inGroup(page).showWhen(en, 1));
 			objs.add(new ObjDef(o + 1, pre + "Switch", page + ": switch", "Input", 1, "DPST-1-1", false, true, false, false)
 					.inGroup(page).showWhen(en, 1));
-			objs.add(new ObjDef(o + 2, pre + "RelativeDimming", page + ": relative dimming (4 bit)", "Input", 4, "DPST-3-7", false, true, false, false)
+			objs.add(new ObjDef(o + 2, pre + "RelativeDimming", page + ": relative dimming", "Input", 4, "DPST-3-7", false, true, false, false)
 					.inGroup(page).showWhen(en, 1));
 			objs.add(new ObjDef(o + 3, pre + "BrightnessValue", page + ": brightness (value)", "Input", 8, "DPST-5-1", false, true, false, false)
 					.inGroup(page).showWhen(en, 1));

@@ -1103,7 +1103,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public String paramText(final String paramName) {
 		final ParamDef p = product.param(paramName);
 		final byte[] area = parameterArea();
-		return area.length == 0 ? p.defaultText() : p.readText(area);
+		final String t = area.length == 0 ? p.defaultText() : p.readText(area);
+		return t.isBlank() ? p.defaultText() : t; // a channel name left empty in ETS: the product default ("Output 1")
 	}
 
 	/** True while all conditions hold (the item is shown in ETS, so it matters to the simulation). */
