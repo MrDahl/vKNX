@@ -357,14 +357,20 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 /* slider: the slider on top, name and value below */
 .mk-slider .mk-card { grid-template-columns: auto 1fr; border-radius: 1em; }
 .mk-slider .mk-body > :not(input) { grid-column: 1; grid-row: 1; }
-.mk-slider .mk-body > input { grid-column: 2; grid-row: 1; }
+.mk-slider .mk-body > input { grid-column: 2; grid-row: 1; margin-bottom: .25em; }
 .mk.mk-slider .mk-card .mk-label { grid-column: 1 / -1; grid-row: 2; align-self: auto; text-align: center; font-size: .8em; color: var(--muted); }
 .mk .mk-btn { border: 0; background: transparent; cursor: var(--cur-pointer); display: grid; place-items: center; padding: 2px; border-radius: 6px; }
 .mk .mk-btn.down, .mk .mk-btn:active { background: var(--accent); color: var(--accent-ink); }
 .mk .mk-info { position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; padding: 0; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); display: none; place-items: center; cursor: var(--cur-pointer); color: var(--muted); }
 .mk .mk-info .ic { width: 14px; height: 14px; }
 .mk:hover .mk-info, .mk:focus-within .mk-info, .mk.sel .mk-info { display: grid; }
-.mk input[type=range] { width: calc(110px * var(--mk-scale, 1)); height: calc(16px * var(--mk-scale, 1)); }
+/* The slider is drawn with sizes in em, so the track and the knob scale with the symbol like everything else
+   (the browser's own slider keeps its size and then overlaps the name when the plan is zoomed out). */
+.mk input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; font-size: inherit; width: calc(110px * var(--mk-scale, 1)); height: 1.2em; margin: 0; padding: 0; }
+.mk input[type=range]::-webkit-slider-runnable-track { height: .36em; border-radius: .2em; background: var(--border-strong); }
+.mk input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 1em; height: 1em; margin-top: -.32em; border-radius: 50%; border: 0; background: var(--accent); box-shadow: 0 0 0 .1em var(--surface); }
+.mk input[type=range]::-moz-range-track { height: .36em; border-radius: .2em; background: var(--border-strong); }
+.mk input[type=range]::-moz-range-thumb { width: 1em; height: 1em; border-radius: 50%; border: 0; background: var(--accent); }
 .mk .mk-win { width: 1.6em; height: 2em; border: 2px solid var(--border-strong); position: relative; overflow: hidden; border-radius: 3px; background: var(--surface-3); }
 .mk .mk-win > i { position: absolute; left: 0; right: 0; top: 0; background: repeating-linear-gradient(180deg, var(--muted) 0 2px, transparent 2px 4px); }
 .mk.edit { cursor: var(--cur-move); }
