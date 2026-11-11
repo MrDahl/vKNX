@@ -339,31 +339,41 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .plan-canvas img { width: 100%; display: block; user-select: none; -webkit-user-drag: none; }
 .plan-canvas.empty { aspect-ratio: 16 / 9; display: grid; place-items: center; line-height: 1.4; color: var(--muted); }
 .plan-layer { position: absolute; inset: 0; line-height: 1.3; }
-.mk { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: calc(.8rem * var(--mk-scale, 1)); touch-action: none; }
-.mk .mk-body { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 10px; padding: calc(4px * var(--mk-scale, 1)) calc(8px * var(--mk-scale, 1)); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: .35em; min-width: calc(2.1rem * var(--mk-scale, 1)); justify-content: center; font-weight: 600; }
-.mk .mk-body .ic { width: calc(1.35rem * var(--mk-scale, 1)); height: calc(1.35rem * var(--mk-scale, 1)); }
-.mk.on .mk-body { background: var(--lamp-soft); border-color: var(--lamp); color: var(--lamp); box-shadow: 0 0 calc(14px * var(--mk-scale, 1)) calc(3px * var(--mk-scale, 1)) color-mix(in srgb, var(--lamp) 50%, transparent); }
-.mk.on .mk-body .t { color: var(--text); }
-.mk .mk-label .mk-val { margin-left: .4em; font-weight: 700; font-variant-numeric: tabular-nums; }
-.mk .mk-label { background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--border); border-radius: 4px; padding: 0 .35em; color: var(--text); white-space: nowrap; font-weight: 500; max-width: 16em; overflow: hidden; text-overflow: ellipsis; }
+/* Symbols on the floor plan: one card per symbol (icon left, value on top and name below, all inside one surface).
+   --mk-scale is set by plan.js from the width of the plan (zoom) and the symbol size setting, so the symbols grow and shrink with the plan. */
+.mk { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; font-size: calc(.85rem * var(--mk-scale, 1)); touch-action: none; }
+.mk .mk-card { display: grid; grid-template-columns: auto auto; align-items: center; padding: .38em .6em; border: 1px solid var(--border-strong); border-radius: .6em;
+  background: color-mix(in srgb, var(--surface) 90%, transparent); box-shadow: 0 1px 3px rgba(20, 28, 36, .28); color: var(--text); }
+.mk .mk-body { display: contents; font-weight: 600; }
+.mk .mk-body > :not(.t):not(input) { grid-column: 1; grid-row: 1 / span 2; margin-right: .55em; display: grid; place-items: center; align-self: center; }
+.mk .mk-body > .t { grid-column: 2; grid-row: 1; font-size: 1.08em; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; max-width: 10em; overflow: hidden; text-overflow: ellipsis; }
+.mk .mk-body > .t:empty { display: none; }
+.mk .mk-body .ic { width: 1.7em; height: 1.7em; }
+.mk .mk-label { grid-column: 2; grid-row: 2; font-size: .8em; line-height: 1.2; font-weight: 500; color: var(--muted); white-space: nowrap; max-width: 15em; overflow: hidden; text-overflow: ellipsis; }
+.mk:not(.mk-slider) .mk-card:has(.mk-body > .t:empty) .mk-label, .mk:not(.mk-slider) .mk-card:not(:has(.mk-body > .t)) .mk-label { grid-row: 1 / span 2; align-self: center; font-size: .9em; color: var(--text); }
+.mk .mk-label .mk-val { margin-left: .4em; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.mk.on .mk-card { background: color-mix(in srgb, var(--lamp-soft) 90%, transparent); border-color: var(--lamp); color: var(--lamp); box-shadow: 0 0 1em .2em color-mix(in srgb, var(--lamp) 45%, transparent); }
+.mk.on .mk-body > .t, .mk.on .mk-label { color: var(--text); }
+/* slider: the slider on top, name and value below */
+.mk-slider .mk-card { grid-template-columns: auto 1fr; border-radius: 1em; }
+.mk-slider .mk-body > :not(input) { grid-column: 1; grid-row: 1; }
+.mk-slider .mk-body > input { grid-column: 2; grid-row: 1; }
+.mk.mk-slider .mk-card .mk-label { grid-column: 1 / -1; grid-row: 2; align-self: auto; text-align: center; font-size: .8em; color: var(--muted); }
 .mk .mk-btn { border: 0; background: transparent; cursor: var(--cur-pointer); display: grid; place-items: center; padding: 2px; border-radius: 6px; }
 .mk .mk-btn.down, .mk .mk-btn:active { background: var(--accent); color: var(--accent-ink); }
 .mk .mk-info { position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; padding: 0; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); display: none; place-items: center; cursor: var(--cur-pointer); color: var(--muted); }
 .mk .mk-info .ic { width: 14px; height: 14px; }
 .mk:hover .mk-info, .mk:focus-within .mk-info, .mk.sel .mk-info { display: grid; }
-.mk input[type=range] { width: calc(110px * var(--mk-scale, 1)); }
-/* The slider symbol: a slim pill. The global range height (28px) made the white box much taller than the other symbols. */
-.mk input[type=range] { height: calc(16px * var(--mk-scale, 1)); }
-.mk .mk-body:has(> input[type=range]) { padding-block: calc(1px * var(--mk-scale, 1)); border-radius: 999px; }
-.mk .mk-win { width: calc(22px * var(--mk-scale, 1)); height: calc(28px * var(--mk-scale, 1)); border: 2px solid var(--border-strong); position: relative; overflow: hidden; border-radius: 3px; background: var(--surface-3); }
+.mk input[type=range] { width: calc(110px * var(--mk-scale, 1)); height: calc(16px * var(--mk-scale, 1)); }
+.mk .mk-win { width: 1.6em; height: 2em; border: 2px solid var(--border-strong); position: relative; overflow: hidden; border-radius: 3px; background: var(--surface-3); }
 .mk .mk-win > i { position: absolute; left: 0; right: 0; top: 0; background: repeating-linear-gradient(180deg, var(--muted) 0 2px, transparent 2px 4px); }
 .mk.edit { cursor: var(--cur-move); }
-.mk.edit .mk-body { outline: 2px dashed var(--accent); outline-offset: 2px; }
-.mk.sel .mk-body { outline: 3px solid var(--accent); outline-offset: 2px; }
-.mk.hl .mk-body { outline: 3px solid var(--accent); outline-offset: 2px; }
-.mk.flash .mk-body { animation: flash .6s; }
+.mk.edit .mk-card { outline: 2px dashed var(--accent); outline-offset: 2px; }
+.mk.sel .mk-card { outline: 3px solid var(--accent); outline-offset: 2px; }
+.mk.hl .mk-card { outline: 3px solid var(--accent); outline-offset: 2px; }
+.mk.flash .mk-card { animation: flash .6s; }
 @keyframes flash { 0% { transform: scale(1.18); } 100% { transform: scale(1); } }
-@media (prefers-reduced-motion: reduce) { .mk.flash .mk-body { animation: none; } * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { .mk.flash .mk-card { animation: none; } * { transition: none !important; } }
 .plan-side { width: 280px; flex: none; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
 .plan-side.right { border-right: 0; border-left: 1px solid var(--border); }
 .plan-side h3 { font-size: .95rem; padding: .7rem .85rem .3rem; }
@@ -412,10 +422,10 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
   .topbar .right { gap: .1rem; }
 }
 .back-only { display: none; }
-#app.stale .mk-body, #app.stale .bulb, #app.stale .meter, #app.stale .window, #app.stale .sens-grid, #app.stale .lamp-grid, #app.stale .blinds { opacity: .5; }
+#app.stale .mk-card, #app.stale .bulb, #app.stale .meter, #app.stale .window, #app.stale .sens-grid, #app.stale .lamp-grid, #app.stale .blinds { opacity: .5; }
 
 /* paper (e-ink): flat glow-free "on" states (a thicker coloured border instead of a glow) */
-:root[data-theme=paper] .bulb.on, :root[data-theme=paper] .mk.on .mk-body { box-shadow: none; border-width: 3px; }
+:root[data-theme=paper] .bulb.on, :root[data-theme=paper] .mk.on .mk-card { box-shadow: none; border-width: 3px; }
 /* coupler card: routing settings as label/value rows */
 .cp-grid { display: grid; gap: .3rem; width: 100%; }
 .cp-row { display: flex; justify-content: space-between; gap: .75rem; font-size: .85rem; }
@@ -525,7 +535,7 @@ details.diag.compact[open] > summary .more { transform: rotate(90deg); }
 details.diag.compact > .hint { padding: 0 .7rem .55rem 2.4rem; color: var(--text); }
 details.diag.compact > summary > .ic:first-child { flex: none; }
 .chev { display: inline-flex; transition: transform .15s; } .chev.open { transform: rotate(90deg); }
-.btn.danger-outline .ic, .btn.sm.quiet .ic { width: 1.1em; height: 1.1em; }
+.btn.danger-outline .ic, .btn.sm.quiet .ic { width: 1.1em; height: calc(16px * var(--mk-scale, 1)); }
 
 /* ---- icon picker and chosen icons ---- */
 .ipick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr)); gap: .3rem; max-height: 46vh; overflow: auto; padding: .3rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }

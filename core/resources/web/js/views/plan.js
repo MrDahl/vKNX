@@ -70,8 +70,14 @@ export function createPlan() {
   root.append(toolbar, wrap);
 
   // ----- layout helpers -----
-  function applySize() { setStyle(canvas, '--mk-scale', layout.size || 1); sRange.value = Math.round((layout.size || 1) * 100); }
-  function applyZoom() { canvas.style.width = layout.zoom + '%'; zRange.value = layout.zoom; setText(zVal, layout.zoom + ' %'); }
+  // The symbols grow and shrink with the plan: scale = symbol size setting x width of the plan / REF_W
+  const REF_W = 1100;
+  function applySize() {
+    const w = canvas.clientWidth || REF_W;
+    setStyle(canvas, '--mk-scale', ((layout.size || 1) * clamp(w / REF_W, .15, 4)).toFixed(3));
+    sRange.value = Math.round((layout.size || 1) * 100);
+  }
+  function applyZoom() { canvas.style.width = layout.zoom + '%'; zRange.value = layout.zoom; setText(zVal, layout.zoom + ' %'); applySize(); }
   function setZoom(z, anchor) {
     z = clamp(Math.round(z), MIN_Z, MAX_Z);
     let fx = .5, fy = .5, cx, cy;
@@ -146,7 +152,7 @@ export function createPlan() {
         r.addEventListener('change', () => operate('Slider', () => api.act(p.dev, 'slider', r.value)));
         const ib = h('span.mk-ico', icon('slider'));
         // the value stands behind the name under the symbol, so the symbol itself is just the slider
-        const nm = h('span'); label.append(nm, t); label._name = nm;
+        const nm = h('span'); label.append(nm, t); label._name = nm; el.classList.add('mk-slider');
         body.append(ib, r);
         upd = q => { ib.hidden = !hasCustomIcon(p.id); if (!ib.hidden) paintIcon(ib, p.id, pointDefault(p)); if (!active && Date.now() > until && document.activeElement !== r) { if (+r.value !== q.val) r.value = q.val; setText(t, q.val + ' %'); } return ''; };
         break;
@@ -198,7 +204,7 @@ export function createPlan() {
         break;
       }
     }
-    el.append(body, label, infoBtn);
+    el.append(h('div.mk-card', body, label), infoBtn);
     el._upd = upd; el._label = label;
     el.addEventListener('pointerdown', e => {
       if (!S.planEdit || e.button !== 0) return;
@@ -333,7 +339,8 @@ export function createPlan() {
   const endPan = () => { panning = null; viewport.classList.remove('panning'); };
   viewport.addEventListener('pointerup', endPan); viewport.addEventListener('pointercancel', endPan);
   viewport.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); setZoom(layout.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1), { x: e.clientX, y: e.clientY }); }, { passive: false });
-  new ResizeObserver(() => { if (!layout.zoomSet && hasImg && !root.hidden) fit(); }).observe(viewport);
+  new ResizeObserver(() => { if (!layout.zoomSet && hasImg && !root.hidden) fit(); applySize(); }).observe(viewport);
+  new ResizeObserver(() => applySize()).observe(canvas);
 
   async function ensureLoaded() {
     if (loaded) return; loaded = true;
