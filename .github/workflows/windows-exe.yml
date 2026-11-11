@@ -135,7 +135,19 @@ jobs:
         run: |
           choco install innosetup -y --no-progress | Out-Null
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          & $iscc "/DAppVersion=$env:VERSION" "/DSourceDir=$PWD\dist\app" installer\vKNX.iss
+          # Microsoft's small WebView2 "Evergreen Bootstrapper" (redistribution is allowed by Microsoft). The installer runs it only
+          # on a PC without the WebView2 runtime. If the download fails the installer is built without it (the program then offers
+          # the download link at the first start).
+          $wv = Join-Path $PWD 'installer\MicrosoftEdgeWebview2Setup.exe'
+          $isccArgs = @("/DAppVersion=$env:VERSION", "/DSourceDir=$PWD\dist\app")
+          try {
+            Invoke-WebRequest 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $wv -UseBasicParsing -TimeoutSec 120
+            $sig = Get-AuthenticodeSignature $wv
+            if ((Get-Item $wv).Length -gt 500000 -and $sig.Status -eq 'Valid' -and $sig.SignerCertificate.Subject -like '*Microsoft Corporation*') {
+              $isccArgs += "/DWebView2Setup=$wv"; Write-Host "WebView2 bootstrapper bundled ($((Get-Item $wv).Length) bytes)"
+            } else { Write-Host "WebView2 bootstrapper rejected (size or signature): $($sig.Status)" }
+          } catch { Write-Host "WebView2 bootstrapper not bundled: $($_.Exception.Message)" }
+          & $iscc @isccArgs installer\vKNX.iss
           if ($LASTEXITCODE) { throw 'iscc failed' }
           Get-ChildItem dist/*.exe | Select-Object Name, Length | Format-Table | Out-String | Write-Host
 

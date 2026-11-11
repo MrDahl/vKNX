@@ -153,7 +153,15 @@ namespace VKnx.Launcher
             {
                 // WebView2 runtime missing: fall back to the default browser, the server keeps running
                 try { Process.Start(Url); } catch { }
-                status.Text = "WebView2 is missing on this PC, so vKNX was opened in your browser.\n\nClose this window to stop vKNX.\n\n" + Url;
+                status.Text = "WebView2 is missing on this PC, so vKNX was opened in your browser.\n\nClose this window to stop vKNX.\n\n" + Url
+                    + "\n\nFor the vKNX window, install the free Microsoft WebView2 Runtime:\nhttps://developer.microsoft.com/microsoft-edge/webview2/";
+                try
+                {
+                    if (MessageBox.Show(this, "vKNX needs the free Microsoft WebView2 Runtime to show its own window.\n\nvKNX is open in your browser for now.\n\nOpen the Microsoft download page now? (Install it, then start vKNX again.)",
+                        "vKNX", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        Process.Start("https://go.microsoft.com/fwlink/p/?LinkId=2124703");
+                }
+                catch { }
                 return;
             }
             var cw = web.CoreWebView2;

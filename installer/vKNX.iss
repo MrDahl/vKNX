@@ -38,16 +38,40 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 
+#ifdef WebView2Setup
+; Microsoft's WebView2 "Evergreen Bootstrapper" (small, downloads the runtime from Microsoft). Only used when the PC does not have the runtime.
+Source: "{#WebView2Setup}"; DestDir: "{tmp}"; DestName: "MicrosoftEdgeWebview2Setup.exe"; Flags: deleteafterinstall; Check: NeedsWebView2
+#endif
+
 [Icons]
 Name: "{autoprograms}\vKNX"; Filename: "{app}\vKNX.exe"
 Name: "{autodesktop}\vKNX"; Filename: "{app}\vKNX.exe"; Tasks: desktopicon
 
 [Run]
+#ifdef WebView2Setup
+Filename: "{tmp}\MicrosoftEdgeWebview2Setup.exe"; Parameters: "/silent /install"; StatusMsg: "Installing Microsoft WebView2 Runtime (the vKNX window needs it) ..."; Flags: waituntilterminated; Check: NeedsWebView2
+#endif
 ; interactive install: offer to start; silent install (automatic update): always start the new version
 Filename: "{app}\vKNX.exe"; Description: "{cm:LaunchProgram,vKNX}"; Flags: nowait postinstall skipifsilent
 Filename: "{app}\vKNX.exe"; Flags: nowait; Check: WizardSilent
 
 [Code]
+{ Is the Microsoft WebView2 runtime installed (for all users in either registry view, or for this user)? }
+function WebView2Version(const Root: Integer; const Key: String): String;
+begin
+  if not RegQueryStringValue(Root, Key, 'pv', Result) then Result := '';
+end;
+
+function NeedsWebView2: Boolean;
+var Key, V: String;
+begin
+  Key := 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}';
+  V := WebView2Version(HKLM32, Key);
+  if (V = '') or (V = '0.0.0.0') then V := WebView2Version(HKLM64, Key);
+  if (V = '') or (V = '0.0.0.0') then V := WebView2Version(HKCU, Key);
+  Result := (V = '') or (V = '0.0.0.0');
+end;
+
 { Update fix: an installer started by the program itself could not replace files because vKNX.exe or the server
   were still running. Ask the launcher to close (it saves the server), wait, and only then end what is left. }
 function IsRunning(const Name: String): Boolean;
