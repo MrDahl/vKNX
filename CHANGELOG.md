@@ -5,6 +5,8 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+## [0.13.2] - 2026-11-11
+
 ### Fixed
 - **Secure devices lost their download when vKNX was restarted.** After ETS's *master reset* (ETS ends every secure download with one) the device library marked the device as closed and saved nothing more, so after an update or a restart a secure push button or actuator came back with its address but without its application and needed a full download again. The first master reset was saved, the rest was lost: at the first reset of a secure download the application is not loaded yet. Plain products (ETS does a normal restart) were not affected. Now every device saves its state a few seconds after every change (a download, an address, a parameter), and again when vKNX closes, so also a forced stop or a crash loses nearly nothing. **Secure devices that already lost their download must be downloaded once more.**
 - **A removed or renamed device went on living on the bus.** It kept receiving group telegrams until vKNX was restarted (visible in the log as lines from devices that no longer exist). A removed device is now disconnected from the line at once.
