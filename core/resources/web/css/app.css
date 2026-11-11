@@ -356,9 +356,9 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .mk.on .mk-body > .t, .mk.on .mk-label { color: var(--text); }
 /* slider: the slider on top, name and value below */
 .mk-slider .mk-card { grid-template-columns: auto 1fr; border-radius: 1em; }
-.mk-slider .mk-body > :not(input) { grid-column: 1; grid-row: 1; }
-.mk-slider .mk-body > input { grid-column: 2; grid-row: 1; margin-bottom: .25em; }
-.mk.mk-slider .mk-card .mk-label { grid-column: 1 / -1; grid-row: 2; align-self: auto; text-align: center; font-size: .8em; color: var(--muted); }
+.mk.mk-slider .mk-body > :not(.t):not(input) { grid-column: 1; grid-row: 1; }
+.mk.mk-slider .mk-body > input { grid-column: 2; grid-row: 1; align-self: center; }
+.mk.mk-slider .mk-card .mk-label { grid-column: 1 / -1; grid-row: 2; margin-top: .15em; align-self: auto; text-align: center; font-size: .8em; color: var(--muted); }
 .mk .mk-btn { border: 0; background: transparent; cursor: var(--cur-pointer); display: grid; place-items: center; padding: 2px; border-radius: 6px; }
 .mk .mk-btn.down, .mk .mk-btn:active { background: var(--accent); color: var(--accent-ink); }
 .mk .mk-info { position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; padding: 0; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); display: none; place-items: center; cursor: var(--cur-pointer); color: var(--muted); }

@@ -150,11 +150,12 @@ export function createPlan() {
         r.addEventListener('pointerup', end); r.addEventListener('pointercancel', end);
         r.addEventListener('input', () => { setText(t, r.value + ' %'); api.act(p.dev, 'sliderLive', r.value).catch(() => {}); });
         r.addEventListener('change', () => operate('Slider', () => api.act(p.dev, 'slider', r.value)));
-        const ib = h('span.mk-ico', icon('slider'));
-        // the value stands behind the name under the symbol, so the symbol itself is just the slider
+        // one symbol: on/off button on the left, the slider to the right of it, name and value below
+        const ib = h('span.mk-ico', icon('button'));
+        const b = h('button.mk-btn', { type: 'button', 'aria-label': 'Press ' + p.dev, title: 'Switch on / off', onclick: () => { if (!S.planEdit) operate('Button press', () => api.act(p.dev, 'press', 0)); } }, ib);
         const nm = h('span'); label.append(nm, t); label._name = nm; el.classList.add('mk-slider');
-        body.append(ib, r);
-        upd = q => { ib.hidden = !hasCustomIcon(p.id); if (!ib.hidden) paintIcon(ib, p.id, pointDefault(p)); if (!active && Date.now() > until && document.activeElement !== r) { if (+r.value !== q.val) r.value = q.val; setText(t, q.val + ' %'); } return ''; };
+        body.append(b, r);
+        upd = q => { setCls(el, 'on', !!q.on); paintIcon(ib, p.id, 'button'); if (!active && Date.now() > until && document.activeElement !== r) { if (+r.value !== q.val) r.value = q.val; setText(t, q.val + ' %'); } return q.on + ':' + (S.icons[p.id]?.n || ''); };
         break;
       }
       case 'blind': {
