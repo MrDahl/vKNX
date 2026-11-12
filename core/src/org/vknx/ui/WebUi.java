@@ -77,6 +77,23 @@ public final class WebUi {
 		server.createContext("/api/add", this::add);
 		server.createContext("/api/location", this::location);
 		server.createContext("/api/rename", this::rename);
+		// POST /api/restore: puts back the device that was removed last (undo)
+		server.createContext("/api/restore", ex -> {
+			if (!"POST".equals(ex.getRequestMethod())) {
+				send(ex, 405, "text/plain", "POST only".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
+			try {
+				final var d = registry.restoreRemoved();
+				send(ex, 200, "text/plain", d.name().getBytes(StandardCharsets.UTF_8));
+			}
+			catch (final IllegalStateException | IllegalArgumentException e) {
+				send(ex, 409, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+			}
+			catch (final Exception e) {
+				send(ex, 500, "text/plain", String.valueOf(e.getMessage()).getBytes(StandardCharsets.UTF_8));
+			}
+		});
 		server.createContext("/api/remove", ex -> {
 			final String n = param(ex.getRequestURI(), "dev", "");
 			if (!"POST".equals(ex.getRequestMethod())) {

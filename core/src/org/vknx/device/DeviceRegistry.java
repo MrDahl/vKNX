@@ -46,6 +46,7 @@ public final class DeviceRegistry {
 		// the defaults only on the very first start: an installation the user emptied on purpose stays empty
 		if (list.isEmpty() && !Files.exists(file))
 			list.addAll(List.of("push-button:Tryk1", "switch-actuator:Lampe1"));
+		emptyTrash(); // a device removed in the last run is gone for good
 		resetOldSchema();
 		for (final String spec : list) {
 			final var sp = parseSpec(spec);
@@ -157,18 +158,76 @@ public final class DeviceRegistry {
 	public synchronized void remove(final String name) throws IOException {
 		for (final var d : devices)
 			if (d.name().equals(name)) {
-				d.close();
+				final int index = devices.indexOf(d);
+				final var where = d.location();
+				d.close(); // saves the state
 				devices.remove(d);
 				final String stem = fileStem(name);
+				// the state goes to the trash (one device, until the next removal or the next start), so the removal can be undone
+				emptyTrash();
+				final Path trash = dir.resolve(TRASH);
+				Files.createDirectories(trash);
 				try (Stream<Path> s = Files.list(dir)) {
-					for (final Path f : s.filter(f -> f.getFileName().toString().startsWith(stem + ".state")).toList())
-						Files.deleteIfExists(f);
+					for (final Path f : s.filter(f -> f.getFileName().toString().startsWith(stem + ".state")).toList()) {
+						if (f.getFileName().toString().equals(stem + ".state"))
+							Files.move(f, trash.resolve(f.getFileName()), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+						else
+							Files.deleteIfExists(f);
+					}
 				}
 				org.vknx.app.DataFiles.deleteBackupsOf(dir, stem);
-				log.add("device", name, "removed (state files deleted)");
+				removed = new Removed(d.product().key(), name, where, index);
+				log.add("device", name, "removed (can be put back until the next removal or restart)");
 				save();
 				return;
 			}
+	}
+
+	private static final String TRASH = "trash";
+
+	/** The device removed last: enough to put it back as it was. */
+	private record Removed(String product, String name, Line where, int index) {}
+
+	private Removed removed;
+
+	/** @return the name of the device that {@link #restoreRemoved()} would put back, or null */
+	public synchronized String removedName() { return removed == null ? null : removed.name(); }
+
+	/**
+	 * Puts back the device that was removed last, with its address, download, parameters and keys (its state file was
+	 * kept in the trash). What is only live (lamp on or off) starts from its default, as after a restart.
+	 */
+	public synchronized VirtualDevice restoreRemoved() throws Exception {
+		final Removed r = removed;
+		if (r == null)
+			throw new IllegalStateException("there is no removed device to put back");
+		if (devices.stream().anyMatch(d -> d.name().equalsIgnoreCase(r.name())))
+			throw new IllegalArgumentException("a device called " + r.name() + " exists again, so the removed one cannot be put back");
+		final String stem = fileStem(r.name());
+		final Path kept = dir.resolve(TRASH).resolve(stem + ".state");
+		if (Files.exists(kept))
+			Files.move(kept, dir.resolve(stem + ".state"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		final var d = VirtualDevice.create(r.name(), Products.ALL.get(r.product()), serialFor(r.name()), dir.resolve(stem + ".state"), net,
+				(src, cat, text) -> log.add(cat, src.name(), text), r.where());
+		devices.add(Math.min(r.index(), devices.size()), d);
+		removed = null;
+		emptyTrash();
+		log.add("device", r.name(), "put back (removal undone)");
+		save();
+		return d;
+	}
+
+	/** Deletes what is in the trash for good. */
+	public synchronized void emptyTrash() throws IOException {
+		removed = null;
+		final Path trash = dir.resolve(TRASH);
+		if (!Files.isDirectory(trash))
+			return;
+		try (Stream<Path> s = Files.list(trash)) {
+			for (final Path f : s.toList())
+				Files.deleteIfExists(f);
+		}
+		Files.deleteIfExists(trash);
 	}
 
 	/**

@@ -13,12 +13,19 @@ const openGroups = new Set();
 export async function removeDevice(name) {
   const ok = await confirmDialog({
     title: 'Remove device', danger: true, confirmLabel: 'Remove device',
-    message: `Remove "${name}"? Its address, downloaded application and saved state are deleted. ETS will see the device disappear from the line. This cannot be undone.`,
+    message: `Remove "${name}"? Its address, downloaded application and saved state are deleted, and ETS will see the device disappear from the line. Right after the removal you can still undo it.`,
   });
   if (!ok) return;
   if (await operate(`Removing "${name}"`, () => api.remove(name))) {
-    forgetIconsOf(name);
-    toast(`"${name}" was removed.`, 'ok');
+    // the icons and the place on the floor plan are kept until the undo offer is over
+    toast(`"${name}" was removed.`, 'ok', 12000, {
+      label: 'Undo',
+      onclick: async () => {
+        if (await operate(`Putting "${name}" back`, () => api.restore())) { toast(`"${name}" is back, with its address and download.`, 'ok'); await hooks.refresh(); emit('devices'); }
+        else forgetIconsOf(name);
+      },
+      onExpire: () => { if (!(S.state?.devices || []).some(d => d.name === name)) forgetIconsOf(name); },
+    });
     if (S.selected === name) selectDevice(null, { drawer: false });
     await hooks.refresh();
     emit('devices');

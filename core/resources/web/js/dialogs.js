@@ -3,11 +3,15 @@ import { h, icon } from './util.js';
 const toasts = h('div.toasts', { 'aria-live': 'polite', role: 'status' });
 document.body.append(toasts);
 
-export function toast(message, kind = 'info', ms = 5000) {
+/** @param action optional { label, onclick, onExpire }: a button in the toast (for example Undo); onExpire runs when the toast goes away unused */
+export function toast(message, kind = 'info', ms = 5000, action = null) {
+  let used = false, gone = false;
+  const end = () => { if (gone) return; gone = true; t.remove(); if (action && !used) action.onExpire?.(); };
   const t = h(`div.toast.${kind}`, icon(kind === 'error' ? 'alert' : kind === 'ok' ? 'check' : 'info'), h('span', message),
-    h('button', { 'aria-label': 'Dismiss', onclick: () => t.remove() }, icon('close')));
+    action ? h('button.toast-act', { type: 'button', onclick: () => { used = true; end(); action.onclick(); } }, action.label) : null,
+    h('button', { 'aria-label': 'Dismiss', onclick: end }, icon('close')));
   toasts.append(t);
-  if (kind !== 'error') setTimeout(() => t.remove(), ms); else setTimeout(() => t.remove(), 12000);
+  setTimeout(end, kind === 'error' ? 12000 : ms);
 }
 
 /** Opens a modal dialog built from body nodes; resolves when closed. Returns the <dialog> for control. */

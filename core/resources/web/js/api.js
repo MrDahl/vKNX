@@ -46,6 +46,7 @@ export const api = {
   setLocation: (dev, line) => req('/api/location?' + q({ dev, line }), { method: 'POST' }),
   rename: (dev, to) => req('/api/rename?' + q({ dev, to }), { method: 'POST' }),
   remove: dev => req('/api/remove?' + q({ dev }), { method: 'POST' }),
+  restore: () => req('/api/restore', { method: 'POST' }),
   layout: () => req('/api/layout'),
   icons: () => req('/api/icons'),
   saveIcons: obj => req('/api/icons', { method: 'POST', body: JSON.stringify(obj) }),

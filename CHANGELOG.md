@@ -5,6 +5,14 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Added
+- **Undo for a removed device.** After *Remove device* the message at the bottom has an **Undo** button for 12 seconds. It puts the device back with its address, download, parameters, keys, its place in the list, its place on the floor plan and its icons. Only the device removed last can be put back, and only until vKNX is restarted.
+- **A release now stops if the `.knxprod` files are older than the products** (`KnxprodCheck`), so a release cannot go out with product files that do not match what vKNX expects.
+- Issue templates, `CONTRIBUTING.md` and `SECURITY.md` on GitHub.
+
+### Changed
+- `docs/limitations.md` was brought up to date (it still described 0.5.0).
+
 ## [0.13.2] - 2026-11-11
 
 ### Fixed

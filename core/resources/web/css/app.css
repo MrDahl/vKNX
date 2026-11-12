@@ -229,6 +229,8 @@ dialog .dlg-foot { display: flex; justify-content: flex-end; gap: .6rem; padding
 .toast { display: flex; gap: .6rem; align-items: flex-start; padding: .7rem .9rem; border-radius: var(--radius); background: var(--text); color: var(--bg); box-shadow: var(--shadow-md); }
 .toast.error { background: var(--danger); color: #fff; }
 .toast.ok { background: var(--ok); color: #fff; }
+.toast .toast-act { margin-left: auto; font: inherit; font-weight: 600; text-decoration: underline; padding: 0 .3rem; }
+.toast .toast-act + button { margin-left: 0; }
 .toast button { margin-left: auto; background: transparent; border: 0; color: inherit; cursor: var(--cur-pointer); }
 :root[data-theme=dark] .toast.ok, :root[data-theme=dark] .toast.error { color: #0b0f15; }
 
