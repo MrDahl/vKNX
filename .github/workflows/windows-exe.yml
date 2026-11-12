@@ -53,7 +53,7 @@ jobs:
           $ErrorActionPreference = 'Continue'
           cmd /c "powershell -File tools/selftest.ps1 KnxprodCheck > dist\knxprod-check.log 2>&1"
           $code = $LASTEXITCODE
-          Get-Content dist\knxprod-check.log | Where-Object { $_ -match '^(PASS|FAIL|all |\d+ of )' }
+          Get-Content dist\knxprod-check.log | Where-Object { $_ -match '^(PASS|FAIL|WARN|all |\d+ (of|new) )' }
           if ($code -ne 0 -and $env:PUBLISH -eq 'True') { throw 'The knxprod folder is older than Products.java: run tools\make-knxprod.ps1 on Windows with ETS, commit the knxprod folder, then release again.' }
 
       - name: Package modules as jars

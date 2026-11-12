@@ -5,6 +5,8 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-12
+
 ### Added
 - **Three new products (not tried in ETS yet; the `.knxprod` files must be built first):**
   - **Presence detector** (`vknx-presence-detector`): a light channel that sends ON at movement when the room is darker than a threshold and OFF after a follow-up time (10 s to 30 min), a presence object for heating and ventilation with its own, longer time (DPT 1.018), the measured brightness (lux) and a lock object. On the card: *Movement* (one movement), *Person in the room* (movement all the time) and a slider for the room brightness.
@@ -12,7 +14,7 @@ The text under each version is also shown as the release notes on GitHub and in 
   - **Energy meter** (`vknx-energy-meter`): a simulated consumption of a base load plus up to four monitored loads; a load is counted while its input object is on (connect it to the status of a switch actuator output). Sends power (W, DPT 14.056), energy (Wh and kWh, DPT 13.010 / 13.013), current (mA) and an alarm above a power limit; the counter can be reset by a telegram or on the card, where an extra load can also be set.
 - **Several floors on the floor plan.** *Plan settings → Add a floor…* (in *Edit plan*) gives the plan up to 8 floors, each with its own image, zoom and symbols; buttons next to *Operate / Edit plan* switch between them (shown when there is more than one floor). A floor can be renamed and removed (its symbols are taken off the plan, the devices stay). A channel can be on one floor at a time. Export / import carries all floors. A plan from before keeps working as the first floor.
 - **Undo for a removed device.** After *Remove device* the message at the bottom has an **Undo** button for 12 seconds. It puts the device back with its address, download, parameters, keys, its place in the list, its place on the floor plan and its icons. Only the device removed last can be put back, and only until vKNX is restarted.
-- **A release now stops if the `.knxprod` files are older than the products** (`KnxprodCheck`), so a release cannot go out with product files that do not match what vKNX expects.
+- **A release now stops if the `.knxprod` files are older than the products** (`KnxprodCheck`), so a release cannot go out with product files that do not match what vKNX expects. A product that has no file yet only gives a warning.
 - Issue templates, `CONTRIBUTING.md` and `SECURITY.md` on GitHub.
 
 ### Changed

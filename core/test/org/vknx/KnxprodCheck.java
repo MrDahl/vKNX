@@ -62,7 +62,7 @@ public final class KnxprodCheck {
 
 	public static void main(final String[] args) throws Exception {
 		final Path products = Path.of("products"), dir = Path.of("knxprod");
-		int bad = 0, n = 0;
+		int bad = 0, n = 0, missing = 0;
 		try (var files = Files.newDirectoryStream(products, "vknx-*.xml")) {
 			final List<Path> sorted = new ArrayList<>();
 			files.forEach(sorted::add);
@@ -71,12 +71,19 @@ public final class KnxprodCheck {
 				n++;
 				final String name = xml.getFileName().toString().replaceAll("\\.xml$", ".knxprod");
 				final String problem = compare(xml, dir.resolve(name));
-				System.out.println((problem == null ? "PASS  " : "FAIL  ") + name + (problem == null ? " matches Products.java" : " " + problem));
-				if (problem != null)
+				// A file that is not there yet (a new product that was never built) is only a warning: nothing wrong is
+				// shipped, the product is just not in the package. An OLD file is the dangerous case and stops the release.
+				final boolean absent = problem != null && !Files.exists(dir.resolve(name));
+				System.out.println((problem == null ? "PASS  " : absent ? "WARN  " : "FAIL  ") + name + (problem == null ? " matches Products.java" : " " + problem));
+				if (absent)
+					missing++;
+				else if (problem != null)
 					bad++;
 			}
 		}
-		System.out.println(bad == 0 ? "all " + n + " .knxprod files match" : bad + " of " + n + " .knxprod files must be rebuilt: tools\\make-knxprod.ps1, then commit the knxprod folder");
+		if (missing > 0)
+			System.out.println(missing + " new product(s) have no .knxprod file yet and are not in this release's product package");
+		System.out.println(bad == 0 ? "all " + (n - missing) + " existing .knxprod files match" : bad + " of " + n + " .knxprod files must be rebuilt: tools\\make-knxprod.ps1, then commit the knxprod folder");
 		System.exit(bad == 0 ? 0 : 1);
 	}
 }
