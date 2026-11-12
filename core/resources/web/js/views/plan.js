@@ -2,7 +2,7 @@ import { h, icon, setText, setCls, setStyle, setAttr, syncKeyed, clamp, debounce
 import { api } from '../api.js';
 import { S, on, emit, device, selectDevice, showGroupAddress } from '../bus.js';
 import { pointsOf, objectsOfPoint, SENSORS } from '../devinfo.js';
-import { operate, kelvinCss } from '../cards.js';
+import { operate, kelvinCss, createCard } from '../cards.js';
 import { confirmDialog, toast, menuButton, modal } from '../dialogs.js';
 import { paintIcon, setIcon, hasCustomIcon, pointDefault, pointKind } from '../iconStore.js';
 import { pickIcon } from '../iconPicker.js';
@@ -19,6 +19,14 @@ export function createPlan() {
   const root = h('div.view', { hidden: true });
   let layout = { items: [], zoom: 100, size: 1 };
   let loaded = false, hasImg = false, planKnown = null, sel = null, dragging = null, panning = null;
+  const selSet = new Set(); // all selected symbols (edit mode); sel is the one whose properties are shown
+  const undoStack = []; let lastNudge = 0;
+  /** Remembers where the symbols are, before something changes them (place, move, align, remove). */
+  function pushUndo() { undoStack.push(JSON.stringify(layout.items)); if (undoStack.length > 40) undoStack.shift(); refreshTools(); }
+  function undo() {
+    if (!undoStack.length) return;
+    layout.items = JSON.parse(undoStack.pop()); selSet.clear(); sel = null; save(); update();
+  }
   const MAX_FLOORS = 8;
   let cur = 0; // the floor shown (its number n, which is also the number of its image)
   const floors = () => (layout.floors && layout.floors.length ? layout.floors : [{ n: 0, name: 'Floor 1' }]);
@@ -53,11 +61,12 @@ export function createPlan() {
     { label: 'Rename this floor…', icon: 'pencil', onclick: renameFloor },
     ...(floors().length > 1 ? [{ label: 'Remove this floor…', icon: 'trash', danger: true, onclick: removeFloor }] : [])] });
   const settingsBox = h('span.plan-settings', planMenu);
+  const bUndo = h('button.btn', { type: 'button', disabled: true, title: 'Undo the last change to the symbols (Ctrl+Z)', onclick: undo }, icon('restart'), h('span.btn-text.opt', 'Undo'));
   const floorTabs = h('div.segmented.floor-tabs', { role: 'group', 'aria-label': 'Floor', hidden: true });
   const toolbar = h('div.toolbar', seg, floorTabs,
     h('button.btn', { onclick: fit, title: 'Fit the whole plan into the window' }, icon('fit'), h('span.btn-text.opt', 'Fit to window')),
     h('span.zoom-box', h('button.btn.icon', { 'aria-label': 'Zoom out', title: 'Zoom out', onclick: () => setZoom(layout.zoom - 15) }, icon('zoomOut')), zRange, h('button.btn.icon', { 'aria-label': 'Zoom in', title: 'Zoom in', onclick: () => setZoom(layout.zoom + 15) }, icon('zoomIn')), zVal),
-    symBox, h('span.grow'), settingsBox, file);
+    symBox, bUndo, h('span.grow'), settingsBox, file);
 
   // ----- canvas -----
   const img = h('img', { alt: 'Floor plan', draggable: false });
@@ -177,8 +186,44 @@ export function createPlan() {
     layout.zoom = clamp(Math.floor(Math.min(100, byH)), MIN_Z, MAX_Z); layout.fitted = true; delete layout.zoomSet; applyZoom();
     viewport.scrollLeft = viewport.scrollTop = 0; save();
   }
-  function setEdit(v) { S.planEdit = v; if (!v) sel = null; update(); }
-  function refreshTools() { symBox.hidden = !S.planEdit; settingsBox.hidden = !S.planEdit; }
+  function setEdit(v) { S.planEdit = v; if (!v) { sel = null; selSet.clear(); } else closePop(); update(); }
+  function refreshTools() { symBox.hidden = !S.planEdit; settingsBox.hidden = !S.planEdit; bUndo.hidden = !S.planEdit; bUndo.disabled = !undoStack.length; }
+
+  // ----- operating card next to a symbol (operate mode) -----
+  let pop = null;
+  function closePop() {
+    if (!pop) return;
+    document.removeEventListener('pointerdown', pop.outside, true); document.removeEventListener('keydown', pop.key, true);
+    pop.el.remove(); pop = null;
+  }
+  function placePop() {
+    if (!pop || !pop.anchor.isConnected) return;
+    const a = pop.anchor.getBoundingClientRect(), w = pop.el.offsetWidth, hh = pop.el.offsetHeight, gap = 10;
+    let left = a.right + gap; if (left + w > innerWidth - 8) left = a.left - w - gap; if (left < 8) left = clamp(a.left, 8, Math.max(8, innerWidth - w - 8));
+    pop.el.style.left = left + 'px'; pop.el.style.top = clamp(a.top - 16, 8, Math.max(8, innerHeight - hh - 8)) + 'px';
+  }
+  /** Shows the operating card of a device beside its symbol, so it can be operated without leaving the plan. */
+  function openPop(devName, anchor) {
+    if (pop && pop.dev === devName) { closePop(); return; }
+    closePop();
+    const d = device(devName); if (!d) return;
+    const card = createCard(d, { menu: () => h('span.pop-btns',
+      h('button.btn.quiet.sm', { type: 'button', title: 'Open the device details', onclick: () => { closePop(); selectDevice(devName, { drawer: true }); } }, 'Details'),
+      h('button.btn.quiet.icon', { type: 'button', 'aria-label': 'Close', title: 'Close', onclick: closePop }, icon('close'))) });
+    const el = h('div.mk-pop', { role: 'dialog', 'aria-label': 'Operate ' + devName }, card.el);
+    document.body.append(el);
+    pop = { dev: devName, el, card, anchor,
+      outside: e => { if (!el.contains(e.target) && !e.target.closest('dialog, .toast')) { const again = anchor.contains(e.target); closePop(); if (again) e.stopPropagation(); } },
+      key: e => { if (e.key === 'Escape' && !document.querySelector('dialog[open]')) { e.stopPropagation(); closePop(); } } };
+    card.update(d); placePop();
+    document.addEventListener('pointerdown', pop.outside, true); document.addEventListener('keydown', pop.key, true);
+  }
+  viewport.addEventListener('scroll', closePop);
+  document.addEventListener('keydown', e => {
+    if (!S.planEdit || root.hidden || root.offsetParent === null || !(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'z') return;
+    const a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+    e.preventDefault(); undo();
+  });
 
   async function upload() {
     const f = file.files[0]; if (!f) return;
@@ -207,7 +252,7 @@ export function createPlan() {
         body.append(ib, t);
         // a colour channel shows its colour on the icon (col: '#RRGGBB', or 'k<Kelvin>' for tunable white)
         upd = q => { setCls(el, 'on', q.on); paintIcon(ib, p.id, pointDefault(p), q.on); setStyle(ib, 'color', q.on && q.col ? (q.col[0] === 'k' ? kelvinCss(+q.col.slice(1)) : q.col) : ''); setText(t, q.pct != null && q.on ? q.pct + ' %' : ''); return q.on + ':' + q.pct + ':' + (q.col || '') + ':' + (S.icons[p.id]?.n || ''); };
-        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        card.classList.add('opens'); card.addEventListener('click', () => { if (!S.planEdit) openPop(p.dev, el); }); card.title = 'Open the operating card of ' + p.dev;
         break;
       }
       case 'button': {
@@ -247,7 +292,7 @@ export function createPlan() {
         const w = h('i'); const t = h('span.t'); const win = h('div.mk-win', w); const ib = h('span.mk-ico', icon('blind'));
         body.append(win, ib, t);
         upd = q => { const own = hasCustomIcon(p.id); win.hidden = own; ib.hidden = !own; if (own) paintIcon(ib, p.id, pointDefault(p)); setStyle(w, 'height', q.pos + '%'); setText(t, q.pos + ' %'); body.title = 'Blind position: ' + q.pos + ' % closed'; return q.pos; };
-        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        card.classList.add('opens'); card.addEventListener('click', () => { if (!S.planEdit) openPop(p.dev, el); }); card.title = 'Open the operating card of ' + p.dev;
         break;
       }
       case 'display': {
@@ -255,7 +300,7 @@ export function createPlan() {
         const ib = h('span.mk-ico', icon('display'));
         body.append(ib, t);
         upd = q => { paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.text; };
-        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        card.classList.add('opens'); card.addEventListener('click', () => { if (!S.planEdit) openPop(p.dev, el); }); card.title = 'Open the operating card of ' + p.dev;
         break;
       }
       case 'logic': {
@@ -263,7 +308,7 @@ export function createPlan() {
         const ib = h('span.mk-ico', icon('logic'));
         body.append(ib, t);
         upd = q => { paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.text; };
-        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        card.classList.add('opens'); card.addEventListener('click', () => { if (!S.planEdit) openPop(p.dev, el); }); card.title = 'Open the operating card of ' + p.dev;
         break;
       }
       case 'contact': {
@@ -279,7 +324,7 @@ export function createPlan() {
         const t = h('span.t'); const ib = h('span.mk-ico', icon(p.sym));
         body.append(ib, t);
         upd = q => { setCls(el, 'on', !!q.on); paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.on + ':' + q.text + ':' + (S.icons[p.id]?.n || ''); };
-        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        card.classList.add('opens'); card.addEventListener('click', () => { if (!S.planEdit) openPop(p.dev, el); }); card.title = 'Open the operating card of ' + p.dev;
         break;
       }
       case 'sensor': {
@@ -287,7 +332,7 @@ export function createPlan() {
         const ib = h('span.mk-ico', icon(SENSORS[p.sensor].icon));
         body.append(ib, t);
         upd = q => { paintIcon(ib, p.id, pointDefault(p)); setText(t, q.text); return q.text; };
-        body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
+        card.classList.add('opens'); card.addEventListener('click', () => { if (!S.planEdit) openPop(p.dev, el); }); card.title = 'Open the operating card of ' + p.dev;
         break;
       }
     }
@@ -297,34 +342,48 @@ export function createPlan() {
     el.addEventListener('pointerdown', e => {
       if (!S.planEdit || e.button !== 0) return;
       e.preventDefault(); e.stopPropagation();
-      selectMarker(p.id);
+      const add = e.shiftKey || e.ctrlKey || e.metaKey;
+      if (add) { selectMarker(p.id, true); return; } // Shift or Ctrl + click: add to / take out of the selection
+      if (!selSet.has(p.id)) selectMarker(p.id);
+      else if (sel !== p.id) { sel = p.id; update(); }
       const it = itemOf(p.id); if (!it) return;
-      dragging = { id: p.id, it, el }; el.setPointerCapture(e.pointerId);
+      // all selected symbols move together
+      const group = layout.items.filter(i => selSet.has(i.id) && onFloor(i)).map(i => ({ it: i, x: i.x, y: i.y, el: layer.querySelector(`[data-id="${CSS.escape(i.id)}"]`) }));
+      dragging = { id: p.id, it, el, group, px: e.clientX, py: e.clientY, moved: false }; el.setPointerCapture(e.pointerId);
     });
     el.addEventListener('pointermove', e => {
       if (!dragging || dragging.id !== p.id) return;
       const r = canvas.getBoundingClientRect();
-      dragging.it.x = clamp((e.clientX - r.left) / r.width, .01, .99); dragging.it.y = clamp((e.clientY - r.top) / r.height, .01, .99);
-      el.style.left = dragging.it.x * 100 + '%'; el.style.top = dragging.it.y * 100 + '%';
+      let dx = (e.clientX - dragging.px) / r.width, dy = (e.clientY - dragging.py) / r.height;
+      if (!dragging.moved) { if (Math.abs(e.clientX - dragging.px) + Math.abs(e.clientY - dragging.py) < 3) return; dragging.moved = true; pushUndo(); }
+      // keep the whole group on the plan
+      for (const g of dragging.group) { dx = clamp(dx, .01 - g.x, .99 - g.x); dy = clamp(dy, .01 - g.y, .99 - g.y); }
+      for (const g of dragging.group) { g.it.x = g.x + dx; g.it.y = g.y + dy; if (g.el) { g.el.style.left = g.it.x * 100 + '%'; g.el.style.top = g.it.y * 100 + '%'; } }
     });
-    const endDrag = () => { if (dragging && dragging.id === p.id) { dragging = null; save(); renderProps(); } };
+    const endDrag = () => { if (dragging && dragging.id === p.id) { const moved = dragging.moved; dragging = null; if (moved) save(); renderProps(); } };
     el.addEventListener('pointerup', endDrag); el.addEventListener('pointercancel', endDrag);
     el.addEventListener('keydown', e => {
       if (!S.planEdit || !e.key.startsWith('Arrow')) return;
-      const it = itemOf(p.id); if (!it) return; const st = e.shiftKey ? .02 : .005;
-      if (e.key === 'ArrowLeft') it.x -= st; if (e.key === 'ArrowRight') it.x += st; if (e.key === 'ArrowUp') it.y -= st; if (e.key === 'ArrowDown') it.y += st;
-      it.x = clamp(it.x, .01, .99); it.y = clamp(it.y, .01, .99); el.style.left = it.x * 100 + '%'; el.style.top = it.y * 100 + '%'; save(); e.preventDefault();
+      if (!itemOf(p.id)) return; const st = e.shiftKey ? .02 : .005;
+      if (!selSet.has(p.id)) selectMarker(p.id);
+      if (Date.now() - lastNudge > 1500) pushUndo(); lastNudge = Date.now(); // a run of key presses is one step to undo
+      for (const it of layout.items.filter(i => selSet.has(i.id) && onFloor(i))) {
+        if (e.key === 'ArrowLeft') it.x -= st; if (e.key === 'ArrowRight') it.x += st; if (e.key === 'ArrowUp') it.y -= st; if (e.key === 'ArrowDown') it.y += st;
+        it.x = clamp(it.x, .01, .99); it.y = clamp(it.y, .01, .99);
+        const m = layer.querySelector(`[data-id="${CSS.escape(it.id)}"]`); if (m) { m.style.left = it.x * 100 + '%'; m.style.top = it.y * 100 + '%'; }
+      }
+      save(); e.preventDefault();
     });
     return el;
   }
 
   function updateMarker(el, p, it) {
-    if (!dragging || dragging.id !== p.id) { setStyle(el, 'left', it.x * 100 + '%'); setStyle(el, 'top', it.y * 100 + '%'); }
+    if (!dragging) { setStyle(el, 'left', it.x * 100 + '%'); setStyle(el, 'top', it.y * 100 + '%'); }
     const sig = el._upd(p);
     if (el._sig !== undefined && el._sig !== sig && !S.planEdit) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
     el._sig = sig;
     setText(el._label._name || el._label, it.label || p.label);
-    setCls(el, 'edit', S.planEdit); setCls(el, 'sel', S.planEdit && sel === p.id);
+    setCls(el, 'edit', S.planEdit); setCls(el, 'sel', S.planEdit && selSet.has(p.id));
     setAttr(el, 'tabindex', S.planEdit ? 0 : null);
     const d = device(p.dev);
     setCls(el, 'hl', !!S.gaSel && !!d && objectsOfPoint(d, p).some(n => (d.assoc || []).some(a => a.obj === n && a.ga === S.gaSel)));
@@ -334,7 +393,11 @@ export function createPlan() {
     el.setAttribute('role', 'group'); el.setAttribute('aria-label', (it.label || p.label) + ', ' + p.name);
   }
 
-  function selectMarker(id) { sel = id; update(); }
+  function selectMarker(id, additive) {
+    if (additive) { if (selSet.has(id)) { selSet.delete(id); sel = [...selSet].at(-1) || null; } else { selSet.add(id); sel = id; } }
+    else { selSet.clear(); selSet.add(id); sel = id; }
+    props.dataset.sel = ''; update();
+  }
 
   // ----- palette -----
   function placeAt(id, x, y, cascade) {
@@ -344,8 +407,9 @@ export function createPlan() {
       while (layout.items.some(i => onFloor(i) && Math.abs(i.x - (x + n * .075)) < .03 && Math.abs(i.y - (y + n * .07)) < .03) && n < 10) n++;
       x += n * .075; y += n * .07;
     }
+    pushUndo();
     layout.items.push({ id, x: clamp(x, .02, .98), y: clamp(y, .02, .98), ...(cur ? { f: cur } : {}) });
-    sel = id; save(); update();
+    sel = id; selSet.clear(); selSet.add(id); save(); update();
   }
   function viewCenter() {
     const r = canvas.getBoundingClientRect(), v = viewport.getBoundingClientRect();
@@ -378,7 +442,35 @@ export function createPlan() {
   });
 
   // ----- properties -----
+  /** Puts the selected symbols in one row (same height) or one column, at the average position. */
+  function align(axis) {
+    const its = layout.items.filter(i => selSet.has(i.id) && onFloor(i)); if (its.length < 2) return;
+    pushUndo(); const avg = its.reduce((a, i) => a + i[axis], 0) / its.length;
+    for (const i of its) i[axis] = avg;
+    save(); update();
+  }
+  /** Spreads the selected symbols evenly between the two outermost ones. */
+  function spread(axis) {
+    const its = layout.items.filter(i => selSet.has(i.id) && onFloor(i)).sort((a, b) => a[axis] - b[axis]); if (its.length < 3) return;
+    pushUndo(); const a = its[0][axis], b = its.at(-1)[axis];
+    its.forEach((i, k) => { i[axis] = a + (b - a) * k / (its.length - 1); });
+    save(); update();
+  }
   function renderProps() {
+    if (selSet.size > 1) {
+      const n = selSet.size, key = 'multi:' + [...selSet].join(',');
+      if (props.dataset.sel === key) return; props.dataset.sel = key;
+      props.replaceChildren(
+        h('div.props-head', h('div.grow', h('h3', `${n} symbols selected`), h('div.mute', 'Drag one to move them all, or use the arrow keys.')), h('button.btn.quiet.icon', { 'aria-label': 'Close', title: 'Clear the selection', onclick: () => { sel = null; selSet.clear(); update(); } }, icon('close'))),
+        h('div', { style: 'padding:.4rem .85rem .85rem;display:grid;gap:.5rem' },
+          h('button.btn', { onclick: () => align('y') }, 'Align in a row'),
+          h('button.btn', { onclick: () => align('x') }, 'Align in a column'),
+          n > 2 ? h('button.btn', { onclick: () => spread('x') }, 'Spread evenly, left to right') : null,
+          n > 2 ? h('button.btn', { onclick: () => spread('y') }, 'Spread evenly, top to bottom') : null,
+          h('button.btn', { onclick: removeFromPlan }, icon('close'), 'Remove from plan'),
+          h('div.hint', 'Shift + click adds a symbol to the selection or takes it out. Undo (Ctrl+Z) takes back the last change.')));
+      return;
+    }
     const it = sel && itemOf(sel), p = it && pointsMap().get(sel);
     if (!it || !p) {
       props.replaceChildren(); props.dataset.sel = ''; return;
@@ -393,7 +485,7 @@ export function createPlan() {
     const gas = (d.assoc || []).filter(a => objs.has(a.obj));
     const catObjs = S.cat[d.product]?.objects || [];
     props.replaceChildren(
-      h('div.props-head', h('div.grow', h('h3', `${p.dev} · ${p.name}`), it.label ? h('div.mute', 'Shown on the plan as “' + it.label + '”') : null), h('button.btn.quiet.icon', { 'aria-label': 'Close properties', title: 'Close', onclick: () => { sel = null; update(); } }, icon('close'))),
+      h('div.props-head', h('div.grow', h('h3', `${p.dev} · ${p.name}`), it.label ? h('div.mute', 'Shown on the plan as “' + it.label + '”') : null), h('button.btn.quiet.icon', { 'aria-label': 'Close properties', title: 'Close', onclick: () => { sel = null; selSet.clear(); update(); } }, icon('close'))),
       h('div', { style: 'padding:.4rem .85rem .85rem;display:grid;gap:.85rem' },
         h('div.field', { style: 'margin:0' }, h('label', { for: 'mk-label' }, 'Label on the plan'), label, h('div.hint#mk-label-help', 'Leave empty to use the default name.')),
         h('div.field', { style: 'margin:0' }, h('label', 'Icon'), (() => {
@@ -413,13 +505,14 @@ export function createPlan() {
           h('div.hint', { style: 'margin-top:.4rem' }, 'Only removes this symbol from the floor plan. The device stays in the installation.'))));
   }
   function removeFromPlan() {
-    layout.items = layout.items.filter(i => i.id !== sel); sel = null; save(); update();
+    pushUndo();
+    layout.items = layout.items.filter(i => !selSet.has(i.id) && i.id !== sel); sel = null; selSet.clear(); save(); update();
   }
 
   // ----- interactions on the viewport -----
   viewport.addEventListener('pointerdown', e => {
     if (e.button !== 0 || e.target.closest('.mk')) return;
-    if (S.planEdit && sel) { sel = null; update(); }
+    if (S.planEdit && (sel || selSet.size) && !e.shiftKey) { sel = null; selSet.clear(); update(); }
     panning = { x: e.clientX, y: e.clientY, sl: viewport.scrollLeft, st: viewport.scrollTop };
     viewport.setPointerCapture(e.pointerId); viewport.classList.add('panning');
   });
@@ -446,7 +539,8 @@ export function createPlan() {
     renderFloors();
     if (loaded && hp !== planKnown) { planKnown = hp; if (hp) loadImg(); else img.onerror(); }
     bOp.setAttribute('aria-pressed', String(!S.planEdit)); bEd.setAttribute('aria-pressed', String(S.planEdit));
-    palette.hidden = !S.planEdit; props.hidden = !(S.planEdit && sel);
+    palette.hidden = !S.planEdit; props.hidden = !(S.planEdit && (sel || selSet.size > 1));
+    if (pop) { const pd = device(pop.dev); if (!pd || S.planEdit || !pop.anchor.isConnected) closePop(); else { pop.card.update(pd); placePop(); } }
     refreshTools();
     const pts = pointsMap();
     const items = layout.items.filter(i => pts.has(i.id) && onFloor(i));

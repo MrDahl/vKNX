@@ -15,9 +15,10 @@ export function toast(message, kind = 'info', ms = 5000, action = null) {
 }
 
 /** Opens a modal dialog built from body nodes; resolves when closed. Returns the <dialog> for control. */
-export function modal({ title, body, buttons, wide }) {
+export function modal({ title, body, buttons, wide, cls }) {
   const dlg = h('dialog', { 'aria-labelledby': 'dlg-title' });
-  if (wide) dlg.style.maxWidth = 'min(94vw, 860px)';
+  if (cls) dlg.classList.add(cls);
+  else if (wide) dlg.style.maxWidth = 'min(94vw, 860px)';
   const close = () => dlg.close();
   dlg.append(
     h('div.dlg-head', h('h2#dlg-title', title), h('button.btn.quiet.icon', { 'aria-label': 'Close', title: 'Close', onclick: close }, icon('close'))),

@@ -5,6 +5,24 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-12
+
+A round of changes to the control panel; no product and no device behaviour changed.
+
+### Changed
+- **Monitor shows what the devices tell each other.** What ETS sends while it sets a device up (property and memory services, connects, acknowledgements, the address broadcasts) is hidden by default; the button **ETS programming** shows it, and a note says how many telegrams are hidden. Before, a download filled the list with hundreds of lines.
+- **Installation, right side:** when no device is selected it now shows how many devices are ready, need a download or have no address, and a *Still to do* list with the next step of every unfinished device (click to open it). The device list is wider, so product names are no longer cut off.
+- **Messages take one line.** The warnings at the top are folded into the *n messages* button, which shows the first message; a new serious message opens the list by itself.
+- **A finished device no longer says "Next: Connect ETS".** A device with its address and a complete download shows *Ready*, also when ETS is not connected.
+- **ETS connection shown once:** the second "No ETS connected" label under Installation is gone; the top bar shows it.
+- **Operating cards:** a search field, a filter by kind of device and a **Compact** button (cards without "How to operate" and the group addresses).
+- **Add device:** a larger dialog, every product with a line that says what it is, and **How many** to add several of the same kind at once (Lamp1, Lamp2, Lamp3).
+- **Floor plan, operate:** a click on a lamp, blind, display, sensor or other symbol that is not a button opens the **operating card of that device next to the symbol** (for example the light control with its colour wheel), instead of the details panel. *Details* in the card still opens the panel; Esc or a click outside closes the card.
+- **Floor plan, labels:** a channel that was given its own name in ETS shows just that name ("Ceiling lamp" instead of "Lamp Ceiling lamp"); default names keep the device name in front.
+- **Floor plan, edit:** Shift + click selects several symbols; they move together (mouse or arrow keys) and can be aligned in a row or column, spread evenly or removed. **Undo** (button or Ctrl+Z) takes back placing, moving, aligning and removing.
+- **Topology overview:** the lines are drawn as branches of the main line (each with its own coupler) instead of one below the other as a chain.
+- The button *Telegram monitor* under Simulation is now called *Monitor*, like the tab.
+
 ## [0.15.0] - 2026-11-12
 
 ### Added

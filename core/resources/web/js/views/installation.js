@@ -26,14 +26,24 @@ export function createInstallation() {
   const overview = { el: ov, update() {
     overviewDiagram.update();
     const ds = S.state?.devices || [];
-    const next = ds.map(d => ({ d, g: renderGuide(d) })).find(x => !x.g.ready);
-    const sig = next ? next.d.name + next.g.sig : 'none:' + ds.length;
+    const all = ds.map(d => ({ d, g: renderGuide(d) }));
+    const next = all.find(x => !x.g.ready), open = all.filter(x => !x.g.ready);
+    const nReady = all.length - open.length, nNoAddr = ds.filter(d => d.unassigned).length;
+    const sig = (next ? next.d.name + next.g.sig : 'none') + ':' + ds.length + ':' + open.map(x => x.d.name + (x.g.next?.key || '')).join(',');
     if (sig === ovSig && ov.firstChild) return; ovSig = sig;
     ov.replaceChildren(
       next ? h('div.next-bar.now', icon('chevron'), h('span.grow', h('b', 'Next: '), next.g.next ? next.g.next.short : 'finish ' + next.d.name, h('span.mute', ' · ' + next.d.name)),
         h('button.btn.sm', { onclick: () => selectDevice(next.d.name) }, 'Open ' + next.d.name))
         : ds.length ? h('div.next-bar.ok', icon('check'), h('span.grow', h('b', 'All devices are ready. '), 'Select a device for its details, or go to Simulation to operate them.'))
         : h('div.empty', icon('devices'), 'Add a device to get started.'),
+      ds.length ? h('div.ov-stats',
+        h('div.ov-stat.ok', h('b', String(nReady)), h('span', 'ready')),
+        h('div.ov-stat' + (open.length - nNoAddr > 0 ? '.warn' : ''), h('b', String(open.length - nNoAddr)), h('span', 'need a download')),
+        h('div.ov-stat' + (nNoAddr ? '.warn' : ''), h('b', String(nNoAddr)), h('span', 'without address'))) : null,
+      open.length ? h('div.ov-todo', h('h3', 'Still to do'), ...open.slice(0, 12).map(x => h('button.ov-row', { type: 'button', onclick: () => selectDevice(x.d.name) },
+        h('span.ico', icon(productOf(x.d).icon)), h('span.grow', h('b.ellipsis', x.d.name), h('span.sub.ellipsis', productOf(x.d).title)),
+        h('span.ov-next', x.g.next ? x.g.next.short : 'Finish the setup'), icon('chevron'))),
+        open.length > 12 ? h('div.hint', `and ${open.length - 12} more`) : null) : null,
       h('details.fold', { open: true }, h('summary', 'Topology'), overviewDiagram.el),
       next && next.g.next && next.g.next.key === 'ets' ? h('details.fold', h('summary', 'Need help connecting ETS?'), h('p.hint', { style: 'margin-top:.4rem' }, next.g.next.todo), h('button.btn.sm', { onclick: openEtsMessages }, icon('info'), 'ETS messages explained')) : null);
     overviewDiagram.el.dataset.mounted = '1';

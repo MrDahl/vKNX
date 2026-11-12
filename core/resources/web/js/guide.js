@@ -13,10 +13,12 @@ import { problems, hints, tunnels, interfaceLine, reachable, reachableFrom, line
 export function guideSteps(d) {
   const tun = tunnels();
   const ok = reachable(d);
+  // a device that has its address and a complete download needs nothing more from ETS: "Connect ETS" is not its next step
+  const finished = !d.unassigned && d.loaded && d.downloadState === 'complete';
   const steps = [
-    { key: 'ets', label: 'Connect ETS', doneLabel: 'ETS connected', short: 'Connect ETS to continue', done: tun.length > 0,
+    { key: 'ets', label: 'Connect ETS', doneLabel: tun.length ? 'ETS connected' : 'ETS has set this device up', short: 'Connect ETS to continue', done: tun.length > 0 || finished,
       todo: 'In ETS choose the connection "vKNX" (Project, Connections). It lists the interface when vKNX runs on the same network.',
-      did: tun.length ? `${tun.length} connection${tun.length === 1 ? '' : 's'} open (${tun.map(t => t.address).join(', ')})` : '' },
+      did: tun.length ? `${tun.length} connection${tun.length === 1 ? '' : 's'} open (${tun.map(t => t.address).join(', ')})` : 'ETS is not connected right now; connect it again to change something' },
     { key: 'iface', label: 'Check the interface line', doneLabel: 'Interface can reach the device', short: 'Fix the interface line', done: ok, problem: !ok,
       todo: `The interface sits on line ${interfaceLine()}; this device is on line ${d.line}. Set the interface to ${d.line} or give the device an address on line ${interfaceLine()}.`,
       did: d.unassigned ? 'A device without an address counts as being on the interface line' : `Interface line ${interfaceLine()} reaches line ${d.line}` },
@@ -94,18 +96,21 @@ function compactRow(p) {
 export function createStatusStrip() {
   const root = h('section.status-strip', { 'aria-label': 'Status and warnings' });
   const head = h('div.strip-head'); const list = h('div.strip-list');
-  let open = pref('stripOpen', true), sig = '';
+  // collapsed unless the user opened it; a NEW serious message (danger) opens it once by itself
+  let open = pref('stripOpen2', false), sig = ''; const seen = new Set();
   root.append(head, list);
   function update() {
     const tun = tunnels(), iface = interfaceLine();
     const items = [...problems(), ...hints()];
     const worst = items.some(i => i.level === 'danger') ? 'danger' : items.some(i => i.level === 'warn') ? 'warn' : 'ok';
+    for (const i of items) { if (!seen.has(i.key)) { seen.add(i.key); if (i.level === 'danger') open = true; } }
+    for (const k of [...seen]) if (!items.some(i => i.key === k)) seen.delete(k);
     const s = JSON.stringify([tun.map(t => t.address), iface, items.map(i => i.key + i.level), open]);
     if (s === sig) return; sig = s;
-    const etsChip = h('span.chip' + (tun.length ? '.ok' : ''), icon(tun.length ? 'check' : 'circle'), tun.length ? `ETS connected · ${tun.length} connection${tun.length === 1 ? '' : 's'}` : 'No ETS connected');
     const toggle = items.length ? h('button.btn.sm.' + (worst === 'danger' ? 'danger-outline' : 'quiet'), { 'aria-expanded': String(open), title: open ? 'Hide the warnings' : 'Show the warnings',
-      onclick: () => { open = !open; setPref('stripOpen', open); sig = ''; update(); } }, icon(worst === 'ok' ? 'info' : 'alert'), `${items.length} ${items.length === 1 ? 'message' : 'messages'}`, h('span' + (open ? '.chev.open' : '.chev'), icon('chevron'))) : null;
-    head.replaceChildren(etsChip, h('span.chip', 'Interface line ' + (iface || '?')),
+      onclick: () => { open = !open; setPref('stripOpen2', open); sig = ''; update(); } }, icon(worst === 'ok' ? 'info' : 'alert'), `${items.length} ${items.length === 1 ? 'message' : 'messages'}` + (open ? '' : ': ' + items[0].title.slice(0, 70) + (items[0].title.length > 70 ? '…' : '') + (items.length > 1 ? ` (+${items.length - 1})` : '')), h('span' + (open ? '.chev.open' : '.chev'), icon('chevron'))) : null;
+    // whether ETS is connected is shown once, in the top bar
+    head.replaceChildren(h('span.chip', 'Interface line ' + (iface || '?')),
       items.length ? toggle : h('span.chip.ok', icon('check'), 'No problems found'),
       h('span.grow'), h('button.btn.sm.quiet', { onclick: openEtsMessages }, icon('info'), 'ETS messages explained'));
     list.hidden = !items.length || !open;
@@ -151,7 +156,7 @@ export function createTopologyDiagram() {
     const sig2 = JSON.stringify([order.map(a => areas.get(a)), iface, couplers.map(c => [c.a, c.b, c.d.loaded]), [...hot.keys()], [...lines].map(cnt), S.state?.routing]);
     if (sig2 === sig) return; sig = sig2;
     if (!order.length) { root.replaceChildren(h('div.hint', 'No lines yet. They appear as soon as there is a device or an ETS connection.')); return; }
-    const colW = 190, W = Math.max(400, order.length * colW);
+    const colW = 210, W = Math.max(400, order.length * colW);
     const needBack = order.length > 1 || lines.has('0.0') || couplers.some(c => c.b === '0.0');
     const mainOf = a => a + '.0';
     const subsOf = a => areas.get(a).filter(l => l.split('.')[1] !== '0');
@@ -181,14 +186,19 @@ export function createTopologyDiagram() {
         svg.append(bar(main, x, mainY, colW - 30, 'Main line ' + main, { sub: cnt(main) ? cnt(main) + ' device(s)' : '' }));
         parentY = mainY;
       }
+      // the lines hang as branches on a trunk that comes down from the main line (or the backbone): every line is
+      // connected to the line above through its own coupler, not through the line drawn before it
+      const subW = colW - 70, subX = parentY !== null ? x + 18 : x, trunkX = x - (colW - 30) / 2 + 14;
+      const ys = subs.map((l, i) => startY(a) + 8 + i * 56);
+      if (parentY !== null && subs.length) svg.append(sv('line', { x1: trunkX, y1: parentY + 16, x2: trunkX, y2: ys.at(-1), class: 'tlink trunk' }));
       subs.forEach((l, i) => {
-        const y = startY(a) + 16 + i * 56 - 8 + (i === 0 ? 0 : 0);
-        if (parentY !== null || i > 0) svg.append(link(x, i === 0 ? parentY + 16 : y - 40, x, y - 16, hasC(l, showMain ? main : '0.0')));
-        svg.append(bar(l, x, y, colW - 44, 'Line ' + l, { sub: cnt(l) ? cnt(l) + ' device(s)' : 'no devices' }));
-        if (hasC(l, main)) svg.append(sv('text', { x: x + 6, y: y - 22, class: 'tc' }, 'coupler'));
+        const y = ys[i], parent = showMain ? main : '0.0', ok = hasC(l, parent);
+        if (parentY !== null) svg.append(link(trunkX, y, subX - subW / 2, y, ok));
+        svg.append(bar(l, subX, y, subW, 'Line ' + l, { sub: cnt(l) ? cnt(l) + ' device(s)' : 'no devices' }));
+        if (parentY !== null && ok) svg.append(sv('text', { x: subX - subW / 2 + 2, y: y - 20, class: 'tc' }, 'coupler'));
       });
     }
-    root.replaceChildren(svg, h('div.hint', { style: 'margin-top:.3rem' }, S.state?.routing === false ? 'Line routing is switched off: every device hears everything.' : 'Solid link = a coupler exists. Dashed = none, so telegrams stop there. A red-edged line cannot be reached from the ETS interface. A glowing line carried a telegram a moment ago.'));
+    root.replaceChildren(svg, h('div.hint', { style: 'margin-top:.3rem' }, S.state?.routing === false ? 'Line routing is switched off: every device hears everything.' : 'Every line hangs on the line above it. Solid branch = its coupler exists. Dashed = no coupler, so telegrams stop there. A red-edged line cannot be reached from the ETS interface. A glowing line carried a telegram a moment ago.'));
   }
   return { el: root, update: draw };
 }

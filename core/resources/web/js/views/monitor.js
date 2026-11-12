@@ -28,12 +28,19 @@ function relatedToDevice(e, name) {
   return !d.unassigned && tg.dst === d.address;
 }
 
+/**
+ * What ETS sends to set devices up, not what devices tell each other: everything addressed to one device, and the
+ * broadcasts that look for devices and assign addresses. Group value telegrams (also encrypted ones) are not programming.
+ */
+export const isProgramming = tg => !tg.group || (svcKind(tg.svc) === 'other' && !(secureInfo(tg)?.service === 'data'));
+
 export function filtered() {
   const f = S.filter, q = f.text.trim().toLowerCase();
   const cut = S.monCutoff || 0;
   return S.telegrams.filter(e => {
     if (e.seq <= cut) return false;
     const tg = e.tg;
+    if (!S.monMgmt && isProgramming(tg) && f.service !== 'other') return false; // programming traffic of ETS is hidden unless asked for
     if (f.origin && tg.origin !== f.origin) return false;
     if (f.service === 'secure' ? !secureInfo(tg) : f.service && svcKind(tg.svc) !== f.service) return false;
     if (f.ga && !(tg.group && tg.dst === f.ga)) return false;
@@ -65,9 +72,13 @@ export function createMonitor({ compact }) {
   const selOrg = h('select.select', { 'aria-label': 'Filter by origin' },
     [['', 'All origins'], ['ip', 'From ETS / IP clients'], ['device', 'From virtual devices']].map(([v, t]) => h('option', { value: v }, t)));
   selOrg.addEventListener('change', () => setFilter({ origin: selOrg.value }));
+  // what ETS sends to one device while it assigns an address or downloads (property and memory services, T_ACK ...): off by default
+  const bMgmt = h('button.btn', { type: 'button', 'aria-pressed': String(!!S.monMgmt), title: 'Also show what ETS sends to a single device while it assigns an address or downloads: property and memory services, connects, acknowledgements. Off: only group telegrams (what the devices tell each other).',
+    onclick: () => { S.monMgmt = !S.monMgmt; setPref('monMgmt', S.monMgmt); st.sig = ''; emit('filter'); } }, icon('download'), h('span', 'ETS programming'));
+  const hiddenNote = h('span.hint.mon-hidden', { hidden: true });
   const bReset = h('button.btn.sm', { type: 'button', onclick: resetFilter }, icon('restart'), h('span', 'Reset filters'));
   const bClear = h('button.btn', { type: 'button', 'aria-label': 'Clear view', title: 'Clear view: empties this list only. The simulation keeps running and the log file vknx.log is not changed.', onclick: clearView }, icon('trash'), compact ? null : h('span', 'Clear view'));
-  const tools = h('div.mon-tools', tabs, bPause, newBadge, bFollow, h('span.grow'), search, selDev, selSvc, compact ? null : selOrg, bClear);
+  const tools = h('div.mon-tools', tabs, bPause, newBadge, bFollow, bMgmt, hiddenNote, h('span.grow'), search, selDev, selSvc, compact ? null : selOrg, bClear);
   const chips = h('div.mon-filters');
   const thead = h('thead', h('tr', ['Time', 'Source', 'Destination', 'Service', 'Value'].map(t => h('th', t))));
   const tbody = h('tbody');
@@ -166,7 +177,10 @@ export function createMonitor({ compact }) {
     bTg.setAttribute('aria-pressed', String(st.tab === 'telegrams')); bLog.setAttribute('aria-pressed', String(st.tab === 'devlog'));
     const isTg = st.tab === 'telegrams';
     table.hidden = !isTg; logTable.hidden = isTg;
-    for (const el of [bPause, bFollow, selSvc, selOrg]) el.hidden = !isTg;
+    for (const el of [bPause, bFollow, selSvc, selOrg, bMgmt]) el.hidden = !isTg;
+    bMgmt.setAttribute('aria-pressed', String(!!S.monMgmt)); setCls(bMgmt, 'on', !!S.monMgmt);
+    const hid = isTg && !S.monMgmt ? S.telegrams.filter(e => e.seq > (S.monCutoff || 0) && isProgramming(e.tg)).length : 0;
+    hiddenNote.hidden = !hid || compact; setText(hiddenNote, hid ? `${hid} programming telegram${hid === 1 ? '' : 's'} hidden` : '');
     const af = activeFilters();
     chips.hidden = !af.length && !st.paused;
     chips.replaceChildren(...af.map(([k, v]) => h('span.chip.info', `${{ text: 'Text', device: 'Device', service: 'Type', origin: 'Origin', ga: 'Group address' }[k]}: ${v}`,
@@ -178,7 +192,7 @@ export function createMonitor({ compact }) {
       const all = filtered();
       const vis = st.paused ? all.filter(e => e.seq <= st.pausedAt) : all;
       const rows = vis.slice(-MAX_ROWS);
-      const sig = rows.length + ':' + (rows.at(-1)?.seq || 0) + ':' + rows[0]?.seq;
+      const sig = rows.length + ':' + (rows.at(-1)?.seq || 0) + ':' + rows[0]?.seq + ':' + !!S.monMgmt;
       if (sig !== st.sig) {
         st.sig = sig;
         scroll.dataset.auto = '1';
@@ -190,7 +204,7 @@ export function createMonitor({ compact }) {
       const fresh = st.paused ? all.length - vis.length : 0;
       newBadge.hidden = !st.paused; setText(newBadge, fresh ? `${fresh} new` : 'no new telegrams');
       emptyMsg.hidden = !!rows.length;
-      emptyMsg.replaceChildren(icon('devices'), af.length ? 'No telegram matches the filters.' : 'No telegrams yet. They appear when a device or ETS sends something.');
+      emptyMsg.replaceChildren(icon('devices'), af.length ? 'No telegram matches the filters.' : hid ? 'No group telegrams yet. They appear when a device sends something. What ETS sends while it programs a device is hidden: switch on "ETS programming" to see it.' : 'No telegrams yet. They appear when a device or ETS sends something.');
     } else {
       const f = S.filter, q = f.text.trim().toLowerCase();
       const rows = S.devlog.filter(e => e.seq > (S.monCutoff || 0) && (!f.device || e.dev === f.device) && (!q || `${e.dev} ${e.cat} ${e.text}`.toLowerCase().includes(q))).slice(-MAX_ROWS);

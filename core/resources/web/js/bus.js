@@ -17,6 +17,7 @@ export const S = {
   dockHeight: pref('dockHeight', 240),
   telegrams: [], devlog: [], since: 0,   // buffers filled from /api/log
   filter: { text: '', device: '', service: '', origin: '', ga: '' },
+  monMgmt: pref('monMgmt', false),      // monitor also shows the programming traffic of ETS (individually addressed telegrams)
   planEdit: false,
   icons: {},                             // chosen icons: id -> { n, p, o } (see iconStore.js)
 };
