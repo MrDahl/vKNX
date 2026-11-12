@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in vKNX does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting. vKNX is a teaching tool made in spare time, so a clear report helps a lot.
+        English or Danish is fine.
+  - type: input
+    id: version
+    attributes:
+      label: vKNX version
+      description: Shown in Settings (for example 0.13.2)
+    validations:
+      required: true
+  - type: input
+    id: ets
+    attributes:
+      label: ETS version
+      description: For example ETS 6.4.1. Leave empty if ETS is not involved.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead? Include the exact ETS message if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Add a switch actuator
+        2. Download it from ETS
+        3. ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log files
+      description: |
+        Attach `vknx.log` and `console.log` taken right after the problem (drag the files here). On Windows they are in `%LOCALAPPDATA%\vKNX\data` (paste that into the address bar of File Explorer).
+        Note: the logs contain device names and group addresses of your installation, but no keys.
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where is the problem?
+      options:
+        - Import of a product in ETS
+        - Addressing or download from ETS
+        - A device behaves wrongly
+        - Control panel / floor plan
+        - Installer or update
+        - Something else

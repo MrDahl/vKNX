@@ -86,6 +86,9 @@ vKNX uses a penguin (Pingi) as its program icon. The original blue "V" icon is b
 | `docs/knx-explorer-reuse.md` | Reuse of KNX Explorer and licence suggestion |
 | `docs/limitations.md` | Known limitations |
 
+## Help, bugs and ideas
+Report a bug or an idea under [Issues](https://github.com/MrDahl/vKNX/issues/new/choose), ask questions in [Discussions](https://github.com/MrDahl/vKNX/discussions). How to build and what the rules of the code are: [CONTRIBUTING.md](CONTRIBUTING.md). Security: [SECURITY.md](SECURITY.md).
+
 ## License
 vKNX's own code is under the **Apache License 2.0** (`LICENSE`) – free to use, change and share, also commercially. If you distribute vKNX or a work based on it, you must keep the notice in `NOTICE`: **vKNX was developed by Marc Sonne Dahl (<https://www.marcdahl.dk>)**. Third-party components (Calimero, Java, OpenKNXproducer) have their own licenses, see `THIRD-PARTY-NOTICES.md`. KNX and ETS are registered trademarks of KNX Association; vKNX is independent and not certified.
 

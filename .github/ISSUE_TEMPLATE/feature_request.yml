@@ -1,0 +1,25 @@
+name: Idea or wish
+description: Suggest a new device, a function or an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like vKNX to do?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What would you use it for?
+      description: For example a teaching exercise, a certain KNX function, a real product you want to practise with.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - New virtual device
+        - Change to an existing device
+        - Control panel / floor plan
+        - Teaching (exercises, faults, documentation)
+        - Something else
