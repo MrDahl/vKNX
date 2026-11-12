@@ -20,6 +20,7 @@ tools/run.sh                   # control panel on http://127.0.0.1:8080/
 ## Rules of the code base
 - **`core/src/org/vknx/product/Products.java` is the only place a product is defined.** The ETS product files (`products/*.xml`) are generated from it by the build; do not edit them by hand. A test checks that the checked-in XML matches.
 - **A change of a product needs a new application version** (`Products.V`) and new `.knxprod` files. Those can only be made on Windows with ETS (`tools\make-knxprod.ps1`); the maintainer does that. The release stops if the `knxprod` folder does not match `Products.java` (`KnxprodCheck`).
+- **Where things are (`core/src/org/vknx/device`):** `VirtualDevice` is one device on the bus (what ETS talks to: address, memory, load state machine, group telegrams). What a product *does* is in its `...Behavior` class. Helpers of the device: `DeviceSecurity` (KNX Data Secure), `RouterMemory` (coupler settings and filter table), `Tables` (the downloaded address, association and object tables), `GroupValue`, `EtsActivity`. `DeviceRegistry` holds all devices and their files.
 - ETS limits texts to 50 characters; a test enforces it.
 - Calimero is fetched at a pinned commit; local changes are small patches in `third_party/patches` with a line in its README saying why.
 - The control panel is plain JavaScript and CSS without a build step (`core/resources/web`). Texts in the program are English.

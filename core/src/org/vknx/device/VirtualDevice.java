@@ -303,8 +303,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public ServiceResult<java.time.Duration> restart(final boolean masterReset,
 			final io.calimero.mgmt.ManagementClient.EraseCode eraseCode, final int channel) {
 		log("mgmt", "A_Restart (" + (masterReset ? "master reset " + eraseCode : "basic restart") + ")");
-		if (!masterReset && (lastEts.startsWith("Download") || lastEts.startsWith("Partial download")) && !lastEts.endsWith("device restarted"))
-			etsAction(lastEts + ", device restarted"); // ETS ends a download with a restart: keep what was downloaded in view
+		if (!masterReset && ets.downloadJustEnded())
+			etsAction(ets.last() + ", device restarted"); // ETS ends a download with a restart: keep what was downloaded in view
 		else
 			etsAction(masterReset ? "Master reset (" + eraseCode + ")" : "Restart");
 		// ETS sends "factory reset without address" (code 7) when it deactivates secure commissioning, and goes on talking
@@ -413,8 +413,8 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public ServiceResult<io.calimero.mgmt.Description> readPropertyDescription(final int objectIndex, final int propertyId,
 			final int propertyIndex) {
 		if (product.coupler() && propertyId > 0 && couplerProperty(objectIndex, propertyId) != null) {
-			final int pdt = propertyId == PID.LOAD_STATE_CONTROL ? 0 : propertyId == PID_MAX_ROUTING_APDU ? 4 : 2;
-			final boolean writable = propertyId != PID_MAX_ROUTING_APDU;
+			final int pdt = propertyId == PID.LOAD_STATE_CONTROL ? 0 : propertyId == RouterMemory.PID_MAX_ROUTING_APDU ? 4 : 2;
+			final boolean writable = propertyId != RouterMemory.PID_MAX_ROUTING_APDU;
 			final int type = objectIndex == routerIndex ? 6 : 0;
 			return ServiceResult.of(new io.calimero.mgmt.Description(objectIndex, type, propertyId, 0, pdt, writable, 1, 1, 3, 3));
 		}
@@ -453,12 +453,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			changed();
 		log("download", String.format("memory write 0x%06X, %d bytes -> %s", startAddress, data.length,
 				r.getResult() == null ? "ok" : "ok"));
-		synchronized (this) {
-			sessionTick();
-			sessWrites++;
-			if (!sessStarted.isEmpty())
-				downloadSummary();
-		}
+		ets.memoryWritten();
 		return r;
 	}
 
@@ -569,21 +564,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			}
 		}
 		ios.setProperty(obj, PID.LOAD_STATE_CONTROL, 1, 1, (byte) state);
-		synchronized (this) {
-			if (event == LE_START_LOADING || event == LE_LOAD_COMPLETED || event == LE_UNLOAD || state == LS_ERROR) {
-				sessionTick();
-				if (event == LE_START_LOADING)
-					sessStarted.add(obj);
-				else if (event == LE_LOAD_COMPLETED)
-					sessDone.add(obj);
-				if (state == LS_ERROR)
-					sessErrors = true;
-				if (event == LE_UNLOAD)
-					etsAction("Unloaded " + what + " (ETS is about to download it again)");
-				else
-					downloadSummary();
-			}
-		}
+		if (event == LE_START_LOADING || event == LE_LOAD_COMPLETED || event == LE_UNLOAD || state == LS_ERROR)
+			ets.loadEvent(obj, event == LE_START_LOADING, event == LE_LOAD_COMPLETED, state == LS_ERROR,
+					event == LE_UNLOAD ? "Unloaded " + what + " (ETS is about to download it again)" : null);
 		if (event == LE_LOAD_COMPLETED) {
 			if (obj == OBJ_APPLICATION)
 				downloadCount++;
@@ -607,11 +590,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		final var mem = base.deviceMemory();
 		// Mode 1 = (re)initialise with the fill byte (full download). Mode 0 = partial download: keep what is already in
 		// memory, because ETS then writes only the parameters that changed. Zeroing here wiped every unchanged parameter.
-		synchronized (this) {
-			sessionTick();
-			if (!fill)
-				sessPartial = true;
-		}
+		ets.allocated(!fill);
 		if (fill && size > 0) {
 			final byte[] region = new byte[size];
 			java.util.Arrays.fill(region, fillByte);
@@ -655,39 +634,6 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	private int u16(final int addr) {
 		final byte[] b = base.deviceMemory().get(addr, 2);
 		return ((b[0] & 0xff) << 8) | (b[1] & 0xff);
-	}
-
-	/** Parsed view of the three downloaded tables. */
-	record Tables(int[] groupAddresses, int[][] associations, int[] goConfig) {
-		static final Tables EMPTY = new Tables(new int[0], new int[0][], new int[0]);
-
-		int indexOf(final GroupAddress ga) {
-			for (int i = 0; i < groupAddresses.length; i++)
-				if (groupAddresses[i] == ga.getRawAddress())
-					return i + 1;
-			return 0;
-		}
-
-		/** Object numbers associated with the 1-based address-table index, in association-table order. */
-		List<Integer> objectsOf(final int gaIndex) {
-			final var l = new ArrayList<Integer>();
-			for (final int[] a : associations)
-				if (a[0] == gaIndex)
-					l.add(a[1]);
-			return l;
-		}
-
-		/** Sending group address of an object: the first association entry of that object. */
-		GroupAddress sendAddress(final int objectNumber) {
-			for (final int[] a : associations)
-				if (a[1] == objectNumber && a[0] >= 1 && a[0] <= groupAddresses.length)
-					return new GroupAddress(groupAddresses[a[0] - 1]);
-			return null;
-		}
-
-		int config(final int objectNumber) {
-			return objectNumber >= 1 && objectNumber <= goConfig.length ? goConfig[objectNumber - 1] : 0;
-		}
 	}
 
 	static final int F_COMM = 0x04, F_READ = 0x08, F_WRITE = 0x10, F_READ_ON_INIT = 0x20, F_TRANSMIT = 0x40,
@@ -736,7 +682,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	private int loadState(final int obj) {
 		if (product.coupler())
-			return base.deviceMemory().get(CFG) & 0xff; // the router object keeps its load state in device memory
+			return RouterMemory.loadState(base.deviceMemory()); // the router object keeps its load state in device memory
 		return base.getInterfaceObjectServer().getProperty(obj, PID.LOAD_STATE_CONTROL, 1, 1)[0] & 0xff;
 	}
 
@@ -833,50 +779,16 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	public int downloadCount() { return downloadCount; }
 
-	// ---- the last thing ETS did to this device, in one line (for the device card)
+	// ---- the last thing ETS did to this device, in one line (for the device card): see EtsActivity
 
-	private volatile String lastEts = "";
-	private volatile long lastEtsAt;
-	private final java.util.Set<Integer> sessStarted = new java.util.TreeSet<>(), sessDone = new java.util.TreeSet<>();
-	private int sessWrites;
-	private boolean sessPartial, sessErrors;
-	private long sessAt;
+	private final EtsActivity ets = new EtsActivity(() -> scheduleSave(SAVE_SOON_S));
 
 	/** One line about the most recent ETS action ("Partial download: 3 of 4 parts written"), or "" if ETS has done nothing yet. */
-	public String lastEtsAction() { return lastEts; }
+	public String lastEtsAction() { return ets.last(); }
 
-	public long lastEtsAt() { return lastEtsAt; }
+	public long lastEtsAt() { return ets.lastAt(); }
 
-	private synchronized void etsAction(final String text) {
-		lastEts = text;
-		lastEtsAt = System.currentTimeMillis();
-		scheduleSave(SAVE_SOON_S);
-	}
-
-	/** A new download session starts when the previous activity is more than 20 s ago. */
-	private void sessionTick() {
-		final long now = System.currentTimeMillis();
-		if (now - sessAt > 20_000) {
-			sessStarted.clear();
-			sessDone.clear();
-			sessWrites = 0;
-			sessPartial = false;
-			sessErrors = false;
-		}
-		sessAt = now;
-	}
-
-	private synchronized void downloadSummary() {
-		final int parts = 4;
-		final String kind = sessPartial ? "Partial download" : "Download";
-		if (sessErrors)
-			etsAction(kind + " failed (see the device log)");
-		else if (sessStarted.size() > sessDone.size())
-			etsAction(kind + " in progress: " + sessDone.size() + " of " + parts + " parts finished");
-		else
-			etsAction(kind + ": " + sessDone.size() + " of " + parts + " parts written, " + sessWrites + " memory write"
-					+ (sessWrites == 1 ? "" : "s"));
-	}
+	private void etsAction(final String text) { ets.action(text); }
 
 	/**
 	 * What the device itself can document about its configuration, from the load states of its four tables:
@@ -955,13 +867,11 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	// ---------------------------------------------------------------- coupler (mask 0x0912: router object + filter table)
 
-	static final int PID_ROUTETABLE_CONTROL = 56, PID_MAX_ROUTING_APDU = 58;
-	/** Router configuration kept in device memory (so it is saved with the device): lsm, pid 52, 53, 54, 55, 57, 59, run error. */
-	private static final int CFG = 0x01F0;
-	/** Group filter table: one bit per raw group address, set = route (MV-0912 LcFilterMemory 512, 8192 bytes). */
-	static final int FILTER_TABLE = 0x0200, FILTER_SIZE = 8192;
-	private static final int[] ROUTER_PIDS = { PID.LOAD_STATE_CONTROL, 52, 53, 54, 55, 57, 59 };
+	static final int PID_ROUTETABLE_CONTROL = RouterMemory.PID_ROUTETABLE_CONTROL;
+	static final int FILTER_TABLE = RouterMemory.FILTER_TABLE, FILTER_SIZE = RouterMemory.FILTER_SIZE;
 	private int routerIndex = -1;
+	/** The router settings and the filter table in the device memory (see RouterMemory); only a coupler has one. */
+	private RouterMemory router;
 
 	private void initRouter(final boolean fresh) {
 		final var ios = base.getInterfaceObjectServer();
@@ -973,71 +883,28 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		// the management notifier looks the function property up in the object server before it calls us
 		ios.setDescription(new io.calimero.mgmt.Description(routerIndex, 6, PID_ROUTETABLE_CONTROL, 0,
 				io.calimero.dptxlator.PropertyTypes.PDT_FUNCTION, true, 0, 1, 3, 3), true);
-		if (fresh) {
-			// factory state: nothing loaded, everything routed (modelling choice, see docs/limitations.md), empty filter table
-			base.deviceMemory().set(CFG, (byte) LS_UNLOADED, (byte) 0x15, (byte) 0x15, (byte) 0x15, (byte) 0x15, (byte) 0, (byte) 0, (byte) 0xFF);
-		}
+		router = new RouterMemory(base.deviceMemory(), routerIndex, this::log, this::changed);
+		if (fresh)
+			router.factoryState(LS_UNLOADED);
 		log("coupler", "router object at index " + routerIndex);
 	}
 
 	/** Raw router property value, or null if the property is not one of the coupler's. */
-	private byte[] couplerProperty(final int objectIndex, final int pid) {
-		if (objectIndex == 0 && pid == 53)
-			return new byte[] { (byte) base.deviceMemory().get(CFG + 7) };
-		if (objectIndex != routerIndex)
-			return null;
-		if (pid == PID_MAX_ROUTING_APDU)
-			return new byte[] { 0, 66 };
-		for (int i = 0; i < ROUTER_PIDS.length; i++)
-			if (ROUTER_PIDS[i] == pid)
-				return new byte[] { (byte) base.deviceMemory().get(CFG + i) };
-		return null;
-	}
+	private byte[] couplerProperty(final int objectIndex, final int pid) { return router == null ? null : router.property(objectIndex, pid); }
 
-	private void setCouplerProperty(final int objectIndex, final int pid, final byte[] data) {
-		if (data.length == 0)
-			return;
-		if (objectIndex == 0 && pid == 53) {
-			base.deviceMemory().set(CFG + 7, data[0]);
-			return;
-		}
-		for (int i = 1; i < ROUTER_PIDS.length; i++)
-			if (ROUTER_PIDS[i] == pid) {
-				base.deviceMemory().set(CFG + i, data[0]);
-				log("download", "router property " + pid + " = 0x" + HexFormat.of().formatHex(new byte[] { data[0] }));
-				changed();
-			}
-	}
+	private void setCouplerProperty(final int objectIndex, final int pid, final byte[] data) { router.setProperty(objectIndex, pid, data); }
 
 	/** Router configuration byte for a property id (52, 53, 54, 55, 57, 59). */
-	int routerByte(final int pid) {
-		final byte[] v = couplerProperty(routerIndex, pid);
-		return v == null ? 0 : v[0] & 0xff;
-	}
+	int routerByte(final int pid) { return router.settingByte(pid); }
 
 	/** True if the filter table says the raw group address is routed. */
-	boolean filterBit(final int rawGroupAddress) {
-		final int b = base.deviceMemory().get(FILTER_TABLE + (rawGroupAddress >> 3)) & 0xff;
-		return (b >> (rawGroupAddress & 7) & 1) != 0;
-	}
+	boolean filterBit(final int rawGroupAddress) { return router.filterBit(rawGroupAddress); }
 
 	/** Number of group addresses set in the filter table. */
-	int filterCount() {
-		int n = 0;
-		for (final byte b : base.deviceMemory().get(FILTER_TABLE, FILTER_SIZE))
-			n += Integer.bitCount(b & 0xff);
-		return n;
-	}
+	int filterCount() { return router.filterCount(); }
 
 	/** The group addresses that are set in the filter table (for the panel; capped). */
-	List<Integer> filterAddresses(final int max) {
-		final var out = new ArrayList<Integer>();
-		final byte[] t = base.deviceMemory().get(FILTER_TABLE, FILTER_SIZE);
-		for (int ga = 0; ga < FILTER_SIZE * 8 && out.size() < max; ga++)
-			if ((t[ga >> 3] >> (ga & 7) & 1) != 0)
-				out.add(ga);
-		return out;
-	}
+	List<Integer> filterAddresses(final int max) { return router.filterAddresses(max); }
 
 	private byte couplerLoadControl(final byte[] data) {
 		final int event = data.length > 0 ? data[0] & 0xff : LE_NOOP;
@@ -1059,14 +926,12 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				behavior.onStop();
 				// an unloaded coupler is no longer the factory-new "route all" device: it has lost its application, so it
 				// falls back to filtering with an empty table (group telegrams blocked, individually addressed ones filtered)
-				final var m = base.deviceMemory();
-				m.set(CFG + 1, (byte) 0x77, (byte) 0x77, (byte) 0x17, (byte) 0x17);
-				m.set(FILTER_TABLE, new byte[FILTER_SIZE]);
+				router.unloaded();
 				log("coupler", "unloaded: group telegrams now blocked (empty filter table), physical routing = filter");
 			}
 			default -> log("download", "router load event " + event + " (ignored)");
 		}
-		base.deviceMemory().set(CFG, (byte) state);
+		router.setLoadState(state);
 		if (event == LE_LOAD_COMPLETED) {
 			downloadCount++;
 			startApplication();
@@ -1075,38 +940,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		return (byte) state;
 	}
 
-	/** PID_ROUTETABLE_CONTROL function property: 1 = clear filter table, 2 = set all, 3 = clear range, 4 = set range. */
-	private ServiceResult<byte[]> routeTableControl(final byte[] command) {
-		final int service = command.length > 1 ? command[1] & 0xff : 0;
-		final var mem = base.deviceMemory();
-		switch (service) {
-			case 1, 2 -> {
-				final byte[] t = new byte[FILTER_SIZE];
-				if (service == 2)
-					java.util.Arrays.fill(t, (byte) 0xFF);
-				mem.set(FILTER_TABLE, t);
-				log("download", "filter table " + (service == 1 ? "cleared" : "set to route everything"));
-				changed();
-				return new ServiceResult<>((byte) 0, (byte) service);
-			}
-			case 3, 4 -> {
-				final int from = command.length >= 4 ? ((command[2] & 0xff) << 8) | (command[3] & 0xff) : 0;
-				final int to = command.length >= 6 ? ((command[4] & 0xff) << 8) | (command[5] & 0xff) : 0xFFFF;
-				for (int ga = from; ga <= to; ga++) {
-					final int a = FILTER_TABLE + (ga >> 3), m = 1 << (ga & 7), cur = mem.get(a);
-					mem.set(a, service == 4 ? cur | m : cur & ~m);
-				}
-				log("download", "filter table " + (service == 3 ? "cleared" : "set") + " for raw group addresses " + from + ".." + to);
-				changed();
-				return new ServiceResult<>((byte) 0, (byte) service, command.length > 2 ? command[2] : 0,
-						command.length > 3 ? command[3] : 0, command.length > 4 ? command[4] : (byte) 0xFF,
-						command.length > 5 ? command[5] : (byte) 0xFF);
-			}
-			default -> {
-				return ServiceResult.of(io.calimero.ReturnCode.Error, new byte[0]);
-			}
-		}
-	}
+	private ServiceResult<byte[]> routeTableControl(final byte[] command) { return router.routeTableControl(command); }
 
 	// ---------------------------------------------------------------- group communication (process communication)
 
@@ -1153,7 +987,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 				continue;
 			}
 			log("rx", head + "-> object " + go + " (" + oname + ")");
-			behavior.onObjectReceived(go, decode(e.getASDU(), product.object(go).map(ObjDef::sizeBits).orElse(1)));
+			behavior.onObjectReceived(go, GroupValue.decode(e.getASDU(), product.object(go).map(ObjDef::sizeBits).orElse(1)));
 		}
 		changed();
 	}
@@ -1182,30 +1016,9 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			final int bits = product.object(go).map(ObjDef::sizeBits).orElse(1);
 			log("tx", head + "answering from object " + go + " with " + v);
 			return bits <= 6 ? new ServiceResult<>(new byte[] { (byte) (v & 0x3f) }, true)
-					: new ServiceResult<>(encodeData(bits, v), false);
+					: new ServiceResult<>(GroupValue.encode(bits, v), false);
 		}
 		return null;
-	}
-
-	/** Value of a group telegram: small objects (up to 6 bit) are packed into the APCI byte, larger ones are big-endian bytes. */
-	static int decode(final byte[] asdu, final int bits) {
-		if (asdu.length == 0)
-			return 0;
-		if (bits <= 6)
-			return asdu[asdu.length - 1] & 0x3f;
-		int v = 0;
-		for (int i = Math.max(0, asdu.length - 4); i < asdu.length; i++)
-			v = (v << 8) | (asdu[i] & 0xff);
-		return v;
-	}
-
-	/** Big-endian bytes of an object value: 1, 2, 3 or 4 bytes by the object size. */
-	static byte[] encodeData(final int bits, final int v) {
-		final int len = Math.max(1, Math.min(4, bits / 8));
-		final byte[] b = new byte[len];
-		for (int i = 0; i < len; i++)
-			b[i] = (byte) (v >>> (8 * (len - 1 - i)));
-		return b;
 	}
 
 	/**
@@ -1217,7 +1030,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	/** @param quiet true for cyclic sending: stay silent in the log when nothing can be sent (avoids log flooding) */
 	boolean transmit(final int go, final int value, final boolean quiet) {
 		final int bits = product.object(go).map(ObjDef::sizeBits).orElse(1);
-		final byte[] data = encodeData(bits, value);
+		final byte[] data = GroupValue.encode(bits, value);
 		final byte[] apdu = bits <= 6 ? new byte[] { 0x00, (byte) (0x80 | (value & 0x3f)) }
 				: new byte[2 + data.length];
 		if (bits > 6) {

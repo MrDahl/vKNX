@@ -18,6 +18,7 @@ The text under each version is also shown as the release notes on GitHub and in 
 ### Changed
 - The state file is written 3 seconds after something ETS did (address, download, restart) and at most every 30 seconds for what only changes on the screen (a sensor that sends, a dimmer that ramps); 0.13.2 wrote it every 3 seconds for those too.
 - `docs/limitations.md` was brought up to date (it still described 0.5.0).
+- Inside: `VirtualDevice.java` (1,540 lines) was split up. The KNX Data Secure code (`DeviceSecurity`), the coupler's settings and filter table (`RouterMemory`), the downloaded tables (`Tables`), the coding of group values (`GroupValue`) and the "last ETS action" bookkeeping (`EtsActivity`) are now classes of their own; the device class is about 1,200 lines. No change in behaviour is intended.
 
 ## [0.13.2] - 2026-11-11
 
