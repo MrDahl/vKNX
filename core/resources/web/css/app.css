@@ -656,6 +656,39 @@ details.howto[open] > summary { margin-bottom: .25rem; }
 
 /* info display card */
 .disp { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: .6rem .8rem; display: grid; gap: .25rem; }
+/* light control screen of the info display: a dark glass panel in both themes */
+.lp { --lp-col: transparent; --lp-arc: 0deg; background: #15171c; color: #e8eaf0; border-radius: 12px; padding: .7rem .8rem .8rem; display: grid; gap: .6rem; margin-top: .2rem; }
+.lp[hidden] { display: none; }
+.lp-top { display: flex; align-items: center; gap: .6rem; min-height: 2rem; }
+.lp-pct { font-weight: 600; font-variant-numeric: tabular-nums; }
+.lp-kt { color: #9aa3b5; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.lp-power { margin-left: auto; width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 0; background: transparent; color: #9aa3b5; cursor: var(--cur-pointer); display: grid; place-items: center; }
+.lp-power .ic { width: 1.4rem; height: 1.4rem; }
+.lp-power:hover { background: #262a33; }
+.lp.on .lp-power { color: #6ee7a0; }
+.lp-mid { display: flex; align-items: center; justify-content: center; gap: .9rem; }
+.lp-key { width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 0; background: transparent; color: #e8eaf0; font-size: 1.5rem; line-height: 1; cursor: var(--cur-pointer); flex: none; }
+.lp-key:hover { background: #262a33; }
+.lp-center { width: min(9.5rem, 46vw); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; padding: .55rem; flex: none;
+  background: conic-gradient(from 225deg, var(--lp-col) 0 var(--lp-arc, 0deg), #3a3f4b var(--lp-arc, 0deg) 270deg, #15171c 270deg 360deg); }
+.lp-wheel { position: relative; width: 100%; height: 100%; border-radius: 50%; cursor: crosshair; touch-action: none;
+  background: radial-gradient(circle closest-side, #fff 0%, rgba(255,255,255,0) 100%), conic-gradient(#f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); box-shadow: 0 0 0 .3rem #15171c; }
+.lp-wheel[hidden], .lp-lamp[hidden], .lp-row[hidden], .lp-kt[hidden] { display: none; }
+.lp:not(.on) .lp-wheel { filter: saturate(.55) brightness(.75); }
+.lp-dot { position: absolute; width: .8rem; height: .8rem; margin: -.4rem 0 0 -.4rem; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.6); pointer-events: none; left: 50%; top: 50%; }
+.lp-lamp { width: 100%; height: 100%; border-radius: 50%; background: #15171c; display: grid; place-items: center; color: #4b5261; box-shadow: 0 0 0 .3rem #15171c; }
+.lp-lamp .ic { width: 3rem; height: 3rem; }
+.lp-row { display: flex; align-items: center; gap: .5rem; }
+.lp-end { color: #7d8698; font-size: .75rem; flex: none; display: grid; place-items: center; min-width: 1.2rem; }
+.lp-end .ic { width: 1rem; height: 1rem; }
+.lp-end.hi { color: #6ee7a0; }
+.lp input[type=range] { flex: 1; min-width: 0; -webkit-appearance: none; appearance: none; height: 1.1rem; background: transparent; margin: 0; }
+.lp input[type=range]::-webkit-slider-runnable-track { height: .22rem; border-radius: 2px; background: linear-gradient(90deg, #f5b301, #fff); }
+.lp input[type=range]::-moz-range-track { height: .22rem; border-radius: 2px; background: linear-gradient(90deg, #f5b301, #fff); }
+.lp input.lp-kelvin::-webkit-slider-runnable-track { background: linear-gradient(90deg, #ffaa50, #fff 55%, #c8e1ff); }
+.lp input.lp-kelvin::-moz-range-track { background: linear-gradient(90deg, #ffaa50, #fff 55%, #c8e1ff); }
+.lp input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: .95rem; height: .95rem; border-radius: 50%; background: #fff; border: 0; margin-top: -.37rem; box-shadow: 0 0 0 2px #15171c; cursor: var(--cur-pointer); }
+.lp input[type=range]::-moz-range-thumb { width: .95rem; height: .95rem; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 0 0 2px #15171c; cursor: var(--cur-pointer); }
 .disp-hd { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; padding-bottom: .3rem; margin-bottom: .1rem; border-bottom: 1px solid var(--border); }
 .disp-hd b { font-size: 1.05rem; }
 .disp-row { display: flex; justify-content: space-between; align-items: baseline; gap: .8rem; }

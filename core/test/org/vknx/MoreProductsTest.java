@@ -75,10 +75,11 @@ public final class MoreProductsTest {
 		final var sa = VirtualDevice.create("sa", Products.SWITCH_ACTUATOR, serial(2), dir.resolve("sa.state"), net, listener);
 		final var cd = VirtualDevice.create("cd", Products.COLOUR_DIMMER, serial(3), dir.resolve("cd.state"), net, listener);
 		final var em = VirtualDevice.create("em", Products.ENERGY_METER, serial(4), dir.resolve("em.state"), net, listener);
+		final var id = VirtualDevice.create("id", Products.INFO_DISPLAY, serial(5), dir.resolve("id.state"), net, listener);
 		final var etsLink = net.createDeviceLink(new IndividualAddress(0, 2, 255));
 		final var ets = new EtsLikeClient(etsLink);
 		try {
-			for (final var p : List.of(Products.PRESENCE_DETECTOR, Products.COLOUR_DIMMER, Products.ENERGY_METER)) {
+			for (final var p : List.of(Products.PRESENCE_DETECTOR, Products.COLOUR_DIMMER, Products.ENERGY_METER, Products.INFO_DISPLAY)) {
 				check(p.key() + ": ETS texts within 50 characters", p.params().stream().noneMatch(q -> q.text().length() > 50)
 						&& p.objects().stream().noneMatch(o -> p.dynamicText(o).length() > 50 && o.text().length() > 50)
 						&& p.params().stream().flatMap(q -> q.choices().stream()).noneMatch(c -> c.text().length() > 50));
@@ -86,7 +87,7 @@ public final class MoreProductsTest {
 				check(p.key() + ": parameter names are unique", p.params().stream().map(q -> q.name()).distinct().count() == p.params().size());
 			}
 			int host = 1;
-			for (final var d : List.of(pd, sa, cd, em)) {
+			for (final var d : List.of(pd, sa, cd, em, id)) {
 				d.toggleProgrammingMode();
 				check("address assigned to " + d.name(), ets.assignAddress(new IndividualAddress(1, 1, host++)));
 				Thread.sleep(300);
@@ -167,6 +168,29 @@ public final class MoreProductsTest {
 					&& TelegramDecoder.decode("0080000003E8", "GroupValueWrite", Set.of("DPST-13-13")).value() != null
 					&& TelegramDecoder.decode("00800C1A", "GroupValueWrite", Set.of("DPST-9-21")).value() != null
 					&& TelegramDecoder.decode("0081", "GroupValueWrite", Set.of("DPST-1-18")).value() != null && before == 0);
+
+			// ---- info display with a light control screen for channel 1 of the colour actuator
+			final int L = Products.displayLightObject(1, 0);
+			ets.downloadAll(new IndividualAddress(1, 1, 5), new int[] { gSw, gBri, gRgb, gRgbSt }, new int[][] { { 1, L }, { 2, L + 1 }, { 3, L + 2 }, { 4, L + 6 } },
+					flags(L + 6, L, SelfTest.FLAGS_SEND, L + 1, SelfTest.FLAGS_SEND, L + 2, SelfTest.FLAGS_SEND, L + 6, FLAGS_STATUS_IN),
+					Products.INFO_DISPLAY.params("S1Kind", 1, "S1Colour", 1, "S1Name", "Sofa"));
+			check("display loaded with a light control screen", waitFor(5000, id::applicationLoaded) && "true".equals(s(id, "light")) && "1".equals(s(id, "lcol")));
+			check("display: the application version is one ahead (the product changed)", Products.INFO_DISPLAY.appVersion() == Products.PUSH_BUTTON.appVersion() + 1);
+			id.behavior().act("lrgb", 0x00FF40);
+			check("display: the colour wheel sends RGB, the actuator takes the colour", waitFor(2000, () -> cb.rgb(0) == 0x00FF40 && cb.levelPct(0) > 0));
+			id.behavior().act("llevel", 20);
+			check("display: the brightness slider dims the actuator", waitFor(2000, () -> cb.levelPct(0) == 20) && "20".equals(s(id, "llevel")));
+			id.behavior().act("lstep", 10);
+			check("display: + adds 10 %", waitFor(2000, () -> cb.levelPct(0) == 30));
+			id.behavior().act("lswitch", 2);
+			check("display: the round button switches off", waitFor(2000, () -> cb.levelPct(0) == 0) && "false".equals(s(id, "lon")));
+			id.behavior().act("lswitch", 2);
+			check("display: and on again with the last brightness", waitFor(2000, () -> cb.levelPct(0) == 30) && "true".equals(s(id, "lon")));
+			etsLink.sendRequest(new GroupAddress(gRgb), Priority.LOW, wN(0x10, 0x20, 0xF0)); // someone else changes the colour
+			check("display: the screen follows the RGB status of the actuator", waitFor(2000, () -> "#1020F0".equals(s(id, "lrgb"))));
+			id.behavior().act("lkelvin", 4000);
+			Thread.sleep(300);
+			check("display: a colour temperature is not sent from an RGB screen", count(trace, "id [tx]") > 0 && count(trace, "(object " + (L + 3)) == 0);
 
 			// ---- energy meter: base 100 W, load 1 = 60 W follows the status of output 1, limit 150 W, no fluctuation
 			ets.downloadAll(new IndividualAddress(1, 1, 4), new int[] { gStatus, gReset, gAlarm, gPower },

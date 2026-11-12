@@ -363,6 +363,8 @@ public final class Products {
 	// ------------------------------------------------------------------ info display
 
 	public static final int DISPLAY_SCREENS = 5, DISPLAY_ROWS = 6;
+	/** Application version of the info display: one ahead of the other products since the light control screen was added. */
+	public static final int DISPLAY_VERSION = V + 1;
 	/** Parameter bytes per screen: enable(1) + name(16) + six rows of type(1) + label(12). */
 	public static final int DISPLAY_SCREEN_BYTES = 96, DISPLAY_ROW_BYTES = 13, DISPLAY_LABEL_CHARS = 12;
 	/** What a row shows. The value is the ETS parameter value; the unit is only for the text on the display. */
@@ -383,8 +385,21 @@ public final class Products {
 		return 3 + ((screen - 1) * DISPLAY_ROWS + (row - 1)) * 4 + kind;
 	}
 
+	/** Where the light control settings start (after the screens) and how many bytes each screen has there: kind and colour, warmest, coldest white. */
+	public static final int DISPLAY_LIGHT_AT = DISPLAY_SCREENS * DISPLAY_SCREEN_BYTES, DISPLAY_LIGHT_BYTES = 3;
+	/** Group objects of a light control screen: switch, brightness, RGB, colour temperature (outputs), then the same four as status inputs. */
+	public static final int DISPLAY_LIGHT_OBJS = 8;
+
+	/** Object number of a light control screen: {@code kind} 0 switch, 1 brightness, 2 RGB, 3 colour temperature; 4 to 7 the status inputs in the same order. */
+	public static int displayLightObject(final int screen, final int kind) {
+		return 3 + DISPLAY_SCREENS * DISPLAY_ROWS * 4 + (screen - 1) * DISPLAY_LIGHT_OBJS + kind;
+	}
+
 	/**
-	 * Info display: up to five screens (named, each can be left out) with six rows each. A row has a label and a type
+	 * Info display: up to five screens (named, each can be left out). A screen either shows six rows of values or (since
+	 * application version 6) is a light control: on/off, a brightness slider and a colour wheel (RGB) or a colour
+	 * temperature slider (tunable white), which sends to a dimming actuator and follows its status objects.
+	 * A values screen has six rows. A row has a label and a type
 	 * (on/off status, percent, scene or one of the multisensor values) and its own group object of the matching size.
 	 * It only listens; objects 1 and 2 (1 bit) switch to the next and previous screen.
 	 */
@@ -403,25 +418,59 @@ public final class Products {
 			final int b = (s - 1) * DISPLAY_SCREEN_BYTES;
 			params.add(new ParamDef(id++, en, "Show this screen", b, 0, 1, s == 1 ? 1 : 0, NO_YES).inGroup(page));
 			params.add(ParamDef.text(id++, "S" + s + "Name", "Name of the screen", b + 1, 16, "Screen " + s).inGroup(page).showWhen(en, 1));
+			final String kd = "S" + s + "Kind";
 			for (int r = 1; r <= DISPLAY_ROWS; r++) {
 				final String pre = "S" + s + "R" + r, ty = pre + "Type";
 				final int rb = b + 17 + (r - 1) * DISPLAY_ROW_BYTES;
-				params.add(new ParamDef(id++, ty, "Row " + r + " shows", rb, 0, 4, 0, choices).inGroup(page).showWhen(en, 1));
+				params.add(new ParamDef(id++, ty, "Row " + r + " shows", rb, 0, 4, 0, choices).inGroup(page).showWhen(en, 1).showWhen(kd, 0));
 				params.add(ParamDef.text(id++, pre + "Label", "Row " + r + " text", rb + 1, DISPLAY_LABEL_CHARS, "Value " + r)
-						.inGroup(page).showWhen(en, 1).showWhen(ty, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+						.inGroup(page).showWhen(en, 1).showWhen(kd, 0).showWhen(ty, 1, 2, 3, 4, 5, 6, 7, 8, 9));
 				final String t = page + " row " + r + ": ";
 				objs.add(new ObjDef(displayObject(s, r, 0), pre + "Status", t + "on/off status", "Input", 1, "DPST-1-1", false, true, false, true)
-						.inGroup(page).showWhen(en, 1).showWhen(ty, 1).withReadOnInit());
+						.inGroup(page).showWhen(en, 1).showWhen(kd, 0).showWhen(ty, 1).withReadOnInit());
 				objs.add(new ObjDef(displayObject(s, r, 1), pre + "Percent", t + "percent value", "Input", 8, "DPST-5-1", false, true, false, true)
-						.inGroup(page).showWhen(en, 1).showWhen(ty, 2).withReadOnInit());
+						.inGroup(page).showWhen(en, 1).showWhen(kd, 0).showWhen(ty, 2).withReadOnInit());
 				objs.add(new ObjDef(displayObject(s, r, 2), pre + "Scene", t + "active scene", "Input", 8, "DPST-18-1", false, true, false, true)
-						.inGroup(page).showWhen(en, 1).showWhen(ty, 3));
+						.inGroup(page).showWhen(en, 1).showWhen(kd, 0).showWhen(ty, 3));
 				objs.add(new ObjDef(displayObject(s, r, 3), pre + "Value", t + "measured value", "Input", 16, "DPT-9", false, true, false, true)
-						.inGroup(page).showWhen(en, 1).showWhen(ty, 4, 5, 6, 7, 8, 9).withReadOnInit());
+						.inGroup(page).showWhen(en, 1).showWhen(kd, 0).showWhen(ty, 4, 5, 6, 7, 8, 9).withReadOnInit());
 			}
 		}
-		return new ProductDef("info-display", 0x0A0A, V, "vKNX Info Display", "VKNXID1", 0x0A0A,
-				DISPLAY_SCREENS * DISPLAY_SCREEN_BYTES, params, objs);
+		// light control screens (application version 6): the settings come after all screens, so a display that still has
+		// the older download reads the defaults (every screen shows values) until it is downloaded again
+		for (int s = 1; s <= DISPLAY_SCREENS; s++) {
+			final String page = "Screen " + s, en = "S" + s + "Enable", kd = "S" + s + "Kind", col = "S" + s + "Colour";
+			final int b = DISPLAY_LIGHT_AT + (s - 1) * DISPLAY_LIGHT_BYTES;
+			final int at = indexOfParam(params, "S" + s + "Name") + 1;
+			params.add(at, new ParamDef(id++, kd, "The screen is", b, 0, 1, 0, List.of(
+					new Choice(0, "Values (six rows)"), new Choice(1, "Light control (on/off, brightness, colour)"))).inGroup(page).showWhen(en, 1));
+			params.add(at + 1, new ParamDef(id++, col, "Colour", b, 1, 2, 1, List.of(
+					new Choice(0, "None (on/off and brightness only)"), new Choice(1, "RGB (colour wheel)"),
+					new Choice(2, "Tunable white (warm to cold)"))).inGroup(page).showWhen(en, 1).showWhen(kd, 1));
+			params.add(at + 2, ParamDef.number(id++, "S" + s + "WarmK", "Warmest white (x 100 K)", b + 1, 8, 27, 15, 40)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1).showWhen(col, 2));
+			params.add(at + 3, ParamDef.number(id++, "S" + s + "ColdK", "Coldest white (x 100 K)", b + 2, 8, 65, 40, 100)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1).showWhen(col, 2));
+			final String t = page + " light: ", pre = "S" + s + "Light";
+			objs.add(new ObjDef(displayLightObject(s, 0), pre + "Switch", t + "switch", "Output", 1, "DPST-1-1", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1));
+			objs.add(new ObjDef(displayLightObject(s, 1), pre + "Brightness", t + "brightness (value)", "Output", 8, "DPST-5-1", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1));
+			objs.add(new ObjDef(displayLightObject(s, 2), pre + "Rgb", t + "colour RGB", "Output", 24, "DPST-232-600", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1).showWhen(col, 1));
+			objs.add(new ObjDef(displayLightObject(s, 3), pre + "ColourTemp", t + "colour temperature (K)", "Output", 16, "DPST-7-600", false, false, true, false)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1).showWhen(col, 2));
+			objs.add(new ObjDef(displayLightObject(s, 4), pre + "SwitchStatus", t + "switch status", "Input", 1, "DPST-1-1", false, true, false, true)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1).withReadOnInit());
+			objs.add(new ObjDef(displayLightObject(s, 5), pre + "BrightnessStatus", t + "brightness status", "Input", 8, "DPST-5-1", false, true, false, true)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1).withReadOnInit());
+			objs.add(new ObjDef(displayLightObject(s, 6), pre + "RgbStatus", t + "colour RGB status", "Input", 24, "DPST-232-600", false, true, false, true)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1).showWhen(col, 1).withReadOnInit());
+			objs.add(new ObjDef(displayLightObject(s, 7), pre + "ColourTempStatus", t + "colour temp. status (K)", "Input", 16, "DPST-7-600", false, true, false, true)
+					.inGroup(page).showWhen(en, 1).showWhen(kd, 1).showWhen(col, 2).withReadOnInit());
+		}
+		return new ProductDef("info-display", 0x0A0A, DISPLAY_VERSION, "vKNX Info Display", "VKNXID1", 0x0A0A,
+				DISPLAY_LIGHT_AT + DISPLAY_SCREENS * DISPLAY_LIGHT_BYTES, params, objs);
 	}
 
 	public static final ProductDef INFO_DISPLAY = infoDisplay();

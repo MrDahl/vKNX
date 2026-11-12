@@ -35,6 +35,79 @@ export function kelvinCss(k) {
   const mix = (a, b) => Math.round(a + (b - a) * t);
   return `rgb(${mix(255, 200)}, ${mix(170, 225)}, ${mix(80, 255)})`;
 }
+const hex2 = n => Math.round(n).toString(16).padStart(2, '0');
+/** Hue 0-360, saturation 0-1 (full brightness) -> "#rrggbb" */
+function hsToHex(hDeg, sat) {
+  const f = n => { const k = (n + hDeg / 60) % 6; return 255 * (1 - sat * Math.max(0, Math.min(k, 4 - k, 1))); };
+  return '#' + hex2(f(5)) + hex2(f(3)) + hex2(f(1));
+}
+/** "#rrggbb" -> [hue 0-360, saturation 0-1] */
+function hexToHs(hex) {
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let hDeg = 0;
+  if (d > 0) hDeg = max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [hDeg * 60, max === 0 ? 0 : d / max];
+}
+
+/**
+ * The light control screen of the info display: on/off, colour wheel (RGB) or colour temperature slider (tunable white),
+ * brightness slider with − and + keys. What the user drags is never overwritten by live updates.
+ */
+function lightPanel(devName) {
+  const act = (a, val) => api.act(devName, a, val);
+  const power = h('button.lp-power', { type: 'button', 'aria-pressed': 'false', 'aria-label': 'Switch the light on or off', title: 'On / off', onclick: () => operate('On / off', () => act('lswitch', 2)) }, icon('power'));
+  const dot = h('span.lp-dot');
+  const wheel = h('div.lp-wheel', { role: 'slider', tabindex: 0, 'aria-label': 'Colour wheel: hue around, white in the middle' }, dot);
+  const minus = h('button.lp-key', { type: 'button', 'aria-label': 'Darker', title: 'Darker (10 %)', onclick: () => operate('Brightness', () => act('lstep', -10)) }, '−');
+  const plus = h('button.lp-key', { type: 'button', 'aria-label': 'Brighter', title: 'Brighter (10 %)', onclick: () => operate('Brightness', () => act('lstep', 10)) }, '+');
+  const pct = h('span.lp-pct');
+  const lamp = h('span.lp-lamp', icon('lamp'));
+  const mid = h('div.lp-mid', minus, h('div.lp-center', wheel, lamp), plus);
+  const kel = h('input.lp-kelvin', { type: 'range', min: 2700, max: 6500, step: 100, 'aria-label': 'Colour temperature in Kelvin' });
+  const kelT = h('span.lp-kt');
+  const kelRow = h('div.lp-row', h('span.lp-end', 'warm'), kel, h('span.lp-end', 'cold'));
+  const bri = h('input.lp-bri', { type: 'range', min: 0, max: 100, step: 1, 'aria-label': 'Brightness' });
+  const briRow = h('div.lp-row', h('span.lp-end', icon('lampOff')), bri, h('span.lp-end.hi', icon('lamp')));
+  const el = h('div.lp', h('div.lp-top', pct, kelT, power), mid, kelRow, briRow);
+  let busy = 0; const hold = () => { busy = Date.now() + 1200; };
+  // colour wheel: the angle is the hue (red at the top, clockwise), the distance from the middle the saturation
+  let dragging = false;
+  const pick = (e, live) => {
+    const r = wheel.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    const sat = Math.min(1, Math.hypot(dx, dy) / (r.width / 2)), hue = (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
+    const hex = hsToHex(hue, sat);
+    place(hue, sat); hold();
+    const v = parseInt(hex.slice(1), 16) || 0x010101;
+    if (live) act('lrgbLive', v).catch(() => {}); else operate('Colour', () => act('lrgb', v));
+  };
+  const place = (hue, sat) => { const a = hue * Math.PI / 180; dot.style.left = (50 + 50 * sat * Math.sin(a)) + '%'; dot.style.top = (50 - 50 * sat * Math.cos(a)) + '%'; };
+  wheel.addEventListener('pointerdown', e => { dragging = true; wheel.setPointerCapture(e.pointerId); pick(e, true); });
+  wheel.addEventListener('pointermove', e => { if (dragging) pick(e, true); });
+  const up = e => { if (!dragging) return; dragging = false; pick(e, false); };
+  wheel.addEventListener('pointerup', up); wheel.addEventListener('pointercancel', () => { dragging = false; });
+  bri.addEventListener('input', () => { hold(); setText(pct, bri.value + ' %'); act('llevelLive', bri.value).catch(() => {}); });
+  bri.addEventListener('change', () => { hold(); operate('Brightness', () => act('llevel', bri.value)); });
+  kel.addEventListener('input', () => { hold(); setText(kelT, kel.value + ' K'); act('lkelvinLive', kel.value).catch(() => {}); });
+  kel.addEventListener('change', () => { hold(); operate('Colour temperature', () => act('lkelvin', kel.value)); });
+  return {
+    el,
+    update(v) {
+      const rgb = v.lcol === 1, white = v.lcol === 2, on = !!v.lon;
+      setCls(el, 'on', on); setAttr(power, 'aria-pressed', String(on));
+      wheel.hidden = !rgb; lamp.hidden = rgb; kelRow.hidden = !white; kelT.hidden = !white;
+      const css = rgb ? (v.lrgb || '#FFFFFF') : white ? kelvinCss(v.lk ?? 3000) : 'var(--lamp)';
+      setStyle(el, '--lp-col', on ? css : 'transparent'); setStyle(lamp, 'color', on ? css : '');
+      setStyle(el, '--lp-arc', (on ? 2.7 * (v.llevel ?? 0) : 0).toFixed(0) + 'deg');
+      if (Date.now() < busy || dragging) return;
+      setText(pct, on ? (v.llevel ?? 0) + ' %' : 'Off');
+      if (+bri.value !== (v.llevel ?? 0)) bri.value = v.llevel ?? 0;
+      if (white) { setAttr(kel, 'min', v.lwarm ?? 2700); setAttr(kel, 'max', v.lcold ?? 6500); if (+kel.value !== v.lk) kel.value = v.lk; setText(kelT, (v.lk ?? '') + ' K'); }
+      if (rgb) { const [hue, sat] = hexToHs(v.lrgb || '#FFFFFF'); place(hue, sat); }
+    },
+  };
+}
+
 const LAMP = { on: 'lamp', off: 'lampOff' };
 function bulb() { const el = h('div.bulb'); el.append(icon('lampOff')); return el; }
 /** id: the icon id of this output ("<device>|l3"): the user's own icon or the built-in lamp */
@@ -338,16 +411,20 @@ export function createCard(d, handlers) {
       L.r = [1, 2, 3, 4, 5, 6].map(() => ({ row: h('div.disp-row'), l: h('span.l'), v: h('b.v') }));
       L.r.forEach(r => r.row.append(r.l, r.v));
       L.none = h('div.hint', 'No screen is enabled. Switch one on in the ETS parameters (page "Screen 1") and download.');
-      state.append(h('div.disp', L.hd, ...L.r.map(r => r.row), L.none));
+      L.lp = lightPanel(d.name);
+      state.append(h('div.disp', L.hd, ...L.r.map(r => r.row), L.lp.el, L.none));
       L.prev = h('button.btn', { type: 'button', onclick: () => operate('Previous screen', () => api.act(d.name, 'prev', 0)) }, '‹ Previous');
       L.next = h('button.btn', { type: 'button', onclick: () => operate('Next screen', () => api.act(d.name, 'next', 0)) }, 'Next ›');
-      controls.append(h('div.btn-row', L.prev, L.next),
-        howTo('The display only shows what it receives from the bus; the values cannot be changed here. Use the buttons, or the next/previous screen objects, to page through the screens. A row set to "Active scene" shows the scene number of the last scene call on its group address.'));
+      L.nav = h('div.btn-row', L.prev, L.next);
+      controls.append(L.nav,
+        howTo('A values screen only shows what it receives from the bus; the values cannot be changed here. A light control screen (set in ETS: "The screen is") sends: the round button switches on and off, the slider and the − / + keys set the brightness, and the colour wheel (RGB) or the warm-to-cold slider (tunable white) sets the colour. Connect its status objects to the actuator and the screen follows what the lamp really does. Use the buttons, or the next/previous screen objects, to page through the screens.'));
       face = (v, dev) => {
         const any = !!v.cur;
         L.hd.hidden = !any; L.none.hidden = any; L.prev.disabled = L.next.disabled = !any || (v.count || 0) < 2;
         setText(L.name, v.name || ('Screen ' + v.cur)); setText(L.pos, (v.count || 0) > 1 ? v.pos + ' / ' + v.count : '');
-        L.r.forEach((r, i) => { const n = i + 1, used = any && v['r' + n + 't'] > 0; r.row.hidden = !used; setText(r.l, v['r' + n + 'l'] || ''); setText(r.v, v['r' + n + 'v'] || '–'); });
+        L.nav.hidden = (v.count || 0) < 2; // one screen only: nothing to page through
+        L.lp.el.hidden = !(any && v.light); if (any && v.light) L.lp.update(v);
+        L.r.forEach((r, i) => { const n = i + 1, used = any && !v.light && v['r' + n + 't'] > 0; r.row.hidden = !used; setText(r.l, v['r' + n + 'l'] || ''); setText(r.v, v['r' + n + 'v'] || '–'); });
       };
       break;
     }

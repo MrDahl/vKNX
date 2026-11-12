@@ -5,6 +5,9 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Added
+- **Light control screen on the info display (application version 6 of `vknx-info-display`; download the display again).** A screen can now be a light control instead of six rows of values (ETS: *The screen is*): a round on/off button, a brightness slider with − and + keys and a ring that shows the brightness, and for colour either a colour wheel (RGB, 3 bytes, DPT 232.600) or a warm-to-cold slider (tunable white, Kelvin, DPT 7.600, with the range set in ETS); *None* gives on/off and brightness only. It sends on switch, brightness, RGB and colour temperature objects and follows four status objects, so it shows what the lamp really does. With one screen enabled the display is nothing but the light control (the paging buttons are hidden). Made for the colour dimming actuator, but it works with any dimming actuator. Not tried in ETS yet.
+
 ## [0.14.1] - 2026-11-12
 
 ### Fixed

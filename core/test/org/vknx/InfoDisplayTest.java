@@ -51,8 +51,8 @@ public final class InfoDisplayTest {
 		final var etsLink = net.createDeviceLink(new IndividualAddress(0, 2, 255));
 		final var ets = new EtsLikeClient(etsLink);
 		try {
-			check("product has 2 paging objects and 4 objects per row of 5 screens x 6 rows",
-					Products.INFO_DISPLAY.objects().size() == 2 + 5 * 6 * 4);
+			check("product has 2 paging objects, 4 objects per row of 5 screens x 6 rows and 8 light control objects per screen",
+					Products.INFO_DISPLAY.objects().size() == 2 + 5 * 6 * 4 + 5 * 8);
 			check("ETS texts of the display stay within 50 characters", Products.INFO_DISPLAY.params().stream().noneMatch(p -> p.text().length() > 50)
 					&& Products.INFO_DISPLAY.objects().stream().noneMatch(o -> o.text().length() > 50)
 					&& Products.ROW_TYPES.stream().noneMatch(t -> t.text().length() > 50));

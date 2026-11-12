@@ -38,7 +38,7 @@ export function pointsOf(d) {
     case 'dimmer': for (let i = 1; i <= 4; i++) if (on(i)) add('d' + i, 'lamp', { on: (v['level' + i] ?? 0) > 0, pct: v['level' + i] ?? 0, label: n + ' ' + (v['n' + i] || 'Channel ' + i), name: v['n' + i] || 'Channel ' + i }); break;
     case 'blind-actuator': for (let i = 1; i <= 4; i++) if (on(i)) add('b' + i, 'blind', { pos: v['pos' + i] ?? 0, label: n + ' ' + (v['n' + i] || 'Blind ' + i), name: v['n' + i] || 'Blind ' + i }); break;
     case 'logic': add('lg', 'logic', { name: 'Logic', text: 'Logic' }); break;
-    case 'info-display': add('scr', 'display', { name: 'Display', text: v.cur ? (v.name || 'Screen ' + v.cur) : 'No screen' }); break;
+    case 'info-display': add('scr', 'display', { name: 'Display', text: v.cur ? (v.name || 'Screen ' + v.cur) + (v.light ? (v.lon ? ' · ' + (v.llevel ?? 0) + ' %' : ' · off') : '') : 'No screen' }); break;
     case 'binary-input': for (let i = 1; i <= 4; i++) if (on(i)) add('c' + i, 'contact', { keyNo: i, closed: !!v['c' + i], label: n + ' ' + (v['n' + i] || 'Input ' + i), name: v['n' + i] || 'Input ' + i }); break;
     case 'thermostat': add('th', 'info', { sym: 'thermostat', name: 'Thermostat', on: !!v.heat, text: (v.temp ?? '–') + ' → ' + (v.sp ?? '–') + ' °C' }); break;
     case 'heating-actuator': for (let i = 1; i <= 6; i++) if (on(i)) add('v' + i, 'info', { sym: 'radiator', on: !!v['open' + i], text: (v['pct' + i] ?? 0) + ' %', label: n + ' ' + (v['n' + i] || 'Valve ' + i), name: v['n' + i] || 'Valve ' + i, objs: [3 * (i - 1) + 1, 3 * (i - 1) + 2, 3 * (i - 1) + 3] }); break;
