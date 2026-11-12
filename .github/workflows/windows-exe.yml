@@ -47,6 +47,15 @@ jobs:
           cmd /c "powershell -File tools/selftest.ps1 > dist\selftest.log 2>&1"
           "exit=$LASTEXITCODE" | Add-Content dist/selftest.log
 
+      - name: Check that the .knxprod files match Products.java (stops a release with old product files)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          cmd /c "powershell -File tools/selftest.ps1 KnxprodCheck > dist\knxprod-check.log 2>&1"
+          $code = $LASTEXITCODE
+          Get-Content dist\knxprod-check.log | Where-Object { $_ -match '^(PASS|FAIL|all |\d+ of )' }
+          if ($code -ne 0 -and $env:PUBLISH -eq 'True') { throw 'The knxprod folder is older than Products.java: run tools\make-knxprod.ps1 on Windows with ETS, commit the knxprod folder, then release again.' }
+
       - name: Package modules as jars
         shell: pwsh
         run: |
