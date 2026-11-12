@@ -48,6 +48,9 @@ export function pointsOf(d) {
       if (v.alarmE !== false) add('alarm', 'info', { sym: 'wind', name: 'Wind alarm', on: !!v.alarm, text: v.alarm ? 'ALARM' : 'No alarm', label: n + ' wind alarm', objs: [5] });
       break;
     }
+    case 'presence-detector': add('pd', 'info', { sym: 'motion', name: 'Presence', on: !!v.light, text: v.light ? 'Light on' : (v.presence ? 'Occupied' : 'No one'), objs: [1, 2, 3, 4] }); break;
+    case 'colour-dimmer': for (let i = 1; i <= 2; i++) if (on(i)) add('c' + i, 'lamp', { on: (v['level' + i] ?? 0) > 0, pct: v['level' + i] ?? 0, col: v['w' + i] ? 'k' + (v['k' + i] ?? 3000) : (v['rgb' + i] || ''), label: n + ' ' + (v['n' + i] || 'Channel ' + i), name: v['n' + i] || 'Channel ' + i, objs: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => 9 * (i - 1) + k) }); break;
+    case 'energy-meter': add('em', 'info', { sym: 'flash', name: 'Power', on: !!v.alarm, text: (v.power ?? '–') + ' W' }); break;
     case 'multisensor': SENSORS.forEach((s, i) => { if (v['e' + i] !== false) add('s' + i, 'sensor', { text: (v['s' + i] ?? '–') + ' ' + s.unit, label: n + ' ' + s.name, name: s.name, sensor: i }); }); break;
   }
   return P;

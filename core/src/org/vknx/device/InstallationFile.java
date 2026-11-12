@@ -173,13 +173,16 @@ public final class InstallationFile {
 		files.put(DEVICES, String.join("\n", kept).concat(kept.isEmpty() ? "" : "\n").getBytes(StandardCharsets.UTF_8));
 
 		boolean plan = false;
-		for (final var e : raw.entrySet())
-			if (!plan && e.getKey().startsWith("plan.")) {
+		final var floors = new java.util.HashSet<Integer>(); // one image per floor
+		for (final var e : raw.entrySet()) {
+			final int floor = DataFiles.planFloor(e.getKey());
+			if (floor >= 0 && floors.add(floor)) {
 				if (e.getValue().length > MAX_PLAN)
-					throw new IllegalArgumentException("The floor plan image in the file is larger than " + (MAX_PLAN >> 20) + " MB.");
+					throw new IllegalArgumentException("A floor plan image in the file is larger than " + (MAX_PLAN >> 20) + " MB.");
 				files.put(e.getKey(), e.getValue());
 				plan = true;
 			}
+		}
 		final boolean layout = text(raw, LAYOUT, files), icons = text(raw, ICONS, files);
 		return new Content(new Summary(info.getProperty("vknx", "?"), info.getProperty("created", ""), List.copyOf(devices), List.copyOf(skipped), plan, layout, icons), files);
 	}
@@ -197,7 +200,7 @@ public final class InstallationFile {
 	private static final Set<String> FIXED = Set.of(INFO, DEVICES, LAYOUT, ICONS);
 
 	private static boolean known(final String n) {
-		return FIXED.contains(n) || STATE_NAME.matcher(n).matches() || DataFiles.isPlan(n) && n.startsWith("plan.");
+		return FIXED.contains(n) || STATE_NAME.matcher(n).matches() || DataFiles.planFloor(n) >= 0;
 	}
 
 	private static IllegalArgumentException notOurs() {

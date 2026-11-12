@@ -26,6 +26,15 @@ function gaText(dev, objs) {
 const howTo = text => h('details.howto', h('summary', 'How to operate'), h('div.hint', text));
 const range = (from, n) => Array.from({ length: n }, (_, i) => from + i);
 
+/** "45 s", "2 min 05 s" */
+export const fmtSecs = s => (s < 60 ? s + ' s' : Math.floor(s / 60) + ' min ' + String(s % 60).padStart(2, '0') + ' s');
+const fmtWh = wh => (wh < 1000 ? wh.toFixed(1) + ' Wh' : (wh / 1000).toFixed(3) + ' kWh');
+/** A colour that looks like white light of the given colour temperature (2000 K orange to 8000 K bluish). */
+export function kelvinCss(k) {
+  const t = Math.max(0, Math.min(1, (k - 2000) / 6000));
+  const mix = (a, b) => Math.round(a + (b - a) * t);
+  return `rgb(${mix(255, 200)}, ${mix(170, 225)}, ${mix(80, 255)})`;
+}
 const LAMP = { on: 'lamp', off: 'lampOff' };
 function bulb() { const el = h('div.bulb'); el.append(icon('lampOff')); return el; }
 /** id: the icon id of this output ("<device>|l3"): the user's own icon or the built-in lamp */
@@ -254,6 +263,72 @@ export function createCard(d, handlers) {
         L.w.forEach((c, i) => { paintIcon(c.sb, d.name + '|w' + i, c.ic); c.el.hidden = v['e' + i] === false; put(c, v['s' + i] === undefined ? '–' : String(v['s' + i]), c.unit); });
         L.rain.el.hidden = v.rainE === false; put(L.rain, v.rain ? 'Rain' : 'Dry');
         L.alarm.el.hidden = v.alarmE === false; put(L.alarm, v.alarm ? 'ALARM' : 'Off'); setCls(L.alarm.el, 'alarm', !!v.alarm); setCls(L.rain.el, 'alarm', !!v.rain);
+      };
+      break;
+    }
+    case 'presence-detector': {
+      L.ico = h('span.pd-ico', icon('motion')); L.t = h('div.value'); L.sub = h('div.hint'); L.pres = h('div.hint'); L.lock = h('div.hint'); L.ga = h('div.cga');
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(h('div.th-main', L.ico, L.t), L.sub, L.pres, L.lock, L.ga);
+      L.move = h('button.btn.press', { type: 'button', title: 'One movement in the room', onclick: () => operate('Movement', () => api.act(d.name, 'motion', 0)) }, icon('walk'), 'Movement');
+      L.stay = h('button.btn', { type: 'button', 'aria-pressed': 'false', title: 'A person stays in the room: movement all the time', onclick: () => operate('Presence', () => api.act(d.name, 'occupied', L.stay.getAttribute('aria-pressed') === 'true' ? 0 : 1)) }, icon('person'), 'Person in the room');
+      L.lux = h('input', { type: 'range', min: 0, max: 1000, step: 10, value: 150, 'aria-label': 'Brightness of the room in lux', style: 'flex:1;min-width:4rem' }); L.luxT = h('span.mono', { style: 'min-width:4.2rem;text-align:right' });
+      let luxBusy = 0;
+      L.lux.addEventListener('input', () => { luxBusy = Date.now() + 1500; setText(L.luxT, L.lux.value + ' lux'); });
+      L.lux.addEventListener('change', () => { luxBusy = Date.now() + 1500; operate('Brightness', () => api.act(d.name, 'lux', L.lux.value)); });
+      controls.append(h('div.btn-row', L.move, L.stay), h('div.btn-row.slide-row', h('span.hint', { style: 'align-self:center' }, 'Room brightness'), L.lux, L.luxT),
+        howTo('"Movement" is one movement in the room; "Person in the room" keeps the detector triggered until you switch it off again. The light channel sends ON at a movement when the room is darker than the threshold from ETS, and OFF when the follow-up time has passed without movement. Set the room brightness with the slider (for example above the threshold, to see that the light stays off). The presence object for heating and ventilation ignores the brightness and has its own, longer time. The lock object stops the light channel.'));
+      face = (v, dev) => {
+        setCls(L.ico, 'on', !!v.light); setText(L.t, v.light ? 'Light on' : 'Light off');
+        setText(L.sub, v.light ? (v.occupied ? 'Movement all the time' : 'Off in ' + fmtSecs(v.left ?? 0) + ' without movement') : (v.threshold ? 'Switches on below ' + v.threshold + ' lux' : 'Switches on at any brightness'));
+        L.pres.hidden = v.hvac === false; setText(L.pres, 'Presence object: ' + (v.presence ? 'occupied' + (v.occupied ? '' : ' (' + fmtSecs(v.pleft ?? 0) + ' left)') : 'not occupied'));
+        L.lock.hidden = !v.locked; setText(L.lock, 'Light channel locked by the lock object');
+        setAttr(L.stay, 'aria-pressed', String(!!v.occupied));
+        if (Date.now() > luxBusy && document.activeElement !== L.lux) { if (v.lux != null && +L.lux.value !== v.lux) L.lux.value = v.lux; setText(L.luxT, (v.lux ?? '–') + ' lux'); }
+        setText(L.ga, dev ? gaText(dev, [1, 2, 3, 4]) : '');
+      };
+      break;
+    }
+    case 'colour-dimmer': {
+      L.cells = [];
+      const grid = h('div.lamp-grid.dim-grid');
+      for (let i = 0; i < 2; i++) {
+        const b = bulb(); const nm = h('span'); const t = h('b'); const m = h('i.fill'); const ga = h('span.cga'); const col = h('span.swatch'); const ct = h('span.hint');
+        const trk = h('div.dslider', { role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-label': 'Brightness (display only)' }, m);
+        const cell = h('div.lamp-cell', b, nm, t, trk, h('span.col-line', col, ct), ga); L.cells.push({ cell, b, nm, t, m, ga, trk, col, ct }); grid.append(cell);
+      }
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(grid);
+      controls.append(howTo('Each channel is RGB or tunable white, as chosen in ETS. Switch and dim it like a normal dimming actuator. An RGB channel takes its colour from a 3 byte telegram (DPT 232.600: red, green, blue), for example from the Group monitor of ETS; a tunable white channel takes a colour temperature in Kelvin (DPT 7.600), limited to the range set in ETS. The small square shows the colour the lamp has.'));
+      face = (v, dev) => L.cells.forEach((c, i) => {
+        const n = i + 1, lv = v['level' + n] ?? 0, white = !!v['w' + n], css = white ? kelvinCss(v['k' + n] ?? 3000) : (v['rgb' + n] || '#FFFFFF');
+        c.cell.hidden = v['e' + n] === false; setBulb(c.b, lv > 0, lv, d.name + '|c' + n); setStyle(c.b, 'color', lv > 0 ? css : '');
+        setText(c.t, lv + ' %'); setStyle(c.m, 'width', lv + '%'); setStyle(c.m, 'background', lv > 0 ? css : '');
+        setAttr(c.trk, 'aria-valuenow', lv); setStyle(c.col, 'background', css);
+        setText(c.ct, white ? (v['k' + n] ?? '–') + ' K' : (v['rgb' + n] || ''));
+        setText(c.ga, dev ? gaText(dev, range(9 * (n - 1) + 1, 9)) : ''); setText(c.nm, v['n' + n] || 'Channel ' + n);
+      });
+      break;
+    }
+    case 'energy-meter': {
+      L.p = h('div.value'); L.e = h('div.hint'); L.a = h('div.hint'); L.al = h('div.hint.alarm-line'); L.ga = h('div.cga');
+      L.loads = [1, 2, 3, 4].map(() => ({ row: h('div.load-row'), led: h('span.keyled'), nm: h('span.grow.ellipsis'), w: h('span.mono') }));
+      const list = h('div.load-list'); L.loads.forEach(l => { l.row.append(l.led, l.nm, l.w); list.append(l.row); });
+      state.style.flexDirection = 'column'; state.style.alignItems = 'stretch';
+      state.append(h('div.th-main', h('span.pd-ico.meter', icon('flash')), L.p), L.e, L.a, L.al, list, L.ga);
+      L.x = h('input', { type: 'range', min: 0, max: 3000, step: 50, value: 0, 'aria-label': 'Extra load in watt', style: 'flex:1;min-width:4rem' }); L.xT = h('span.mono', { style: 'min-width:4.4rem;text-align:right' });
+      let xBusy = 0;
+      L.x.addEventListener('input', () => { xBusy = Date.now() + 1500; setText(L.xT, L.x.value + ' W'); });
+      L.x.addEventListener('change', () => { xBusy = Date.now() + 1500; operate('Extra load', () => api.act(d.name, 'extra', L.x.value)); });
+      controls.append(h('div.btn-row.slide-row', h('span.hint', { style: 'align-self:center' }, 'Extra load'), L.x, L.xT),
+        h('div.btn-row', h('button.btn', { type: 'button', onclick: () => operate('Reset', () => api.act(d.name, 'reset', 0)) }, icon('restart'), 'Reset the energy counter')),
+        howTo('The meter adds up a base load, the loads it monitors and the extra load you set here. A monitored load is counted while its input object is on: connect that object in ETS to the status of a switch actuator output, and the power goes up when the lamp is switched on. Power, current and energy are sent as set in ETS; above the power limit the alarm object sends 1. The energy counter starts at 0 when vKNX starts.'));
+      face = (v, dev) => {
+        setText(L.p, (v.power ?? 0) + ' W'); setText(L.e, 'Energy ' + fmtWh(v.wh ?? 0)); setText(L.a, 'Current ' + (v.amp ?? 0).toFixed(2) + ' A · base load ' + (v.base ?? 0) + ' W');
+        L.al.hidden = !v.limit; setText(L.al, v.limit ? (v.alarm ? 'ALARM: above the limit of ' + v.limit + ' W' : 'Limit ' + v.limit + ' W') : ''); setCls(L.al, 'alarm', !!v.alarm);
+        L.loads.forEach((l, i) => { const n = i + 1; l.row.hidden = v['e' + n] !== true; setCls(l.led, 'on', !!v['on' + n]); setText(l.nm, v['n' + n] || 'Load ' + n); setText(l.w, (v['on' + n] ? '' : '(') + (v['p' + n] ?? 0) + ' W' + (v['on' + n] ? '' : ')')); });
+        if (Date.now() > xBusy && document.activeElement !== L.x) { if (v.extra != null && +L.x.value !== v.extra) L.x.value = Math.min(3000, v.extra); setText(L.xT, (v.extra ?? 0) + ' W'); }
+        setText(L.ga, dev ? gaText(dev, range(1, 10)) : '');
       };
       break;
     }

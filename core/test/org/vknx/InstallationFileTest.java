@@ -71,8 +71,10 @@ public final class InstallationFileTest {
 			Files.write(dirA.resolve("plan.png"), new byte[] { (byte) 0x89, 'P', 'N', 'G', 1, 2, 3 });
 			Files.writeString(dirA.resolve("plan-layout.json"), "{\"items\":[{\"dev\":\"" + weather + "\",\"x\":10,\"y\":20}]}");
 			Files.writeString(dirA.resolve("icons.json"), "{\"icons\":{\"Lampe1\":\"lamp\"}}");
-			// the device was never closed: its state file does not exist yet, the export has to write it
-			check("no state file before the export (state is only written when a device closes)", !Files.exists(dirA.resolve(DeviceRegistry.fileStem(weather) + ".state")));
+			// the device was never closed. Since 0.13.2 the state file is written a few seconds after a change, so it may or
+			// may not exist here; the export must write the current state itself either way (checked after the import).
+			Files.write(dirA.resolve("plan-f1.png"), new byte[] { (byte) 0x89, 'P', 'N', 'G', 9 });
+			Files.write(dirA.resolve("plan-f9.png"), new byte[] { 1 }); // not a floor (0 to 7)
 
 			final byte[] file = InstallationFile.export(a, "9.9.9");
 			check("the running device is still alive after the export", wd.applicationLoaded() && wd.address().equals(addr));
@@ -100,6 +102,7 @@ public final class InstallationFileTest {
 			check("after the import the devices of the file exist", b.devices().stream().map(d -> d.name()).toList().containsAll(List.of(weather, "Tryk1", "Lampe1")) && b.devices().size() == 3);
 			final var wb = b.devices().stream().filter(d -> d.name().equals(weather)).findFirst().orElse(null);
 			check("the imported device has its address and its download", wb != null && wb.address().equals(addr) && wb.applicationLoaded());
+			check("the image of a second floor comes along, a file that only looks like one does not", Files.exists(dirB.resolve("plan-f1.png")) && !Files.exists(dirB.resolve("plan-f9.png")));
 			check("plan, layout and icons are in place", Files.exists(dirB.resolve("plan.png")) && Files.readString(dirB.resolve("plan-layout.json")).contains(weather)
 					&& Files.readString(dirB.resolve("icons.json")).contains("Lampe1"));
 			try (var s = Files.list(dirB)) {

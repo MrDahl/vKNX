@@ -5,7 +5,8 @@ import { modal, toast } from './dialogs.js';
 
 const PREFIX = { 'push-button': 'Button', 'secure-push-button': 'SecButton', 'secure-switch-actuator': 'SecSwitch', 'push-slider': 'Slider', 'switch-actuator': 'Switch', dimmer: 'Dimmer', 'blind-actuator': 'Blind',
   multisensor: 'Sensor', 'info-display': 'Display', logic: 'Logic', coupler: 'Coupler',
-  'binary-input': 'Input', thermostat: 'Thermostat', 'heating-actuator': 'Heating', 'weather-station': 'Weather' };
+  'binary-input': 'Input', thermostat: 'Thermostat', 'heating-actuator': 'Heating', 'weather-station': 'Weather',
+  'presence-detector': 'Presence', 'colour-dimmer': 'Colour', 'energy-meter': 'Meter' };
 const MAX_NAME = 40;
 // any characters are fine (spaces, other alphabets, special characters); only what would break the storage is refused (same rules as the server)
 function nameProblem(n) {

@@ -116,8 +116,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		final boolean restored = Files.exists(stateFile);
 		final var logic = new VirtualDevice(name, product, stateFile);
 		if (product.secure()) {
-			SECURE_DEVICES.put(name, logic);
-			installSecureLogBridge();
+			DeviceSecurity.watch(name, logic);
 		}
 		logic.subnet = uplink;
 		logic.location = location;
@@ -167,197 +166,34 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			ios.setProperty(obj, PID.TABLE_REFERENCE, 1, 1, intBytes(SLOT_ADDRESS[obj]));
 		}
 		ios.setProperty(OBJ_APPLICATION, PID.PROGRAM_VERSION, 1, 1, new byte[5]);
-		if (product.secure()) {
-			// KNX Data Secure: the factory default setup key (FDSK) ETS needs for the first, secure download
-			final byte[] fdsk = new byte[16];
-			new java.security.SecureRandom().nextBytes(fdsk);
-			final var sec = io.calimero.device.ios.SecurityObject.lookup(ios);
-			sec.set(io.calimero.device.ios.SecurityObject.Pid.Fdsk, fdsk);
-			// start the sending sequence number above 1: a device that starts at 1 first asks another device for a
-			// sync (S-A_Sync.req) before it can send a group telegram, and no such partner is known yet
-			final long seq = 2 + new java.security.SecureRandom().nextInt(1_000_000);
-			final byte[] seqBytes = java.nio.ByteBuffer.allocate(8).putLong(seq).array();
-			final byte[] six = java.util.Arrays.copyOfRange(seqBytes, 2, 8);
-			sec.set(io.calimero.device.ios.SecurityObject.Pid.SequenceNumberSending, six);
-			sec.set(io.calimero.device.ios.SecurityObject.Pid.InitialSequenceNumberSending, six);
-		}
+		if (product.secure())
+			security().initFresh(); // KNX Data Secure: factory key (FDSK) and sequence number
 	}
 
-	// ---------------------------------------------------------------- KNX Data Secure
+	// ---------------------------------------------------------------- KNX Data Secure (see DeviceSecurity)
 
-	private io.calimero.device.ios.SecurityObject securityObject() {
-		return io.calimero.device.ios.SecurityObject.lookup(base.getInterfaceObjectServer());
-	}
-
-	/**
-	 * Master reset of a secure device (ETS does this when "Secure commissioning" is switched off or on): the tool key,
-	 * group keys, group object security flags and security mode are deleted, so the factory key (FDSK) is in use again.
-	 * The FDSK and serial number themselves never change.
-	 */
-	private void resetSecurity() {
-		final var sec = securityObject();
-		sec.set(io.calimero.device.ios.SecurityObject.Pid.SecurityMode, 1, 1, (byte) 0);
-		sec.set(io.calimero.device.ios.SecurityObject.Pid.ToolKey, new byte[16]);
-		sec.clear(io.calimero.device.ios.SecurityObject.Pid.GroupKeyTable);
-		sec.clear(io.calimero.device.ios.SecurityObject.Pid.P2PKeyTable);
-		sec.clear(io.calimero.device.ios.SecurityObject.Pid.SecurityIndividualAddressTable);
-		sec.clear(io.calimero.device.ios.SecurityObject.Pid.GoSecurityFlags);
-		log("mgmt", "security reset: keys deleted, factory key (FDSK) in use again");
-	}
-
-	private static final int[] KEPT_SECURITY_PIDS = {
-			io.calimero.device.ios.SecurityObject.Pid.GroupKeyTable, io.calimero.device.ios.SecurityObject.Pid.ZoneKeyTable,
-			io.calimero.device.ios.SecurityObject.Pid.GoSecurityFlags, io.calimero.device.ios.SecurityObject.Pid.P2PKeyTable,
-			io.calimero.device.ios.SecurityObject.Pid.SecurityIndividualAddressTable };
-
-	/** Tool key, security mode and the key/flag tables: {pid, element count, data}. */
-	private java.util.List<Object[]> snapshotSecurity() {
-		final var sec = securityObject();
-		final var out = new java.util.ArrayList<Object[]>();
-		out.add(new Object[] { io.calimero.device.ios.SecurityObject.Pid.ToolKey, 1, sec.get(io.calimero.device.ios.SecurityObject.Pid.ToolKey) });
-		out.add(new Object[] { io.calimero.device.ios.SecurityObject.Pid.SecurityMode, 1, sec.get(io.calimero.device.ios.SecurityObject.Pid.SecurityMode) });
-		for (final int pid : KEPT_SECURITY_PIDS) {
-			try {
-				final byte[] n = sec.get(pid, 0, 1);
-				final int count = ((n[0] & 0xff) << 8) | (n[1] & 0xff);
-				out.add(new Object[] { pid, count, count == 0 ? new byte[0] : sec.get(pid) });
-			}
-			catch (final RuntimeException e) { /* property not there: nothing to keep */ }
-		}
-		return out;
-	}
-
-	private void restoreSecurity(final java.util.List<Object[]> kept) {
-		final var sec = securityObject();
-		for (final var k : kept) {
-			final int pid = (Integer) k[0];
-			final int count = (Integer) k[1];
-			final byte[] data = (byte[]) k[2];
-			try {
-				if (count == 0)
-					continue;
-				if (java.util.Arrays.equals(sec.get(pid), data))
-					continue;
-				sec.set(pid, 1, count, data);
-			}
-			catch (final RuntimeException e) { log("mgmt", "could not keep security property " + pid + ": " + e); }
-		}
-	}
+	private DeviceSecurity security() { return new DeviceSecurity(base.getInterfaceObjectServer(), this::log); }
 
 	/** The factory default setup key as 32 hex digits, or "" for a device that is not a secure product. */
-	public String fdskHex() {
-		return product.secure() ? HexFormat.of().withUpperCase().formatHex(securityObject().get(io.calimero.device.ios.SecurityObject.Pid.Fdsk)) : "";
-	}
+	public String fdskHex() { return product.secure() ? security().fdskHex() : ""; }
 
 	/** The 6-byte KNX serial number as 12 hex digits (ETS shows and asks for it together with the FDSK). */
 	public String serialHex() { return HexFormat.of().withUpperCase().formatHex(serialNumber().array()); }
 
-	/**
-	 * The device certificate ETS asks for ("Add Device Certificate"): serial number (6 bytes) + FDSK (16 bytes) as
-	 * Base32 (A-Z, 2-7) plus a 4-bit CRC, 36 characters in six blocks of six. ETS does not accept 0 or 1, so the hex FDSK cannot be typed.
-	 * Verified against the example in the KNX Secure course (serial 0007:EE952A16 = AAD65F-JKCY6F-...).
-	 */
-	public static String deviceCertificate(final byte[] serial, final byte[] fdsk) {
-		final byte[] all = new byte[serial.length + fdsk.length];
-		System.arraycopy(serial, 0, all, 0, serial.length);
-		System.arraycopy(fdsk, 0, all, serial.length, fdsk.length);
-		final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-		final var sb = new StringBuilder();
-		int buffer = 0, bits = 0;
-		// 4-bit CRC (x^4 + x + 1, start value 0, no reflection) over serial + FDSK, appended as the last 4 bits
-		int crc = 0;
-		for (final byte b : all)
-			for (int i = 7; i >= 0; i--) {
-				final boolean feedback = (crc >> 3 & 1 ^ b >> i & 1) != 0;
-				crc = crc << 1 & 0xF;
-				if (feedback)
-					crc ^= 0x3;
-			}
-		final byte[] withCrc = java.util.Arrays.copyOf(all, all.length + 1);
-		withCrc[all.length] = (byte) (crc << 4);
-		for (final byte b : withCrc) {
-			buffer = buffer << 8 | b & 0xff;
-			bits += 8;
-			while (bits >= 5) {
-				sb.append(alphabet.charAt(buffer >> bits - 5 & 31));
-				bits -= 5;
-			}
-		}
-		final var out = new StringBuilder();
-		for (int i = 0; i < sb.length(); i += 6) {
-			if (i > 0)
-				out.append(" - ");
-			out.append(sb, i, Math.min(sb.length(), i + 6));
-		}
-		return out.toString();
-	}
+	/** The device certificate ETS asks for; see {@link DeviceSecurity#certificate}. */
+	public static String deviceCertificate(final byte[] serial, final byte[] fdsk) { return DeviceSecurity.certificate(serial, fdsk); }
 
 	/** This device's certificate code (see {@link #deviceCertificate}), or "" for a plain product. */
-	public String certificate() {
-		return product.secure() ? deviceCertificate(serialNumber().array(),
-				securityObject().get(io.calimero.device.ios.SecurityObject.Pid.Fdsk)) : "";
-	}
-
-	// ---- what the secure layer does, in the device's own log (for finding out why ETS and a device do not agree)
-
-	private static final java.util.Map<String, VirtualDevice> SECURE_DEVICES = new java.util.concurrent.ConcurrentHashMap<>();
-	private static volatile boolean secureLogInstalled;
-	private static final java.util.List<java.util.logging.Logger> SECURE_LOGGERS = new java.util.concurrent.CopyOnWriteArrayList<>();
-
-	private static synchronized void installSecureLogBridge() {
-		if (secureLogInstalled)
-			return;
-		secureLogInstalled = true;
-		final var handler = new java.util.logging.Handler() {
-			@Override
-			public void publish(final java.util.logging.LogRecord r) {
-				final String logger = r.getLoggerName();
-				if (logger == null)
-					return;
-				for (final var e : SECURE_DEVICES.entrySet())
-					if (logger.endsWith(" " + e.getKey())) {
-						String msg = r.getMessage();
-						try {
-							if (r.getParameters() != null && r.getParameters().length > 0)
-								msg = java.text.MessageFormat.format(msg, r.getParameters());
-						}
-						catch (final RuntimeException ignore) { /* use the raw text */ }
-						if (r.getThrown() != null)
-							msg += " (" + r.getThrown().getMessage() + ")";
-						e.getValue().log("secure", msg);
-					}
-			}
-			@Override public void flush() {}
-			@Override public void close() {}
-		};
-		handler.setLevel(java.util.logging.Level.ALL);
-		for (final String n : new String[] { "io.calimero.device", "io.calimero.secure" }) {
-			final var l = java.util.logging.Logger.getLogger(n);
-			l.setLevel(java.util.logging.Level.FINE);
-			l.addHandler(handler);
-			// java.util.logging keeps loggers only weakly: without a strong reference a garbage collection can drop the
-			// logger together with its level and handler, and the secure log would silently stay empty
-			SECURE_LOGGERS.add(l);
-		}
-	}
+	public String certificate() { return product.secure() ? DeviceSecurity.certificate(serialNumber().array(), security().fdsk()) : ""; }
 
 	/** The serial number the way ETS shows it: 2 bytes, colon, 4 bytes (e.g. 00FA:00000033). */
 	public String serialEts() { final String s = serialHex(); return s.substring(0, 4) + ":" + s.substring(4); }
 
 	/** True once ETS has switched on security mode (the secure download completed far enough). */
-	public boolean securityModeOn() {
-		return product.secure() && (securityObject().get(io.calimero.device.ios.SecurityObject.Pid.SecurityMode, 1, 1)[0] & 0xff) == 1;
-	}
+	public boolean securityModeOn() { return product.secure() && security().modeOn(); }
 
 	/** True once ETS replaced the factory key with its own tool key: the FDSK is no longer used. */
-	public boolean toolKeyActive() {
-		if (!product.secure())
-			return false;
-		for (final byte b : securityObject().get(io.calimero.device.ios.SecurityObject.Pid.ToolKey))
-			if (b != 0)
-				return true;
-		return false;
-	}
+	public boolean toolKeyActive() { return product.secure() && security().toolKeyActive(); }
 
 	public String name() { return name; }
 
@@ -476,18 +312,18 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		// so the device would no longer answer ETS. Keep what is there: snapshot now, put it back once Calimero is done.
 		final boolean keepSecurity = masterReset && product.secure()
 				&& eraseCode == io.calimero.mgmt.ManagementClient.EraseCode.FactoryResetWithoutIndividualAddress;
-		final var kept = keepSecurity ? snapshotSecurity() : null;
+		final var kept = keepSecurity ? security().snapshot() : null;
 		final var r = super.restart(masterReset, eraseCode, channel);
 		if (masterReset) { // Calimero keeps the old state file at every reset: only the newest copy is worth keeping
 			try { org.vknx.app.DataFiles.deleteBackups(stateFile.toAbsolutePath().getParent(), 1); }
 			catch (final java.io.IOException e) { /* only a left-over file */ }
 		}
 		if (kept != null) {
-			restoreSecurity(kept);
+			security().restore(kept);
 			final var t = new Thread(() -> {
 				for (int i = 0; i < 4; i++) {
 					try { Thread.sleep(400); } catch (final InterruptedException e) { return; }
-					restoreSecurity(kept);
+					security().restore(kept);
 				}
 				changed();
 			}, "vknx-secure-keep-" + name);
@@ -501,7 +337,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		if (masterReset && product.secure() && eraseCode == io.calimero.mgmt.ManagementClient.EraseCode.FactoryReset) {
 			final var t = new Thread(() -> {
 				try { Thread.sleep(500); } catch (final InterruptedException e) { return; }
-				resetSecurity();
+				security().reset();
 				changed();
 			}, "vknx-secure-reset-" + name);
 			t.setDaemon(true);
@@ -510,6 +346,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		afterTablesChanged();
 		startApplication();
 		changed();
+		scheduleSave(SAVE_SOON_S); // after Calimero has done its part of the reset
 		return r;
 	}
 
@@ -1013,7 +850,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	private synchronized void etsAction(final String text) {
 		lastEts = text;
 		lastEtsAt = System.currentTimeMillis();
-		scheduleSave();
+		scheduleSave(SAVE_SOON_S);
 	}
 
 	/** A new download session starts when the previous activity is more than 20 s ago. */
@@ -1362,8 +1199,13 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 		return v;
 	}
 
-	private static byte[] encodeData(final int bits, final int v) {
-		return bits == 16 ? new byte[] { (byte) (v >> 8), (byte) v } : new byte[] { (byte) v };
+	/** Big-endian bytes of an object value: 1, 2, 3 or 4 bytes by the object size. */
+	static byte[] encodeData(final int bits, final int v) {
+		final int len = Math.max(1, Math.min(4, bits / 8));
+		final byte[] b = new byte[len];
+		for (int i = 0; i < len; i++)
+			b[i] = (byte) (v >>> (8 * (len - 1 - i)));
+		return b;
 	}
 
 	/**
@@ -1451,27 +1293,33 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	void changed() {
 		for (final var l : listeners)
 			l.changed(this);
-		scheduleSave();
+		scheduleSave(SAVE_SLOW_S);
 	}
 
-	private final java.util.concurrent.atomic.AtomicBoolean savePending = new java.util.concurrent.atomic.AtomicBoolean();
+	/** Seconds until the state is saved: soon after something ETS did, later after a change of what is only shown. */
+	private static final int SAVE_SOON_S = 3, SAVE_SLOW_S = 30;
+	private final java.util.concurrent.atomic.AtomicBoolean saveSoon = new java.util.concurrent.atomic.AtomicBoolean(),
+			saveSlow = new java.util.concurrent.atomic.AtomicBoolean();
 
 	/**
-	 * Writes the state file a few seconds after the last change. Calimero saves a device only when it closes, and a
-	 * master reset (ETS sends one at the end of every secure download) closes it for good: everything after that was
-	 * lost when vKNX restarted, and a force-stopped vKNX (update, crash) lost everything since the start.
+	 * Writes the state file some seconds after a change. Calimero saves a device only when it closes, and a master reset
+	 * (ETS sends one at the end of every secure download) closes it for good: everything after that was lost when vKNX
+	 * restarted, and a force-stopped vKNX (update, crash) lost everything since the start. What ETS does (address,
+	 * download, restart) is saved after {@value #SAVE_SOON_S} s; {@link #changed()} is also called for every live value
+	 * (a ramping dimmer, a sensor that sends), so it only asks for a save within {@value #SAVE_SLOW_S} s.
 	 */
-	void scheduleSave() {
-		if (scheduler.isShutdown() || !savePending.compareAndSet(false, true))
+	void scheduleSave(final int seconds) {
+		final var pending = seconds <= SAVE_SOON_S ? saveSoon : saveSlow;
+		if (scheduler.isShutdown() || !pending.compareAndSet(false, true))
 			return;
 		try {
 			scheduler.schedule(() -> {
-				savePending.set(false);
+				pending.set(false);
 				saveQuietly();
-			}, 3, java.util.concurrent.TimeUnit.SECONDS);
+			}, seconds, java.util.concurrent.TimeUnit.SECONDS);
 		}
 		catch (final java.util.concurrent.RejectedExecutionException e) {
-			savePending.set(false);
+			pending.set(false);
 		}
 	}
 
@@ -1522,7 +1370,7 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 	public void close() {
 		if (behavior instanceof final CouplerBehavior cb && subnet != null)
 			subnet.topology().unregister(cb);
-		SECURE_DEVICES.remove(name, this);
+		DeviceSecurity.unwatch(name, this);
 		behavior.onStop();
 		scheduler.shutdownNow();
 		saveQuietly(); // Calimero's own save at close does nothing for a device that has had a master reset

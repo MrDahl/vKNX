@@ -52,7 +52,28 @@ public final class DataFiles {
 	public static boolean isPlan(final String n) {
 		if (n.equals("plan-layout.json") || n.equals("icons.json"))
 			return true;
-		return n.startsWith("plan.") && PLAN_TYPES.contains(n.substring(5));
+		return planFloor(n) >= 0;
+	}
+
+	/** Number of floors a plan can have. */
+	public static final int MAX_FLOORS = 8;
+
+	/**
+	 * The floor a plan image belongs to: {@code plan.<ext>} is floor 0 (the only one before floors existed),
+	 * {@code plan-f1.<ext>} to {@code plan-f7.<ext>} the others. @return the floor, or -1 if it is not a plan image
+	 */
+	public static int planFloor(final String n) {
+		if (n.startsWith("plan.") && PLAN_TYPES.contains(n.substring(5)))
+			return 0;
+		if (n.length() > 8 && n.startsWith("plan-f") && n.charAt(7) == '.' && n.charAt(6) >= '1' && n.charAt(6) < '0' + MAX_FLOORS
+				&& PLAN_TYPES.contains(n.substring(8)))
+			return n.charAt(6) - '0';
+		return -1;
+	}
+
+	/** File name of the plan image of a floor. */
+	public static String planName(final int floor, final String ext) {
+		return (floor == 0 ? "plan." : "plan-f" + floor + ".") + ext;
 	}
 
 	private static List<Path> list(final Path dir) throws IOException {

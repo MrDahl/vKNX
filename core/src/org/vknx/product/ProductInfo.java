@@ -37,6 +37,12 @@ public final class ProductInfo {
 					"Six outputs for thermal valve drives with on/off or continuous (PWM) control value, normally closed or open valves, valve status and monitoring of the control value with an emergency position.")),
 			Map.entry("weather-station", new Info("Weather station", "Sensor", "weather",
 					"Outdoor temperature, wind speed and brightness (fixed or random like the multisensor), a rain sensor and a wind alarm. Blind actuators retract awnings on the alarm objects.")),
+			Map.entry("presence-detector", new Info("Presence detector", "Sensor", "motion",
+					"Switches the light on at movement when the room is darker than a threshold and off after a follow-up time. A second presence object with its own, longer time for heating and ventilation, the measured brightness and a lock object. Movement and room brightness are simulated on the card.")),
+			Map.entry("colour-dimmer", new Info("Colour dimming actuator, 2 channels", "Actuator", "palette",
+					"Two channels, each either RGB colour (3 byte) or tunable white with a colour temperature in Kelvin. Switch, relative dimming, brightness value and status objects per channel. Each channel can be disabled and named.")),
+			Map.entry("energy-meter", new Info("Energy meter", "Sensor", "meter",
+					"Measures a simulated consumption: a base load plus up to four loads that follow the status of your switch actuator outputs. Sends power, energy, current and an alarm above a power limit; the counter can be reset.")),
 			Map.entry("coupler", new Info("Coupler (line / area)", "Coupler", "router",
 					"One coupler for both roles: x.y.0 connects a line to its main line, x.0.0 connects a main line to the backbone. Routing and the filter table come from the ETS download; a missing download shows up as blocked telegrams.")));
 

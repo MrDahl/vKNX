@@ -28,6 +28,9 @@ public abstract class DeviceBehavior {
 			case "thermostat" -> new ThermostatBehavior(dev);
 			case "heating-actuator" -> new HeatingActuatorBehavior(dev);
 			case "weather-station" -> new WeatherStationBehavior(dev);
+			case "presence-detector" -> new PresenceBehavior(dev);
+			case "colour-dimmer" -> new ColourDimmerBehavior(dev);
+			case "energy-meter" -> new EnergyMeterBehavior(dev);
 			case "coupler" -> new CouplerBehavior(dev);
 			default -> throw new IllegalArgumentException("no behaviour for product " + p.key());
 		};

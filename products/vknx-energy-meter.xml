@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<KNX xmlns="http://knx.org/xml/project/20">
+  <ManufacturerData>
+    <Manufacturer RefId="M-00FA">
+      <Catalog>
+        <CatalogSection Id="M-00FA_CS-vKNX" Name="vKNX" Number="vKNX" DefaultLanguage="en-US">
+          <CatalogItem Id="M-00FA_H-2582-1_HP-0A16-05-0000_CI-VKNXEM1-1" Name="vKNX Energy Meter" Number="1" ProductRefId="M-00FA_H-2582-1_P-VKNXEM1" Hardware2ProgramRefId="M-00FA_H-2582-1_HP-0A16-05-0000" DefaultLanguage="en-US" />
+        </CatalogSection>
+      </Catalog>
+      <ApplicationPrograms>
+        <ApplicationProgram Id="M-00FA_A-0A16-05-0000" ApplicationNumber="2582" ApplicationVersion="5" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="vKNX Energy Meter" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="en-US" DynamicTableManagement="false" Linkable="true" MinEtsVersion="5.0" ReplacesVersions="1 2 3 4">
+          <Static>
+            <Code>
+              <RelativeSegment Id="M-00FA_A-0A16-05-0000_RS-04-00000" Name="Parameters" Offset="0" Size="90" LoadStateMachine="4" />
+            </Code>
+            <ParameterTypes>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-BaseLoad" Name="BaseLoad">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="10000" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Fluctuation" Name="Fluctuation">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="None" Value="0" Id="M-00FA_A-0A16-05-0000_PT-Fluctuation_EN-0" />
+                  <Enumeration Text="2 %" Value="2" Id="M-00FA_A-0A16-05-0000_PT-Fluctuation_EN-2" />
+                  <Enumeration Text="5 %" Value="5" Id="M-00FA_A-0A16-05-0000_PT-Fluctuation_EN-5" />
+                  <Enumeration Text="10 %" Value="10" Id="M-00FA_A-0A16-05-0000_PT-Fluctuation_EN-10" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-PowerInterval" Name="PowerInterval">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-SendOnChange" Name="SendOnChange">
+                <TypeRestriction Base="Value" SizeInBit="8">
+                  <Enumeration Text="Do not send on change" Value="0" Id="M-00FA_A-0A16-05-0000_PT-SendOnChange_EN-0" />
+                  <Enumeration Text="5 %" Value="5" Id="M-00FA_A-0A16-05-0000_PT-SendOnChange_EN-5" />
+                  <Enumeration Text="10 %" Value="10" Id="M-00FA_A-0A16-05-0000_PT-SendOnChange_EN-10" />
+                  <Enumeration Text="25 %" Value="25" Id="M-00FA_A-0A16-05-0000_PT-SendOnChange_EN-25" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-EnergyInterval" Name="EnergyInterval">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="65535" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Limit" Name="Limit">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="20000" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load1Enable" Name="Load1Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A16-05-0000_PT-Load1Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A16-05-0000_PT-Load1Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load1Name" Name="Load1Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load1Power" Name="Load1Power">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="10000" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load2Enable" Name="Load2Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A16-05-0000_PT-Load2Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A16-05-0000_PT-Load2Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load2Name" Name="Load2Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load2Power" Name="Load2Power">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="10000" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load3Enable" Name="Load3Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A16-05-0000_PT-Load3Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A16-05-0000_PT-Load3Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load3Name" Name="Load3Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load3Power" Name="Load3Power">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="10000" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load4Enable" Name="Load4Enable">
+                <TypeRestriction Base="Value" SizeInBit="1">
+                  <Enumeration Text="No" Value="0" Id="M-00FA_A-0A16-05-0000_PT-Load4Enable_EN-0" />
+                  <Enumeration Text="Yes" Value="1" Id="M-00FA_A-0A16-05-0000_PT-Load4Enable_EN-1" />
+                </TypeRestriction>
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load4Name" Name="Load4Name">
+                <TypeText SizeInBit="128" />
+              </ParameterType>
+              <ParameterType Id="M-00FA_A-0A16-05-0000_PT-Load4Power" Name="Load4Power">
+                <TypeNumber SizeInBit="16" Type="unsignedInt" minInclusive="0" maxInclusive="10000" />
+              </ParameterType>
+            </ParameterTypes>
+            <Parameters>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-1" Name="BaseLoad" ParameterType="M-00FA_A-0A16-05-0000_PT-BaseLoad" Text="Base load, always on (W)" Value="120">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="0" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-2" Name="Fluctuation" ParameterType="M-00FA_A-0A16-05-0000_PT-Fluctuation" Text="Random fluctuation of the power" Value="2">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="2" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-3" Name="PowerInterval" ParameterType="M-00FA_A-0A16-05-0000_PT-PowerInterval" Text="Send power and current every (seconds, 0 = never)" Value="30">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="3" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-4" Name="SendOnChange" ParameterType="M-00FA_A-0A16-05-0000_PT-SendOnChange" Text="Send power and current when the power changes by" Value="10">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="5" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-5" Name="EnergyInterval" ParameterType="M-00FA_A-0A16-05-0000_PT-EnergyInterval" Text="Send the energy every (seconds, 0 = never)" Value="60">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="6" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-6" Name="Limit" ParameterType="M-00FA_A-0A16-05-0000_PT-Limit" Text="Alarm when the power is above (W, 0 = no alarm)" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="8" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-7" Name="Load1Enable" ParameterType="M-00FA_A-0A16-05-0000_PT-Load1Enable" Text="Monitor this load" Value="1">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="10" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-8" Name="Load1Name" ParameterType="M-00FA_A-0A16-05-0000_PT-Load1Name" Text="Name" Value="">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="12" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-9" Name="Load1Power" ParameterType="M-00FA_A-0A16-05-0000_PT-Load1Power" Text="Power of the load when it is on (W)" Value="60">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="28" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-10" Name="Load2Enable" ParameterType="M-00FA_A-0A16-05-0000_PT-Load2Enable" Text="Monitor this load" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="30" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-11" Name="Load2Name" ParameterType="M-00FA_A-0A16-05-0000_PT-Load2Name" Text="Name" Value="">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="32" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-12" Name="Load2Power" ParameterType="M-00FA_A-0A16-05-0000_PT-Load2Power" Text="Power of the load when it is on (W)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="48" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-13" Name="Load3Enable" ParameterType="M-00FA_A-0A16-05-0000_PT-Load3Enable" Text="Monitor this load" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="50" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-14" Name="Load3Name" ParameterType="M-00FA_A-0A16-05-0000_PT-Load3Name" Text="Name" Value="">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="52" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-15" Name="Load3Power" ParameterType="M-00FA_A-0A16-05-0000_PT-Load3Power" Text="Power of the load when it is on (W)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="68" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-16" Name="Load4Enable" ParameterType="M-00FA_A-0A16-05-0000_PT-Load4Enable" Text="Monitor this load" Value="0">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="70" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-17" Name="Load4Name" ParameterType="M-00FA_A-0A16-05-0000_PT-Load4Name" Text="Name" Value="">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="72" BitOffset="0" />
+              </Parameter>
+              <Parameter Id="M-00FA_A-0A16-05-0000_P-18" Name="Load4Power" ParameterType="M-00FA_A-0A16-05-0000_PT-Load4Power" Text="Power of the load when it is on (W)" Value="100">
+                <Memory CodeSegment="M-00FA_A-0A16-05-0000_RS-04-00000" Offset="88" BitOffset="0" />
+              </Parameter>
+            </Parameters>
+            <ParameterRefs>
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-1_R-1" RefId="M-00FA_A-0A16-05-0000_P-1" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-2_R-2" RefId="M-00FA_A-0A16-05-0000_P-2" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-3_R-3" RefId="M-00FA_A-0A16-05-0000_P-3" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-4_R-4" RefId="M-00FA_A-0A16-05-0000_P-4" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-5_R-5" RefId="M-00FA_A-0A16-05-0000_P-5" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-6_R-6" RefId="M-00FA_A-0A16-05-0000_P-6" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-7_R-7" RefId="M-00FA_A-0A16-05-0000_P-7" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-8_R-8" RefId="M-00FA_A-0A16-05-0000_P-8" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-9_R-9" RefId="M-00FA_A-0A16-05-0000_P-9" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-10_R-10" RefId="M-00FA_A-0A16-05-0000_P-10" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-11_R-11" RefId="M-00FA_A-0A16-05-0000_P-11" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-12_R-12" RefId="M-00FA_A-0A16-05-0000_P-12" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-13_R-13" RefId="M-00FA_A-0A16-05-0000_P-13" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-14_R-14" RefId="M-00FA_A-0A16-05-0000_P-14" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-15_R-15" RefId="M-00FA_A-0A16-05-0000_P-15" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-16_R-16" RefId="M-00FA_A-0A16-05-0000_P-16" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-17_R-17" RefId="M-00FA_A-0A16-05-0000_P-17" />
+              <ParameterRef Id="M-00FA_A-0A16-05-0000_P-18_R-18" RefId="M-00FA_A-0A16-05-0000_P-18" />
+            </ParameterRefs>
+            <ComObjectTable>
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-1" Name="Power" Text="Active power (W)" Number="1" FunctionText="Output" ObjectSize="4 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-14-56" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-2" Name="EnergyWh" Text="Active energy (Wh)" Number="2" FunctionText="Output" ObjectSize="4 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-13-10" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-3" Name="EnergyKwh" Text="Active energy (kWh)" Number="3" FunctionText="Output" ObjectSize="4 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-13-13" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-4" Name="Current" Text="Current (mA)" Number="4" FunctionText="Output" ObjectSize="2 Bytes" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-9-21" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-5" Name="Reset" Text="Reset the energy counter (1 = reset)" Number="5" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-15" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-6" Name="LimitAlarm" Text="Power limit exceeded (1 = alarm)" Number="6" FunctionText="Output" ObjectSize="1 Bit" ReadFlag="Enabled" WriteFlag="Disabled" CommunicationFlag="Enabled" TransmitFlag="Enabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-5" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-7" Name="Load1State" Text="Load 1 - {{0:unnamed}}: is on (status)" Number="7" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-8" Name="Load2State" Text="Load 2 - {{0:unnamed}}: is on (status)" Number="8" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-9" Name="Load3State" Text="Load 3 - {{0:unnamed}}: is on (status)" Number="9" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+              <ComObject Id="M-00FA_A-0A16-05-0000_O-10" Name="Load4State" Text="Load 4 - {{0:unnamed}}: is on (status)" Number="10" FunctionText="Input" ObjectSize="1 Bit" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Enabled" ReadOnInitFlag="Disabled" DatapointType="DPST-1-1" />
+            </ComObjectTable>
+            <ComObjectRefs>
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-1_R-1" RefId="M-00FA_A-0A16-05-0000_O-1" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-2_R-2" RefId="M-00FA_A-0A16-05-0000_O-2" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-3_R-3" RefId="M-00FA_A-0A16-05-0000_O-3" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-4_R-4" RefId="M-00FA_A-0A16-05-0000_O-4" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-5_R-5" RefId="M-00FA_A-0A16-05-0000_O-5" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-6_R-6" RefId="M-00FA_A-0A16-05-0000_O-6" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-7_R-7" RefId="M-00FA_A-0A16-05-0000_O-7" TextParameterRefId="M-00FA_A-0A16-05-0000_P-8_R-8" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-8_R-8" RefId="M-00FA_A-0A16-05-0000_O-8" TextParameterRefId="M-00FA_A-0A16-05-0000_P-11_R-11" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-9_R-9" RefId="M-00FA_A-0A16-05-0000_O-9" TextParameterRefId="M-00FA_A-0A16-05-0000_P-14_R-14" />
+              <ComObjectRef Id="M-00FA_A-0A16-05-0000_O-10_R-10" RefId="M-00FA_A-0A16-05-0000_O-10" TextParameterRefId="M-00FA_A-0A16-05-0000_P-17_R-17" />
+            </ComObjectRefs>
+            <AddressTable MaxEntries="255" />
+            <AssociationTable MaxEntries="255" />
+            <LoadProcedures>
+              <LoadProcedure MergeId="2">
+                <LdCtrlRelSegment LsmIdx="4" Size="90" Mode="1" Fill="0" AppliesTo="full" />
+                <LdCtrlRelSegment LsmIdx="4" Size="90" Mode="0" Fill="0" AppliesTo="par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="4">
+                <LdCtrlWriteRelMem ObjIdx="4" Offset="0" Size="90" Verify="true" AppliesTo="full,par" />
+              </LoadProcedure>
+              <LoadProcedure MergeId="7">
+                <LdCtrlLoadImageProp ObjIdx="1" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="2" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="3" PropId="27" />
+                <LdCtrlLoadImageProp ObjIdx="4" PropId="27" />
+              </LoadProcedure>
+            </LoadProcedures>
+            <Options />
+          </Static>
+          <Dynamic>
+            <ChannelIndependentBlock>
+              <ParameterBlock Id="M-00FA_A-0A16-05-0000_PB-1" Name="Measurement" Text="Measurement">
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-1_R-1" />
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-2_R-2" />
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-3_R-3" />
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-4_R-4" />
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-5_R-5" />
+                <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-1_R-1" />
+                <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-2_R-2" />
+                <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-3_R-3" />
+                <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-4_R-4" />
+                <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-5_R-5" />
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A16-05-0000_PB-2" Name="Limit" Text="Limit">
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-6_R-6" />
+                <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-6_R-6" />
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A16-05-0000_PB-3" Name="Load1" Text="Load 1">
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-7_R-7" />
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-8_R-8" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-7_R-7">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-9_R-9" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-7_R-7">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-7_R-7" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A16-05-0000_PB-4" Name="Load2" Text="Load 2">
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-10_R-10" />
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-10_R-10">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-11_R-11" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-10_R-10">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-12_R-12" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-10_R-10">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-8_R-8" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A16-05-0000_PB-5" Name="Load3" Text="Load 3">
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-13_R-13" />
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-14_R-14" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-13_R-13">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-15_R-15" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-13_R-13">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-9_R-9" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+              <ParameterBlock Id="M-00FA_A-0A16-05-0000_PB-6" Name="Load4" Text="Load 4">
+                <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-16_R-16" />
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-16_R-16">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-17_R-17" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-16_R-16">
+                  <when test="1">
+                    <ParameterRefRef RefId="M-00FA_A-0A16-05-0000_P-18_R-18" />
+                  </when>
+                </choose>
+                <choose ParamRefId="M-00FA_A-0A16-05-0000_P-16_R-16">
+                  <when test="1">
+                    <ComObjectRefRef RefId="M-00FA_A-0A16-05-0000_O-10_R-10" />
+                  </when>
+                </choose>
+              </ParameterBlock>
+            </ChannelIndependentBlock>
+          </Dynamic>
+        </ApplicationProgram>
+      </ApplicationPrograms>
+      <Hardware>
+        <Hardware Id="M-00FA_H-2582-1" Name="vKNX Energy Meter" SerialNumber="2582" VersionNumber="1" BusCurrent="10" HasIndividualAddress="true" HasApplicationProgram="true">
+          <Products>
+            <Product Id="M-00FA_H-2582-1_P-VKNXEM1" Text="vKNX Energy Meter" OrderNumber="VKNXEM1" IsRailMounted="false" DefaultLanguage="en-US">
+              <RegistrationInfo RegistrationStatus="Registered" />
+            </Product>
+          </Products>
+          <Hardware2Programs>
+            <Hardware2Program Id="M-00FA_H-2582-1_HP-0A16-05-0000" MediumTypes="MT-0">
+              <ApplicationProgramRef RefId="M-00FA_A-0A16-05-0000" />
+              <RegistrationInfo RegistrationStatus="Registered" RegistrationNumber="0001/11" />
+            </Hardware2Program>
+          </Hardware2Programs>
+        </Hardware>
+      </Hardware>
+    </Manufacturer>
+  </ManufacturerData>
+</KNX>

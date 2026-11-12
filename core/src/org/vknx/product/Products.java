@@ -759,6 +759,143 @@ public final class Products {
 
 	// ------------------------------------------------------------------ couplers
 
+	// ------------------------------------------------------------------ presence detector
+
+	/** Follow-up times of the presence detector in seconds (index = parameter value). */
+	public static final int[] PRESENCE_FOLLOW_S = { 10, 30, 60, 120, 300, 600, 900, 1800 };
+	/** Follow-up times of the HVAC presence object in seconds (index = parameter value). */
+	public static final int[] PRESENCE_HVAC_S = { 60, 300, 600, 900, 1800, 3600 };
+
+	/**
+	 * Presence detector for a ceiling: a light channel (switches on at movement when the room is darker than a threshold,
+	 * off after the follow-up time), a presence object for heating and ventilation with its own, longer follow-up time
+	 * (independent of the brightness), the measured brightness and a lock object. Movement and the brightness of the room
+	 * are simulated from the card. Byte 0: follow-up time, what happens at its end, HVAC on/off, lock reaction; byte 1:
+	 * HVAC follow-up time; bytes 2-3 threshold (lux); 4-5 brightness send interval; 6-7 brightness at start.
+	 */
+	private static ProductDef presenceDetector() {
+		final String light = "Light", hvac = "Presence (HVAC)", lux = "Brightness";
+		final var params = List.of(
+			new ParamDef(1, "FollowTime", "Follow-up time after the last movement", 0, 0, 3, 3, List.of(
+					new Choice(0, "10 s"), new Choice(1, "30 s"), new Choice(2, "1 min"), new Choice(3, "2 min"), new Choice(4, "5 min"),
+					new Choice(5, "10 min"), new Choice(6, "15 min"), new Choice(7, "30 min"))).inGroup(light),
+			new ParamDef(2, "SendOff", "At the end of the follow-up time", 0, 3, 1, 1, List.of(
+					new Choice(0, "Sends nothing"), new Choice(1, "Sends OFF"))).inGroup(light),
+			ParamDef.number(3, "Threshold", "Switch on only below (lux, 0 = always)", 2, 16, 300, 0, 2000).inGroup(light),
+			new ParamDef(4, "LockReaction", "When locked", 0, 5, 1, 0, List.of(
+					new Choice(0, "Sends nothing (the light stays as it is)"), new Choice(1, "Sends OFF"))).inGroup(light),
+			new ParamDef(5, "HvacEnable", "Presence object for heating / ventilation", 0, 4, 1, 1, NO_YES).inGroup(hvac),
+			new ParamDef(6, "HvacFollow", "Follow-up time after the last movement", 1, 0, 3, 2, List.of(
+					new Choice(0, "1 min"), new Choice(1, "5 min"), new Choice(2, "10 min"), new Choice(3, "15 min"),
+					new Choice(4, "30 min"), new Choice(5, "60 min"))).inGroup(hvac).showWhen("HvacEnable", 1),
+			ParamDef.number(7, "LuxInterval", "Send the brightness every (seconds, 0 = never)", 4, 16, 60, 0, 65535).inGroup(lux),
+			ParamDef.number(8, "LuxStart", "Brightness of the room when vKNX starts (lux)", 6, 16, 150, 0, 2000).inGroup(lux));
+		final var objs = List.of(
+			new ObjDef(1, "LightSwitch", "Light: switch", "Output", 1, "DPST-1-1", true, false, true, false).inGroup(light),
+			new ObjDef(2, "Presence", "Presence (occupied)", "Output", 1, "DPST-1-18", true, false, true, false).inGroup(hvac).showWhen("HvacEnable", 1),
+			new ObjDef(3, "Brightness", "Brightness (lux)", "Output", 16, "DPST-9-4", true, false, true, false).inGroup(lux),
+			new ObjDef(4, "Lock", "Lock (1 = locked)", "Input", 1, "DPST-1-3", false, true, false, false).inGroup(light));
+		return new ProductDef("presence-detector", 0x0A14, V, "vKNX Presence Detector", "VKNXPD1", 0x0A14, 8, params, objs);
+	}
+
+	public static final ProductDef PRESENCE_DETECTOR = presenceDetector();
+
+	// ------------------------------------------------------------------ colour dimming actuator (RGB / tunable white)
+
+	/** Channels of the colour dimming actuator and group objects per channel. */
+	public static final int COLOUR_CHANNELS = 2, COLOUR_OBJS = 9;
+
+	/**
+	 * Dimming actuator for colour: two channels, each either RGB (DPT 232.600, 3 bytes) or tunable white (colour
+	 * temperature in Kelvin, DPT 7.600). Per channel (block of {@link #STRIDE} bytes): byte 0 = Enable, Type, DimTime,
+	 * SendStatus, StartupState; bytes 2-17 name; byte 18 warmest, byte 19 coldest colour temperature in 100 K.
+	 * Objects of channel c: 9(c-1)+1 switch, +2 relative dimming, +3 brightness, +4 RGB colour, +5 colour temperature,
+	 * +6 switch status, +7 brightness status, +8 RGB status, +9 colour temperature status.
+	 */
+	private static ProductDef colourDimmer() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		int id = 1;
+		for (int c = 1; c <= COLOUR_CHANNELS; c++) {
+			final String pre = "Ch" + c, page = "Channel " + c, en = pre + "Enable", ty = pre + "Type";
+			final int b = (c - 1) * STRIDE, o = (c - 1) * COLOUR_OBJS;
+			params.add(enable(id++, pre, b, "Enable channel", page));
+			params.add(nameParam(id++, pre, b, "Channel " + c, page));
+			params.add(new ParamDef(id++, ty, "Light source", b, 1, 1, c == 1 ? 0 : 1, List.of(
+					new Choice(0, "RGB (colour)"), new Choice(1, "Tunable white (warm to cold)"))).inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "DimTime", "Time 0-100 % for relative dimming", b, 2, 2, 1,
+					List.of(new Choice(0, "2 s"), new Choice(1, "5 s"), new Choice(2, "10 s"), new Choice(3, "20 s")))
+					.inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "SendStatus", "Send status", b, 4, 1, 1, NO_YES).inGroup(page).showWhen(en, 1));
+			params.add(new ParamDef(id++, pre + "StartupState", "State after download/restart", b, 5, 2, 0, STARTUP)
+					.inGroup(page).showWhen(en, 1));
+			params.add(ParamDef.number(id++, pre + "WarmK", "Warmest white (x 100 K)", b + 18, 8, 27, 15, 40)
+					.inGroup(page).showWhen(en, 1).showWhen(ty, 1));
+			params.add(ParamDef.number(id++, pre + "ColdK", "Coldest white (x 100 K)", b + 19, 8, 65, 40, 100)
+					.inGroup(page).showWhen(en, 1).showWhen(ty, 1));
+			final String t = page + ": ";
+			objs.add(new ObjDef(o + 1, pre + "Switch", t + "switch", "Input", 1, "DPST-1-1", false, true, false, false).inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 2, pre + "RelativeDimming", t + "relative dimming", "Input", 4, "DPST-3-7", false, true, false, false).inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 3, pre + "BrightnessValue", t + "brightness (value)", "Input", 8, "DPST-5-1", false, true, false, false).inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 4, pre + "Rgb", t + "colour RGB", "Input", 24, "DPST-232-600", false, true, false, false).inGroup(page).showWhen(en, 1).showWhen(ty, 0));
+			objs.add(new ObjDef(o + 5, pre + "ColourTemp", t + "colour temperature (K)", "Input", 16, "DPST-7-600", false, true, false, false).inGroup(page).showWhen(en, 1).showWhen(ty, 1));
+			objs.add(new ObjDef(o + 6, pre + "SwitchStatus", t + "switch status", "Output", 1, "DPST-1-1", true, false, true, false).inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 7, pre + "BrightnessStatus", t + "brightness status", "Output", 8, "DPST-5-1", true, false, true, false).inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(o + 8, pre + "RgbStatus", t + "colour RGB status", "Output", 24, "DPST-232-600", true, false, true, false).inGroup(page).showWhen(en, 1).showWhen(ty, 0));
+			objs.add(new ObjDef(o + 9, pre + "ColourTempStatus", t + "colour temp. status (K)", "Output", 16, "DPST-7-600", true, false, true, false).inGroup(page).showWhen(en, 1).showWhen(ty, 1));
+		}
+		return new ProductDef("colour-dimmer", 0x0A15, V, "vKNX Colour Dimming Actuator 2-fold", "VKNXCD2", 0x0A15, COLOUR_CHANNELS * STRIDE, params, objs);
+	}
+
+	public static final ProductDef COLOUR_DIMMER = colourDimmer();
+
+	// ------------------------------------------------------------------ energy meter
+
+	/** Monitored loads of the energy meter, the byte where their blocks start, and the first load object. */
+	public static final int METER_LOADS = 4, METER_LOAD_AT = 10, METER_LOAD_OBJ = 7;
+
+	/**
+	 * Energy meter (one phase, 230 V) with a simulated consumption: a base load plus up to four monitored loads. Each load
+	 * has a 1 bit input (connect it to the status of a switch actuator output) and a power in watt; when the input is on
+	 * the load is added. Sends power (W, DPT 14.056), energy (Wh, DPT 13.010 and kWh, DPT 13.013), current (mA, DPT 9.021)
+	 * and an alarm when a limit is exceeded; the energy counter can be reset. Bytes 0-1 base load, 2 fluctuation, 3-4 power
+	 * interval, 5 send on change, 6-7 energy interval, 8-9 limit; then one block of {@link #STRIDE} bytes per load
+	 * (byte 0 enable, 2-17 name, 18-19 power).
+	 */
+	private static ProductDef energyMeter() {
+		final var params = new ArrayList<ParamDef>();
+		final var objs = new ArrayList<ObjDef>();
+		final String gen = "Measurement", lim = "Limit";
+		int id = 1;
+		params.add(ParamDef.number(id++, "BaseLoad", "Base load, always on (W)", 0, 16, 120, 0, 10000).inGroup(gen));
+		params.add(new ParamDef(id++, "Fluctuation", "Random fluctuation of the power", 2, 0, 8, 2, List.of(
+				new Choice(0, "None"), new Choice(2, "2 %"), new Choice(5, "5 %"), new Choice(10, "10 %"))).inGroup(gen));
+		params.add(ParamDef.number(id++, "PowerInterval", "Send power and current every (seconds, 0 = never)", 3, 16, 30, 0, 65535).inGroup(gen));
+		params.add(new ParamDef(id++, "SendOnChange", "Send power and current when the power changes by", 5, 0, 8, 10, List.of(
+				new Choice(0, "Do not send on change"), new Choice(5, "5 %"), new Choice(10, "10 %"), new Choice(25, "25 %"))).inGroup(gen));
+		params.add(ParamDef.number(id++, "EnergyInterval", "Send the energy every (seconds, 0 = never)", 6, 16, 60, 0, 65535).inGroup(gen));
+		params.add(ParamDef.number(id++, "Limit", "Alarm when the power is above (W, 0 = no alarm)", 8, 16, 0, 0, 20000).inGroup(lim));
+		objs.add(new ObjDef(1, "Power", "Active power (W)", "Output", 32, "DPST-14-56", true, false, true, false).inGroup(gen));
+		objs.add(new ObjDef(2, "EnergyWh", "Active energy (Wh)", "Output", 32, "DPST-13-10", true, false, true, false).inGroup(gen));
+		objs.add(new ObjDef(3, "EnergyKwh", "Active energy (kWh)", "Output", 32, "DPST-13-13", true, false, true, false).inGroup(gen));
+		objs.add(new ObjDef(4, "Current", "Current (mA)", "Output", 16, "DPST-9-21", true, false, true, false).inGroup(gen));
+		objs.add(new ObjDef(5, "Reset", "Reset the energy counter (1 = reset)", "Input", 1, "DPST-1-15", false, true, false, false).inGroup(gen));
+		objs.add(new ObjDef(6, "LimitAlarm", "Power limit exceeded (1 = alarm)", "Output", 1, "DPST-1-5", true, false, true, false).inGroup(lim));
+		for (int l = 1; l <= METER_LOADS; l++) {
+			final String pre = "Load" + l, page = "Load " + l, en = pre + "Enable";
+			final int b = METER_LOAD_AT + (l - 1) * STRIDE;
+			params.add(new ParamDef(id++, en, "Monitor this load", b, 0, 1, l == 1 ? 1 : 0, NO_YES).inGroup(page));
+			params.add(nameParam(id++, pre, b, "Load " + l, page));
+			params.add(ParamDef.number(id++, pre + "Power", "Power of the load when it is on (W)", b + 18, 16, l == 1 ? 60 : 100, 0, 10000)
+					.inGroup(page).showWhen(en, 1));
+			objs.add(new ObjDef(METER_LOAD_OBJ + l - 1, pre + "State", page + ": is on (status)", "Input", 1, "DPST-1-1", false, true, false, true)
+					.inGroup(page).showWhen(en, 1));
+		}
+		return new ProductDef("energy-meter", 0x0A16, V, "vKNX Energy Meter", "VKNXEM1", 0x0A16, METER_LOAD_AT + METER_LOADS * STRIDE, params, objs);
+	}
+
+	public static final ProductDef ENERGY_METER = energyMeter();
+
 	/**
 	 * The coupler: ONE product for both line couplers (x.y.0) and area couplers (x.0.0); the role follows from the
 	 * address ETS gives it. For ETS it is a TP/TP coupler (mask 0x0912) with a router object and a group filter
@@ -772,7 +909,7 @@ public final class Products {
 	static {
 		final var m = new java.util.LinkedHashMap<String, ProductDef>();
 		for (final var p : List.of(PUSH_BUTTON, PUSH_SLIDER, SWITCH_ACTUATOR, SECURE_PUSH_BUTTON, SECURE_SWITCH_ACTUATOR, DIMMER, BLIND_ACTUATOR, MULTISENSOR, INFO_DISPLAY, LOGIC, COUPLER,
-				BINARY_INPUT, THERMOSTAT, HEATING_ACTUATOR, WEATHER_STATION))
+				BINARY_INPUT, THERMOSTAT, HEATING_ACTUATOR, WEATHER_STATION, PRESENCE_DETECTOR, COLOUR_DIMMER, ENERGY_METER))
 			m.put(p.key(), p);
 		ALL = java.util.Collections.unmodifiableMap(m);
 	}

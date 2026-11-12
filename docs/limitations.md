@@ -16,6 +16,7 @@ The owner reported on 2026-11-11 that everything worked, also the new devices, b
 - **Room thermostat and heating actuator:** DPT 20.102 (operating mode), a signed 16 bit parameter, the control loop with PWM and monitoring. Model limits: the thermostat's room is a simple first-order model (4 K/h at full heating, time constant 3 h) and does not know about the heating actuator (the valve is assumed to follow the control value at once); a thermal valve drive's delay is not simulated; heating only (no cooling); the weather station cannot be changed from the card, only through ETS parameters.
 - **Logic module and time master:** 32 input/output pages, 8 timer pages, 3 and 8 byte time objects, *Read on init*. It is **not an ETS plug-in**: the logic editor is a window inside the vKNX control panel.
 - **Info display.**
+- **Presence detector, colour dimming actuator and energy meter (new, unreleased): not tried in ETS at all.** New for ETS: objects of 3 bytes (DPT 232.600) and 4 bytes (DPT 14.056, 13.010, 13.013), DPT 7.600, 9.021 and 1.018. Behaviour is covered only by our own mini-ETS (`MoreProductsTest`). Model limits: the detector's movement and room brightness come from the card (no simulated people); once the light is on, every movement restarts the follow-up time whatever the brightness. The colour actuator keeps colour and brightness apart (the brightness objects never change the colour; the RGB status is the colour while on and black while off); no HSV, RGBW or XY objects, no colour scenes. The energy meter is one phase at 230 V with a purely resistive load (current = power / 230 V); its counter starts at 0 when vKNX starts; a dimmed lamp counts with its full power (the load inputs are 1 bit).
 - **The installer's WebView2 step (0.13.1):** the setup contains Microsoft's WebView2 bootstrapper and runs it when the PC has no WebView2. Built and bundled by the release workflow, **not tried on a clean Windows 10** yet.
 - **Coupler open points:** ETS may not set the x.y.0 address automatically for a line coupler (manual addressing is fine). Medium rule in ETS: a TP/TP coupler needs a TP main line or a TP backbone; it cannot sit between an IP line and a TP line (that needs an IP/TP router, not part of vKNX).
 - **Non-Latin text in ETS parameters** (see device names below).
@@ -29,7 +30,7 @@ About 30 test programs in `core/test` (run one with `tools/selftest.sh <Name>`):
 - **DPT decoding** uses the types declared in the product definitions. A group address used by devices with different types, or by none, is shown as "Unknown DPT" with raw data. Telegrams that ETS sends to addresses no device uses are therefore not decoded.
 - **Device filter in the monitor** shows telegrams sent by the device or addressed to one of its configured group addresses. The second kind is not proof that the device received them.
 - The monitor keeps the latest 3000 telegrams in memory; older ones are only in `vknx.log`.
-- One floor plan; rooms and room filters are not part of this version.
+- The floor plan can have up to 8 floors (each its own image); rooms and room filters are not part of this version. A channel can be placed once, on one floor.
 - Touch screens have not been tried.
 
 ## Functional limits
@@ -42,7 +43,7 @@ About 30 test programs in `core/test` (run one with `tools/selftest.sh <Name>`):
 - **Products are built by hand:** the `.knxprod` files can only be made on Windows with ETS (`tools/make-knxprod.ps1`). After a change of `Products.java` they must be rebuilt and committed; `KnxprodCheck` stops a release where they were not.
 
 ## Design
-- **Persistence:** every device writes its state file a few seconds after a change (a download, an address, a parameter) and again when vKNX closes (0.13.2). A forced stop can lose the last few seconds. Live values (lamp on/off, blind position, sensor values) are not kept.
+- **Persistence:** every device writes its state file 3 seconds after something ETS did (a download, an address, a restart), within 30 seconds after other changes, and again when vKNX closes. A forced stop can lose the last few seconds of a download. Live values (lamp on/off, blind position, sensor values) are not kept.
 - No login/isolation per student: each student runs their own local instance.
 - Built for teaching only; no emulation of other manufacturers' firmware.
 - The program is not code-signed, so Windows may show a SmartScreen warning; the first start asks for a firewall exception (UDP/TCP 3671).

@@ -111,7 +111,7 @@ async function pickDefaultMode() {
   if (modeChecked || !S.state) return;
   modeChecked = true;
   try { if (localStorage.getItem('vknx-simMode') !== null) return; } catch (e) { return; }
-  if (!S.state.plan) return;
+  if (!S.state.plan && !(S.state.plans || []).length) return;
   try {
     const l = await api.layout();
     if ((l.items || []).length) { S.simMode = 'plan'; emit('state'); }

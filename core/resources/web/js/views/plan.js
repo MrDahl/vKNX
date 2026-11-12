@@ -2,8 +2,8 @@ import { h, icon, setText, setCls, setStyle, setAttr, syncKeyed, clamp, debounce
 import { api } from '../api.js';
 import { S, on, emit, device, selectDevice, showGroupAddress } from '../bus.js';
 import { pointsOf, objectsOfPoint, SENSORS } from '../devinfo.js';
-import { operate } from '../cards.js';
-import { confirmDialog, toast, menuButton } from '../dialogs.js';
+import { operate, kelvinCss } from '../cards.js';
+import { confirmDialog, toast, menuButton, modal } from '../dialogs.js';
 import { paintIcon, setIcon, hasCustomIcon, pointDefault, pointKind } from '../iconStore.js';
 import { pickIcon } from '../iconPicker.js';
 
@@ -11,15 +11,25 @@ const MIN_Z = 20, MAX_Z = 300;
 
 /**
  * Floor plan: "Operate" mode (maximum space, inputs work, no editing tools) and "Edit" mode (channel list, move symbols,
- * properties). Placements are stored in plan-layout.json as { items: [{id:"<device>|<channel>", x, y, label?}], zoom, size }.
+ * properties). Placements are stored in plan-layout.json as { items: [{id:"<device>|<channel>", x, y, label?, f?}], zoom, size,
+ * floors?: [{n, name, zoom?}], floor? }. A plan can have several floors: each has its own image (floor n, 0 to 7) and its own
+ * zoom; an item is on floor f (0 if absent, which is also what a layout from before floors existed means).
  */
 export function createPlan() {
   const root = h('div.view', { hidden: true });
   let layout = { items: [], zoom: 100, size: 1 };
   let loaded = false, hasImg = false, planKnown = null, sel = null, dragging = null, panning = null;
+  const MAX_FLOORS = 8;
+  let cur = 0; // the floor shown (its number n, which is also the number of its image)
+  const floors = () => (layout.floors && layout.floors.length ? layout.floors : [{ n: 0, name: 'Floor 1' }]);
+  const floorObj = n => floors().find(f => f.n === n);
+  const onFloor = i => (i.f || 0) === cur;
 
   const save = debounce(async () => {
-    try { await api.saveLayout({ items: layout.items, zoom: layout.zoom, size: layout.size }); } catch (e) { toast(`The floor plan layout could not be saved: ${e.message}`, 'error'); }
+    const fl = floors().map(f => (f.n === cur ? { ...f, zoom: layout.zoom } : f));
+    const out = { items: layout.items, zoom: fl.find(f => f.n === 0)?.zoom ?? layout.zoom, size: layout.size };
+    if (layout.floors && layout.floors.length) { out.floors = fl; out.floor = cur; }
+    try { await api.saveLayout(out); } catch (e) { toast(`The floor plan layout could not be saved: ${e.message}`, 'error'); }
   }, 300);
 
   // ----- toolbar -----
@@ -37,9 +47,14 @@ export function createPlan() {
   const symBox = h('span.zoom-box', h('span.hint', 'Symbol size'), sRange);
   const planMenu = menuButton({ label: 'Plan settings', text: 'Plan settings', items: () => [
     { label: hasImg ? 'Replace plan image…' : 'Upload plan image…', icon: 'upload', onclick: () => file.click() },
-    ...(hasImg ? [{ label: 'Remove plan image…', icon: 'trash', danger: true, onclick: removePlanImage }] : [])] });
+    ...(hasImg ? [{ label: 'Remove plan image…', icon: 'trash', danger: true, onclick: removePlanImage }] : []),
+    'hr',
+    ...(floors().length < MAX_FLOORS ? [{ label: 'Add a floor…', icon: 'plus', onclick: addFloor }] : []),
+    { label: 'Rename this floor…', icon: 'pencil', onclick: renameFloor },
+    ...(floors().length > 1 ? [{ label: 'Remove this floor…', icon: 'trash', danger: true, onclick: removeFloor }] : [])] });
   const settingsBox = h('span.plan-settings', planMenu);
-  const toolbar = h('div.toolbar', seg,
+  const floorTabs = h('div.segmented.floor-tabs', { role: 'group', 'aria-label': 'Floor', hidden: true });
+  const toolbar = h('div.toolbar', seg, floorTabs,
     h('button.btn', { onclick: fit, title: 'Fit the whole plan into the window' }, icon('fit'), h('span.btn-text.opt', 'Fit to window')),
     h('span.zoom-box', h('button.btn.icon', { 'aria-label': 'Zoom out', title: 'Zoom out', onclick: () => setZoom(layout.zoom - 15) }, icon('zoomOut')), zRange, h('button.btn.icon', { 'aria-label': 'Zoom in', title: 'Zoom in', onclick: () => setZoom(layout.zoom + 15) }, icon('zoomIn')), zVal),
     symBox, h('span.grow'), settingsBox, file);
@@ -55,7 +70,72 @@ export function createPlan() {
   const viewport = h('div.plan-viewport', { tabindex: -1 }, canvas);
   img.onload = () => { hasImg = true; img.hidden = false; emptyMsg.hidden = true; canvas.classList.remove('empty'); if (!layout.fitted && !layout.zoomSet) fit(); refreshTools(); };
   img.onerror = () => { hasImg = false; img.hidden = true; emptyMsg.hidden = false; canvas.classList.add('empty'); refreshTools(); };
-  const loadImg = () => { img.src = '/api/plan?' + Date.now(); };
+  const loadImg = () => { img.src = '/api/plan?floor=' + cur + '&t=' + Date.now(); };
+  const hasPlanImage = () => (S.state?.plans ? S.state.plans.includes(cur) : cur === 0 && !!S.state?.plan);
+
+  // ----- floors -----
+  function renderFloors() {
+    const fl = floors();
+    floorTabs.hidden = fl.length < 2;
+    syncKeyed(floorTabs, fl, f => String(f.n),
+      f => h('button', { type: 'button', onclick: () => showFloor(f.n) }),
+      (b, f) => { setText(b, f.name); setAttr(b, 'aria-pressed', String(f.n === cur)); setAttr(b, 'title', 'Show ' + f.name); });
+  }
+  function showFloor(n) {
+    if (n === cur || !floorObj(n)) return;
+    const old = floorObj(cur); if (old && layout.floors) old.zoom = layout.zoom;
+    cur = n; sel = null;
+    const z = floorObj(n).zoom;
+    delete layout.fitted; delete layout.zoomSet;
+    if (z) { layout.zoom = z; layout.zoomSet = true; } else layout.zoom = 100;
+    applyZoom(); viewport.scrollLeft = viewport.scrollTop = 0;
+    planKnown = hasPlanImage(); if (planKnown) loadImg(); else img.onerror();
+    save(); update();
+  }
+  /** Asks for a floor name. @returns the name, or null if cancelled */
+  function askName(title, value, confirmLabel) {
+    return new Promise(resolve => {
+      let result = null;
+      const input = h('input.input', { type: 'text', maxLength: 24, value, 'aria-label': 'Name of the floor', style: 'width:100%' });
+      const ok = close => { const v = input.value.trim(); if (!v) { input.focus(); return; } result = v; close(); };
+      const dlg = modal({ title, body: h('div', h('label.hint', { style: 'display:block;margin-bottom:.3rem' }, 'Name of the floor (for example Ground floor, 1st floor, Basement)'), input),
+        buttons: close => [h('button.btn', { onclick: close }, 'Cancel'), h('button.btn.primary', { onclick: () => ok(close) }, confirmLabel)] });
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ok(() => dlg.close()); } });
+      dlg.addEventListener('close', () => resolve(result));
+      input.focus(); input.select();
+    });
+  }
+  async function addFloor() {
+    const fl = floors();
+    if (fl.length >= MAX_FLOORS) return;
+    const name = await askName('Add a floor', 'Floor ' + (fl.length + 1), 'Add floor');
+    if (!name) return;
+    let n = 0; while (fl.some(f => f.n === n)) n++;
+    layout.floors = [...fl.map(f => ({ ...f })), { n, name }];
+    // a floor number that was used before may still have an image: a new floor starts empty
+    if (S.state?.plans?.includes(n)) { try { await api.planRemove(n); } catch (e) { /* the old image stays, it can be replaced */ } }
+    showFloor(n); renderFloors();
+    toast(`"${name}" was added. Upload its plan image under Plan settings.`, 'ok');
+  }
+  async function renameFloor() {
+    const f = floorObj(cur); if (!f) return;
+    const name = await askName('Rename floor', f.name, 'Rename');
+    if (!name || name === f.name) return;
+    layout.floors = floors().map(x => (x.n === cur ? { ...x, name } : { ...x }));
+    save(); update();
+  }
+  async function removeFloor() {
+    const fl = floors(); if (fl.length < 2) return;
+    const f = floorObj(cur), count = layout.items.filter(onFloor).length;
+    const ok = await confirmDialog({ title: 'Remove floor', danger: true, confirmLabel: 'Remove floor',
+      message: `Remove "${f.name}" with its plan image?` + (count ? ` The ${count} symbol${count === 1 ? '' : 's'} on it ${count === 1 ? 'is' : 'are'} taken off the plan (the devices themselves stay).` : '') });
+    if (!ok) return;
+    try { await api.planRemove(cur); } catch (e) { toast(`The plan image could not be removed: ${e.message}`, 'error'); return; }
+    layout.items = layout.items.filter(i => !onFloor(i));
+    layout.floors = fl.filter(x => x.n !== cur).map(x => ({ ...x }));
+    const next = layout.floors[0].n; cur = -1; showFloor(next);
+    toast(`"${f.name}" was removed.`, 'ok');
+  }
 
   // ----- palette (edit mode) -----
   const palSearch = h('input.input', { type: 'search', placeholder: 'Search channels', 'aria-label': 'Search channels', style: 'margin:.5rem .85rem;width:calc(100% - 1.7rem)' });
@@ -103,14 +183,14 @@ export function createPlan() {
   async function upload() {
     const f = file.files[0]; if (!f) return;
     const ext = (f.name.split('.').pop() || '').toLowerCase();
-    try { await api.planUpload(ext, await f.arrayBuffer()); toast('The floor plan image was uploaded.', 'ok'); delete layout.fitted; planKnown = true; loadImg(); }
+    try { await api.planUpload(ext, await f.arrayBuffer(), cur); toast('The floor plan image was uploaded.', 'ok'); delete layout.fitted; planKnown = true; loadImg(); }
     catch (e) { toast(`The plan image could not be uploaded: ${e.message}`, 'error'); }
     file.value = '';
   }
   async function removePlanImage() {
-    const ok = await confirmDialog({ title: 'Remove plan image', danger: true, confirmLabel: 'Remove image', message: 'Remove the floor plan image? The symbol placements are kept, so a new image can be used with the same layout.' });
+    const ok = await confirmDialog({ title: 'Remove plan image', danger: true, confirmLabel: 'Remove image', message: 'Remove the plan image of this floor? The symbol placements are kept, so a new image can be used with the same layout.' });
     if (!ok) return;
-    try { await api.planRemove(); planKnown = false; img.onerror(); toast('The plan image was removed.', 'ok'); } catch (e) { toast(`The plan image could not be removed: ${e.message}`, 'error'); }
+    try { await api.planRemove(cur); planKnown = false; img.onerror(); toast('The plan image was removed.', 'ok'); } catch (e) { toast(`The plan image could not be removed: ${e.message}`, 'error'); }
   }
 
   // ----- markers -----
@@ -125,7 +205,8 @@ export function createPlan() {
       case 'lamp': {
         const ib = h('span.mk-ico', icon('lampOff')); const t = h('span.t');
         body.append(ib, t);
-        upd = q => { setCls(el, 'on', q.on); paintIcon(ib, p.id, pointDefault(p), q.on); setText(t, q.pct != null && q.on ? q.pct + ' %' : ''); return q.on + ':' + q.pct + ':' + (S.icons[p.id]?.n || ''); };
+        // a colour channel shows its colour on the icon (col: '#RRGGBB', or 'k<Kelvin>' for tunable white)
+        upd = q => { setCls(el, 'on', q.on); paintIcon(ib, p.id, pointDefault(p), q.on); setStyle(ib, 'color', q.on && q.col ? (q.col[0] === 'k' ? kelvinCss(+q.col.slice(1)) : q.col) : ''); setText(t, q.pct != null && q.on ? q.pct + ' %' : ''); return q.on + ':' + q.pct + ':' + (q.col || '') + ':' + (S.icons[p.id]?.n || ''); };
         body.style.cursor = 'var(--cur-pointer)'; body.addEventListener('click', () => { if (!S.planEdit) selectDevice(p.dev, { drawer: true }); });
         break;
       }
@@ -260,10 +341,10 @@ export function createPlan() {
     if (itemOf(id)) return;
     if (cascade) { // several symbols placed from the list must not end up exactly on top of each other
       let n = 0;
-      while (layout.items.some(i => Math.abs(i.x - (x + n * .075)) < .03 && Math.abs(i.y - (y + n * .07)) < .03) && n < 10) n++;
+      while (layout.items.some(i => onFloor(i) && Math.abs(i.x - (x + n * .075)) < .03 && Math.abs(i.y - (y + n * .07)) < .03) && n < 10) n++;
       x += n * .075; y += n * .07;
     }
-    layout.items.push({ id, x: clamp(x, .02, .98), y: clamp(y, .02, .98) });
+    layout.items.push({ id, x: clamp(x, .02, .98), y: clamp(y, .02, .98), ...(cur ? { f: cur } : {}) });
     sel = id; save(); update();
   }
   function viewCenter() {
@@ -352,20 +433,23 @@ export function createPlan() {
   async function ensureLoaded() {
     if (loaded) return; loaded = true;
     try { const l = await api.layout(); layout = { items: [], zoom: 100, size: 1, ...l }; if (!layout.items) layout.items = []; } catch (e) { toast(`The floor plan layout could not be loaded: ${e.message}`, 'error'); loaded = false; return; }
+    cur = floorObj(layout.floor) ? layout.floor : floors()[0].n;
+    if (floorObj(cur).zoom) layout.zoom = floorObj(cur).zoom;
     if (layout.zoom) layout.zoomSet = layout.zoom !== 100 || undefined;
-    applyZoom(); applySize(); planKnown = !!S.state?.plan; if (planKnown) loadImg(); else img.onerror();
+    applyZoom(); applySize(); planKnown = hasPlanImage(); if (planKnown) loadImg(); else img.onerror();
   }
 
   function update() {
     if (root.parentElement && root.hidden) return;
     ensureLoaded();
-    const hp = !!S.state?.plan;
+    const hp = hasPlanImage();
+    renderFloors();
     if (loaded && hp !== planKnown) { planKnown = hp; if (hp) loadImg(); else img.onerror(); }
     bOp.setAttribute('aria-pressed', String(!S.planEdit)); bEd.setAttribute('aria-pressed', String(S.planEdit));
     palette.hidden = !S.planEdit; props.hidden = !(S.planEdit && sel);
     refreshTools();
     const pts = pointsMap();
-    const items = layout.items.filter(i => pts.has(i.id));
+    const items = layout.items.filter(i => pts.has(i.id) && onFloor(i));
     syncKeyed(layer, items, i => i.id, i => createMarker(pts.get(i.id)), (el, i) => updateMarker(el, pts.get(i.id), i));
     if (S.planEdit) { renderPalette(); renderProps(); }
   }

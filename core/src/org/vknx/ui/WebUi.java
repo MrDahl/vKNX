@@ -120,30 +120,59 @@ public final class WebUi {
 
 	private boolean hasPlan() {
 		try {
-			return planFile() != null;
+			return planFile(0) != null;
 		}
 		catch (final IOException e) {
 			return false;
 		}
 	}
 
-	private java.nio.file.Path planFile() throws IOException {
+	/** The floors that have a plan image, as a JSON array of floor numbers. */
+	private String planFloors() {
+		final var floors = new java.util.TreeSet<Integer>();
 		try (var s = java.nio.file.Files.list(registry.dir())) {
-			return s.filter(f -> f.getFileName().toString().startsWith("plan.")
-					&& PLAN_TYPES.containsKey(f.getFileName().toString().substring(5))).findFirst().orElse(null);
+			s.forEach(f -> {
+				final int fl = org.vknx.app.DataFiles.planFloor(f.getFileName().toString());
+				if (fl >= 0)
+					floors.add(fl);
+			});
+		}
+		catch (final IOException e) {}
+		return floors.toString().replace(" ", "");
+	}
+
+	private java.nio.file.Path planFile(final int floor) throws IOException {
+		try (var s = java.nio.file.Files.list(registry.dir())) {
+			return s.filter(f -> org.vknx.app.DataFiles.planFloor(f.getFileName().toString()) == floor).findFirst().orElse(null);
 		}
 	}
 
-	/** Floor plan image: GET returns it, POST ?ext=png stores it (replacing the old one), POST ?remove=1 deletes it. */
+	private static int floorOf(final HttpExchange ex) {
+		try {
+			final int f = Integer.parseInt(param(ex.getRequestURI(), "floor", "0"));
+			return f >= 0 && f < org.vknx.app.DataFiles.MAX_FLOORS ? f : -1;
+		}
+		catch (final NumberFormatException e) {
+			return -1;
+		}
+	}
+
+	/** Floor plan image of a floor (?floor=0..7, default 0): GET returns it, POST ?ext=png stores it (replacing the old one), POST ?remove=1 deletes it. */
 	private void plan(final HttpExchange ex) throws IOException {
 		try {
+			final int floor = floorOf(ex);
+			if (floor < 0) {
+				send(ex, 400, "text/plain", "no such floor".getBytes(StandardCharsets.UTF_8));
+				return;
+			}
 			if ("GET".equals(ex.getRequestMethod())) {
-				final var f = planFile();
+				final var f = planFile(floor);
 				if (f == null) {
 					send(ex, 404, "text/plain", "no plan".getBytes(StandardCharsets.UTF_8));
 					return;
 				}
-				final String ext = f.getFileName().toString().substring(5);
+				final String fn = f.getFileName().toString();
+				final String ext = fn.substring(fn.lastIndexOf('.') + 1);
 				send(ex, 200, PLAN_TYPES.get(ext), java.nio.file.Files.readAllBytes(f));
 				return;
 			}
@@ -151,7 +180,7 @@ public final class WebUi {
 				send(ex, 405, "text/plain", "GET or POST".getBytes(StandardCharsets.UTF_8));
 				return;
 			}
-			final var old = planFile();
+			final var old = planFile(floor);
 			if ("1".equals(param(ex.getRequestURI(), "remove", ""))) {
 				if (old != null)
 					java.nio.file.Files.delete(old);
@@ -170,7 +199,7 @@ public final class WebUi {
 			}
 			if (old != null)
 				java.nio.file.Files.delete(old);
-			java.nio.file.Files.write(registry.dir().resolve("plan." + ext), body);
+			java.nio.file.Files.write(registry.dir().resolve(org.vknx.app.DataFiles.planName(floor, ext)), body);
 			send(ex, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
 		}
 		catch (final IOException e) {
@@ -542,7 +571,7 @@ public final class WebUi {
 		final var sb = new StringBuilder("{\"version\":" + q(org.vknx.app.Version.current()) + ",\"line\":" + q(settings == null ? "1.1" : settings.line())
 				+ ",\"routing\":" + (settings == null || settings.lineRouting())
 				+ ",\"uplink\":" + q(net == null ? "" : net.topology().uplinkLine().toString()) + ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"started\":" + started
-				+ ",\"plan\":" + hasPlan() + ",\"now\":" + System.currentTimeMillis() + ",\"link\":" + linkJson() + ",\"devices\":[");
+				+ ",\"plan\":" + hasPlan() + ",\"plans\":" + planFloors() + ",\"now\":" + System.currentTimeMillis() + ",\"link\":" + linkJson() + ",\"devices\":[");
 		boolean first = true;
 		for (final VirtualDevice d : devices) {
 			if (!first)
