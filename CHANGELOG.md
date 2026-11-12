@@ -5,6 +5,11 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-11-12
+
+### Fixed
+- **Topology overview:** with a main line and no backbone (for example the interface on 1.0 and the lines 1.1, 1.2, 1.3) the main line was drawn on top of the first line. The main line is now at the top with the lines below it.
+
 ## [0.14.0] - 2026-11-12
 
 ### Added

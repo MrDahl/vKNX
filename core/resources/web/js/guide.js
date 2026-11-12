@@ -155,7 +155,9 @@ export function createTopologyDiagram() {
     const needBack = order.length > 1 || lines.has('0.0') || couplers.some(c => c.b === '0.0');
     const mainOf = a => a + '.0';
     const subsOf = a => areas.get(a).filter(l => l.split('.')[1] !== '0');
-    const startY = a => (needBack ? 82 : 24) + (lines.has(mainOf(a)) && a !== '0' ? 56 : 0) + 8;
+    // y of a main line: under the backbone if there is one, else at the top (with room for the "ETS interface" label)
+    const mainY = needBack ? 82 : 34;
+    const startY = a => mainY + (lines.has(mainOf(a)) && a !== '0' ? 56 : 0) + 8;
     const maxSubs = Math.max(1, ...order.map(a => subsOf(a).length));
     const H = Math.max(...order.map(a => startY(a))) + maxSubs * 56 + 8;
     const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', class: 'topo-svg', preserveAspectRatio: 'xMidYMin meet', style: `max-width:${Math.round(W * 1.25)}px` });
@@ -176,8 +178,8 @@ export function createTopologyDiagram() {
       let parentY = needBack ? 24 : null;
       if (showMain) {
         if (needBack) svg.append(link(x, 40, x, 66, hasC(main, '0.0')));
-        svg.append(bar(main, x, 82, colW - 30, 'Main line ' + main, { sub: cnt(main) ? cnt(main) + ' device(s)' : '' }));
-        parentY = 82;
+        svg.append(bar(main, x, mainY, colW - 30, 'Main line ' + main, { sub: cnt(main) ? cnt(main) + ' device(s)' : '' }));
+        parentY = mainY;
       }
       subs.forEach((l, i) => {
         const y = startY(a) + 16 + i * 56 - 8 + (i === 0 ? 0 : 0);
