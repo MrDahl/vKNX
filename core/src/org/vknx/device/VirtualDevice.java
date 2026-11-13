@@ -571,8 +571,17 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 			if (obj == OBJ_APPLICATION)
 				downloadCount++;
 			afterTablesChanged();
-			if (obj == OBJ_APPLICATION)
+			if (obj == OBJ_APPLICATION) {
+				final String other = foreignApplication();
+				if (!other.isEmpty()) {
+					log("download", "WRONG PRODUCT: ETS loaded the application of '" + other + "' into this '" + product.name()
+							+ "'. The address of this device probably belongs to another device in your ETS project.");
+					ets.warn("wrong application (that of '" + other + "')");
+				}
+				else
+					ets.warn("");
 				startApplication();
+			}
 		}
 		if (event == LE_UNLOAD && obj == OBJ_APPLICATION)
 			behavior.onStop();
@@ -776,6 +785,30 @@ public final class VirtualDevice extends KnxDeviceServiceLogic implements AutoCl
 
 	/** Whether the application program (parameter area) is currently loaded. */
 	public boolean applicationLoaded() { return loadState(product.coupler() ? routerIndex : OBJ_APPLICATION) == LS_LOADED; }
+
+	/**
+	 * Name of the product whose application ETS has loaded into this device when that is not this device's own product
+	 * (typically the individual address was given to the wrong device, so ETS downloaded to the wrong one), else "".
+	 * ETS writes the application's id (manufacturer, application number, version) into the application object.
+	 */
+	public String foreignApplication() {
+		try {
+			if (product.coupler() || !applicationLoaded())
+				return "";
+			final byte[] v = base.getInterfaceObjectServer().getProperty(OBJ_APPLICATION, PID.PROGRAM_VERSION, 1, 1);
+			if (v == null || v.length < 4)
+				return "";
+			final int app = ((v[2] & 0xff) << 8) | (v[3] & 0xff);
+			if (app == 0 || app == product.appNumber())
+				return "";
+			for (final var p : org.vknx.product.Products.ALL.values())
+				if (p.appNumber() == app)
+					return p.name();
+			return String.format("an unknown application (0x%04X)", app);
+		} catch (final RuntimeException e) {
+			return "";
+		}
+	}
 
 	public int downloadCount() { return downloadCount; }
 

@@ -145,6 +145,9 @@ public final class SelfTest {
 			return resp[resp.length - 1] & 0xff;
 		}
 
+		/** If set, written to PID_PROGRAM_VERSION of the application object before it completes, as ETS does. */
+		byte[] programVersion;
+
 		void downloadSegment(final Destination d, final int obj, final byte[] data) throws Exception {
 			loadEvent(d, obj, (byte) 4); // unload
 			loadEvent(d, obj, (byte) 1); // start loading
@@ -159,6 +162,8 @@ public final class SelfTest {
 				final int n = Math.min(piece, data.length - off);
 				mc.writeMemory(d, addr + off, java.util.Arrays.copyOfRange(data, off, off + n));
 			}
+			if (obj == 4 && programVersion != null)
+				mc.rawPropertyWrite(d, obj, PID.PROGRAM_VERSION, programVersion);
 			final int st = loadEvent(d, obj, (byte) 2); // load completed
 			if (st != 1)
 				throw new IllegalStateException("obj " + obj + " not Loaded after LOAD_COMPLETED: state " + st);

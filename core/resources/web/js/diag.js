@@ -56,6 +56,9 @@ export function problems() {
     out.push({ key: 'unreach-' + d.name, level: 'danger', dev: d.name, title: `${d.name} (${d.address}) cannot reach the interface line ${iface}`,
       text: `ETS enters the bus on line ${iface}, and no coupler connects it to line ${dl}. ETS will report "Device does not respond". Fix it in one of three ways: set the interface to line ${dl} (Settings, KNXnet/IP interface, or the address in ETS under Local Interface Settings), give the device an address on line ${iface}, or add line and area couplers that join ${iface} and ${dl}.` });
   }
+  for (const d of devs) if (d.foreignApp)
+    out.push({ key: 'wrongapp-' + d.name, level: 'danger', dev: d.name, title: `${d.name} (${d.address}) has the application of "${d.foreignApp}" from ETS`,
+      text: `ETS downloaded the wrong application to this ${d.productName}. Most likely the individual address ${d.address} was given to the wrong device: the programming button was pressed on another device than the one ETS was addressing. Fix it: in ETS, check which device has ${d.address}, then press the programming button of that vKNX device and assign the address again. Download both devices again afterwards (or reset ${d.name} to the factory state first).` });
   const byAddr = new Map();
   for (const d of devs) if (!d.unassigned) { if (!byAddr.has(d.address)) byAddr.set(d.address, []); byAddr.get(d.address).push(d.name); }
   for (const [a, names] of byAddr) if (names.length > 1)
@@ -86,6 +89,7 @@ export function hints() {
       const d = devs.find(x => x.name === e.dev);
       if (d && d.unassigned && !d.programming) noProg.add(e.dev); // solved once the device has an address or its button is on
     }
+    if (e.cat === 'download' && /^WRONG PRODUCT/.test(e.text)) continue; // shown by problems()
     if (e.cat === 'download' && /ERROR/.test(e.text))
       add({ key: 'dl-' + e.dev, level: 'danger', dev: e.dev, title: `A download step to ${e.dev} failed`, text: e.text.replace(/^ERROR:\s*/, '') + ' – see the device log for the steps before it. Try the download again; if it keeps failing, unload the application in ETS and download again.' });
     if (e.cat === 'secure' && SECURE_BAD.test(e.text) && !/ok|success/i.test(e.text))

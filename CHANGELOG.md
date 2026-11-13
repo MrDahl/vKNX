@@ -5,6 +5,9 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Added
+- **Wrong application detected.** If ETS downloads the application of one product into a device of another product (typically the address was given to the wrong device because the programming button was pressed on another one), vKNX now says so: a red warning in the installation overview and in the device's ETS line ("wrong application (that of 'vKNX Info Display')"), with the fix. The warning disappears when the right application is downloaded. New test `WrongAppTest`.
+
 ## [0.16.0] - 2026-11-12
 
 A round of changes to the control panel; no product and no device behaviour changed.

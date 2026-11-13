@@ -10,6 +10,7 @@ final class EtsActivity {
 	private static final int PARTS = 4;
 	private final Runnable onAction;
 	private volatile String last = "";
+	private volatile String warning = "";
 	private volatile long lastAt;
 	private final java.util.Set<Integer> started = new java.util.TreeSet<>(), done = new java.util.TreeSet<>();
 	private int writes;
@@ -30,8 +31,15 @@ final class EtsActivity {
 		return (l.startsWith("Download") || l.startsWith("Partial download")) && !l.endsWith("device restarted");
 	}
 
+	/** A warning that stays on every line about the download until it is cleared with "" (for example "wrong application"). */
+	synchronized void warn(final String text) {
+		warning = text == null ? "" : text;
+		if (!last.isEmpty())
+			action(last);
+	}
+
 	synchronized void action(final String text) {
-		last = text;
+		last = warning.isEmpty() || text.contains(warning) ? text : text + " - " + warning;
 		lastAt = System.currentTimeMillis();
 		onAction.run();
 	}
