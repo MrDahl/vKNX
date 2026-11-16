@@ -23,6 +23,19 @@ Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://w
 
 <img src="assets/products.png" alt="vKNX products in ETS 6.4.1" width="100%">
 
+## System requirements
+| | Minimum | Recommended |
+|---|---|---|
+| Operating system | Windows 10 (64-bit), kept reasonably up to date | Windows 10 (up-to-date) or Windows 11 |
+| Window component | Microsoft WebView2 Runtime (installed by the installer; needs internet). Without it vKNX opens in your browser instead | WebView2 Runtime installed (included in Windows 11 and in current Windows 10 updates) |
+| Browser (only if WebView2 is missing) | A current version of Edge, Chrome or Firefox. Old browsers cannot display the control panel correctly | Edge, Chrome or Firefox, latest version |
+| Memory / disk | 4 GB RAM, about 400 MB free disk space | 8 GB RAM or more |
+| KNX software | ETS 6 (tested with ETS 6.4.1) on the same PC or on a PC on the same network | ETS 6.4.1 or newer |
+| Network | Allow vKNX through Windows Firewall on private networks, so ETS can find the interface | Wired or stable Wi-Fi on the same network as ETS |
+| Java | Included, nothing to install | |
+
+Very old PCs that no longer receive Windows updates may not be able to install WebView2 or run a modern browser. If something fails, install the missing component (for example the [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)) or update Windows and try again.
+
 ## Build and run
 Requires JDK 21 and git (no Maven/Gradle).
 
