@@ -92,6 +92,7 @@ vKNX uses a penguin (Pingi) as its program icon. The original blue "V" icon is b
 ## Documentation
 | File | Contents |
 |---|---|
+| `docs/ets-step-by-step.md` | **Step-by-step guide:** download vKNX, get and import the `.knxprod` files, build a two-line project in ETS (push button, dimmer, switch, blinds, colour dimmer, info display, All off), download and test |
 | `docs/research.md` | Source-based research (Calimero, thelsing/knx, product tools, other projects) with commits and evidence levels |
 | `docs/decisions.md` | Choice of stack and reasons |
 | `docs/ets-download-sequence.md` | The ETS download sequence and vKNX's answers |
