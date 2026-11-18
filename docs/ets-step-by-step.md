@@ -2,7 +2,7 @@
 
 A complete walk-through from "nothing installed" to a working two-line KNX installation: download vKNX, get the `.knxprod` product files, import them into ETS, build the project (topology, individual addresses, parameters, group addresses), download to the virtual devices and test everything.
 
-> **Status of this guide.** It is written from the vKNX product definitions and from what has been confirmed in ETS 6.4.1 (import, addressing, downloads, couplers over several lines, colour dimmer and info display light control). The exact scenario below has not been clicked through from start to finish in one go, and menu names in ETS can differ a little between versions. If a screen looks different, the idea is the same. Please report anything that does not match.
+> **Status of this guide.** The vKNX side (all screenshots, the group address table, the parameters, the object numbers and the coupler filter tables) was checked by building exactly this installation with a test program that behaves like ETS (addresses, application downloads and coupler filter tables) and then operating it: the keys, the display and the central panel work across both lines. The ETS screens themselves are described from what has been confirmed in ETS 6.4.1 (import, addressing, downloads, couplers over several lines, colour dimmer and info display light control); the exact click path can differ a little between ETS versions. If a screen looks different, the idea is the same. Please report anything that does not match.
 
 **Contents**
 
@@ -217,6 +217,10 @@ Leave **Physical line** empty (*automatic*). A new device has no address yet (15
 > Do **not** pick the "Secure" variants for this exercise. They add KNX Data Secure, which is a separate, advanced exercise.
 
 At this stage every device shows the status **No address**.
+
+![The Add device dialog in vKNX, with the 4-key push button selected](img/guide-02-add-device.webp)
+
+*The Add device dialog: search, choose a category (for example Couplers), pick the product, type the name, click Add device. "How many" adds several devices of the same kind at once.*
 
 ---
 
@@ -501,7 +505,13 @@ The **application program** contains the parameters, the group address table and
 3. Watch vKNX: the status chip of each device changes to **Ready**. In the device details, *Download* shows *Complete* and the parameters and group addresses ETS wrote.
 4. If ETS shows an error, read it, look at the vKNX log (Monitor) and see section 16. A download can simply be repeated.
 
-When everything is done, the Installation list shows all nine devices as **Ready**.
+When everything is done, the Installation list shows all nine devices as **Ready**, and the topology shows the two lines below the main line 1.0 where the ETS interface sits.
+
+![The Installation view: nine devices ready, the topology with main line 1.0 and the lines 1.1 and 1.2](img/guide-01-installation.webp)
+
+Select a device and open **Group objects** to see what ETS wrote: every group object with its size, datapoint type, flags and the group addresses it is linked to. Compare it with your table in step 10.
+
+![Group objects of Panel1 after the download: object, direction, size, datapoint type, flags and group addresses](img/guide-03-group-objects.webp)
 
 > **Wrong device?** If ETS downloads the application of one product into the device of another (because the programming button was pressed on the wrong device), vKNX shows a red message: *"<device> has the application of "<other product>" from ETS"*. Take the address and application off the wrong device (or use *Start a new installation…* in Settings → Maintenance), and repeat the address programming with the correct programming button.
 
@@ -524,7 +534,26 @@ Go to the **Simulation** view in vKNX. Every device has a card; you can click ke
 | 9 | Click **Blinds down** on Master | Both blinds start to move down. Click the key again within 30 seconds: they stop. **Blinds up**: both run up. |
 | 10 | While the blinds are moving, short press key 4 on **Panel1** | The south blind stops (its own group addresses 1/0/1 and 1/0/2); the west blind keeps running. |
 
-**Look at the couplers.** Select **Coupler11** and **Coupler12** in vKNX. Their cards show *routed* and *blocked* counters and the **filter table** ETS wrote. Telegram 2/0/1 from 1.2.3 is *routed* by Coupler12 and by Coupler11, as both couplers have 2/0/1 in their filter tables.
+![The Simulation view with the operating cards of all nine devices](img/guide-04-simulation.webp)
+
+*The Simulation view: the keys and lamps are live. The two lamps of Colour1 show the colour and brightness the display set, the blinds show their position, and the display shows the overview screen.*
+
+The light control screens of the display look like this (the screens *Mood light* and *Desk light* from step 9.6):
+
+<table>
+<tr>
+<td><img src="img/guide-05-display-mood.webp" alt="Display1, screen Mood light: on/off, brightness slider and colour wheel" width="300"></td>
+<td><img src="img/guide-05b-display-desk.webp" alt="Display1, screen Desk light: on/off, brightness slider and warm-to-cold slider" width="300"></td>
+</tr>
+</table>
+
+**Look at the couplers.** Select **Coupler11** and **Coupler12** in vKNX. Their cards show *routed* and *blocked* counters and the **filter table** ETS wrote. Telegram 2/0/1 from 1.2.3 is *routed* by Coupler12 and by Coupler11, as both couplers have 2/0/1 in their filter tables. In the same way, the dimming telegrams on 0/1/2 never leave line 1.1: that group address is not in the filter table, and the coupler card says so under *Last blocked*.
+
+![The card of Coupler11: routing settings, routed and blocked counters and the filter table written by ETS](img/guide-06-coupler.webp)
+
+**All off in the monitor.** Switch the lamps on, clear the monitor, then click **All off** on Master. One telegram from 1.2.3 to 2/0/1 is followed by the status telegrams of every actuator that switched off:
+
+![The Monitor after All off: the command to 2/0/1 and the status telegrams from the actuators on both lines](img/guide-07-monitor.webp)
 
 ---
 
