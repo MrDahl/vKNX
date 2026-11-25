@@ -119,7 +119,7 @@ function setBulb(el, on, pct, id) {
 }
 
 /** A press-and-hold button: sends down on pointerdown and up on pointerup/cancel, even if the card is re-rendered meanwhile. */
-function holdButton(devName, keyNo, label, iconName) {
+export function holdButton(devName, keyNo, label, iconName) {
   const lbl = h('span', label);
   const led = h('span.keyled');
   const ico = h('span.kico', icon(iconName || 'button'));

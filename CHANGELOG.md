@@ -5,6 +5,9 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Added
+- **Board view.** A new tab that shows the installation the way it sits in a distribution board: the devices made for a DIN rail (couplers, switch, dimming, blind and colour actuators, and so on) are drawn as modules on one rail per line, with the bus cable of that line underneath and the ETS interface marked on its line. Each module shows its live state (outputs, brightness, blind position, coupler filter and counters) and has its own programming button. Push buttons, displays and sensors are shown beside the board as the devices that sit in the rooms; the keys can be pressed there. Devices without an address are listed apart until ETS gives them one.
+
 ## [0.16.1] - 2026-11-13
 
 No product changed. A check that helps when a download goes wrong.

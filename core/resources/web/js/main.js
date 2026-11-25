@@ -6,13 +6,14 @@ import { applyTheme, currentTheme, linkSummary, openConnection, openSettings } f
 import { createInstallation } from './views/installation.js';
 import { createSimulation } from './views/simulation.js';
 import { createMonitorView } from './views/monitor.js';
+import { createBoard } from './views/board.js';
 import { loadIcons } from './iconStore.js';
 
 const app = document.getElementById('app');
 
 // ----- shell -----
 const logo = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="var(--accent)"/><path d="M13 14l11 20 11-20" fill="none" stroke="var(--accent-ink)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const NAV = [['installation', 'Installation', 'devices'], ['simulation', 'Simulation', 'plan'], ['monitor', 'Monitor', 'prog']];
+const NAV = [['installation', 'Installation', 'devices'], ['simulation', 'Simulation', 'plan'], ['board', 'Board', 'board'], ['monitor', 'Monitor', 'prog']];
 const navBtns = {};
 const nav = h('nav.nav', { 'aria-label': 'Workspaces' });
 for (const [key, label, ic] of NAV) {
@@ -32,7 +33,7 @@ const version = h('span.version');
 const topbar = h('header.topbar', h('div.brand', { innerHTML: logo }, h('span', 'v', h('i', 'KNX'))), nav,
   h('div.right', connBtn, version, themeBtn, h('button.btn.quiet.icon', { type: 'button', 'aria-label': 'Settings', title: 'Settings', onclick: openSettings }, icon('cog'))));
 const banner = h('div.banner', { role: 'status', hidden: true });
-const views = { installation: createInstallation(), simulation: createSimulation(), monitor: createMonitorView() };
+const views = { installation: createInstallation(), simulation: createSimulation(), board: createBoard(), monitor: createMonitorView() };
 const main = h('main', ...Object.values(views).map(v => v.el));
 for (const [k, v] of Object.entries(views)) v.el.dataset.view = k;
 app.append(topbar, banner, main);
