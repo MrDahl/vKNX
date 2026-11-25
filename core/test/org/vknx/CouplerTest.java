@@ -43,6 +43,11 @@ public final class CouplerTest {
 					if (attempt >= 3)
 						throw new IllegalStateException("no answer from the device when looking for the router object", e);
 				}
+				catch (final io.calimero.mgmt.KNXDisconnectException e) { // the connection was dropped (a lost acknowledgement), not a negative answer: wait for the device to time the old connection out, then ask again
+					if (attempt >= 3)
+						throw new IllegalStateException("device disconnected while looking for the router object", e);
+					Thread.sleep(15000);
+				}
 				catch (final io.calimero.KNXException e) { // negative answer: there is no such interface object
 					i = 20;
 					break;
