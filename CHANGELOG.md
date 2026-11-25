@@ -5,6 +5,9 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Changed
+- **A failed update check explains itself.** "GitHub answered HTTP 403" now says when it is GitHub's hourly limit for the network (a shared school or company network counts together), when to try again, and where to download the installer by hand.
+
 ## [0.17.0] - 2026-11-25
 
 No product changed. A new view and new documentation.

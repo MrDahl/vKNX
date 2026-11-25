@@ -36,8 +36,29 @@ public final class Updater {
 				.header("Accept", "application/vnd.github+json").header("User-Agent", "vKNX-updater").build();
 		final var resp = HTTP.send(req, HttpResponse.BodyHandlers.ofString());
 		if (resp.statusCode() != 200)
-			throw new IOException("GitHub answered HTTP " + resp.statusCode());
+			throw new IOException(explain(resp.statusCode(), resp.headers().firstValue("x-ratelimit-remaining").orElse(""),
+					resp.headers().firstValue("x-ratelimit-reset").orElse(""), resp.body()));
 		return parse(resp.body(), Version.current());
+	}
+
+	/**
+	 * Text for a failed check. GitHub answers 403 when a network has used up the 60 anonymous requests per hour (a school or
+	 * company network shares one address), which says nothing about vKNX; the person can still download the installer.
+	 */
+	static String explain(final int status, final String remaining, final String reset, final String body) {
+		final String page = "https://github.com/MrDahl/vKNX/releases/latest";
+		if ((status == 403 || status == 429) && ("0".equals(remaining) || body.toLowerCase().contains("rate limit"))) {
+			String when = "";
+			try {
+				when = " Try again after " + java.time.LocalTime.ofInstant(java.time.Instant.ofEpochSecond(Long.parseLong(reset)),
+						java.time.ZoneId.systemDefault()).withSecond(0).withNano(0) + ".";
+			}
+			catch (final RuntimeException e) { /* no reset time given */ }
+			return "GitHub answered HTTP " + status + ": the limit for update checks from this network is used up (GitHub allows 60 per hour per address, and a shared network counts together)." + when
+					+ " You can always download the newest installer from " + page;
+		}
+		final String msg = first(body, "\"message\"\\s*:\\s*\"([^\"]*)\"");
+		return "GitHub answered HTTP " + status + (msg.isEmpty() ? "" : " (" + msg + ")") + ". You can download the newest installer from " + page;
 	}
 
 	/** Parses the GitHub "latest release" JSON (only the few fields we need, no JSON library). */
