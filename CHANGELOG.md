@@ -5,6 +5,10 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+## [0.17.2] - 2026-11-27
+
+Fixes for updating and for PCs without WebView2.
+
 ### Changed
 - **vKNX offers to install WebView2 itself.** If the Microsoft WebView2 Runtime is missing (for example after unpacking the zip instead of running the installer, or when the installer's own attempt did not work), vKNX asks, downloads Microsoft's small setup program, runs it (first as the current user, then with administrator rights if that was not enough) and opens its own window. If it does not work the reason is shown, and vKNX stays open in the browser as before.
 - **WebView2 link goes straight to Microsoft's small setup program** (`MicrosoftEdgeWebview2Setup.exe`) instead of the general download page, where the "Fixed Version" .cab files are easy to pick by mistake. Text in the program and in the README.
