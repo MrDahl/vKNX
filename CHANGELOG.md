@@ -5,6 +5,9 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Changed
+- **WebView2 link goes straight to Microsoft's small setup program** (`MicrosoftEdgeWebview2Setup.exe`) instead of the general download page, where the "Fixed Version" .cab files are easy to pick by mistake. Text in the program and in the README.
+
 ### Fixed
 - **Update from inside the program could stop halfway.** The installer is started by vKNX's engine; the installer's last step force-ended the engine together with everything it had started, which could include the installer itself, leaving the old version in place. It no longer ends the process tree, waits longer for the engine to save and close, and writes a log (`install.log` next to the downloaded installer; the path is in `console.log`). Takes effect from the update after this one; to get 0.17.1 run the installer from the release page.
 

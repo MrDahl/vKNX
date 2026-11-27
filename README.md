@@ -34,7 +34,7 @@ Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://w
 | Network | Allow vKNX through Windows Firewall on private networks, so ETS can find the interface | Wired or stable Wi-Fi on the same network as ETS |
 | Java | Included, nothing to install | |
 
-Very old PCs that no longer receive Windows updates may not be able to install WebView2 or run a modern browser. If something fails, install the missing component (for example the [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)) or update Windows and try again.
+Very old PCs that no longer receive Windows updates may not be able to install WebView2 or run a modern browser. If something fails, install the missing component (for example the [WebView2 Runtime](https://go.microsoft.com/fwlink/p/?LinkId=2124703), which downloads the small Microsoft setup program `MicrosoftEdgeWebview2Setup.exe`; do not use the "Fixed Version" .cab files on Microsoft's page) or update Windows and try again.
 
 ## Build and run
 Requires JDK 21 and git (no Maven/Gradle).
