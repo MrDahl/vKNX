@@ -62,8 +62,11 @@ export function createPlan() {
     ...(floors().length > 1 ? [{ label: 'Remove this floor…', icon: 'trash', danger: true, onclick: removeFloor }] : [])] });
   const settingsBox = h('span.plan-settings', planMenu);
   const bUndo = h('button.btn', { type: 'button', disabled: true, title: 'Undo the last change to the symbols (Ctrl+Z)', onclick: undo }, icon('restart'), h('span.btn-text.opt', 'Undo'));
-  const floorTabs = h('div.segmented.floor-tabs', { role: 'group', 'aria-label': 'Floor', hidden: true });
-  const toolbar = h('div.toolbar', seg, floorTabs,
+  // with more than one floor: a drop-down with the floors (hidden while there is only one)
+  const floorMenu = menuButton({ label: 'Choose floor', text: '', icon: 'plan', chevron: true,
+    items: () => floors().map(f => ({ label: f.name, checked: f.n === cur, onclick: () => showFloor(f.n) })) });
+  floorMenu.classList.add('floor-menu'); floorMenu.hidden = true;
+  const toolbar = h('div.toolbar', seg, floorMenu,
     h('button.btn', { onclick: fit, title: 'Fit the whole plan into the window' }, icon('fit'), h('span.btn-text.opt', 'Fit to window')),
     h('span.zoom-box', h('button.btn.icon', { 'aria-label': 'Zoom out', title: 'Zoom out', onclick: () => setZoom(layout.zoom - 15) }, icon('zoomOut')), zRange, h('button.btn.icon', { 'aria-label': 'Zoom in', title: 'Zoom in', onclick: () => setZoom(layout.zoom + 15) }, icon('zoomIn')), zVal),
     symBox, bUndo, h('span.grow'), settingsBox, file);
@@ -85,10 +88,8 @@ export function createPlan() {
   // ----- floors -----
   function renderFloors() {
     const fl = floors();
-    floorTabs.hidden = fl.length < 2;
-    syncKeyed(floorTabs, fl, f => String(f.n),
-      f => h('button', { type: 'button', onclick: () => showFloor(f.n) }),
-      (b, f) => { setText(b, f.name); setAttr(b, 'aria-pressed', String(f.n === cur)); setAttr(b, 'title', 'Show ' + f.name); });
+    floorMenu.hidden = fl.length < 2;
+    floorMenu.setLabel((floorObj(cur) || fl[0]).name);
   }
   function showFloor(n) {
     if (n === cur || !floorObj(n)) return;

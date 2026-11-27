@@ -46,9 +46,10 @@ export function confirmDialog({ title, message, confirmLabel, danger }) {
 }
 
 /** Small popup menu anchored to a button. items: [{label, icon, onclick, danger}] or 'hr'. */
-export function menuButton({ label, items, text }) {
+export function menuButton({ label, items, text, icon: iconName = 'cog', chevron = false }) {
   const wrap = h('div.menu-wrap');
-  const btn = text ? h('button.btn', { title: label, 'aria-haspopup': 'menu', 'aria-expanded': 'false' }, icon('cog'), text)
+  const textEl = h('span.menu-label', text || '');
+  const btn = text !== undefined ? h('button.btn', { title: label, 'aria-haspopup': 'menu', 'aria-expanded': 'false' }, icon(iconName), textEl, chevron ? icon('chevron') : null)
     : h('button.btn.quiet.icon', { 'aria-label': label, title: label, 'aria-haspopup': 'menu', 'aria-expanded': 'false' }, icon('more'));
   let menu = null;
   const close = () => { if (menu) { menu.remove(); menu = null; btn.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', outside, true); } };
@@ -56,13 +57,16 @@ export function menuButton({ label, items, text }) {
   btn.addEventListener('click', () => {
     if (menu) { close(); return; }
     menu = h('div.menu', { role: 'menu' }, items().map(it => it === 'hr' ? h('hr') :
-      h(`button${it.danger ? '.danger' : ''}`, { role: 'menuitem', onclick: () => { close(); it.onclick(); } }, it.icon ? icon(it.icon) : null, it.label)));
+      h(`button${it.danger ? '.danger' : ''}`, { role: it.checked === undefined ? 'menuitem' : 'menuitemradio', 'aria-checked': it.checked === undefined ? null : String(!!it.checked), onclick: () => { close(); it.onclick(); } }, it.icon ? icon(it.icon) : null, h('span.menu-item-label', it.label), it.checked ? icon('check') : null)));
     wrap.append(menu);
+    // keep the menu inside the window: open to the right if the button sits near the left edge
+    if (menu.getBoundingClientRect().left < 4) { menu.style.right = 'auto'; menu.style.left = '0'; }
     btn.setAttribute('aria-expanded', 'true');
     document.addEventListener('pointerdown', outside, true);
     menu.querySelector('button')?.focus();
   });
   wrap.addEventListener('keydown', e => { if (e.key === 'Escape') { close(); btn.focus(); } });
   wrap.append(btn);
+  wrap.setLabel = t => { textEl.textContent = t; };
   return wrap;
 }

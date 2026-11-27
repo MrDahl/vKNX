@@ -114,8 +114,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 input[type=range] { accent-color: var(--accent); width: 100%; height: 28px; margin: 0; }
 .segmented { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface); }
 .segmented button { height: calc(var(--control-h) - 2px); padding: 0 .9rem; border: 0; background: transparent; cursor: var(--cur-pointer); display: inline-flex; align-items: center; gap: .4rem; font-weight: 500; }
-.floor-tabs { max-width: 46vw; overflow-x: auto; flex: none; }
-.floor-tabs button { white-space: nowrap; padding: 0 .7rem; }
+.floor-menu[hidden] { display: none; }
+.floor-menu .menu-label { max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-item-label { flex: 1; }
+.menu button[aria-checked=true] { font-weight: 600; }
 .segmented button + button { border-left: 1px solid var(--border); }
 .segmented button[aria-pressed=true] { background: var(--accent); color: var(--accent-ink); }
 .segmented button:not([aria-pressed=true]):hover { background: var(--surface-3); }
@@ -877,3 +879,5 @@ a:hover { color: var(--accent-hover); }
 .bp-row { display: flex; gap: .4rem; margin-top: .4rem; }
 .bp-foot { display: flex; align-items: center; gap: .5rem; }
 .bp-foot .bm-prog { padding: .22rem .8rem; }
+.floor-menu .menu { right: auto; left: 0; }
+.floor-menu button .ic:last-child { transform: rotate(90deg); }
