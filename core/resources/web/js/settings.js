@@ -193,11 +193,16 @@ export function openSettings() {
     h('input', { type: 'checkbox', checked: S.state?.routing !== false, onchange: async e => { try { await api.saveRouting(e.target.checked); toast(e.target.checked ? 'Telegrams now cross lines only through couplers.' : 'All devices hear everything again (one flat line).'); } catch (err) { e.target.checked = !e.target.checked; toast('Could not change the setting: ' + err.message); } } }),
     'Route telegrams between lines through couplers'),
     h('p.hint', 'On: a device on another line only hears a telegram if a coupler with the right address exists, is downloaded, and lets it pass (filter table, hop count). Off: every device hears everything, couplers have no effect.'));
+  const discovery = h('div', h('label', { style: 'display:flex;gap:.5rem;align-items:center' },
+    h('input', { type: 'checkbox', checked: S.state?.discovery === true, onchange: async e => { try { await api.saveDiscovery(e.target.checked); toast(e.target.checked ? 'Auto-discovery is on: ETS on other computers can find this interface.' : 'Auto-discovery is off: only ETS on this computer finds this interface.'); } catch (err) { e.target.checked = !e.target.checked; toast('Could not change the setting: ' + err.message); } } }),
+    'Auto-discovery (let other computers find this interface)'),
+    h('p.hint', 'Off (default): only ETS on this computer lists the interface, so a class on the same network does not see each other\'s interfaces. On: ETS on every computer on the network lists it. ETS can always connect by typing the IP address of this computer.'));
   const TABS = [
     ['appearance', 'Appearance', () => [sec('Appearance', themeSeg, h('div', { style: 'margin-top:.6rem' }, sizeSeg), h('p.hint', 'Light is bright and high contrast for projectors. Large makes text and buttons bigger. Paper is a flat, animation-free look for e-ink screens.'))]],
     ['connection', 'Connection', () => [
       sec('KNXnet/IP interface', h('div', 'Interface address: ', h('b.mono', S.state?.iface || '')), h('p.hint', 'ETS connects to the interface "vKNX". The line decides the physical addresses of its tunnels (line.241–244). Changing it restarts vKNX.'),
         h('div', { style: 'display:flex;gap:.5rem;align-items:center' }, line, h('button.btn', { onclick: saveLine }, icon('restart'), 'Save and restart')), lineMsg),
+      sec('Discovery', discovery),
       sec('Status', h('p.hint', { style: 'margin-top:0' }, 'Whether ETS or another IP client is connected, and when the last frame arrived.'), h('button.btn', { onclick: openConnection }, icon('info'), 'Show connection status'))]],
     ['simulation', 'Simulation', () => [sec('Lines and couplers', routing)]],
     ['share', 'Share', () => [shareSection()]],

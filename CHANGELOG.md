@@ -5,6 +5,9 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Added
+- **Auto-discovery switch (Settings → Connection).** Off by default: ETS only lists the interface of the vKNX running on the same computer, so a whole class on one network no longer sees everybody's interfaces. Switch it on to let ETS on other computers find this interface; typing the computer's IP address into ETS works in both cases. Takes effect at once, no restart.
+
 ### Changed
 - **A failed update check explains itself.** "GitHub answered HTTP 403" now says when it is GitHub's hourly limit for the network (a shared school or company network counts together), when to try again, and where to download the installer by hand.
 

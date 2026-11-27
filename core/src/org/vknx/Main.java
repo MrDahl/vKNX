@@ -64,6 +64,7 @@ public final class Main {
 		System.out.println("vKNX " + org.vknx.app.Version.current());
 		final var log = new EventLog(3000);
 		log.tee(dir.resolve("vknx.log"));
+		settings.applyDiscovery();
 		final var net = Subnet.withServer(dir, friendly, port, settings.area(), settings.lineNo());
 		settings.onLineRouting(net.topology()::setEnabled);
 		net.tap((origin, f) -> {

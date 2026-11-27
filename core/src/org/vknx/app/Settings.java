@@ -65,6 +65,24 @@ public final class Settings {
 		routingListener.accept(on);
 	}
 
+	/**
+	 * Whether this vKNX answers KNXnet/IP searches from other computers on the network (default off). Off: only ETS on
+	 * this computer finds the interface by itself, so a classroom on one network does not see each other's interfaces.
+	 * ETS can still connect to it by IP address.
+	 */
+	public boolean autoDiscovery() { return "true".equals(p.getProperty("autoDiscovery", "false")); }
+
+	public void setAutoDiscovery(final boolean on) throws IOException {
+		p.setProperty("autoDiscovery", String.valueOf(on));
+		save();
+		applyDiscovery();
+	}
+
+	/** Hands the setting to the patched Calimero server, which reads it at every search request (no restart needed). */
+	public void applyDiscovery() {
+		System.setProperty("vknx.localDiscoveryOnly", String.valueOf(!autoDiscovery()));
+	}
+
 	private void save() throws IOException {
 		try (Writer w = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
 			p.store(w, "vKNX settings");

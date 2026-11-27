@@ -1,0 +1,32 @@
+diff --git a/src/io/calimero/server/knxnetip/DiscoveryService.java b/src/io/calimero/server/knxnetip/DiscoveryService.java
+index 4219169..c8def2a 100644
+--- a/src/io/calimero/server/knxnetip/DiscoveryService.java
++++ b/src/io/calimero/server/knxnetip/DiscoveryService.java
+@@ -167,6 +167,8 @@ final class DiscoveryService extends UdpServiceLooper
+ 			// protocol version shall be discarded.
+ 			if (!checkVersion(h))
+ 				return true;
++			if (Boolean.getBoolean("vknx.localDiscoveryOnly") && !fromThisComputer(src))
++				return true; // vKNX: auto-discovery off, only answer searches sent from this computer
+ 			final SearchRequest sr = SearchRequest.from(h, data, offset);
+ 			if (sr.getEndpoint().hostProtocol() != HPAI.IPV4_UDP) {
+ 				logger.log(INFO, "ignoring search request to the discovery endpoint from {0}: unexpected host protocol code {1}",
+@@ -214,6 +216,18 @@ final class DiscoveryService extends UdpServiceLooper
+ 		return false;
+ 	}
+ 
++	private static boolean fromThisComputer(final EndpointAddress src) {
++		if (!(src instanceof UdpEndpointAddress udp) || udp.address().getAddress() == null)
++			return false;
++		final InetAddress a = udp.address().getAddress();
++		try {
++			return a.isLoopbackAddress() || a.isAnyLocalAddress() || NetworkInterface.getByInetAddress(a) != null;
++		}
++		catch (final java.net.SocketException e) {
++			return false;
++		}
++	}
++
+ 	// known knx ip services which we receive but can safely ignore
+ 	private static final Set<Integer> ignoreServices = Set.of(
+ 			KNXnetIPHeader.ROUTING_IND,

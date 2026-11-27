@@ -411,7 +411,10 @@ public final class WebUi {
 		}
 		try {
 			final String routing = param(ex.getRequestURI(), "routing", "");
-			if (!routing.isEmpty())
+			final String discovery = param(ex.getRequestURI(), "discovery", "");
+			if (!discovery.isEmpty())
+				settings.setAutoDiscovery(Boolean.parseBoolean(discovery));
+			else if (!routing.isEmpty())
 				settings.setLineRouting(Boolean.parseBoolean(routing));
 			else
 				settings.setLine(param(ex.getRequestURI(), "line", ""));
@@ -570,6 +573,7 @@ public final class WebUi {
 	private void state(final HttpExchange ex) throws IOException {
 		final var sb = new StringBuilder("{\"version\":" + q(org.vknx.app.Version.current()) + ",\"line\":" + q(settings == null ? "1.1" : settings.line())
 				+ ",\"routing\":" + (settings == null || settings.lineRouting())
+				+ ",\"discovery\":" + (settings != null && settings.autoDiscovery())
 				+ ",\"uplink\":" + q(net == null ? "" : net.topology().uplinkLine().toString()) + ",\"iface\":" + q(iface) + ",\"supervised\":" + supervised + ",\"started\":" + started
 				+ ",\"plan\":" + hasPlan() + ",\"plans\":" + planFloors() + ",\"now\":" + System.currentTimeMillis() + ",\"link\":" + linkJson() + ",\"devices\":[");
 		boolean first = true;
