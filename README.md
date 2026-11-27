@@ -27,7 +27,7 @@ Open-source teaching simulator for KNX, developed by [Marc Sonne Dahl](https://w
 | | Minimum | Recommended |
 |---|---|---|
 | Operating system | Windows 10 (64-bit), kept reasonably up to date | Windows 10 (up-to-date) or Windows 11 |
-| Window component | Microsoft WebView2 Runtime (installed by the installer; needs internet). Without it vKNX opens in your browser instead | WebView2 Runtime installed (included in Windows 11 and in current Windows 10 updates) |
+| Window component | Microsoft WebView2 Runtime (installed by the installer, or by vKNX itself when it starts without it; needs internet). Without it vKNX opens in your browser instead | WebView2 Runtime installed (included in Windows 11 and in current Windows 10 updates) |
 | Browser (only if WebView2 is missing) | A current version of Edge, Chrome or Firefox. Old browsers cannot display the control panel correctly | Edge, Chrome or Firefox, latest version |
 | Memory / disk | 4 GB RAM, about 400 MB free disk space | 8 GB RAM or more |
 | KNX software | ETS 6 (tested with ETS 6.4.1) on the same PC or on a PC on the same network | ETS 6.4.1 or newer |

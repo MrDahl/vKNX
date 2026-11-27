@@ -13,7 +13,7 @@ namespace VKnx.Launcher
 {
     internal sealed class MainForm : Form
     {
-        private readonly WebView2 web = new WebView2();
+        private WebView2 web = new WebView2();
         private readonly Label status = new Label();
         private Process server;
         private int port;
@@ -141,28 +141,106 @@ namespace VKnx.Launcher
             return false;
         }
 
-        private async Task ShowWeb()
+        private const string WebView2Setup = "https://go.microsoft.com/fwlink/p/?LinkId=2124703"; // Microsoft's small Evergreen bootstrapper
+
+        private async Task<bool> TryInitWebView()
         {
             try
             {
                 var userData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "vKNX", "webview");
                 var env = await CoreWebView2Environment.CreateAsync(null, userData);
                 await web.EnsureCoreWebView2Async(env);
+                return true;
             }
             catch (Exception)
             {
-                // WebView2 runtime missing: fall back to the default browser, the server keeps running
-                try { Process.Start(Url); } catch { }
-                status.Text = "WebView2 is missing on this PC, so vKNX was opened in your browser.\n\nClose this window to stop vKNX.\n\n" + Url
-                    + "\n\nFor the vKNX window, install the free Microsoft WebView2 Runtime (a small setup program, not the .cab files):\nhttps://go.microsoft.com/fwlink/p/?LinkId=2124703";
+                return false;
+            }
+        }
+
+        /// <summary>A control whose initialisation failed cannot be initialised again: use a fresh one.</summary>
+        private void NewWebView()
+        {
+            Controls.Remove(web);
+            web.Dispose();
+            web = new WebView2();
+            web.Dock = DockStyle.Fill;
+            web.Visible = false;
+            Controls.Add(web);
+        }
+
+        /// <summary>Downloads Microsoft's WebView2 setup program and runs it. Returns null if it ran without error, otherwise a reason.</summary>
+        private static string InstallWebView2(bool elevated)
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                var exe = Path.Combine(Path.GetTempPath(), "vknx-MicrosoftEdgeWebview2Setup.exe");
+                using (var wc = new WebClient()) wc.DownloadFile(WebView2Setup, exe);
+                // only run the file if it carries a Microsoft signature (the download itself is over https from Microsoft)
+                var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                    System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromSignedFile(exe));
+                if (cert.Subject.IndexOf("Microsoft Corporation", StringComparison.OrdinalIgnoreCase) < 0)
+                    return "the downloaded file is not signed by Microsoft";
+                var psi = new ProcessStartInfo(exe, "/silent /install") { UseShellExecute = true };
+                if (elevated) psi.Verb = "runas"; // asks Windows for administrator rights
+                using (var p = Process.Start(psi))
+                {
+                    if (p == null) return null;
+                    p.WaitForExit();
+                    return p.ExitCode == 0 ? null : "the Microsoft setup program stopped with code 0x" + p.ExitCode.ToString("X");
+                }
+            }
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+            {
+                return "administrator permission was not given";
+            }
+            catch (WebException ex)
+            {
+                return "could not download the setup program from Microsoft (" + ex.Message + ")";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        private async Task ShowWeb()
+        {
+            if (!await TryInitWebView())
+            {
+                // WebView2 runtime missing: offer to install it, otherwise fall back to the default browser (the server keeps running)
+                var ready = false;
+                string why = null;
+                var yes = false;
                 try
                 {
-                    if (MessageBox.Show(this, "vKNX needs the free Microsoft WebView2 Runtime to show its own window.\n\nvKNX is open in your browser for now.\n\nOpen the Microsoft download page now? (Install it, then start vKNX again.)",
-                        "vKNX", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                        Process.Start("https://go.microsoft.com/fwlink/p/?LinkId=2124703");
+                    yes = MessageBox.Show(this, "vKNX needs the free Microsoft WebView2 Runtime to show its own window.\n\nInstall it now? It is a small download from Microsoft and takes about a minute. Windows may ask for permission.",
+                        "vKNX", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
                 }
                 catch { }
-                return;
+                if (yes)
+                {
+                    status.Text = "Installing the Microsoft WebView2 Runtime…\n\nThis takes about a minute.";
+                    Refresh();
+                    foreach (var elevated in new[] { false, true }) // first as the current user, then with administrator rights
+                    {
+                        if (elevated) status.Text = "Installing the Microsoft WebView2 Runtime…\n\nWindows may ask for permission.";
+                        why = await Task.Run(() => InstallWebView2(elevated));
+                        NewWebView();
+                        if (await TryInitWebView()) { ready = true; break; }
+                        if (why == null) why = "the setup finished, but vKNX still cannot use WebView2";
+                    }
+                    if (!ready) NewWebView();
+                }
+                if (!ready)
+                {
+                    try { Process.Start(Url); } catch { }
+                    status.Text = "WebView2 is missing on this PC, so vKNX was opened in your browser.\n\nClose this window to stop vKNX.\n\n" + Url
+                        + (why != null ? "\n\nThe automatic install did not work: " + why + "." : "")
+                        + "\n\nFor the vKNX window, install the free Microsoft WebView2 Runtime (a small setup program, not the .cab files):\n" + WebView2Setup;
+                    return;
+                }
             }
             var cw = web.CoreWebView2;
             cw.Settings.AreDevToolsEnabled = false;
