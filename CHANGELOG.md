@@ -5,6 +5,10 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-11-27
+
+No product changed. Classroom use, and small improvements to the Board and the floor plan.
+
 ### Added
 - **Auto-discovery switch (Settings → Connection).** Off by default: ETS only lists the interface of the vKNX running on the same computer, so a whole class on one network no longer sees everybody's interfaces. Switch it on to let ETS on other computers find this interface; typing the computer's IP address into ETS works in both cases. Takes effect at once, no restart.
 
