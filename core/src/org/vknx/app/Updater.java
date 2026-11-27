@@ -139,8 +139,10 @@ public final class Updater {
 					}
 				}
 				state = "installing";
+				final Path log = tmp.resolveSibling("install.log"); // what the installer did, if an update does not take
+				System.out.println("Update: starting " + tmp + " (installer log: " + log + ")");
 				final Process installer = new ProcessBuilder(tmp.toString(), "/SILENT", "/CLOSEAPPLICATIONS", "/NORESTART",
-						"/SUPPRESSMSGBOXES").start();
+						"/SUPPRESSMSGBOXES", "/LOG=" + log).start();
 				Thread.sleep(1500);
 				// if the installer ended at once it did not run (blocked, damaged): say so instead of closing the program silently
 				if (!installer.isAlive() && installer.exitValue() != 0)

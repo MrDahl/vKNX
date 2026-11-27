@@ -5,6 +5,9 @@ The text under each version is also shown as the release notes on GitHub and in 
 
 ## [Unreleased]
 
+### Fixed
+- **Update from inside the program could stop halfway.** The installer is started by vKNX's engine; the installer's last step force-ended the engine together with everything it had started, which could include the installer itself, leaving the old version in place. It no longer ends the process tree, waits longer for the engine to save and close, and writes a log (`install.log` next to the downloaded installer; the path is in `console.log`). Takes effect from the update after this one; to get 0.17.1 run the installer from the release page.
+
 ## [0.17.1] - 2026-11-27
 
 No product changed. Classroom use, and small improvements to the Board and the floor plan.

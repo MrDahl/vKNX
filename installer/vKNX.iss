@@ -95,12 +95,13 @@ begin
     end;
   end
   else
-    for I := 1 to 6 do
+    for I := 1 to 30 do   { the server saves the devices when it exits (an update): give it time instead of killing it }
     begin
       if not IsRunning(Name) then Exit;
       Sleep(500);
     end;
-  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /T /IM ' + Name, '', SW_HIDE, ewWaitUntilTerminated, R);
+  { no /T: an installer started by the program is a child of vKNX-Server.exe and must not be killed with it }
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM ' + Name, '', SW_HIDE, ewWaitUntilTerminated, R);
   Sleep(500);
 end;
 
