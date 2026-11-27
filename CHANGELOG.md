@@ -9,6 +9,8 @@ The text under each version is also shown as the release notes on GitHub and in 
 - **Auto-discovery switch (Settings → Connection).** Off by default: ETS only lists the interface of the vKNX running on the same computer, so a whole class on one network no longer sees everybody's interfaces. Switch it on to let ETS on other computers find this interface; typing the computer's IP address into ETS works in both cases. Takes effect at once, no restart.
 
 ### Changed
+- **Board: 8 outputs in two rows of four.** Switch actuators show A–D above E–H instead of six and two.
+- **Board: security shield on secure devices.** Secure switch actuators and push buttons show a shield next to the name: blue with a check mark once secure commissioning is done, grey while it is not. It is always visible on secure products.
 - **Floors are a drop-down.** With more than one floor the floor plan shows one "Floor" drop-down instead of a button per floor, so the toolbar no longer breaks with many floors. With a single floor nothing changes. The Plan settings menu also stays inside the window when the toolbar wraps.
 - **A failed update check explains itself.** "GitHub answered HTTP 403" now says when it is GitHub's hourly limit for the network (a shared school or company network counts together), when to try again, and where to download the installer by hand.
 

@@ -114,17 +114,17 @@ function linesFace(max = 3) {
 
 /** The bits every device has: name (opens the details), address, status chip, programming button. */
 function frame(d0, cls) {
-  const lock = h('span.bm-lock', { hidden: true, title: 'Secure commissioned' }, icon('lock'));
+  const shield = h('span.bm-shield', { hidden: true });
   const ico = h('span.bm-ico');
   const nameB = h('b.bm-name'), addr = h('span.mono.bm-addr');
-  const sel = h('button.bm-select', { type: 'button', title: 'Show the details of ' + d0.name, onclick: () => selectDevice(d0.name, { drawer: true }) }, ico, h('span.bm-id', nameB, addr));
+  const sel = h('button.bm-select', { type: 'button', title: 'Show the details of ' + d0.name, onclick: () => selectDevice(d0.name, { drawer: true }) }, ico, h('span.bm-id', nameB, addr), shield);
   const typ = h('div.bm-type');
   const chip = h('span.chip.bm-chip');
   const led = h('span.led');
   const prog = h('button.bm-prog', { type: 'button', 'aria-pressed': 'false', title: 'Programming button: press it, then give the device its physical address from ETS', onclick: () => operate('Programming button', () => api.prog(d0.name)) }, led, 'Prog');
   const el = h('div.' + cls, { dataset: { dev: d0.name } });
   return {
-    el, sel, lock, typ, chip, prog,
+    el, sel, typ, chip, prog,
     update(d) {
       const info = productOf(d), st = statusOf(d);
       paintIcon(ico, d.name, info.icon);
@@ -132,7 +132,11 @@ function frame(d0, cls) {
       chip.hidden = st.key === 'ready' && !d.programming;
       setText(chip, d.programming ? 'Programming' : st.label); chip.className = 'chip bm-chip ' + (d.programming ? 'prog' : st.cls);
       setAttr(prog, 'aria-pressed', d.programming ? 'true' : 'false'); setCls(led, 'on', !!d.programming);
-      lock.hidden = !(d.secure && d.secMode); setAttr(lock, 'title', d.toolKey ? 'Secure commissioned' : 'Security mode on (factory key)');
+      shield.hidden = !d.secure;
+      const done = !!(d.secure && d.secMode && d.toolKey);
+      if (shield.dataset.done !== String(done)) { shield.dataset.done = String(done); shield.replaceChildren(icon(done ? 'shieldCheck' : 'shield')); }
+      setCls(shield, 'on', done);
+      setAttr(shield, 'title', done ? 'Secure: commissioned with the project key' : d.secMode ? 'Secure product: security is on, but still the factory key (FDSK)' : 'Secure product: not commissioned with security yet');
       setCls(el, 'sel', S.selected === d.name && S.drawer);
       setCls(el, 'hl', !!S.gaSel && (d.assoc || []).some(a => a.ga === S.gaSel));
       setCls(el, 'idle', !(d.loaded || baseKey(d) === 'coupler'));
@@ -144,7 +148,7 @@ function makeModule(d0) {
   const key = baseKey(d0);
   const f = frame(d0, 'bmod'); const face = buildFace(key);
   f.el.style.setProperty('--w', TE[key] || 3);
-  f.el.append(h('div.bm-top', h('span.bm-pwr', { title: 'Bus voltage present' }), f.lock), face.el, f.sel, f.typ, f.chip, f.prog);
+  f.el.append(h('div.bm-top', h('span.bm-pwr', { title: 'Bus voltage present' })), face.el, f.sel, f.typ, f.chip, f.prog);
   return { el: f.el, update(d) { f.update(d); face.update(d.loaded || key === 'coupler' ? d.view || {} : {}, d, d.loaded || key === 'coupler'); } };
 }
 
@@ -169,7 +173,7 @@ function makePlate(d0) {
     }
   }
   const line = h('span.chip.plain.bp-line');
-  f.el.append(h('div.bp-head', f.sel, f.lock), line, body, h('div.bp-foot', f.chip, h('span.grow'), f.prog));
+  f.el.append(h('div.bp-head', f.sel), line, body, h('div.bp-foot', f.chip, h('span.grow'), f.prog));
   return {
     el: f.el,
     update(d) {
