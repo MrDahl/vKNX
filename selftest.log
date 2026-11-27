@@ -1,0 +1,63 @@
+Nov 27, 2026 12:36:12 PM io.calimero.device.KnxDeviceServiceLogic setDeviceAddress
+INFO: set new device address 1.1.2 (old 15.15.255)
+Nov 27, 2026 12:36:17 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+Nov 27, 2026 12:36:18 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  only the device in programming mode answers; ETS-style address sequence works
+PASS  actuator took address 1.1.2
+PASS  push button kept factory address
+PASS  actuator left programming mode after the sequence (restart)
+Nov 27, 2026 12:36:29 PM io.calimero.device.KnxDeviceServiceLogic setDeviceAddress
+INFO: set new device address 1.1.1 (old 15.15.255)
+Nov 27, 2026 12:36:34 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+Nov 27, 2026 12:36:34 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  second address sequence on the button
+PASS  push button took address 1.1.1
+PASS  actuator address unchanged by second assignment
+Nov 27, 2026 12:36:40 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+PASS  device descriptor is 0x07B0 (System B)
+Nov 27, 2026 12:36:40 PM io.calimero.device.ManagementServiceNotifier send
+WARNING: 1.1.2->0.2.255 A_Device-desc.response 43 40 07 b0: 0.2.255 disconnected while awaiting ACK, destination 0.2.255 (TL 15.15.255) Destroyed
+PASS  unprogrammed actuator ignores GroupValueWrite
+Nov 27, 2026 12:36:40 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+Nov 27, 2026 12:36:46 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  actuator application loaded
+PASS  push button application loaded
+PASS  device reports the last ETS action as a finished full download
+PASS  address assignment was recorded as an ETS action before (and the download replaced it)
+PASS  button press switches lamp on (via bus, from 1.1.1)
+PASS  telegram on the bus came from 1.1.1 to 1/0/1
+PASS  second press (toggle; status followed) switches lamp off
+PASS  status telegram sent by actuator from 1.1.2 to 1/0/2
+Nov 27, 2026 12:36:52 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  inverted relay logic: ON telegram now opens the relay (lamp off)
+PASS  inverted relay logic: OFF telegram closes the relay (lamp on)
+  (download to 1.1.2 retried after: 1.1.2 disconnected while awaiting ACK)
+Nov 27, 2026 12:37:02 PM io.calimero.device.ManagementServiceNotifier send
+WARNING: 1.1.2->0.2.255 A_MemoryExtended.write-response 41 fc 00 00 10 6e: 0.2.255 disconnected while awaiting ACK, destination 0.2.255 (TL 15.15.255) Destroyed
+Nov 27, 2026 12:37:17 PM io.calimero.mgmt.TransportLayerImpl handleConnected
+WARNING: destination 0.2.255 (TL 15.15.255) connectionless, no verify mode: recreate for conn-oriented
+  (download to 1.1.2 retried after: 1.1.2 disconnected while awaiting ACK)
+Nov 27, 2026 12:37:17 PM io.calimero.device.ManagementServiceNotifier send
+WARNING: cannot respond with A_Property.response, destination 0.2.255 (TL 15.15.255) Destroyed
+Nov 27, 2026 12:37:32 PM io.calimero.device.KnxDeviceServiceLogic restart
+INFO: received request for basic restart
+PASS  old group address no longer reaches the actuator
+PASS  new group address now switches the actuator
+Nov 27, 2026 12:37:39 PM io.calimero.device.ManagementServiceNotifier linkClosed
+INFO: attached link was closed
+Nov 27, 2026 12:37:39 PM io.calimero.device.ManagementServiceNotifier linkClosed
+INFO: attached link was closed
+PASS  restart: individual addresses kept
+PASS  restart: applications still loaded
+PASS  restart: downloaded parameter kept (Out1Logic normal, status on)
+PASS  restart: downloaded association still drives the actuator
+ALL PASSED
+exit=0
